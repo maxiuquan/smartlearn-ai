@@ -1,0 +1,240 @@
+{
+  "version": "1.0.0",
+  "last_updated": "2024-01-01",
+  "description": "单词书配置文件",
+  "word_books": [
+    {
+      "id": "kaoyan-core",
+      "name": "考研核心词汇",
+      "code": "kaoyan-core",
+      "description": "考研英语核心词汇精选，包含高频词汇和学术词汇",
+      "total_words": 220,
+      "difficulty": "intermediate",
+      "category": "考研",
+      "source": "data/vocabulary/kaoyan-words.json",
+      "tags": ["考研", "核心词汇", "高频词汇"],
+      "features": {
+        "has_phonetic": true,
+        "has_example": true,
+        "has_frequency": true
+      },
+      "study_config": {
+        "daily_new_words": 50,
+        "review_interval": [1, 2, 4, 7, 15, 30],
+        "mastery_threshold": 5
+      }
+    },
+    {
+      "id": "cet4-core",
+      "name": "大学英语四级核心词汇",
+      "code": "cet4-core",
+      "description": "大学英语四级考试核心词汇",
+      "total_words": 2500,
+      "difficulty": "beginner",
+      "category": "CET-4",
+      "source": "data/vocabulary/cet4-words.json",
+      "tags": ["四级", "CET-4", "大学"],
+      "features": {
+        "has_phonetic": true,
+        "has_example": true,
+        "has_frequency": true
+      },
+      "study_config": {
+        "daily_new_words": 80,
+        "review_interval": [1, 2, 4, 7, 15],
+        "mastery_threshold": 4
+      }
+    },
+    {
+      "id": "cet6-core",
+      "name": "大学英语六级核心词汇",
+      "code": "cet6-core",
+      "description": "大学英语六级考试核心词汇",
+      "total_words": 3000,
+      "difficulty": "intermediate",
+      "category": "CET-6",
+      "source": "data/vocabulary/cet6-words.json",
+      "tags": ["六级", "CET-6", "大学"],
+      "features": {
+        "has_phonetic": true,
+        "has_example": true,
+        "has_frequency": true
+      },
+      "study_config": {
+        "daily_new_words": 60,
+        "review_interval": [1, 2, 4, 7, 15, 30],
+        "mastery_threshold": 5
+      }
+    },
+    {
+      "id": "gre-core",
+      "name": "GRE核心词汇",
+      "code": "gre-core",
+      "description": "GRE考试核心词汇精选",
+      "total_words": 3000,
+      "difficulty": "advanced",
+      "category": "GRE",
+      "source": "data/vocabulary/gre-words.json",
+      "tags": ["GRE", "研究生", "留学"],
+      "features": {
+        "has_phonetic": true,
+        "has_example": true,
+        "has_frequency": true,
+        "has_synonym": true,
+        "has_antonym": true
+      },
+      "study_config": {
+        "daily_new_words": 40,
+        "review_interval": [1, 2, 4, 7, 15, 30, 60],
+        "mastery_threshold": 6
+      }
+    },
+    {
+      "id": "toefl-core",
+      "name": "TOEFL核心词汇",
+      "code": "toefl-core",
+      "description": "托福考试核心词汇精选",
+      "total_words": 3500,
+      "difficulty": "advanced",
+      "category": "TOEFL",
+      "source": "data/vocabulary/toefl-words.json",
+      "tags": ["TOEFL", "托福", "留学"],
+      "features": {
+        "has_phonetic": true,
+        "has_example": true,
+        "has_frequency": true,
+        "has_topic": true
+      },
+      "study_config": {
+        "daily_new_words": 50,
+        "review_interval": [1, 2, 4, 7, 15, 30],
+        "mastery_threshold": 5
+      }
+    },
+    {
+      "id": "ielts-core",
+      "name": "IELTS核心词汇",
+      "code": "ielts-core",
+      "description": "雅思考试核心词汇精选",
+      "total_words": 3500,
+      "difficulty": "advanced",
+      "category": "IELTS",
+      "source": "data/vocabulary/ielts-words.json",
+      "tags": ["IELTS", "雅思", "留学"],
+      "features": {
+        "has_phonetic": true,
+        "has_example": true,
+        "has_frequency": true,
+        "has_topic": true
+      },
+      "study_config": {
+        "daily_new_words": 50,
+        "review_interval": [1, 2, 4, 7, 15, 30],
+        "mastery_threshold": 5
+      }
+    },
+    {
+      "id": "kaoyan-all",
+      "name": "考研英语大纲词汇",
+      "code": "kaoyan-all",
+      "description": "考研英语大纲词汇完整版",
+      "total_words": 5500,
+      "difficulty": "intermediate",
+      "category": "考研",
+      "source": "data/vocabulary/kaoyan-all-words.json",
+      "tags": ["考研", "大纲词汇", "完整版"],
+      "features": {
+        "has_phonetic": true,
+        "has_example": false,
+        "has_frequency": true
+      },
+      "study_config": {
+        "daily_new_words": 100,
+        "review_interval": [1, 2, 4, 7, 15, 30],
+        "mastery_threshold": 4
+      }
+    },
+    {
+      "id": "academic-writing",
+      "name": "学术写作词汇",
+      "code": "academic-writing",
+      "description": "学术论文写作常用词汇",
+      "total_words": 1500,
+      "difficulty": "advanced",
+      "category": "学术",
+      "source": "data/vocabulary/academic-words.json",
+      "tags": ["学术", "写作", "论文"],
+      "features": {
+        "has_phonetic": true,
+        "has_example": true,
+        "has_frequency": true,
+        "has_collocation": true
+      },
+      "study_config": {
+        "daily_new_words": 30,
+        "review_interval": [1, 2, 4, 7, 15, 30],
+        "mastery_threshold": 5
+      }
+    }
+  ],
+  "study_modes": [
+    {
+      "id": "learn",
+      "name": "学习模式",
+      "description": "学习新单词，显示单词、音标、释义、例句"
+    },
+    {
+      "id": "review",
+      "name": "复习模式",
+      "description": "复习已学单词，根据遗忘曲线安排复习"
+    },
+    {
+      "id": "test",
+      "name": "测试模式",
+      "description": "测试单词掌握程度，选择题、填空题等"
+    },
+    {
+      "id": "spell",
+      "name": "拼写模式",
+      "description": "根据释义拼写单词，加强记忆"
+    },
+    {
+      "id": "listen",
+      "name": "听力模式",
+      "description": "听发音选释义，提高听力词汇量"
+    }
+  ],
+  "review_algorithms": [
+    {
+      "id": "ebbinghaus",
+      "name": "艾宾浩斯遗忘曲线",
+      "description": "基于艾宾浩斯遗忘曲线的复习算法",
+      "intervals": [1, 2, 4, 7, 15, 30, 60, 90, 180]
+    },
+    {
+      "id": "sm2",
+      "name": "SM-2算法",
+      "description": "SuperMemo的SM-2算法",
+      "params": {
+        "ef": 2.5,
+        "interval_factor": 1.3
+      }
+    },
+    {
+      "id": "anki",
+      "name": "Anki算法",
+      "description": "类似Anki的间隔重复算法",
+      "params": {
+        "easy_interval": 4,
+        "good_interval": 2.5,
+        "hard_interval": 1.2
+      }
+    }
+  ],
+  "metadata": {
+    "total_books": 8,
+    "categories": ["考研", "CET-4", "CET-6", "GRE", "TOEFL", "IELTS", "学术"],
+    "created_by": "SmartLearn AI Team",
+    "created_at": "2024-01-01"
+  }
+}

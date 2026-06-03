@@ -1,0 +1,197 @@
+{
+  "version": "1.0.0",
+  "last_updated": "2024-01-01",
+  "description": "习题册数据结构定义",
+  "exercise_books": [
+    {
+      "id": "tongji-math",
+      "name": "同济大学数学教材习题",
+      "code": "tongji-math",
+      "author": "同济大学数学系",
+      "publisher": "高等教育出版社",
+      "subjects": ["高等数学"],
+      "total_questions": 2000,
+      "volumes": [
+        {
+          "id": "tongji-math-vol1",
+          "name": "上册",
+          "chapters": ["函数与极限", "导数与微分", "中值定理与导数应用", "不定积分", "定积分", "定积分应用", "微分方程"],
+          "total_questions": 800
+        },
+        {
+          "id": "tongji-math-vol2",
+          "name": "下册",
+          "chapters": ["空间解析几何", "多元函数微分法", "重积分", "曲线曲面积分", "无穷级数"],
+          "total_questions": 1200
+        }
+      ],
+      "difficulty_levels": ["基础", "中等", "较难"],
+      "features": {
+        "has_answer": true,
+        "has_solution": false,
+        "aligned_with_textbook": true
+      }
+    },
+    {
+      "id": "zhangyu-1000",
+      "name": "张宇1000题",
+      "code": "zhangyu-1000",
+      "author": "张宇",
+      "publisher": "北京理工大学出版社",
+      "subjects": ["高等数学", "线性代数", "概率论"],
+      "total_questions": 1000,
+      "parts": [
+        {
+          "id": "zhangyu-1000-math",
+          "name": "高等数学部分",
+          "total_questions": 600,
+          "sections": ["A组", "B组", "C组"]
+        },
+        {
+          "id": "zhangyu-1000-la",
+          "name": "线性代数部分",
+          "total_questions": 200,
+          "sections": ["A组", "B组", "C组"]
+        },
+        {
+          "id": "zhangyu-1000-prob",
+          "name": "概率论部分",
+          "total_questions": 200,
+          "sections": ["A组", "B组", "C组"]
+        }
+      ],
+      "difficulty_levels": ["基础(A组)", "提高(B组)", "强化(C组)"],
+      "features": {
+        "has_answer": true,
+        "has_solution": true,
+        "has_video": true
+      }
+    },
+    {
+      "id": "lirui-660",
+      "name": "李永乐660题",
+      "code": "lirui-660",
+      "author": "李永乐",
+      "publisher": "国家行政学院出版社",
+      "subjects": ["高等数学", "线性代数", "概率论"],
+      "total_questions": 660,
+      "parts": [
+        {
+          "id": "lirui-660-math",
+          "name": "高等数学部分",
+          "total_questions": 400
+        },
+        {
+          "id": "lirui-660-la",
+          "name": "线性代数部分",
+          "total_questions": 130
+        },
+        {
+          "id": "lirui-660-prob",
+          "name": "概率论部分",
+          "total_questions": 130
+        }
+      ],
+      "difficulty_levels": ["选择填空", "计算证明"],
+      "features": {
+        "has_answer": true,
+        "has_solution": true,
+        "focus_on_choice_fill": true
+      }
+    },
+    {
+      "id": "tangjiafeng-1800",
+      "name": "汤家凤1800题",
+      "code": "tangjiafeng-1800",
+      "author": "汤家凤",
+      "publisher": "中国原子能出版社",
+      "subjects": ["高等数学", "线性代数", "概率论"],
+      "total_questions": 1800,
+      "parts": [
+        {
+          "id": "tangjiafeng-1800-math",
+          "name": "高等数学部分",
+          "total_questions": 1200,
+          "sections": ["入门练习", "基础练习", "强化练习"]
+        },
+        {
+          "id": "tangjiafeng-1800-la",
+          "name": "线性代数部分",
+          "total_questions": 300,
+          "sections": ["入门练习", "基础练习", "强化练习"]
+        },
+        {
+          "id": "tangjiafeng-1800-prob",
+          "name": "概率论部分",
+          "total_questions": 300,
+          "sections": ["入门练习", "基础练习", "强化练习"]
+        }
+      ],
+      "difficulty_levels": ["入门", "基础", "强化"],
+      "features": {
+        "has_answer": true,
+        "has_solution": true,
+        "has_video": true
+      }
+    },
+    {
+      "id": "wuda-xianxing",
+      "name": "武忠祥线性代数辅导讲义习题",
+      "code": "wuda-xianxing",
+      "author": "武忠祥",
+      "publisher": "中国石化出版社",
+      "subjects": ["线性代数"],
+      "total_questions": 500,
+      "features": {
+        "has_answer": true,
+        "has_solution": true,
+        "has_video": true
+      }
+    },
+    {
+      "id": "wangshiansheng-prob",
+      "name": "王式安概率论辅导讲义习题",
+      "code": "wangshiansheng-prob",
+      "author": "王式安",
+      "publisher": "中国石化出版社",
+      "subjects": ["概率论"],
+      "total_questions": 400,
+      "features": {
+        "has_answer": true,
+        "has_solution": true,
+        "has_video": true
+      }
+    }
+  ],
+  "question_schema": {
+    "id": "string",
+    "book_id": "string",
+    "chapter": "string",
+    "section": "string",
+    "number": "integer",
+    "type": "choice|fill|calculation|proof",
+    "difficulty": "integer",
+    "content": "string",
+    "options": {},
+    "answer": "string",
+    "solution": "string",
+    "knowledge_points": ["string"],
+    "tags": ["string"],
+    "source": "string"
+  },
+  "progress_schema": {
+    "user_id": "string",
+    "book_id": "string",
+    "completed_questions": ["string"],
+    "correct_count": "integer",
+    "wrong_count": "integer",
+    "total_time": "integer",
+    "last_study_time": "datetime"
+  },
+  "metadata": {
+    "total_books": 6,
+    "total_questions": 5360,
+    "created_by": "SmartLearn AI Team",
+    "created_at": "2024-01-01"
+  }
+}
