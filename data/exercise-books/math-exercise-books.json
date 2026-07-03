@@ -1,0 +1,105 @@
+{
+  "subject": "考研数学",
+  "subject_code": "math",
+  "version": "1.0.0",
+  "last_updated": "2026-07-03",
+  "description": "考研数学习题册索引",
+  "books": [
+    {
+      "id": "math-660",
+      "name": "数学基础过关660题",
+      "author": "李永乐",
+      "publisher": "中国农业出版社",
+      "category": "math1",
+      "description": "考研数学经典习题集，涵盖选择题和填空题，适合基础阶段练习",
+      "chapters": [
+        { "name": "高等数学", "question_count": 360 },
+        { "name": "线性代数", "question_count": 180 },
+        { "name": "概率论与数理统计", "question_count": 120 }
+      ],
+      "total_questions": 660,
+      "difficulty": "基础",
+      "target_stage": "基础阶段"
+    },
+    {
+      "id": "math-1800",
+      "name": "1800题",
+      "author": "汤家凤",
+      "publisher": "中国原子能出版社",
+      "category": "math1",
+      "description": "考研数学经典习题集，题目量大，覆盖基础与提高两个层次",
+      "chapters": [
+        { "name": "高等数学", "question_count": 1100 },
+        { "name": "线性代数", "question_count": 400 },
+        { "name": "概率论与数理统计", "question_count": 300 }
+      ],
+      "total_questions": 1800,
+      "difficulty": "基础+提高",
+      "target_stage": "基础阶段+提高阶段"
+    },
+    {
+      "id": "math-1000",
+      "name": "1000题",
+      "author": "张宇",
+      "publisher": "北京理工大学出版社",
+      "category": "math1",
+      "description": "考研数学提高类习题集，题目灵活，侧重解题技巧与思维训练",
+      "chapters": [
+        { "name": "高等数学", "question_count": 600 },
+        { "name": "线性代数", "question_count": 240 },
+        { "name": "概率论与数理统计", "question_count": 160 }
+      ],
+      "total_questions": 1000,
+      "difficulty": "提高",
+      "target_stage": "提高阶段"
+    },
+    {
+      "id": "math-880",
+      "name": "880题",
+      "author": "李林",
+      "publisher": "国家开放大学出版社",
+      "category": "math1",
+      "description": "考研数学强化习题集，难度贴近真题，适合强化阶段系统训练",
+      "chapters": [
+        { "name": "高等数学", "question_count": 500 },
+        { "name": "线性代数", "question_count": 220 },
+        { "name": "概率论与数理统计", "question_count": 160 }
+      ],
+      "total_questions": 880,
+      "difficulty": "强化",
+      "target_stage": "强化阶段"
+    },
+    {
+      "id": "math-330",
+      "name": "330题",
+      "author": "李永乐",
+      "publisher": "中国农业出版社",
+      "category": "math1",
+      "description": "考研数学冲刺习题集，精选高频考点，适合考前冲刺",
+      "chapters": [
+        { "name": "高等数学", "question_count": 180 },
+        { "name": "线性代数", "question_count": 90 },
+        { "name": "概率论与数理统计", "question_count": 60 }
+      ],
+      "total_questions": 330,
+      "difficulty": "冲刺",
+      "target_stage": "冲刺阶段"
+    },
+    {
+      "id": "math-135",
+      "name": "超越135分",
+      "author": "合工大数学教研室",
+      "publisher": "合肥工业大学出版社",
+      "category": "math1",
+      "description": "合工大考研数学冲刺模拟卷，难度较高，适合冲刺高分",
+      "chapters": [
+        { "name": "高等数学", "question_count": 75 },
+        { "name": "线性代数", "question_count": 35 },
+        { "name": "概率论与数理统计", "question_count": 25 }
+      ],
+      "total_questions": 135,
+      "difficulty": "冲刺",
+      "target_stage": "冲刺阶段"
+    }
+  ]
+}

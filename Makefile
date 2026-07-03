@@ -2,9 +2,9 @@
 # 常用命令集合
 
 # 变量定义
-DOCKER_COMPOSE = docker-compose
-DOCKER_COMPOSE_FILE = infra/docker/docker-compose.yml
-ENV_FILE = infra/docker/.env
+DOCKER_COMPOSE = docker compose
+DOCKER_COMPOSE_FILE = docker-compose.yml
+ENV_FILE = .env
 
 # 颜色输出
 GREEN = \033[0;32m
@@ -36,9 +36,9 @@ help:
 	@echo "数据管理:"
 	@echo "  make migrate         运行数据库迁移"
 	@echo "  make seed            填充初始数据"
-	@echo "  make import-knowledge 导入知识点数据"
-	@echo "  make import-questions 导入题目数据"
-	@echo "  make import-vocabulary 导入词汇数据"
+	@echo "  make import-kp       导入知识点数据"
+	@echo "  make import-q        导入题目数据"
+	@echo "  make import-vocab    导入词汇数据"
 	@echo "  make import-all      导入所有数据"
 	@echo ""
 	@echo "开发调试:"
@@ -99,7 +99,7 @@ logs-ai:
 	$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE) --env-file $(ENV_FILE) logs -f ai-engine
 
 logs-mobile:
-	$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE) --env-file $(ENV_FILE) logs -f mobile
+	$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE) --env-file $(ENV_FILE) logs -f mobile-web
 
 logs-admin:
 	$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE) --env-file $(ENV_FILE) logs -f admin
@@ -114,15 +114,15 @@ seed:
 	@echo "$(GREEN)填充初始数据...$(NC)"
 	$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE) --env-file $(ENV_FILE) exec api python scripts/seed.py
 
-import-knowledge:
+import-kp:
 	@echo "$(GREEN)导入知识点数据...$(NC)"
 	$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE) --env-file $(ENV_FILE) exec api python scripts/import_knowledge.py
 
-import-questions:
+import-q:
 	@echo "$(GREEN)导入题目数据...$(NC)"
 	$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE) --env-file $(ENV_FILE) exec api python scripts/import_questions.py
 
-import-vocabulary:
+import-vocab:
 	@echo "$(GREEN)导入词汇数据...$(NC)"
 	$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE) --env-file $(ENV_FILE) exec api python scripts/import_vocabulary.py
 
@@ -161,7 +161,7 @@ shell-ai:
 backup:
 	@echo "$(GREEN)备份数据...$(NC)"
 	@mkdir -p backups
-	@$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE) --env-file $(ENV_FILE) exec db pg_dump -U postgres smartlearn > backups/db_$(shell date +%Y%m%d_%H%M%S).sql
+	@$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE) --env-file $(ENV_FILE) exec db pg_dump -U ${POSTGRES_USER:-smartlearn_user} smartlearn > backups/db_$(shell date +%Y%m%d_%H%M%S).sql
 	@echo "$(GREEN)备份完成！$(NC)"
 
 restore:
@@ -169,7 +169,7 @@ restore:
 	@echo "请指定备份文件: make restore FILE=backups/db_xxx.sql"
 
 restore-file:
-	$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE) --env-file $(ENV_FILE) exec -T db psql -U postgres smartlearn < $(FILE)
+	$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE) --env-file $(ENV_FILE) exec -T db psql -U ${POSTGRES_USER:-smartlearn_user} smartlearn < $(FILE)
 
 clean:
 	@echo "$(YELLOW)清理无用数据...$(NC)"

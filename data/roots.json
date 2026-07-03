@@ -1,0 +1,440 @@
+{
+  "name": "英语词根词缀库",
+  "version": "1.0.0",
+  "last_updated": "2026-07-03",
+  "description": "考研英语核心词根词缀，用于词根词缀树游戏",
+  "roots": [
+    {
+      "root": "spect/spic",
+      "meaning": "看",
+      "origin": "拉丁语 specere（看）",
+      "derivatives": [
+        { "word": "inspect", "meaning": "检查", "explanation": "in(向内)+spect(看)→向内看→检查" },
+        { "word": "respect", "meaning": "尊敬", "explanation": "re(再)+spect(看)→再看→重视→尊敬" },
+        { "word": "perspective", "meaning": "视角", "explanation": "per(贯穿)+spect(看)+ive→看透→视角" },
+        { "word": "prospect", "meaning": "前景", "explanation": "pro(向前)+spect(看)→向前看→前景" },
+        { "word": "suspect", "meaning": "怀疑", "explanation": "sus(下面)+spect(看)→在下面看→怀疑" },
+        { "word": "spectacle", "meaning": "景象", "explanation": "spect(看)+acle名词后缀→看到的→景象" },
+        { "word": "spectator", "meaning": "观众", "explanation": "spect(看)+ator表示人→看的人→观众" },
+        { "word": "conspicuous", "meaning": "显眼的", "explanation": "con(共同)+spic(看)+uous→大家都看到的→显眼的" }
+      ],
+      "difficulty": 2
+    },
+    {
+      "root": "dict",
+      "meaning": "说",
+      "origin": "拉丁语 dicere（说）",
+      "derivatives": [
+        { "word": "predict", "meaning": "预测", "explanation": "pre(前)+dict(说)→提前说→预测" },
+        { "word": "dictate", "meaning": "口述；命令", "explanation": "dict(说)+ate动词后缀→口述→命令" },
+        { "word": "contradict", "meaning": "反驳", "explanation": "contra(反对)+dict(说)→说反对的话→反驳" },
+        { "word": "indicate", "meaning": "表明", "explanation": "in(进入)+dic(说)+ate→说进去→表明" },
+        { "word": "verdict", "meaning": "裁决", "explanation": "ver(真实)+dict(说)→说真话→裁决" },
+        { "word": "dictionary", "meaning": "字典", "explanation": "dict(说)+ion+ary→说词语的地方→字典" },
+        { "word": "dedicate", "meaning": "奉献", "explanation": "de(向下)+dic(说)+ate→郑重地说→奉献" }
+      ],
+      "difficulty": 1
+    },
+    {
+      "root": "duct/duc",
+      "meaning": "引导",
+      "origin": "拉丁语 ducere（引导）",
+      "derivatives": [
+        { "word": "conduct", "meaning": "指挥；引导", "explanation": "con(共同)+duct(引导)→共同引导→指挥" },
+        { "word": "produce", "meaning": "生产", "explanation": "pro(向前)+duce(引导)→向前引导→生产" },
+        { "word": "reduce", "meaning": "减少", "explanation": "re(回)+duce(引导)→往回引导→减少" },
+        { "word": "introduce", "meaning": "介绍", "explanation": "intro(向内)+duce(引导)→向内引导→介绍" },
+        { "word": "deduce", "meaning": "推论", "explanation": "de(向下)+duce(引导)→向下引导→推论" },
+        { "word": "educate", "meaning": "教育", "explanation": "e(出)+duc(引导)+ate→引导出来→教育" },
+        { "word": "seduce", "meaning": "引诱", "explanation": "se(分开)+duce(引导)→引开→引诱" }
+      ],
+      "difficulty": 2
+    },
+    {
+      "root": "port",
+      "meaning": "携带；运送",
+      "origin": "拉丁语 portare（携带）",
+      "derivatives": [
+        { "word": "transport", "meaning": "运输", "explanation": "trans(跨越)+port(携带)→跨越携带→运输" },
+        { "word": "import", "meaning": "进口", "explanation": "im(进入)+port(携带)→带进来→进口" },
+        { "word": "export", "meaning": "出口", "explanation": "ex(出)+port(携带)→带出去→出口" },
+        { "word": "report", "meaning": "报告", "explanation": "re(回)+port(携带)→带回来→报告" },
+        { "word": "support", "meaning": "支持", "explanation": "sup(下面)+port(携带)→从下面携带→支持" },
+        { "word": "portable", "meaning": "便携的", "explanation": "port(携带)+able可…的→可携带的→便携的" },
+        { "word": "porter", "meaning": "搬运工", "explanation": "port(携带)+er表示人→携带东西的人→搬运工" }
+      ],
+      "difficulty": 1
+    },
+    {
+      "root": "scrib/script",
+      "meaning": "写",
+      "origin": "拉丁语 scribere（写）",
+      "derivatives": [
+        { "word": "describe", "meaning": "描述", "explanation": "de(向下)+scribe(写)→写下来→描述" },
+        { "word": "prescribe", "meaning": "规定；开药方", "explanation": "pre(前)+scribe(写)→提前写好→规定" },
+        { "word": "subscribe", "meaning": "订阅", "explanation": "sub(下面)+scribe(写)→在下面写→订阅" },
+        { "word": "manuscript", "meaning": "手稿", "explanation": "manu(手)+script(写)→手写的→手稿" },
+        { "word": "transcript", "meaning": "抄本", "explanation": "trans(转)+script(写)→转写→抄本" },
+        { "word": "inscription", "meaning": "铭文", "explanation": "in(进入)+script(写)+ion→刻进去→铭文" }
+      ],
+      "difficulty": 2
+    },
+    {
+      "root": "struct",
+      "meaning": "建造",
+      "origin": "拉丁语 struere（建造）",
+      "derivatives": [
+        { "word": "construct", "meaning": "建造", "explanation": "con(共同)+struct(建造)→共同建造→建造" },
+        { "word": "destruct", "meaning": "破坏", "explanation": "de(相反)+struct(建造)→与建造相反→破坏" },
+        { "word": "instruct", "meaning": "指导", "explanation": "in(进入)+struct(建造)→在心里建造→指导" },
+        { "word": "structure", "meaning": "结构", "explanation": "struct(建造)+ure→建造的东西→结构" },
+        { "word": "obstruct", "meaning": "阻碍", "explanation": "ob(对面)+struct(建造)→在对面建造→阻碍" },
+        { "word": "infrastructure", "meaning": "基础设施", "explanation": "infra(下面)+structure(结构)→下面的结构→基础设施" }
+      ],
+      "difficulty": 2
+    },
+    {
+      "root": "ject",
+      "meaning": "投掷",
+      "origin": "拉丁语 jacere（投掷）",
+      "derivatives": [
+        { "word": "project", "meaning": "项目；投射", "explanation": "pro(向前)+ject(投掷)→向前投→投射" },
+        { "word": "reject", "meaning": "拒绝", "explanation": "re(回)+ject(投掷)→扔回去→拒绝" },
+        { "word": "inject", "meaning": "注射", "explanation": "in(进入)+ject(投掷)→投进去→注射" },
+        { "word": "subject", "meaning": "主题；服从", "explanation": "sub(下面)+ject(投掷)→投在下面→服从" },
+        { "word": "object", "meaning": "物体；反对", "explanation": "ob(对面)+ject(投掷)→投向对面→反对" },
+        { "word": "eject", "meaning": "弹出", "explanation": "e(出)+ject(投掷)→扔出去→弹出" },
+        { "word": "dejected", "meaning": "沮丧的", "explanation": "de(向下)+ject(投掷)+ed→被扔下→沮丧的" }
+      ],
+      "difficulty": 2
+    },
+    {
+      "root": "tract",
+      "meaning": "拉",
+      "origin": "拉丁语 trahere（拉）",
+      "derivatives": [
+        { "word": "attract", "meaning": "吸引", "explanation": "at(向)+tract(拉)→拉向→吸引" },
+        { "word": "extract", "meaning": "提取", "explanation": "ex(出)+tract(拉)→拉出来→提取" },
+        { "word": "distract", "meaning": "分散注意力", "explanation": "dis(分开)+tract(拉)→拉开→分散注意力" },
+        { "word": "contract", "meaning": "合同；收缩", "explanation": "con(共同)+tract(拉)→拉到一起→合同" },
+        { "word": "subtract", "meaning": "减去", "explanation": "sub(下面)+tract(拉)→往下拉→减去" },
+        { "word": "tractor", "meaning": "拖拉机", "explanation": "tract(拉)+or→拉东西的机器→拖拉机" },
+        { "word": "retract", "meaning": "撤回", "explanation": "re(回)+tract(拉)→拉回来→撤回" }
+      ],
+      "difficulty": 2
+    },
+    {
+      "root": "ven/vent",
+      "meaning": "来",
+      "origin": "拉丁语 venire（来）",
+      "derivatives": [
+        { "word": "invent", "meaning": "发明", "explanation": "in(进入)+vent(来)→来到心里→发明" },
+        { "word": "prevent", "meaning": "预防", "explanation": "pre(前)+vent(来)→提前来→预防" },
+        { "word": "event", "meaning": "事件", "explanation": "e(出)+vent(来)→出来→发生→事件" },
+        { "word": "convention", "meaning": "大会；惯例", "explanation": "con(共同)+vent(来)+ion→大家来到一起→大会" },
+        { "word": "adventure", "meaning": "冒险", "explanation": "ad(向)+vent(来)+ure→向未知而来→冒险" },
+        { "word": "intervene", "meaning": "干预", "explanation": "inter(之间)+vene(来)→来到中间→干预" },
+        { "word": "revenue", "meaning": "收入", "explanation": "re(回)+venue(来)→回来的东西→收入" }
+      ],
+      "difficulty": 2
+    },
+    {
+      "root": "mit/miss",
+      "meaning": "送",
+      "origin": "拉丁语 mittere（送）",
+      "derivatives": [
+        { "word": "transmit", "meaning": "传输", "explanation": "trans(跨越)+mit(送)→跨越传送→传输" },
+        { "word": "submit", "meaning": "提交", "explanation": "sub(下面)+mit(送)→从下面送→提交" },
+        { "word": "commit", "meaning": "承诺；犯", "explanation": "com(共同)+mit(送)→共同送出→承诺" },
+        { "word": "permit", "meaning": "允许", "explanation": "per(通过)+mit(送)→送过去→允许" },
+        { "word": "mission", "meaning": "使命", "explanation": "miss(送)+ion→送出去→使命" },
+        { "word": "dismiss", "meaning": "解散", "explanation": "dis(分开)+miss(送)→送走→解散" },
+        { "word": "omit", "meaning": "省略", "explanation": "o(=ob离开)+mit(送)→送走→省略" }
+      ],
+      "difficulty": 2
+    },
+    {
+      "root": "pel/puls",
+      "meaning": "推",
+      "origin": "拉丁语 pellere（推）",
+      "derivatives": [
+        { "word": "compel", "meaning": "强迫", "explanation": "com(共同)+pel(推)→一起推→强迫" },
+        { "word": "expel", "meaning": "驱逐", "explanation": "ex(出)+pel(推)→推出去→驱逐" },
+        { "word": "repel", "meaning": "击退", "explanation": "re(回)+pel(推)→推回去→击退" },
+        { "word": "impulse", "meaning": "冲动", "explanation": "im(进入)+puls(推)+e→推进去→冲动" },
+        { "word": "propel", "meaning": "推进", "explanation": "pro(向前)+pel(推)→向前推→推进" },
+        { "word": "compulsory", "meaning": "强制的", "explanation": "com(共同)+puls(推)+ory→一起推的→强制的" }
+      ],
+      "difficulty": 3
+    },
+    {
+      "root": "cap/cept",
+      "meaning": "拿",
+      "origin": "拉丁语 capere（拿）",
+      "derivatives": [
+        { "word": "capture", "meaning": "捕获", "explanation": "capt(拿)+ure→拿住→捕获" },
+        { "word": "accept", "meaning": "接受", "explanation": "ac(向)+cept(拿)→拿过来→接受" },
+        { "word": "concept", "meaning": "概念", "explanation": "con(共同)+cept(拿)→共同拿住→概念" },
+        { "word": "except", "meaning": "除了", "explanation": "ex(出)+cept(拿)→拿出去→除了" },
+        { "word": "perceive", "meaning": "感知", "explanation": "per(贯穿)+ceive(拿)→完全拿住→感知" },
+        { "word": "reception", "meaning": "接待", "explanation": "re(回)+cept(拿)+ion→拿回来→接待" },
+        { "word": "intercept", "meaning": "拦截", "explanation": "inter(之间)+cept(拿)→从中间拿→拦截" }
+      ],
+      "difficulty": 3
+    },
+    {
+      "root": "fac/fact",
+      "meaning": "做",
+      "origin": "拉丁语 facere（做）",
+      "derivatives": [
+        { "word": "factory", "meaning": "工厂", "explanation": "fact(做)+ory地点→做东西的地方→工厂" },
+        { "word": "manufacture", "meaning": "制造", "explanation": "manu(手)+fact(做)+ure→用手做→制造" },
+        { "word": "facilitate", "meaning": "促进", "explanation": "fac(做)+ilitate→使容易做→促进" },
+        { "word": "artifact", "meaning": "人工制品", "explanation": "arti(技术)+fact(做)→用技术做的→人工制品" },
+        { "word": "factor", "meaning": "因素", "explanation": "fact(做)+or→做事情的东西→因素" },
+        { "word": "benefactor", "meaning": "恩人", "explanation": "bene(好)+fact(做)+or→做好事的人→恩人" }
+      ],
+      "difficulty": 2
+    },
+    {
+      "root": "fer",
+      "meaning": "携带；运送",
+      "origin": "拉丁语 ferre（携带）",
+      "derivatives": [
+        { "word": "transfer", "meaning": "转移", "explanation": "trans(跨越)+fer(携带)→跨过去→转移" },
+        { "word": "refer", "meaning": "参考", "explanation": "re(回)+fer(携带)→带回去→参考" },
+        { "word": "infer", "meaning": "推断", "explanation": "in(进入)+fer(携带)→带进来→推断" },
+        { "word": "prefer", "meaning": "偏爱", "explanation": "pre(前)+fer(携带)→拿到前面→偏爱" },
+        { "word": "differ", "meaning": "不同", "explanation": "dif(分开)+fer(携带)→分开带→不同" },
+        { "word": "conference", "meaning": "会议", "explanation": "con(共同)+fer(携带)+ence→带到一起→会议" },
+        { "word": "offer", "meaning": "提供", "explanation": "of(向)+fer(携带)→带向→提供" }
+      ],
+      "difficulty": 2
+    },
+    {
+      "root": "vid/vis",
+      "meaning": "看",
+      "origin": "拉丁语 videre（看）",
+      "derivatives": [
+        { "word": "visible", "meaning": "可见的", "explanation": "vis(看)+ible可…的→可看见的→可见的" },
+        { "word": "vision", "meaning": "视力", "explanation": "vis(看)+ion→看的能力→视力" },
+        { "word": "visual", "meaning": "视觉的", "explanation": "vis(看)+ual→看的→视觉的" },
+        { "word": "evidence", "meaning": "证据", "explanation": "e(出)+vid(看)+ence→看出来→证据" },
+        { "word": "provide", "meaning": "提供", "explanation": "pro(向前)+vid(看)+e→提前看到→提供" },
+        { "word": "revise", "meaning": "修订", "explanation": "re(再)+vis(看)+e→再看→修订" },
+        { "word": "supervise", "meaning": "监督", "explanation": "super(上面)+vis(看)+e→在上面看→监督" }
+      ],
+      "difficulty": 2
+    },
+    {
+      "root": "log/logue",
+      "meaning": "说",
+      "origin": "希腊语 logos（说话）",
+      "derivatives": [
+        { "word": "dialogue", "meaning": "对话", "explanation": "dia(之间)+logue(说)→两人之间说→对话" },
+        { "word": "monologue", "meaning": "独白", "explanation": "mono(单一)+logue(说)→一个人说→独白" },
+        { "word": "apology", "meaning": "道歉", "explanation": "apo(离开)+log(说)+y→说开脱的话→道歉" },
+        { "word": "logic", "meaning": "逻辑", "explanation": "log(说)+ic→说话的学问→逻辑" },
+        { "word": "catalog", "meaning": "目录", "explanation": "cata(完全)+log(说)→完全说一遍→目录" },
+        { "word": "prologue", "meaning": "序言", "explanation": "pro(前)+logue(说)→前面说的话→序言" },
+        { "word": "epilogue", "meaning": "尾声", "explanation": "epi(后)+logue(说)→后面说的话→尾声" }
+      ],
+      "difficulty": 3
+    },
+    {
+      "root": "graph/gram",
+      "meaning": "写",
+      "origin": "希腊语 graphein（写）",
+      "derivatives": [
+        { "word": "biography", "meaning": "传记", "explanation": "bio(生命)+graph(写)+y→写生命的→传记" },
+        { "word": "geography", "meaning": "地理", "explanation": "geo(地球)+graph(写)+y→写地球的→地理" },
+        { "word": "telegram", "meaning": "电报", "explanation": "tele(远)+gram(写)→远程写的→电报" },
+        { "word": "program", "meaning": "程序", "explanation": "pro(前)+gram(写)→提前写好的→程序" },
+        { "word": "paragraph", "meaning": "段落", "explanation": "para(旁边)+graph(写)→在旁边写的→段落" },
+        { "word": "photograph", "meaning": "照片", "explanation": "photo(光)+graph(写)→光写的→照片" }
+      ],
+      "difficulty": 2
+    },
+    {
+      "root": "ped",
+      "meaning": "脚",
+      "origin": "拉丁语 pes（脚）",
+      "derivatives": [
+        { "word": "pedestrian", "meaning": "行人", "explanation": "ped(脚)+estrian→用脚走路的人→行人" },
+        { "word": "pedal", "meaning": "踏板", "explanation": "ped(脚)+al→脚用的→踏板" },
+        { "word": "expedition", "meaning": "远征", "explanation": "ex(出)+ped(脚)+ition→走出去→远征" },
+        { "word": "impede", "meaning": "阻碍", "explanation": "im(进入)+ped(脚)+e→把脚放进去→阻碍" },
+        { "word": "centipede", "meaning": "蜈蚣", "explanation": "centi(百)+ped(脚)+e→百脚虫→蜈蚣" },
+        { "word": "pedestal", "meaning": "底座", "explanation": "ped(脚)+estal→脚站立的地方→底座" }
+      ],
+      "difficulty": 3
+    },
+    {
+      "root": "rupt",
+      "meaning": "破",
+      "origin": "拉丁语 rumpere（破）",
+      "derivatives": [
+        { "word": "interrupt", "meaning": "打断", "explanation": "inter(之间)+rupt(破)→在中间打破→打断" },
+        { "word": "disrupt", "meaning": "扰乱", "explanation": "dis(分开)+rupt(破)→打破分开→扰乱" },
+        { "word": "erupt", "meaning": "爆发", "explanation": "e(出)+rupt(破)→破出来→爆发" },
+        { "word": "corrupt", "meaning": "腐败", "explanation": "cor(完全)+rupt(破)→完全破→腐败" },
+        { "word": "bankrupt", "meaning": "破产", "explanation": "bank(银行)+rupt(破)→银行破了→破产" },
+        { "word": "abrupt", "meaning": "突然的", "explanation": "ab(离开)+rupt(破)→断开→突然的" }
+      ],
+      "difficulty": 2
+    },
+    {
+      "root": "cede/ceed/cess",
+      "meaning": "走",
+      "origin": "拉丁语 cedere（走）",
+      "derivatives": [
+        { "word": "proceed", "meaning": "继续", "explanation": "pro(向前)+ceed(走)→向前走→继续" },
+        { "word": "succeed", "meaning": "成功", "explanation": "suc(下面)+ceed(走)→走到底→成功" },
+        { "word": "exceed", "meaning": "超过", "explanation": "ex(出)+ceed(走)→走出去→超过" },
+        { "word": "access", "meaning": "进入", "explanation": "ac(向)+cess(走)→走过去→进入" },
+        { "word": "process", "meaning": "过程", "explanation": "pro(向前)+cess(走)→向前走→过程" },
+        { "word": "recede", "meaning": "后退", "explanation": "re(回)+cede(走)→走回去→后退" },
+        { "word": "precedent", "meaning": "先例", "explanation": "pre(前)+ced(走)+ent→走在前面的事→先例" }
+      ],
+      "difficulty": 3
+    },
+    {
+      "root": "voc/vok",
+      "meaning": "喊",
+      "origin": "拉丁语 vocare（喊）",
+      "derivatives": [
+        { "word": "vocal", "meaning": "声音的", "explanation": "voc(喊)+al→喊的→声音的" },
+        { "word": "advocate", "meaning": "提倡", "explanation": "ad(向)+voc(喊)+ate→向…喊→提倡" },
+        { "word": "provoke", "meaning": "激怒", "explanation": "pro(向前)+vok(喊)+e→向前喊→激怒" },
+        { "word": "evoke", "meaning": "唤起", "explanation": "e(出)+vok(喊)+e→喊出来→唤起" },
+        { "word": "revoke", "meaning": "撤销", "explanation": "re(回)+vok(喊)+e→喊回来→撤销" },
+        { "word": "invoke", "meaning": "祈求", "explanation": "in(进入)+vok(喊)+e→喊进去→祈求" },
+        { "word": "vocabulary", "meaning": "词汇", "explanation": "voc(喊)+abul+ary→喊出来的东西→词汇" }
+      ],
+      "difficulty": 3
+    },
+    {
+      "root": "man/manu",
+      "meaning": "手",
+      "origin": "拉丁语 manus（手）",
+      "derivatives": [
+        { "word": "manual", "meaning": "手工的", "explanation": "manu(手)+al→手的→手工的" },
+        { "word": "manufacture", "meaning": "制造", "explanation": "manu(手)+fact(做)+ure→用手做→制造" },
+        { "word": "manuscript", "meaning": "手稿", "explanation": "manu(手)+script(写)→手写的→手稿" },
+        { "word": "manipulate", "meaning": "操纵", "explanation": "mani(手)+pul(填)+ate→用手填→操纵" },
+        { "word": "maneuver", "meaning": "策略", "explanation": "man(手)+euver→用手操作→策略" },
+        { "word": "manicure", "meaning": "修指甲", "explanation": "mani(手)+cure(护理)→护理手→修指甲" }
+      ],
+      "difficulty": 2
+    },
+    {
+      "root": "aud",
+      "meaning": "听",
+      "origin": "拉丁语 audire（听）",
+      "derivatives": [
+        { "word": "audience", "meaning": "听众", "explanation": "aud(听)+ience→听的人→听众" },
+        { "word": "audio", "meaning": "音频", "explanation": "aud(听)+io→听的→音频" },
+        { "word": "audit", "meaning": "审计", "explanation": "aud(听)+it→听→审计" },
+        { "word": "auditorium", "meaning": "礼堂", "explanation": "aud(听)+itorium→听的地方→礼堂" },
+        { "word": "audible", "meaning": "听得见的", "explanation": "aud(听)+ible可…的→可听见的→听得见的" },
+        { "word": "inaudible", "meaning": "听不见的", "explanation": "in(不)+aud(听)+ible→不可听见的→听不见的" }
+      ],
+      "difficulty": 2
+    },
+    {
+      "root": "bene",
+      "meaning": "好",
+      "origin": "拉丁语 bene（好）",
+      "derivatives": [
+        { "word": "benefit", "meaning": "利益", "explanation": "bene(好)+fit(做)→做好事→利益" },
+        { "word": "beneficial", "meaning": "有益的", "explanation": "bene(好)+fic(做)+ial→做好事的→有益的" },
+        { "word": "benevolent", "meaning": "仁慈的", "explanation": "bene(好)+vol(意愿)+ent→好意愿的→仁慈的" },
+        { "word": "benefactor", "meaning": "恩人", "explanation": "bene(好)+fact(做)+or→做好事的人→恩人" },
+        { "word": "benediction", "meaning": "祝福", "explanation": "bene(好)+dict(说)+ion→说好话→祝福" }
+      ],
+      "difficulty": 2
+    },
+    {
+      "root": "mal",
+      "meaning": "坏",
+      "origin": "拉丁语 malus（坏）",
+      "derivatives": [
+        { "word": "malfunction", "meaning": "故障", "explanation": "mal(坏)+function(功能)→功能坏了→故障" },
+        { "word": "malnutrition", "meaning": "营养不良", "explanation": "mal(坏)+nutrition(营养)→营养坏→营养不良" },
+        { "word": "maltreat", "meaning": "虐待", "explanation": "mal(坏)+treat(对待)→坏对待→虐待" },
+        { "word": "malicious", "meaning": "恶意的", "explanation": "mal(坏)+icious→坏的→恶意的" },
+        { "word": "malevolent", "meaning": "恶毒的", "explanation": "mal(坏)+vol(意愿)+ent→坏意愿的→恶毒的" }
+      ],
+      "difficulty": 2
+    },
+    {
+      "root": "pre",
+      "meaning": "前",
+      "origin": "拉丁语 prae（前）",
+      "derivatives": [
+        { "word": "preview", "meaning": "预览", "explanation": "pre(前)+view(看)→提前看→预览" },
+        { "word": "predict", "meaning": "预测", "explanation": "pre(前)+dict(说)→提前说→预测" },
+        { "word": "preface", "meaning": "前言", "explanation": "pre(前)+face(说)→前面说的话→前言" },
+        { "word": "precaution", "meaning": "预防", "explanation": "pre(前)+caution(小心)→提前小心→预防" },
+        { "word": "precede", "meaning": "先于", "explanation": "pre(前)+cede(走)→走在前面→先于" },
+        { "word": "prescribe", "meaning": "规定", "explanation": "pre(前)+scribe(写)→提前写→规定" }
+      ],
+      "difficulty": 1
+    },
+    {
+      "root": "re",
+      "meaning": "再次；回",
+      "origin": "拉丁语 re-（再次，回）",
+      "derivatives": [
+        { "word": "return", "meaning": "返回", "explanation": "re(回)+turn(转)→转回来→返回" },
+        { "word": "review", "meaning": "复习", "explanation": "re(再)+view(看)→再看→复习" },
+        { "word": "rebuild", "meaning": "重建", "explanation": "re(再)+build(建造)→再建造→重建" },
+        { "word": "recall", "meaning": "回忆", "explanation": "re(回)+call(叫)→叫回来→回忆" },
+        { "word": "reflect", "meaning": "反射", "explanation": "re(回)+flect(弯曲)→弯回来→反射" },
+        { "word": "reform", "meaning": "改革", "explanation": "re(再)+form(形成)→再形成→改革" }
+      ],
+      "difficulty": 1
+    },
+    {
+      "root": "ex",
+      "meaning": "出",
+      "origin": "拉丁语 ex（出）",
+      "derivatives": [
+        { "word": "export", "meaning": "出口", "explanation": "ex(出)+port(携带)→带出去→出口" },
+        { "word": "exit", "meaning": "出口", "explanation": "ex(出)+it(走)→走出去→出口" },
+        { "word": "exclude", "meaning": "排除", "explanation": "ex(出)+clude(关)→关出去→排除" },
+        { "word": "extract", "meaning": "提取", "explanation": "ex(出)+tract(拉)→拉出来→提取" },
+        { "word": "exceed", "meaning": "超过", "explanation": "ex(出)+ceed(走)→走出去→超过" },
+        { "word": "expand", "meaning": "扩展", "explanation": "ex(出)+pand(展开)→展开出去→扩展" }
+      ],
+      "difficulty": 1
+    },
+    {
+      "root": "inter",
+      "meaning": "之间",
+      "origin": "拉丁语 inter（之间）",
+      "derivatives": [
+        { "word": "international", "meaning": "国际的", "explanation": "inter(之间)+nation(国家)+al→国家之间的→国际的" },
+        { "word": "interact", "meaning": "互动", "explanation": "inter(之间)+act(行动)→之间行动→互动" },
+        { "word": "interview", "meaning": "面试", "explanation": "inter(之间)+view(看)→互相看→面试" },
+        { "word": "interrupt", "meaning": "打断", "explanation": "inter(之间)+rupt(破)→在中间打破→打断" },
+        { "word": "internet", "meaning": "互联网", "explanation": "inter(之间)+net(网)→网之间的网→互联网" }
+      ],
+      "difficulty": 1
+    },
+    {
+      "root": "trans",
+      "meaning": "跨越",
+      "origin": "拉丁语 trans（跨越）",
+      "derivatives": [
+        { "word": "transport", "meaning": "运输", "explanation": "trans(跨越)+port(携带)→跨越携带→运输" },
+        { "word": "transfer", "meaning": "转移", "explanation": "trans(跨越)+fer(携带)→跨过去→转移" },
+        { "word": "transform", "meaning": "改变", "explanation": "trans(跨越)+form(形式)→跨越形式→改变" },
+        { "word": "translate", "meaning": "翻译", "explanation": "trans(跨越)+late(搬运)→跨越搬运→翻译" },
+        { "word": "transparent", "meaning": "透明的", "explanation": "trans(跨越)+parent(出现)→跨越出现→透明的" },
+        { "word": "transmit", "meaning": "传送", "explanation": "trans(跨越)+mit(送)→跨越发送→传送" }
+      ],
+      "difficulty": 1
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "version": "1.0.0",
+  "last_updated": "2026-07-03",
+  "description": "SmartLearn AI 排行榜与段位配置",
+  "leaderboards": [
+    { "scope": "global", "name": "全站排行榜", "update_frequency": "daily", "max_entries": 100 },
+    { "scope": "friends", "name": "好友排行榜", "update_frequency": "realtime", "max_entries": 50 },
+    { "scope": "weekly", "name": "周榜", "update_frequency": "weekly", "max_entries": 100 },
+    { "scope": "daily", "name": "日榜", "update_frequency": "daily", "max_entries": 50 }
+  ],
+  "ranks": [
+    { "name": "学徒", "name_en": "Apprentice", "min_xp": 0, "icon": "bronze", "color": "#CD7F32" },
+    { "name": "学者", "name_en": "Scholar", "min_xp": 1000, "icon": "bronze", "color": "#CD7F32" },
+    { "name": "专家", "name_en": "Expert", "min_xp": 3000, "icon": "silver", "color": "#C0C0C0" },
+    { "name": "大师", "name_en": "Master", "min_xp": 8000, "icon": "gold", "color": "#FFD700" },
+    { "name": "宗师", "name_en": "Grandmaster", "min_xp": 20000, "icon": "gold", "color": "#FFD700" },
+    { "name": "传说", "name_en": "Legend", "min_xp": 50000, "icon": "diamond", "color": "#B9F2FF" }
+  ],
+  "pvp_ranks": [
+    { "name": "青铜", "name_en": "Bronze", "min_rating": 0, "icon": "bronze" },
+    { "name": "白银", "name_en": "Silver", "min_rating": 1000, "icon": "silver" },
+    { "name": "黄金", "name_en": "Gold", "min_rating": 1500, "icon": "gold" },
+    { "name": "铂金", "name_en": "Platinum", "min_rating": 2000, "icon": "platinum" },
+    { "name": "钻石", "name_en": "Diamond", "min_rating": 2500, "icon": "diamond" },
+    { "name": "王者", "name_en": "King", "min_rating": 3000, "icon": "crown" }
+  ],
+  "badges": [
+    { "id": "streak-3", "name": "初露锋芒", "description": "连续学习3天", "icon": "fire", "category": "streak" },
+    { "id": "streak-7", "name": "坚持不懈", "description": "连续学习7天", "icon": "fire", "category": "streak" },
+    { "id": "streak-30", "name": "学习达人", "description": "连续学习30天", "icon": "fire_legend", "category": "streak" },
+    { "id": "streak-100", "name": "终身学习者", "description": "连续学习100天", "icon": "eternal_fire", "category": "streak" },
+    { "id": "words-100", "name": "百词斩", "description": "累计掌握100个单词", "icon": "book", "category": "vocabulary" },
+    { "id": "words-500", "name": "词汇达人", "description": "累计掌握500个单词", "icon": "book", "category": "vocabulary" },
+    { "id": "words-1000", "name": "千词斩", "description": "累计掌握1000个单词", "icon": "book_legend", "category": "vocabulary" },
+    { "id": "words-5000", "name": "词汇大师", "description": "累计掌握5000个单词", "icon": "tome", "category": "vocabulary" },
+    { "id": "math-chapter-1", "name": "迈出第一步", "description": "通过第一个章节", "icon": "star", "category": "math" },
+    { "id": "math-chapter-all", "name": "章节全通", "description": "完整通过一个科目所有章节", "icon": "star_cluster", "category": "math" },
+    { "id": "math-perfect", "name": "完美通关", "description": "一个章节全部答对", "icon": "crown", "category": "math" },
+    { "id": "perfect-combo-10", "name": "十连击", "description": "单局达成10连击", "icon": "combo", "category": "gameplay" },
+    { "id": "perfect-combo-20", "name": "二十连击", "description": "单局达成20连击", "icon": "combo_legend", "category": "gameplay" },
+    { "id": "first-pvp-win", "name": "首战告捷", "description": "首次PVP胜利", "icon": "sword", "category": "pvp" },
+    { "id": "pvp-10-wins", "name": "常胜将军", "description": "PVP累计10胜", "icon": "sword_legend", "category": "pvp" },
+    { "id": "boss-slayer-1", "name": "Boss首杀", "description": "击败首个错题Boss", "icon": "skull", "category": "boss" },
+    { "id": "boss-slayer-10", "name": "Boss杀手", "description": "击败10个错题Boss", "icon": "skull_legend", "category": "boss" },
+    { "id": "daily-quest-7", "name": "每日打卡", "description": "完成7天每日任务", "icon": "calendar", "category": "daily" },
+    { "id": "daily-quest-30", "name": "月之星", "description": "完成30天每日任务", "icon": "calendar_legend", "category": "daily" },
+    { "id": "team-first", "name": "团队协作", "description": "首次组队学习", "icon": "team", "category": "social" }
+  ],
+  "daily_tasks": [
+    { "id": "daily-login", "name": "每日签到", "xp": 10, "coins": 5 },
+    { "id": "daily-words", "name": "学习10个单词", "xp": 30, "coins": 10 },
+    { "id": "daily-questions", "name": "完成5道题", "xp": 30, "coins": 10 },
+    { "id": "daily-game", "name": "玩一局游戏", "xp": 20, "coins": 5 },
+    { "id": "daily-review", "name": "完成今日复习", "xp": 30, "coins": 10 },
+    { "id": "daily-ai", "name": "使用AI答疑", "xp": 20, "coins": 5 }
+  ],
+  "shop_items": [
+    { "id": "revive-card", "name": "复活卡", "description": "在游戏中复活", "price": 50, "type": "consumable" },
+    { "id": "streak-saver", "name": "补签卡", "description": "补回断签天数", "price": 100, "type": "consumable" },
+    { "id": "hint-pack", "name": "提示包", "description": "5个提示道具", "price": 30, "type": "consumable" },
+    { "id": "xp-boost", "name": "经验加成卡", "description": "1小时经验+50%", "price": 80, "type": "consumable" },
+    { "id": "avatar-frame-bronze", "name": "青铜头像框", "price": 200, "type": "cosmetic" },
+    { "id": "avatar-frame-gold", "name": "黄金头像框", "price": 500, "type": "cosmetic" },
+    { "id": "theme-dark", "name": "暗夜主题", "price": 300, "type": "cosmetic" },
+    { "id": "theme-ocean", "name": "海洋主题", "price": 300, "type": "cosmetic" }
+  ],
+  "seasons": [
+    { "id": "season-1", "name": "考研冲刺季", "start_date": "2026-09-01", "end_date": "2026-12-31", "theme": "exam" },
+    { "id": "season-2", "name": "寒假特训季", "start_date": "2027-01-01", "end_date": "2027-02-28", "theme": "winter" },
+    { "id": "season-3", "name": "春季备考季", "start_date": "2027-03-01", "end_date": "2027-06-30", "theme": "spring" }
+  ]
+}

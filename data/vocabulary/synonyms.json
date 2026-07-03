@@ -1,0 +1,607 @@
+{
+  "version": "1.0.0",
+  "last_updated": "2026-07-03",
+  "description": "考研英语词汇同反义词数据",
+  "words": [
+    {
+      "word": "abandon",
+      "synonyms": ["desert", "forsake", "give up", "quit"],
+      "antonyms": ["keep", "retain", "maintain"],
+      "common_usage": "abandon the plan"
+    },
+    {
+      "word": "abundant",
+      "synonyms": ["plentiful", "ample", "rich", "sufficient"],
+      "antonyms": ["scarce", "rare", "insufficient"],
+      "common_usage": "abundant resources"
+    },
+    {
+      "word": "accomplish",
+      "synonyms": ["achieve", "complete", "fulfill", "realize"],
+      "antonyms": ["fail", "abandon"],
+      "common_usage": "accomplish a goal"
+    },
+    {
+      "word": "accumulate",
+      "synonyms": ["gather", "collect", "amass", "hoard"],
+      "antonyms": ["disperse", "scatter", "distribute"],
+      "common_usage": "accumulate wealth"
+    },
+    {
+      "word": "accurate",
+      "synonyms": ["precise", "exact", "correct", "right"],
+      "antonyms": ["inaccurate", "wrong", "imprecise"],
+      "common_usage": "accurate data"
+    },
+    {
+      "word": "acknowledge",
+      "synonyms": ["admit", "recognize", "confess", "accept"],
+      "antonyms": ["deny", "reject", "ignore"],
+      "common_usage": "acknowledge the mistake"
+    },
+    {
+      "word": "acquire",
+      "synonyms": ["obtain", "gain", "get", "secure"],
+      "antonyms": ["lose", "forfeit", "give up"],
+      "common_usage": "acquire knowledge"
+    },
+    {
+      "word": "adapt",
+      "synonyms": ["adjust", "modify", "alter", "fit"],
+      "antonyms": ["resist", "refuse", "reject"],
+      "common_usage": "adapt to change"
+    },
+    {
+      "word": "adequate",
+      "synonyms": ["sufficient", "enough", "satisfactory", "suitable"],
+      "antonyms": ["inadequate", "insufficient", "lacking"],
+      "common_usage": "adequate preparation"
+    },
+    {
+      "word": "advance",
+      "synonyms": ["progress", "proceed", "move forward", "promote"],
+      "antonyms": ["retreat", "withdraw", "regress"],
+      "common_usage": "advance technology"
+    },
+    {
+      "word": "aggressive",
+      "synonyms": ["hostile", "combative", "assertive", "forceful"],
+      "antonyms": ["peaceful", "gentle", "passive"],
+      "common_usage": "aggressive expansion"
+    },
+    {
+      "word": "alleviate",
+      "synonyms": ["relieve", "ease", "lessen", "reduce"],
+      "antonyms": ["aggravate", "worsen", "intensify"],
+      "common_usage": "alleviate poverty"
+    },
+    {
+      "word": "ambition",
+      "synonyms": ["aspiration", "goal", "desire", "dream"],
+      "antonyms": ["apathy", "indifference"],
+      "common_usage": "political ambition"
+    },
+    {
+      "word": "amplify",
+      "synonyms": ["enlarge", "magnify", "expand", "increase"],
+      "antonyms": ["reduce", "diminish", "decrease"],
+      "common_usage": "amplify the signal"
+    },
+    {
+      "word": "ancient",
+      "synonyms": ["old", "antique", "archaic", "primitive"],
+      "antonyms": ["modern", "new", "contemporary"],
+      "common_usage": "ancient civilization"
+    },
+    {
+      "word": "anxious",
+      "synonyms": ["worried", "nervous", "uneasy", "concerned"],
+      "antonyms": ["calm", "relaxed", "confident"],
+      "common_usage": "anxious about the exam"
+    },
+    {
+      "word": "apparent",
+      "synonyms": ["obvious", "evident", "clear", "visible"],
+      "antonyms": ["hidden", "obscure", "unclear"],
+      "common_usage": "apparent reason"
+    },
+    {
+      "word": "appreciate",
+      "synonyms": ["value", "treasure", "cherish", "recognize"],
+      "antonyms": ["despise", "disdain", "scorn"],
+      "common_usage": "appreciate the effort"
+    },
+    {
+      "word": "appropriate",
+      "synonyms": ["suitable", "proper", "fitting", "relevant"],
+      "antonyms": ["inappropriate", "unsuitable", "improper"],
+      "common_usage": "appropriate behavior"
+    },
+    {
+      "word": "artificial",
+      "synonyms": ["synthetic", "fake", "man-made", "unnatural"],
+      "antonyms": ["natural", "genuine", "real"],
+      "common_usage": "artificial intelligence"
+    },
+    {
+      "word": "assess",
+      "synonyms": ["evaluate", "judge", "estimate", "measure"],
+      "antonyms": ["ignore", "neglect"],
+      "common_usage": "assess the situation"
+    },
+    {
+      "word": "assign",
+      "synonyms": ["allocate", "designate", "appoint", "distribute"],
+      "antonyms": ["withdraw", "dismiss"],
+      "common_usage": "assign a task"
+    },
+    {
+      "word": "assume",
+      "synonyms": ["suppose", "presume", "believe", "think"],
+      "antonyms": ["doubt", "question", "verify"],
+      "common_usage": "assume responsibility"
+    },
+    {
+      "word": "attempt",
+      "synonyms": ["try", "endeavor", "strive", "seek"],
+      "antonyms": ["give up", "quit"],
+      "common_usage": "attempt to solve"
+    },
+    {
+      "word": "authority",
+      "synonyms": ["power", "control", "command", "jurisdiction"],
+      "antonyms": ["weakness", "powerlessness"],
+      "common_usage": "government authority"
+    },
+    {
+      "word": "avoid",
+      "synonyms": ["evade", "escape", "shun", "dodge"],
+      "antonyms": ["face", "confront", "meet"],
+      "common_usage": "avoid conflict"
+    },
+    {
+      "word": "barrier",
+      "synonyms": ["obstacle", "hurdle", "block", "obstruction"],
+      "antonyms": ["passage", "opening", "entrance"],
+      "common_usage": "language barrier"
+    },
+    {
+      "word": "beneficial",
+      "synonyms": ["helpful", "useful", "advantageous", "favorable"],
+      "antonyms": ["harmful", "detrimental", "useless"],
+      "common_usage": "beneficial effect"
+    },
+    {
+      "word": "brief",
+      "synonyms": ["short", "concise", "succinct", "summary"],
+      "antonyms": ["long", "lengthy", "detailed"],
+      "common_usage": "brief introduction"
+    },
+    {
+      "word": "capable",
+      "synonyms": ["able", "competent", "skilled", "qualified"],
+      "antonyms": ["incapable", "incompetent", "unable"],
+      "common_usage": "capable of learning"
+    },
+    {
+      "word": "capture",
+      "synonyms": ["seize", "catch", "arrest", "trap"],
+      "antonyms": ["release", "free", "liberate"],
+      "common_usage": "capture attention"
+    },
+    {
+      "word": "cautious",
+      "synonyms": ["careful", "wary", "prudent", "vigilant"],
+      "antonyms": ["careless", "reckless", "rash"],
+      "common_usage": "cautious approach"
+    },
+    {
+      "word": "collapse",
+      "synonyms": ["fall", "crash", "break down", "fail"],
+      "antonyms": ["stand", "endure", "survive"],
+      "common_usage": "economic collapse"
+    },
+    {
+      "word": "combine",
+      "synonyms": ["merge", "unite", "join", "blend"],
+      "antonyms": ["separate", "divide", "split"],
+      "common_usage": "combine efforts"
+    },
+    {
+      "word": "compel",
+      "synonyms": ["force", "oblige", "coerce", "urge"],
+      "antonyms": ["persuade", "encourage", "allow"],
+      "common_usage": "compel obedience"
+    },
+    {
+      "word": "complex",
+      "synonyms": ["complicated", "intricate", "involved", "sophisticated"],
+      "antonyms": ["simple", "easy", "straightforward"],
+      "common_usage": "complex problem"
+    },
+    {
+      "word": "conceal",
+      "synonyms": ["hide", "cover", "disguise", "mask"],
+      "antonyms": ["reveal", "expose", "disclose"],
+      "common_usage": "conceal the truth"
+    },
+    {
+      "word": "conflict",
+      "synonyms": ["clash", "dispute", "disagreement", "struggle"],
+      "antonyms": ["harmony", "peace", "agreement"],
+      "common_usage": "armed conflict"
+    },
+    {
+      "word": "constant",
+      "synonyms": ["continuous", "persistent", "steady", "stable"],
+      "antonyms": ["variable", "changing", "unstable"],
+      "common_usage": "constant effort"
+    },
+    {
+      "word": "construct",
+      "synonyms": ["build", "create", "make", "establish"],
+      "antonyms": ["destroy", "demolish", "ruin"],
+      "common_usage": "construct a building"
+    },
+    {
+      "word": "consume",
+      "synonyms": ["use", "spend", "devour", "exhaust"],
+      "antonyms": ["produce", "create", "save"],
+      "common_usage": "consume energy"
+    },
+    {
+      "word": "contract",
+      "synonyms": ["agreement", "deal", "treaty", "pact"],
+      "antonyms": ["disagreement", "dispute"],
+      "common_usage": "sign a contract"
+    },
+    {
+      "word": "contribute",
+      "synonyms": ["donate", "give", "provide", "supply"],
+      "antonyms": ["take", "withdraw", "receive"],
+      "common_usage": "contribute to society"
+    },
+    {
+      "word": "controversy",
+      "synonyms": ["dispute", "argument", "debate", "disagreement"],
+      "antonyms": ["agreement", "consensus", "harmony"],
+      "common_usage": "political controversy"
+    },
+    {
+      "word": "convenient",
+      "synonyms": ["suitable", "handy", "easy", "accessible"],
+      "antonyms": ["inconvenient", "awkward", "difficult"],
+      "common_usage": "convenient location"
+    },
+    {
+      "word": "conventional",
+      "synonyms": ["traditional", "customary", "standard", "normal"],
+      "antonyms": ["unconventional", "unusual", "innovative"],
+      "common_usage": "conventional wisdom"
+    },
+    {
+      "word": "convey",
+      "synonyms": ["transport", "carry", "transmit", "communicate"],
+      "antonyms": ["withhold", "keep", "retain"],
+      "common_usage": "convey a message"
+    },
+    {
+      "word": "convince",
+      "synonyms": ["persuade", "assure", "satisfy", "prove"],
+      "antonyms": ["dissuade", "discourage", "doubt"],
+      "common_usage": "convince the public"
+    },
+    {
+      "word": "crucial",
+      "synonyms": ["critical", "vital", "essential", "important"],
+      "antonyms": ["unimportant", "trivial", "minor"],
+      "common_usage": "crucial decision"
+    },
+    {
+      "word": "decline",
+      "synonyms": ["decrease", "drop", "fall", "refuse"],
+      "antonyms": ["increase", "rise", "accept"],
+      "common_usage": "decline an invitation"
+    },
+    {
+      "word": "defeat",
+      "synonyms": ["beat", "overcome", "conquer", "triumph"],
+      "antonyms": ["surrender", "lose", "yield"],
+      "common_usage": "defeat the enemy"
+    },
+    {
+      "word": "deficit",
+      "synonyms": ["shortage", "lack", "deficiency", "shortfall"],
+      "antonyms": ["surplus", "excess", "abundance"],
+      "common_usage": "trade deficit"
+    },
+    {
+      "word": "deliberate",
+      "synonyms": ["intentional", "planned", "careful", "thoughtful"],
+      "antonyms": ["accidental", "impulsive", "hasty"],
+      "common_usage": "deliberate action"
+    },
+    {
+      "word": "demonstrate",
+      "synonyms": ["show", "prove", "display", "illustrate"],
+      "antonyms": ["hide", "conceal", "disprove"],
+      "common_usage": "demonstrate ability"
+    },
+    {
+      "word": "deposit",
+      "synonyms": ["put", "place", "store", "save"],
+      "antonyms": ["withdraw", "remove", "take"],
+      "common_usage": "bank deposit"
+    },
+    {
+      "word": "depress",
+      "synonyms": ["discourage", "sadden", "dishearten", "lower"],
+      "antonyms": ["encourage", "cheer", "uplift"],
+      "common_usage": "depress the economy"
+    },
+    {
+      "word": "derive",
+      "synonyms": ["obtain", "get", "gain", "acquire"],
+      "antonyms": ["lose", "forfeit", "give"],
+      "common_usage": "derive from tradition"
+    },
+    {
+      "word": "deserve",
+      "synonyms": ["merit", "earn", "warrant", "justify"],
+      "antonyms": ["disqualify", "forfeit"],
+      "common_usage": "deserve recognition"
+    },
+    {
+      "word": "determine",
+      "synonyms": ["decide", "resolve", "ascertain", "establish"],
+      "antonyms": ["hesitate", "waver", "doubt"],
+      "common_usage": "determine the outcome"
+    },
+    {
+      "word": "diminish",
+      "synonyms": ["decrease", "reduce", "lessen", "shrink"],
+      "antonyms": ["increase", "grow", "expand"],
+      "common_usage": "diminish returns"
+    },
+    {
+      "word": "disaster",
+      "synonyms": ["catastrophe", "calamity", "tragedy", "crisis"],
+      "antonyms": ["success", "triumph", "blessing"],
+      "common_usage": "natural disaster"
+    },
+    {
+      "word": "discard",
+      "synonyms": ["throw away", "dispose", "reject", "abandon"],
+      "antonyms": ["keep", "retain", "save"],
+      "common_usage": "discard old habits"
+    },
+    {
+      "word": "disguise",
+      "synonyms": ["hide", "mask", "conceal", "camouflage"],
+      "antonyms": ["reveal", "expose", "uncover"],
+      "common_usage": "disguise oneself"
+    },
+    {
+      "word": "dispute",
+      "synonyms": ["argue", "debate", "quarrel", "contest"],
+      "antonyms": ["agree", "accept", "concede"],
+      "common_usage": "legal dispute"
+    },
+    {
+      "word": "distinct",
+      "synonyms": ["different", "separate", "clear", "definite"],
+      "antonyms": ["similar", "same", "vague"],
+      "common_usage": "distinct feature"
+    },
+    {
+      "word": "distinguish",
+      "synonyms": ["differentiate", "recognize", "identify", "tell"],
+      "antonyms": ["confuse", "mistake", "mix"],
+      "common_usage": "distinguish right from wrong"
+    },
+    {
+      "word": "distribute",
+      "synonyms": ["give out", "spread", "allocate", "divide"],
+      "antonyms": ["collect", "gather", "hoard"],
+      "common_usage": "distribute resources"
+    },
+    {
+      "word": "diverse",
+      "synonyms": ["varied", "different", "various", "multiple"],
+      "antonyms": ["similar", "identical", "uniform"],
+      "common_usage": "diverse culture"
+    },
+    {
+      "word": "dominate",
+      "synonyms": ["control", "rule", "command", "prevail"],
+      "antonyms": ["submit", "obey", "yield"],
+      "common_usage": "dominate the market"
+    },
+    {
+      "word": "drastic",
+      "synonyms": ["extreme", "severe", "radical", "dramatic"],
+      "antonyms": ["mild", "moderate", "gentle"],
+      "common_usage": "drastic measures"
+    },
+    {
+      "word": "eliminate",
+      "synonyms": ["remove", "get rid of", "delete", "erase"],
+      "antonyms": ["add", "include", "keep"],
+      "common_usage": "eliminate poverty"
+    },
+    {
+      "word": "embrace",
+      "synonyms": ["hug", "accept", "welcome", "adopt"],
+      "antonyms": ["reject", "refuse", "spurn"],
+      "common_usage": "embrace change"
+    },
+    {
+      "word": "emerge",
+      "synonyms": ["appear", "arise", "surface", "come out"],
+      "antonyms": ["disappear", "vanish", "hide"],
+      "common_usage": "emerge as a leader"
+    },
+    {
+      "word": "emphasize",
+      "synonyms": ["stress", "highlight", "underline", "accentuate"],
+      "antonyms": ["downplay", "minimize", "ignore"],
+      "common_usage": "emphasize the importance"
+    },
+    {
+      "word": "encounter",
+      "synonyms": ["meet", "face", "confront", "experience"],
+      "antonyms": ["avoid", "escape", "miss"],
+      "common_usage": "encounter difficulties"
+    },
+    {
+      "word": "enormous",
+      "synonyms": ["huge", "vast", "immense", "massive"],
+      "antonyms": ["tiny", "small", "minute"],
+      "common_usage": "enormous potential"
+    },
+    {
+      "word": "ensure",
+      "synonyms": ["guarantee", "assure", "secure", "make sure"],
+      "antonyms": ["risk", "endanger", "threaten"],
+      "common_usage": "ensure safety"
+    },
+    {
+      "word": "essential",
+      "synonyms": ["necessary", "vital", "crucial", "fundamental"],
+      "antonyms": ["unnecessary", "optional", "trivial"],
+      "common_usage": "essential skill"
+    },
+    {
+      "word": "establish",
+      "synonyms": ["set up", "create", "found", "build"],
+      "antonyms": ["destroy", "abolish", "close"],
+      "common_usage": "establish a company"
+    },
+    {
+      "word": "evaluate",
+      "synonyms": ["assess", "judge", "estimate", "appraise"],
+      "antonyms": ["ignore", "neglect"],
+      "common_usage": "evaluate performance"
+    },
+    {
+      "word": "evident",
+      "synonyms": ["obvious", "clear", "apparent", "plain"],
+      "antonyms": ["hidden", "obscure", "unclear"],
+      "common_usage": "evident truth"
+    },
+    {
+      "word": "exaggerate",
+      "synonyms": ["overstate", "magnify", "amplify", "embellish"],
+      "antonyms": ["understate", "minimize", "downplay"],
+      "common_usage": "exaggerate the facts"
+    },
+    {
+      "word": "exceed",
+      "synonyms": ["surpass", "beat", "top", "overtake"],
+      "antonyms": ["fall short", "fail", "lag"],
+      "common_usage": "exceed expectations"
+    },
+    {
+      "word": "excessive",
+      "synonyms": ["too much", "extreme", "immoderate", "unreasonable"],
+      "antonyms": ["moderate", "reasonable", "adequate"],
+      "common_usage": "excessive spending"
+    },
+    {
+      "word": "exclude",
+      "synonyms": ["leave out", "omit", "bar", "prohibit"],
+      "antonyms": ["include", "admit", "allow"],
+      "common_usage": "exclude from consideration"
+    },
+    {
+      "word": "explore",
+      "synonyms": ["investigate", "examine", "search", "discover"],
+      "antonyms": ["ignore", "neglect", "overlook"],
+      "common_usage": "explore new ideas"
+    },
+    {
+      "word": "extensive",
+      "synonyms": ["wide", "broad", "vast", "comprehensive"],
+      "antonyms": ["limited", "narrow", "restricted"],
+      "common_usage": "extensive research"
+    },
+    {
+      "word": "facilitate",
+      "synonyms": ["help", "assist", "ease", "enable"],
+      "antonyms": ["hinder", "obstruct", "impede"],
+      "common_usage": "facilitate communication"
+    },
+    {
+      "word": "flexible",
+      "synonyms": ["adaptable", "elastic", "pliable", "yielding"],
+      "antonyms": ["rigid", "stiff", "inflexible"],
+      "common_usage": "flexible schedule"
+    },
+    {
+      "word": "flourish",
+      "synonyms": ["thrive", "prosper", "bloom", "succeed"],
+      "antonyms": ["decline", "fail", "wither"],
+      "common_usage": "flourish in adversity"
+    },
+    {
+      "word": "fundamental",
+      "synonyms": ["basic", "essential", "primary", "core"],
+      "antonyms": ["advanced", "secondary", "minor"],
+      "common_usage": "fundamental principle"
+    },
+    {
+      "word": "genuine",
+      "synonyms": ["real", "authentic", "true", "sincere"],
+      "antonyms": ["fake", "false", "artificial"],
+      "common_usage": "genuine concern"
+    },
+    {
+      "word": "guarantee",
+      "synonyms": ["promise", "assure", "warrant", "pledge"],
+      "antonyms": ["deny", "refuse", "risk"],
+      "common_usage": "guarantee success"
+    },
+    {
+      "word": "hinder",
+      "synonyms": ["obstruct", "impede", "block", "prevent"],
+      "antonyms": ["help", "assist", "facilitate"],
+      "common_usage": "hinder progress"
+    },
+    {
+      "word": "identical",
+      "synonyms": ["same", "alike", "equal", "matching"],
+      "antonyms": ["different", "distinct", "unlike"],
+      "common_usage": "identical twins"
+    },
+    {
+      "word": "ignore",
+      "synonyms": ["disregard", "neglect", "overlook", "dismiss"],
+      "antonyms": ["notice", "attend", "heed"],
+      "common_usage": "ignore the warning"
+    },
+    {
+      "word": "illustrate",
+      "synonyms": ["demonstrate", "show", "explain", "depict"],
+      "antonyms": ["confuse", "obscure", "hide"],
+      "common_usage": "illustrate a point"
+    },
+    {
+      "word": "implement",
+      "synonyms": ["carry out", "execute", "apply", "enforce"],
+      "antonyms": ["abandon", "cancel", "disregard"],
+      "common_usage": "implement a policy"
+    },
+    {
+      "word": "imply",
+      "synonyms": ["suggest", "hint", "indicate", "infer"],
+      "antonyms": ["state", "declare", "announce"],
+      "common_usage": "imply dissatisfaction"
+    },
+    {
+      "word": "impose",
+      "synonyms": ["force", "enforce", "inflict", "levy"],
+      "antonyms": ["remove", "lift", "withdraw"],
+      "common_usage": "impose restrictions"
+    }
+  ]
+}

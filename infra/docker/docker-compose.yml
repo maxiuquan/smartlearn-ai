@@ -13,14 +13,15 @@ services:
     environment:
       - POSTGRES_SERVER=db
       - POSTGRES_PORT=5432
-      - POSTGRES_USER=${POSTGRES_USER:-postgres}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - POSTGRES_USER=${POSTGRES_USER:-smartlearn_user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?err: POSTGRES_PASSWORD must be set}
       - POSTGRES_DB=${POSTGRES_DB:-smartlearn}
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:?err: REDIS_PASSWORD must be set}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - OPENAI_API_BASE=${OPENAI_API_BASE:-https://api.openai.com/v1}
-      - JWT_SECRET=${JWT_SECRET:-your-secret-key}
+      - JWT_SECRET=${JWT_SECRET:?err: JWT_SECRET must be set}
       - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:3000,http://localhost:3001}
     volumes:
       - ../../data:/app/data:ro
@@ -121,15 +122,15 @@ services:
     ports:
       - "5432:5432"
     environment:
-      - POSTGRES_USER=${POSTGRES_USER:-postgres}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - POSTGRES_USER=${POSTGRES_USER:-smartlearn_user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?err: POSTGRES_PASSWORD must be set}
       - POSTGRES_DB=${POSTGRES_DB:-smartlearn}
     volumes:
       - postgres-data:/var/lib/postgresql/data
     networks:
       - smartlearn-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-smartlearn_user}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -139,15 +140,13 @@ services:
     image: redis:7-alpine
     container_name: smartlearn-redis
     restart: unless-stopped
-    ports:
-      - "6379:6379"
-    command: redis-server --appendonly yes
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:?err: REDIS_PASSWORD must be set}
     volumes:
       - redis-data:/data
     networks:
       - smartlearn-network
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD", "redis-cli", "--no-auth-warning", "-a", "${REDIS_PASSWORD}", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -198,8 +197,8 @@ services:
     container_name: smartlearn-minio
     restart: unless-stopped
     environment:
-      - MINIO_ACCESS_KEY=minioadmin
-      - MINIO_SECRET_KEY=minioadmin
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY:?err: MINIO_ACCESS_KEY must be set}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY:?err: MINIO_SECRET_KEY must be set}
     volumes:
       - minio-data:/minio_data
     command: minio server /minio_data
@@ -217,11 +216,12 @@ services:
     environment:
       - POSTGRES_SERVER=db
       - POSTGRES_PORT=5432
-      - POSTGRES_USER=${POSTGRES_USER:-postgres}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - POSTGRES_USER=${POSTGRES_USER:-smartlearn_user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?err: POSTGRES_PASSWORD must be set}
       - POSTGRES_DB=${POSTGRES_DB:-smartlearn}
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:?err: REDIS_PASSWORD must be set}
     volumes:
       - ../../data:/app/data:ro
     depends_on:
@@ -241,6 +241,7 @@ services:
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:?err: REDIS_PASSWORD must be set}
     depends_on:
       - redis
     networks:

@@ -1,0 +1,219 @@
+{
+  "subject": "考研数学",
+  "subject_code": "math",
+  "version": "1.0.0",
+  "last_updated": "2026-07-03",
+  "description": "考研数学历年真题索引",
+  "exams": [
+    {
+      "year": 2024,
+      "name": "2024年考研数学真题",
+      "categories": [
+        { "code": "math1", "name": "数学一", "total_score": 150, "duration": 180 },
+        { "code": "math2", "name": "数学二", "total_score": 150, "duration": 180 },
+        { "code": "math3", "name": "数学三", "total_score": 150, "duration": 180 }
+      ],
+      "sections": [
+        { "type": "选择题", "count": 10, "score_per": 5, "total": 50 },
+        { "type": "填空题", "count": 6, "score_per": 5, "total": 30 },
+        { "type": "解答题", "count": 6, "total": 70 }
+      ]
+    },
+    {
+      "year": 2023,
+      "name": "2023年考研数学真题",
+      "categories": [
+        { "code": "math1", "name": "数学一", "total_score": 150, "duration": 180 },
+        { "code": "math2", "name": "数学二", "total_score": 150, "duration": 180 },
+        { "code": "math3", "name": "数学三", "total_score": 150, "duration": 180 }
+      ],
+      "sections": [
+        { "type": "选择题", "count": 10, "score_per": 5, "total": 50 },
+        { "type": "填空题", "count": 6, "score_per": 5, "total": 30 },
+        { "type": "解答题", "count": 6, "total": 70 }
+      ]
+    },
+    {
+      "year": 2022,
+      "name": "2022年考研数学真题",
+      "categories": [
+        { "code": "math1", "name": "数学一", "total_score": 150, "duration": 180 },
+        { "code": "math2", "name": "数学二", "total_score": 150, "duration": 180 },
+        { "code": "math3", "name": "数学三", "total_score": 150, "duration": 180 }
+      ],
+      "sections": [
+        { "type": "选择题", "count": 10, "score_per": 5, "total": 50 },
+        { "type": "填空题", "count": 6, "score_per": 5, "total": 30 },
+        { "type": "解答题", "count": 6, "total": 70 }
+      ]
+    },
+    {
+      "year": 2021,
+      "name": "2021年考研数学真题",
+      "categories": [
+        { "code": "math1", "name": "数学一", "total_score": 150, "duration": 180 },
+        { "code": "math2", "name": "数学二", "total_score": 150, "duration": 180 },
+        { "code": "math3", "name": "数学三", "total_score": 150, "duration": 180 }
+      ],
+      "sections": [
+        { "type": "选择题", "count": 10, "score_per": 5, "total": 50 },
+        { "type": "填空题", "count": 6, "score_per": 5, "total": 30 },
+        { "type": "解答题", "count": 6, "total": 70 }
+      ]
+    },
+    {
+      "year": 2020,
+      "name": "2020年考研数学真题",
+      "categories": [
+        { "code": "math1", "name": "数学一", "total_score": 150, "duration": 180 },
+        { "code": "math2", "name": "数学二", "total_score": 150, "duration": 180 },
+        { "code": "math3", "name": "数学三", "total_score": 150, "duration": 180 }
+      ],
+      "sections": [
+        { "type": "选择题", "count": 10, "score_per": 5, "total": 50 },
+        { "type": "填空题", "count": 6, "score_per": 5, "total": 30 },
+        { "type": "解答题", "count": 6, "total": 70 }
+      ]
+    },
+    {
+      "year": 2019,
+      "name": "2019年考研数学真题",
+      "categories": [
+        { "code": "math1", "name": "数学一", "total_score": 150, "duration": 180 },
+        { "code": "math2", "name": "数学二", "total_score": 150, "duration": 180 },
+        { "code": "math3", "name": "数学三", "total_score": 150, "duration": 180 }
+      ],
+      "sections": [
+        { "type": "选择题", "count": 10, "score_per": 5, "total": 50 },
+        { "type": "填空题", "count": 6, "score_per": 5, "total": 30 },
+        { "type": "解答题", "count": 6, "total": 70 }
+      ]
+    },
+    {
+      "year": 2018,
+      "name": "2018年考研数学真题",
+      "categories": [
+        { "code": "math1", "name": "数学一", "total_score": 150, "duration": 180 },
+        { "code": "math2", "name": "数学二", "total_score": 150, "duration": 180 },
+        { "code": "math3", "name": "数学三", "total_score": 150, "duration": 180 }
+      ],
+      "sections": [
+        { "type": "选择题", "count": 10, "score_per": 5, "total": 50 },
+        { "type": "填空题", "count": 6, "score_per": 5, "total": 30 },
+        { "type": "解答题", "count": 6, "total": 70 }
+      ]
+    },
+    {
+      "year": 2017,
+      "name": "2017年考研数学真题",
+      "categories": [
+        { "code": "math1", "name": "数学一", "total_score": 150, "duration": 180 },
+        { "code": "math2", "name": "数学二", "total_score": 150, "duration": 180 },
+        { "code": "math3", "name": "数学三", "total_score": 150, "duration": 180 }
+      ],
+      "sections": [
+        { "type": "选择题", "count": 10, "score_per": 5, "total": 50 },
+        { "type": "填空题", "count": 6, "score_per": 5, "total": 30 },
+        { "type": "解答题", "count": 6, "total": 70 }
+      ]
+    },
+    {
+      "year": 2016,
+      "name": "2016年考研数学真题",
+      "categories": [
+        { "code": "math1", "name": "数学一", "total_score": 150, "duration": 180 },
+        { "code": "math2", "name": "数学二", "total_score": 150, "duration": 180 },
+        { "code": "math3", "name": "数学三", "total_score": 150, "duration": 180 }
+      ],
+      "sections": [
+        { "type": "选择题", "count": 10, "score_per": 5, "total": 50 },
+        { "type": "填空题", "count": 6, "score_per": 5, "total": 30 },
+        { "type": "解答题", "count": 6, "total": 70 }
+      ]
+    },
+    {
+      "year": 2015,
+      "name": "2015年考研数学真题",
+      "categories": [
+        { "code": "math1", "name": "数学一", "total_score": 150, "duration": 180 },
+        { "code": "math2", "name": "数学二", "total_score": 150, "duration": 180 },
+        { "code": "math3", "name": "数学三", "total_score": 150, "duration": 180 }
+      ],
+      "sections": [
+        { "type": "选择题", "count": 10, "score_per": 5, "total": 50 },
+        { "type": "填空题", "count": 6, "score_per": 5, "total": 30 },
+        { "type": "解答题", "count": 6, "total": 70 }
+      ]
+    },
+    {
+      "year": 2014,
+      "name": "2014年考研数学真题",
+      "categories": [
+        { "code": "math1", "name": "数学一", "total_score": 150, "duration": 180 },
+        { "code": "math2", "name": "数学二", "total_score": 150, "duration": 180 },
+        { "code": "math3", "name": "数学三", "total_score": 150, "duration": 180 }
+      ],
+      "sections": [
+        { "type": "选择题", "count": 10, "score_per": 5, "total": 50 },
+        { "type": "填空题", "count": 6, "score_per": 5, "total": 30 },
+        { "type": "解答题", "count": 6, "total": 70 }
+      ]
+    },
+    {
+      "year": 2013,
+      "name": "2013年考研数学真题",
+      "categories": [
+        { "code": "math1", "name": "数学一", "total_score": 150, "duration": 180 },
+        { "code": "math2", "name": "数学二", "total_score": 150, "duration": 180 },
+        { "code": "math3", "name": "数学三", "total_score": 150, "duration": 180 }
+      ],
+      "sections": [
+        { "type": "选择题", "count": 10, "score_per": 5, "total": 50 },
+        { "type": "填空题", "count": 6, "score_per": 5, "total": 30 },
+        { "type": "解答题", "count": 6, "total": 70 }
+      ]
+    },
+    {
+      "year": 2012,
+      "name": "2012年考研数学真题",
+      "categories": [
+        { "code": "math1", "name": "数学一", "total_score": 150, "duration": 180 },
+        { "code": "math2", "name": "数学二", "total_score": 150, "duration": 180 },
+        { "code": "math3", "name": "数学三", "total_score": 150, "duration": 180 }
+      ],
+      "sections": [
+        { "type": "选择题", "count": 10, "score_per": 5, "total": 50 },
+        { "type": "填空题", "count": 6, "score_per": 5, "total": 30 },
+        { "type": "解答题", "count": 6, "total": 70 }
+      ]
+    },
+    {
+      "year": 2011,
+      "name": "2011年考研数学真题",
+      "categories": [
+        { "code": "math1", "name": "数学一", "total_score": 150, "duration": 180 },
+        { "code": "math2", "name": "数学二", "total_score": 150, "duration": 180 },
+        { "code": "math3", "name": "数学三", "total_score": 150, "duration": 180 }
+      ],
+      "sections": [
+        { "type": "选择题", "count": 10, "score_per": 5, "total": 50 },
+        { "type": "填空题", "count": 6, "score_per": 5, "total": 30 },
+        { "type": "解答题", "count": 6, "total": 70 }
+      ]
+    },
+    {
+      "year": 2010,
+      "name": "2010年考研数学真题",
+      "categories": [
+        { "code": "math1", "name": "数学一", "total_score": 150, "duration": 180 },
+        { "code": "math2", "name": "数学二", "total_score": 150, "duration": 180 },
+        { "code": "math3", "name": "数学三", "total_score": 150, "duration": 180 }
+      ],
+      "sections": [
+        { "type": "选择题", "count": 10, "score_per": 5, "total": 50 },
+        { "type": "填空题", "count": 6, "score_per": 5, "total": 30 },
+        { "type": "解答题", "count": 6, "total": 70 }
+      ]
+    }
+  ]
+}

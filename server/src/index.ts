@@ -23,6 +23,9 @@ import { stopPointRoutes } from './routes/stop-point';
 import { mathBankRoutes } from './routes/math-bank';
 import { englishBankRoutes } from './routes/english-bank';
 import { adminRoutes } from './routes/admin';
+import { questionUploadRoutes } from './routes/question-upload';
+import { gameRoutes } from './routes/games';
+import { vocabularyRoutes } from './routes/vocabulary';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -56,6 +59,9 @@ app.use('/api/stop-point', stopPointRoutes);
 app.use('/api/math-bank', mathBankRoutes);
 app.use('/api/english-bank', englishBankRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/questions', questionUploadRoutes);
+app.use('/api/games', gameRoutes);
+app.use('/api/vocab', vocabularyRoutes);
 
 app.get('/api/health', (_req, res) => {
   res.json({

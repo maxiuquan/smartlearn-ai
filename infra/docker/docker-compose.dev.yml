@@ -1,0 +1,46 @@
+# SmartLearn AI - 开发环境覆盖配置
+# 用法: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+version: '3.8'
+
+services:
+  api:
+    build:
+      target: base
+    volumes:
+      - ../../services/api/app:/app/app:ro
+      - ../../data:/app/data:ro
+    environment:
+      - LOG_LEVEL=DEBUG
+      - DEBUG=true
+      - RELOAD=true
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  ai-engine:
+    build:
+      target: base
+    volumes:
+      - ../../services/ai-engine/app:/app/app:ro
+    environment:
+      - LOG_LEVEL=DEBUG
+      - DEBUG=true
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload
+
+  mobile:
+    volumes:
+      - ../../apps/mobile-web/src:/app/src:ro
+    environment:
+      - NODE_ENV=development
+
+  admin:
+    volumes:
+      - ../../apps/admin/src:/app/src:ro
+    environment:
+      - NODE_ENV=development
+
+  db:
+    ports:
+      - "5432:5432"
+
+  redis:
+    ports:
+      - "6379:6379"

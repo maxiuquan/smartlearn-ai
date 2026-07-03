@@ -1,0 +1,234 @@
+{
+  "subject": "考研英语",
+  "subject_code": "english",
+  "version": "1.0.0",
+  "last_updated": "2026-07-03",
+  "description": "考研英语历年真题索引",
+  "exams": [
+    {
+      "year": 2024,
+      "name": "2024年考研英语真题",
+      "categories": [
+        { "code": "english1", "name": "英语一", "total_score": 100, "duration": 180 },
+        { "code": "english2", "name": "英语二", "total_score": 100, "duration": 180 }
+      ],
+      "sections": [
+        { "type": "完形填空", "count": 20, "score_per": 0.5, "total": 10 },
+        { "type": "阅读理解", "count": 20, "score_per": 2, "total": 40 },
+        { "type": "新题型", "count": 5, "score_per": 2, "total": 10 },
+        { "type": "翻译", "count": 1, "total": 10 },
+        { "type": "写作", "count": 2, "total": 30 }
+      ]
+    },
+    {
+      "year": 2023,
+      "name": "2023年考研英语真题",
+      "categories": [
+        { "code": "english1", "name": "英语一", "total_score": 100, "duration": 180 },
+        { "code": "english2", "name": "英语二", "total_score": 100, "duration": 180 }
+      ],
+      "sections": [
+        { "type": "完形填空", "count": 20, "score_per": 0.5, "total": 10 },
+        { "type": "阅读理解", "count": 20, "score_per": 2, "total": 40 },
+        { "type": "新题型", "count": 5, "score_per": 2, "total": 10 },
+        { "type": "翻译", "count": 1, "total": 10 },
+        { "type": "写作", "count": 2, "total": 30 }
+      ]
+    },
+    {
+      "year": 2022,
+      "name": "2022年考研英语真题",
+      "categories": [
+        { "code": "english1", "name": "英语一", "total_score": 100, "duration": 180 },
+        { "code": "english2", "name": "英语二", "total_score": 100, "duration": 180 }
+      ],
+      "sections": [
+        { "type": "完形填空", "count": 20, "score_per": 0.5, "total": 10 },
+        { "type": "阅读理解", "count": 20, "score_per": 2, "total": 40 },
+        { "type": "新题型", "count": 5, "score_per": 2, "total": 10 },
+        { "type": "翻译", "count": 1, "total": 10 },
+        { "type": "写作", "count": 2, "total": 30 }
+      ]
+    },
+    {
+      "year": 2021,
+      "name": "2021年考研英语真题",
+      "categories": [
+        { "code": "english1", "name": "英语一", "total_score": 100, "duration": 180 },
+        { "code": "english2", "name": "英语二", "total_score": 100, "duration": 180 }
+      ],
+      "sections": [
+        { "type": "完形填空", "count": 20, "score_per": 0.5, "total": 10 },
+        { "type": "阅读理解", "count": 20, "score_per": 2, "total": 40 },
+        { "type": "新题型", "count": 5, "score_per": 2, "total": 10 },
+        { "type": "翻译", "count": 1, "total": 10 },
+        { "type": "写作", "count": 2, "total": 30 }
+      ]
+    },
+    {
+      "year": 2020,
+      "name": "2020年考研英语真题",
+      "categories": [
+        { "code": "english1", "name": "英语一", "total_score": 100, "duration": 180 },
+        { "code": "english2", "name": "英语二", "total_score": 100, "duration": 180 }
+      ],
+      "sections": [
+        { "type": "完形填空", "count": 20, "score_per": 0.5, "total": 10 },
+        { "type": "阅读理解", "count": 20, "score_per": 2, "total": 40 },
+        { "type": "新题型", "count": 5, "score_per": 2, "total": 10 },
+        { "type": "翻译", "count": 1, "total": 10 },
+        { "type": "写作", "count": 2, "total": 30 }
+      ]
+    },
+    {
+      "year": 2019,
+      "name": "2019年考研英语真题",
+      "categories": [
+        { "code": "english1", "name": "英语一", "total_score": 100, "duration": 180 },
+        { "code": "english2", "name": "英语二", "total_score": 100, "duration": 180 }
+      ],
+      "sections": [
+        { "type": "完形填空", "count": 20, "score_per": 0.5, "total": 10 },
+        { "type": "阅读理解", "count": 20, "score_per": 2, "total": 40 },
+        { "type": "新题型", "count": 5, "score_per": 2, "total": 10 },
+        { "type": "翻译", "count": 1, "total": 10 },
+        { "type": "写作", "count": 2, "total": 30 }
+      ]
+    },
+    {
+      "year": 2018,
+      "name": "2018年考研英语真题",
+      "categories": [
+        { "code": "english1", "name": "英语一", "total_score": 100, "duration": 180 },
+        { "code": "english2", "name": "英语二", "total_score": 100, "duration": 180 }
+      ],
+      "sections": [
+        { "type": "完形填空", "count": 20, "score_per": 0.5, "total": 10 },
+        { "type": "阅读理解", "count": 20, "score_per": 2, "total": 40 },
+        { "type": "新题型", "count": 5, "score_per": 2, "total": 10 },
+        { "type": "翻译", "count": 1, "total": 10 },
+        { "type": "写作", "count": 2, "total": 30 }
+      ]
+    },
+    {
+      "year": 2017,
+      "name": "2017年考研英语真题",
+      "categories": [
+        { "code": "english1", "name": "英语一", "total_score": 100, "duration": 180 },
+        { "code": "english2", "name": "英语二", "total_score": 100, "duration": 180 }
+      ],
+      "sections": [
+        { "type": "完形填空", "count": 20, "score_per": 0.5, "total": 10 },
+        { "type": "阅读理解", "count": 20, "score_per": 2, "total": 40 },
+        { "type": "新题型", "count": 5, "score_per": 2, "total": 10 },
+        { "type": "翻译", "count": 1, "total": 10 },
+        { "type": "写作", "count": 2, "total": 30 }
+      ]
+    },
+    {
+      "year": 2016,
+      "name": "2016年考研英语真题",
+      "categories": [
+        { "code": "english1", "name": "英语一", "total_score": 100, "duration": 180 },
+        { "code": "english2", "name": "英语二", "total_score": 100, "duration": 180 }
+      ],
+      "sections": [
+        { "type": "完形填空", "count": 20, "score_per": 0.5, "total": 10 },
+        { "type": "阅读理解", "count": 20, "score_per": 2, "total": 40 },
+        { "type": "新题型", "count": 5, "score_per": 2, "total": 10 },
+        { "type": "翻译", "count": 1, "total": 10 },
+        { "type": "写作", "count": 2, "total": 30 }
+      ]
+    },
+    {
+      "year": 2015,
+      "name": "2015年考研英语真题",
+      "categories": [
+        { "code": "english1", "name": "英语一", "total_score": 100, "duration": 180 },
+        { "code": "english2", "name": "英语二", "total_score": 100, "duration": 180 }
+      ],
+      "sections": [
+        { "type": "完形填空", "count": 20, "score_per": 0.5, "total": 10 },
+        { "type": "阅读理解", "count": 20, "score_per": 2, "total": 40 },
+        { "type": "新题型", "count": 5, "score_per": 2, "total": 10 },
+        { "type": "翻译", "count": 1, "total": 10 },
+        { "type": "写作", "count": 2, "total": 30 }
+      ]
+    },
+    {
+      "year": 2014,
+      "name": "2014年考研英语真题",
+      "categories": [
+        { "code": "english1", "name": "英语一", "total_score": 100, "duration": 180 },
+        { "code": "english2", "name": "英语二", "total_score": 100, "duration": 180 }
+      ],
+      "sections": [
+        { "type": "完形填空", "count": 20, "score_per": 0.5, "total": 10 },
+        { "type": "阅读理解", "count": 20, "score_per": 2, "total": 40 },
+        { "type": "新题型", "count": 5, "score_per": 2, "total": 10 },
+        { "type": "翻译", "count": 1, "total": 10 },
+        { "type": "写作", "count": 2, "total": 30 }
+      ]
+    },
+    {
+      "year": 2013,
+      "name": "2013年考研英语真题",
+      "categories": [
+        { "code": "english1", "name": "英语一", "total_score": 100, "duration": 180 },
+        { "code": "english2", "name": "英语二", "total_score": 100, "duration": 180 }
+      ],
+      "sections": [
+        { "type": "完形填空", "count": 20, "score_per": 0.5, "total": 10 },
+        { "type": "阅读理解", "count": 20, "score_per": 2, "total": 40 },
+        { "type": "新题型", "count": 5, "score_per": 2, "total": 10 },
+        { "type": "翻译", "count": 1, "total": 10 },
+        { "type": "写作", "count": 2, "total": 30 }
+      ]
+    },
+    {
+      "year": 2012,
+      "name": "2012年考研英语真题",
+      "categories": [
+        { "code": "english1", "name": "英语一", "total_score": 100, "duration": 180 },
+        { "code": "english2", "name": "英语二", "total_score": 100, "duration": 180 }
+      ],
+      "sections": [
+        { "type": "完形填空", "count": 20, "score_per": 0.5, "total": 10 },
+        { "type": "阅读理解", "count": 20, "score_per": 2, "total": 40 },
+        { "type": "新题型", "count": 5, "score_per": 2, "total": 10 },
+        { "type": "翻译", "count": 1, "total": 10 },
+        { "type": "写作", "count": 2, "total": 30 }
+      ]
+    },
+    {
+      "year": 2011,
+      "name": "2011年考研英语真题",
+      "categories": [
+        { "code": "english1", "name": "英语一", "total_score": 100, "duration": 180 },
+        { "code": "english2", "name": "英语二", "total_score": 100, "duration": 180 }
+      ],
+      "sections": [
+        { "type": "完形填空", "count": 20, "score_per": 0.5, "total": 10 },
+        { "type": "阅读理解", "count": 20, "score_per": 2, "total": 40 },
+        { "type": "新题型", "count": 5, "score_per": 2, "total": 10 },
+        { "type": "翻译", "count": 1, "total": 10 },
+        { "type": "写作", "count": 2, "total": 30 }
+      ]
+    },
+    {
+      "year": 2010,
+      "name": "2010年考研英语真题",
+      "categories": [
+        { "code": "english1", "name": "英语一", "total_score": 100, "duration": 180 },
+        { "code": "english2", "name": "英语二", "total_score": 100, "duration": 180 }
+      ],
+      "sections": [
+        { "type": "完形填空", "count": 20, "score_per": 0.5, "total": 10 },
+        { "type": "阅读理解", "count": 20, "score_per": 2, "total": 40 },
+        { "type": "新题型", "count": 5, "score_per": 2, "total": 10 },
+        { "type": "翻译", "count": 1, "total": 10 },
+        { "type": "写作", "count": 2, "total": 30 }
+      ]
+    }
+  ]
+}

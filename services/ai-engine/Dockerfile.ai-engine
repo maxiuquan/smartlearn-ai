@@ -1,0 +1,57 @@
+# SmartLearn AI - AI 引擎服务 Docker 镜像
+# 构建上下文: 项目根目录
+# 构建命令: docker build -f services/ai-engine/Dockerfile.ai-engine -t smartlearn-ai-engine .
+
+FROM python:3.11-slim as base
+
+# 环境变量设置
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONFAULTHANDLER=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+
+# 安装系统依赖
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    curl \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# ── 依赖安装阶段 ──
+FROM base as dependencies
+
+COPY services/ai-engine/requirements.txt .
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+# ── 最终阶段 ──
+FROM base as final
+
+# 从依赖阶段复制已安装的包
+COPY --from=dependencies /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY --from=dependencies /usr/local/bin /usr/local/bin
+
+# 复制应用代码
+COPY services/ai-engine/app ./app
+COPY services/ai-engine/models ./models 2>/dev/null || true
+COPY services/ai-engine/routers ./routers 2>/dev/null || true
+COPY services/ai-engine/services ./services 2>/dev/null || true
+COPY services/ai-engine/config.py ./config.py 2>/dev/null || true
+
+# 创建模型缓存目录
+RUN mkdir -p /app/models
+
+# 创建非 root 用户并设置权限
+RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
+USER appuser
+
+# 健康检查
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+    CMD curl -f http://localhost:8001/health || exit 1
+
+EXPOSE 8001
+
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8001", "--workers", "2"]

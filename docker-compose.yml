@@ -1,46 +1,467 @@
 version: '3.8'
 
+# ============================================================
+# SmartLearn AI - Docker Compose (开发/测试环境)
+# ============================================================
+# 使用方式:
+#   1. 复制 .env.example 为 .env 并填入真实值
+#   2. docker compose up -d
+# ============================================================
+
 services:
+  # ── PostgreSQL 数据库 ──
   db:
     image: postgres:16-alpine
+    container_name: smartlearn-db
+    restart: unless-stopped
+    # 内部服务不暴露宿主机端口
+    # ports:
+    #   - "5432:5432"
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      POSTGRES_DB: lexistrike
+      POSTGRES_USER: ${POSTGRES_USER:-smartlearn_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?err: POSTGRES_PASSWORD 必须设置}
+      POSTGRES_DB: ${POSTGRES_DB:-smartlearn}
     volumes:
       - pgdata:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
+    networks:
+      - smartlearn-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-smartlearn_user}"]
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 256M
 
-  api:
-    build: .
-    ports:
-      - "${SERVER_PORT:-3001}:3001"
+  # ── Redis 缓存 ──
+  redis:
+    image: redis:7-alpine
+    container_name: smartlearn-redis
+    restart: unless-stopped
+    # 内部服务不暴露宿主机端口
+    # ports:
+    #   - "6379:6379"
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:?err: REDIS_PASSWORD 必须设置}
+    volumes:
+      - redisdata:/data
+    networks:
+      - smartlearn-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--no-auth-warning", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+
+  # ── etcd (Milvus 依赖) ──
+  etcd:
+    image: quay.io/coreos/etcd:v3.5.5
+    container_name: smartlearn-etcd
+    restart: unless-stopped
     environment:
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-postgres}@db:5432/lexistrike
-      JWT_SECRET: ${JWT_SECRET:-change-me}
-      NODE_ENV: production
+      ETCD_AUTO_COMPACTION_MODE: revision
+      ETCD_AUTO_COMPACTION_RETENTION: "1000"
+      ETCD_QUOTA_BACKEND_BYTES: "4294967296"
+      ETCD_SNAPSHOT_COUNT: "50000"
+    volumes:
+      - etcddata:/etcd
+    command: etcd -advertise-client-urls=http://127.0.0.1:2379 -listen-client-urls http://0.0.0.0:2379 --data-dir /etcd
+    networks:
+      - smartlearn-network
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+
+  # ── MinIO (Milvus 依赖) ──
+  minio:
+    image: minio/minio:RELEASE.2023-03-20T20-16-18Z
+    container_name: smartlearn-minio
+    restart: unless-stopped
+    environment:
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:?err: MINIO_ACCESS_KEY 必须设置}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:?err: MINIO_SECRET_KEY 必须设置}
+    volumes:
+      - miniodata:/minio_data
+    command: minio server /minio_data
+    networks:
+      - smartlearn-network
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+
+  # ── Milvus 向量数据库 ──
+  milvus:
+    image: milvusdb/milvus:v2.3.3
+    container_name: smartlearn-milvus
+    restart: unless-stopped
+    # 内部服务不暴露宿主机端口
+    # ports:
+    #   - "19530:19530"
+    #   - "9091:9091"
+    environment:
+      ETCD_ENDPOINTS: etcd:2379
+      MINIO_ADDRESS: minio:9000
+    volumes:
+      - milvusdata:/var/lib/milvus
+    depends_on:
+      - etcd
+      - minio
+    networks:
+      - smartlearn-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9091/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+  # ── API 服务 ──
+  api:
+    build:
+      context: .
+      dockerfile: services/api/Dockerfile.api
+    container_name: smartlearn-api
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_SERVER=db
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=${POSTGRES_USER:-smartlearn_user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?err: POSTGRES_PASSWORD 必须设置}
+      - POSTGRES_DB=${POSTGRES_DB:-smartlearn}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:?err: REDIS_PASSWORD 必须设置}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_API_BASE=${OPENAI_API_BASE:-https://api.openai.com/v1}
+      - JWT_SECRET=${JWT_SECRET:?err: JWT_SECRET 必须设置}
+      - JWT_ALGORITHM=${JWT_ALGORITHM:-HS256}
+      - JWT_ACCESS_EXPIRE_MINUTES=${JWT_ACCESS_EXPIRE_MINUTES:-30}
+      - JWT_REFRESH_EXPIRE_DAYS=${JWT_REFRESH_EXPIRE_DAYS:-7}
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:3000,http://localhost:3001}
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY:?err: MINIO_ACCESS_KEY 必须设置}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY:?err: MINIO_SECRET_KEY 必须设置}
+    volumes:
+      - ./data:/app/data:ro
+      - api-logs:/app/logs
     depends_on:
       db:
         condition: service_healthy
-    restart: unless-stopped
+      redis:
+        condition: service_healthy
+    networks:
+      - smartlearn-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 256M
 
-  nginx:
-    image: nginx:alpine
-    ports:
-      - "80:80"
-      - "443:443"
+  # ── AI 引擎服务 ──
+  ai-engine:
+    build:
+      context: .
+      dockerfile: services/ai-engine/Dockerfile.ai-engine
+    container_name: smartlearn-ai-engine
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:?err: REDIS_PASSWORD 必须设置}
+      # OpenAI 兼容
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - OPENAI_BASE_URL=${OPENAI_BASE_URL:-https://api.openai.com/v1}
+      - LLM_MODEL_NAME=${LLM_MODEL_NAME:-gpt-4o-mini}
+      - EMBEDDING_MODEL_NAME=${EMBEDDING_MODEL_NAME:-text-embedding-3-small}
+      # 多供应商 (Multi-Provider)
+      - GLM_API_KEY=${GLM_API_KEY:-}
+      - GLM_BASE_URL=${GLM_BASE_URL:-https://open.bigmodel.cn/api/paas/v4/}
+      - GLM_MODEL=${GLM_MODEL:-glm-4-flash}
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY:-}
+      - DEEPSEEK_BASE_URL=${DEEPSEEK_BASE_URL:-https://api.deepseek.com/v1}
+      - DEEPSEEK_MODEL=${DEEPSEEK_MODEL:-deepseek-chat}
+      - SILICONFLOW_API_KEY=${SILICONFLOW_API_KEY:-}
+      - SILICONFLOW_BASE_URL=${SILICONFLOW_BASE_URL:-https://api.siliconflow.cn/v1}
+      - SILICONFLOW_EMBEDDING_MODEL=${SILICONFLOW_EMBEDDING_MODEL:-BAAI/bge-m3}
+      - COGVIEW_API_KEY=${COGVIEW_API_KEY:-}
+      - COGVIEW_BASE_URL=${COGVIEW_BASE_URL:-https://open.bigmodel.cn/api/paas/v4/}
+      - COGVIEW_MODEL=${COGVIEW_MODEL:-cogview-3-flash}
+      # 向量存储
+      - VECTOR_STORE_TYPE=${VECTOR_STORE_TYPE:-inmemory}
+      - MILVUS_HOST=milvus
+      - MILVUS_PORT=19530
+      # 环境
+      - ENVIRONMENT=${ENVIRONMENT:-development}
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./client/dist:/usr/share/nginx/html:ro
+      - ./data:/app/data:ro
+      - ai-models:/app/models
+      - ai-logs:/app/logs
+    depends_on:
+      redis:
+        condition: service_healthy
+      milvus:
+        condition: service_healthy
+    networks:
+      - smartlearn-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 4G
+        reservations:
+          cpus: '1'
+          memory: 1G
+
+  # ── 移动端 Web ──
+  mobile-web:
+    build:
+      context: .
+      dockerfile: apps/mobile-web/Dockerfile.mobile
+    container_name: smartlearn-mobile-web
+    restart: unless-stopped
+    environment:
+      - API_BASE_URL=http://api:8000
+      - AI_ENGINE_URL=http://ai-engine:8001
     depends_on:
       - api
+      - ai-engine
+    networks:
+      - smartlearn-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 64M
+
+  # ── 管理后台 ──
+  admin:
+    build:
+      context: .
+      dockerfile: apps/admin/Dockerfile.admin
+    container_name: smartlearn-admin
     restart: unless-stopped
+    environment:
+      - API_BASE_URL=http://api:8000
+    depends_on:
+      - api
+    networks:
+      - smartlearn-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 64M
+
+  # ── Web 前端 (Next.js) ──
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile.web
+    container_name: smartlearn-web
+    restart: unless-stopped
+    environment:
+      - API_BASE_URL=http://api:8000
+      - AI_ENGINE_URL=http://ai-engine:8001
+    depends_on:
+      - api
+      - ai-engine
+    networks:
+      - smartlearn-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 128M
+
+  # ── Celery Worker (异步任务) ──
+  celery-worker:
+    build:
+      context: .
+      dockerfile: services/api/Dockerfile.api
+    container_name: smartlearn-celery-worker
+    restart: unless-stopped
+    command: celery -A app.celery_app worker --loglevel=info
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_SERVER=db
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=${POSTGRES_USER:-smartlearn_user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?err: POSTGRES_PASSWORD 必须设置}
+      - POSTGRES_DB=${POSTGRES_DB:-smartlearn}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:?err: REDIS_PASSWORD 必须设置}
+    depends_on:
+      - db
+      - redis
+    networks:
+      - smartlearn-network
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+
+  # ── Celery Beat (定时任务调度) ──
+  celery-beat:
+    build:
+      context: .
+      dockerfile: services/api/Dockerfile.api
+    container_name: smartlearn-celery-beat
+    restart: unless-stopped
+    command: celery -A app.celery_app beat --loglevel=info
+    env_file:
+      - .env
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:?err: REDIS_PASSWORD 必须设置}
+    depends_on:
+      - redis
+    networks:
+      - smartlearn-network
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+
+  # ── Nginx 反向代理 ──
+  nginx:
+    image: nginx:alpine
+    container_name: smartlearn-nginx
+    restart: unless-stopped
+    ports:
+      - "${NGINX_HTTP_PORT:-80}:80"
+      - "${NGINX_HTTPS_PORT:-443}:443"
+    volumes:
+      - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./infra/nginx/conf.d:/etc/nginx/conf.d:ro
+      - nginx-logs:/var/log/nginx
+      - ./infra/nginx/ssl:/etc/nginx/ssl:ro
+      - ./infra/nginx/certbot/www:/var/www/certbot:ro
+    depends_on:
+      - api
+      - mobile-web
+      - admin
+      - web
+    networks:
+      - smartlearn-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/nginx-health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 64M
+
+networks:
+  smartlearn-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
 
 volumes:
   pgdata:
+  redisdata:
+  etcddata:
+  miniodata:
+  milvusdata:
+  api-logs:
+  ai-models:
+  ai-logs:
+  nginx-logs:

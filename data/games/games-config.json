@@ -1,0 +1,762 @@
+{
+  "version": "1.0.0",
+  "last_updated": "2026-07-03",
+  "description": "SmartLearn AI 游戏化模块配置 - 25款学习游戏",
+  "categories": {
+    "vocabulary": { "name": "英语单词/词汇", "count": 16 },
+    "math": { "name": "数学", "count": 4 },
+    "cross_subject": { "name": "跨科目/社交", "count": 5 }
+  },
+  "games": [
+    {
+      "game_id": "word-match-blast",
+      "name": "词义消消乐",
+      "name_en": "Word Match Blast",
+      "category": "vocabulary",
+      "subjects": ["英语"],
+      "description": "通过拖动连线匹配单词与释义，消除方块获取分数，结合连击系统提升学习效率。",
+      "learning_goal": "快速建立单词与中文释义的对应关系，强化词汇记忆速度和准确度。",
+      "core_mechanisms": ["拖拽匹配", "消除得分", "连击加成", "限时挑战"],
+      "data_sources": ["vocabulary/kaoyan-words.json", "vocabulary/synonyms.json"],
+      "difficulty_levels": ["easy", "medium", "hard"],
+      "session": {
+        "time_limit_sec": 60,
+        "lives": 3,
+        "combo_enabled": true
+      },
+      "rewards": {
+        "base_xp": 30,
+        "base_coin": 15,
+        "combo_multiplier": 2.0
+      },
+      "props": ["hint", "freeze_time", "bomb"],
+      "leaderboard": {
+        "enabled": true,
+        "scopes": ["friends", "global"]
+      },
+      "tech_notes": "使用 Canvas/DOM 实现拖拽交互，双端适配触屏与鼠标事件；匹配算法基于中文释义模糊匹配，支持同义词容错。",
+      "business_value": "基础词汇游戏，用户粘性高，适合作为每日任务推送，可带动广告展示和会员续费。",
+      "stage": 1
+    },
+    {
+      "game_id": "spelling-bee",
+      "name": "拼写蜂",
+      "name_en": "Spelling Bee",
+      "category": "vocabulary",
+      "subjects": ["英语"],
+      "description": "听发音拼写单词，每正确拼写一个单词获得积分，连击越多得分越高。",
+      "learning_goal": "强化单词拼写能力，建立音形对应关系，提升听力拼写准确度。",
+      "core_mechanisms": ["听音拼写", "字母选择", "连击系统", "生命值机制"],
+      "data_sources": ["vocabulary/kaoyan-words.json"],
+      "difficulty_levels": ["easy", "medium", "hard"],
+      "session": {
+        "time_limit_sec": 90,
+        "lives": 5,
+        "combo_enabled": true
+      },
+      "rewards": {
+        "base_xp": 25,
+        "base_coin": 12,
+        "combo_multiplier": 2.0
+      },
+      "props": ["hint", "skip"],
+      "leaderboard": {
+        "enabled": true,
+        "scopes": ["friends", "global"]
+      },
+      "tech_notes": "集成 TTS 语音合成 API 播放单词发音；支持键盘输入和屏幕软键盘两种模式；拼写校验支持美式/英式拼写容错。",
+      "business_value": "核心拼写训练场景，用户每日必练，适合纳入VIP专属词库和付费单词包。",
+      "stage": 1
+    },
+    {
+      "game_id": "root-affix-tree",
+      "name": "词根词缀树",
+      "name_en": "Root & Affix Tree",
+      "category": "vocabulary",
+      "subjects": ["英语"],
+      "description": "从词根出发构建单词树，通过拖拽词缀组装单词，理解单词构成逻辑。",
+      "learning_goal": "掌握常见词根词缀的含义，培养通过词根推测生词含义的能力，提升词汇量扩展效率。",
+      "core_mechanisms": ["树形结构", "拖拽组装", "词根推导", "分支扩展"],
+      "data_sources": ["roots.json"],
+      "difficulty_levels": ["easy", "medium", "hard"],
+      "session": {
+        "time_limit_sec": 120,
+        "lives": 0,
+        "combo_enabled": false
+      },
+      "rewards": {
+        "base_xp": 40,
+        "base_coin": 20,
+        "combo_multiplier": 1.0
+      },
+      "props": ["hint"],
+      "leaderboard": {
+        "enabled": false,
+        "scopes": []
+      },
+      "tech_notes": "使用 D3.js 或 ECharts 树图渲染词根关系；递归构建词根-单词-释义三级节点；支持节点展开/折叠动画。",
+      "business_value": "差异化学习方法，可包装为「词根记忆法」付费课程配套练习工具。",
+      "stage": 2
+    },
+    {
+      "game_id": "cloze-sprint",
+      "name": "语境速填",
+      "name_en": "Cloze Sprint",
+      "category": "vocabulary",
+      "subjects": ["英语"],
+      "description": "在英文句子中快速填入正确的单词，结合上下文语境做出选择，限时挑战提升反应速度。",
+      "learning_goal": "培养在真实语境中运用词汇的能力，提升阅读理解和词汇活用水平。",
+      "core_mechanisms": ["完形填空", "语境推理", "限时作答", "连击加速"],
+      "data_sources": ["vocabulary/kaoyan-words.json"],
+      "difficulty_levels": ["easy", "medium", "hard"],
+      "session": {
+        "time_limit_sec": 60,
+        "lives": 5,
+        "combo_enabled": true
+      },
+      "rewards": {
+        "base_xp": 30,
+        "base_coin": 15,
+        "combo_multiplier": 2.0
+      },
+      "props": ["hint", "skip"],
+      "leaderboard": {
+        "enabled": true,
+        "scopes": ["friends", "global"]
+      },
+      "tech_notes": "从真题语料库抽取句子并挖空生成题目；选项生成需包含近义干扰项以增加区分度；支持 AI 动态生成语境句子。",
+      "business_value": "贴近真题场景，转化率高，适合作为考前冲刺功能吸引付费用户。",
+      "stage": 2
+    },
+    {
+      "game_id": "sentence-untangle",
+      "name": "长难句拆解",
+      "name_en": "Sentence Untangle",
+      "category": "vocabulary",
+      "subjects": ["英语"],
+      "description": "将长难句拆分为主干和修饰成分，通过拖拽重组理解句子结构，逐步掌握复杂句式。",
+      "learning_goal": "掌握考研英语长难句分析技巧，能够快速识别句子主干、从句和修饰成分。",
+      "core_mechanisms": ["结构拆分", "拖拽排序", "语法标注", "逐步提示"],
+      "data_sources": [],
+      "difficulty_levels": ["medium", "hard"],
+      "session": {
+        "time_limit_sec": 180,
+        "lives": 0,
+        "combo_enabled": false
+      },
+      "rewards": {
+        "base_xp": 50,
+        "base_coin": 25,
+        "combo_multiplier": 1.0
+      },
+      "props": ["hint"],
+      "leaderboard": {
+        "enabled": false,
+        "scopes": []
+      },
+      "tech_notes": "使用 NLP 依存句法分析（如 HanLP/StanfordNLP）自动标注句子结构；前端需实现树形结构拖拽，支持语句成分高亮。",
+      "business_value": "高价值功能，考研英语必考难点，可独立包装为付费模块「长难句特训营」。",
+      "stage": 2
+    },
+    {
+      "game_id": "vocabulary-duel",
+      "name": "词汇PK擂台",
+      "name_en": "Vocabulary Duel",
+      "category": "vocabulary",
+      "subjects": ["英语"],
+      "description": "两人实时对战，快速抢答词义题目，比拼反应速度和词汇量，胜者获得额外奖励。",
+      "learning_goal": "通过竞技激励提升词汇学习动力，在对抗中巩固词汇记忆，培养快速反应能力。",
+      "core_mechanisms": ["实时匹配", "抢答机制", "积分对战", "段位排名"],
+      "data_sources": ["vocabulary/kaoyan-words.json"],
+      "difficulty_levels": ["easy", "medium", "hard"],
+      "session": {
+        "time_limit_sec": 120,
+        "lives": 0,
+        "combo_enabled": true
+      },
+      "rewards": {
+        "base_xp": 50,
+        "base_coin": 30,
+        "combo_multiplier": 2.5
+      },
+      "props": [],
+      "leaderboard": {
+        "enabled": true,
+        "scopes": ["friends", "global"]
+      },
+      "tech_notes": "基于 WebSocket 实现实时对战通信；使用匹配队列进行 ELO 段位匹配；需处理断线重连、超时判负等边界情况。",
+      "business_value": "社交裂变核心功能，PVP 模式天然引导用户邀请好友，大幅降低获客成本。",
+      "stage": 3
+    },
+    {
+      "game_id": "flashcard-rush",
+      "name": "闪卡速记",
+      "name_en": "Flashcard Rush",
+      "category": "vocabulary",
+      "subjects": ["英语"],
+      "description": "基于艾宾浩斯遗忘曲线的智能闪卡系统，快速翻阅单词卡片并标记掌握程度。",
+      "learning_goal": "利用间隔重复原理高效记忆单词，系统自动安排复习计划，确保长期记忆效果。",
+      "core_mechanisms": ["卡片翻转", "手势滑动", "间隔重复", "掌握度标记"],
+      "data_sources": ["vocabulary/kaoyan-words.json"],
+      "difficulty_levels": ["easy", "medium", "hard"],
+      "session": {
+        "time_limit_sec": 0,
+        "lives": 0,
+        "combo_enabled": false
+      },
+      "rewards": {
+        "base_xp": 20,
+        "base_coin": 10,
+        "combo_multiplier": 1.0
+      },
+      "props": [],
+      "leaderboard": {
+        "enabled": false,
+        "scopes": []
+      },
+      "tech_notes": "实现 SM-2 算法变体进行间隔重复调度；卡片支持 TTS 发音、例句展示、词根拆分；后端记录每张卡片的复习历史和难度系数。",
+      "business_value": "高频使用场景，DAU 贡献主力，可设置每日免费卡数上限驱动 VIP 转化。",
+      "stage": 1
+    },
+    {
+      "game_id": "listening-dash",
+      "name": "听音辨词",
+      "name_en": "Listening Dash",
+      "category": "vocabulary",
+      "subjects": ["英语"],
+      "description": "播放单词发音，从多个选项中快速选出正确词义，锻炼听力反应速度和辨音能力。",
+      "learning_goal": "提升英语听力词汇识别能力，建立音-形-义三位一体的词汇认知。",
+      "core_mechanisms": ["音频播放", "多选一", "限时作答", "连击得分"],
+      "data_sources": ["vocabulary/kaoyan-words.json"],
+      "difficulty_levels": ["easy", "medium", "hard"],
+      "session": {
+        "time_limit_sec": 60,
+        "lives": 5,
+        "combo_enabled": true
+      },
+      "rewards": {
+        "base_xp": 25,
+        "base_coin": 12,
+        "combo_multiplier": 2.0
+      },
+      "props": ["hint", "replay"],
+      "leaderboard": {
+        "enabled": true,
+        "scopes": ["friends", "global"]
+      },
+      "tech_notes": "集成 TTS 合成或真人录音播放；支持调速播放（0.5x/1x/1.5x）；选项包含近音词干扰，增加区分度。",
+      "business_value": "填补听力词汇训练空白，与阅读词汇形成互补，提升产品完整度，增强用户留存。",
+      "stage": 2
+    },
+    {
+      "game_id": "word-chain",
+      "name": "单词接龙",
+      "name_en": "Word Chain",
+      "category": "vocabulary",
+      "subjects": ["英语"],
+      "description": "根据上一个单词的尾字母输入下一个单词，持续接龙挑战长度记录，考验词汇储备量。",
+      "learning_goal": "激活被动词汇，锻炼词汇联想和快速提取能力，扩大主动词汇量。",
+      "core_mechanisms": ["首尾接龙", "词汇验证", "长度挑战", "时间限制"],
+      "data_sources": ["vocabulary/kaoyan-words.json"],
+      "difficulty_levels": ["easy", "medium", "hard"],
+      "session": {
+        "time_limit_sec": 90,
+        "lives": 0,
+        "combo_enabled": true
+      },
+      "rewards": {
+        "base_xp": 30,
+        "base_coin": 15,
+        "combo_multiplier": 2.0
+      },
+      "props": ["hint", "skip"],
+      "leaderboard": {
+        "enabled": true,
+        "scopes": ["friends", "global"]
+      },
+      "tech_notes": "后端维护 Trie 树结构进行快速单词验证和提示推荐；前端实现输入联想和自动补全；需处理重复单词检测。",
+      "business_value": "趣味性强，传播性好，适合社交分享，可带来自然流量增长。",
+      "stage": 2
+    },
+    {
+      "game_id": "word-bubble-pop",
+      "name": "字母泡泡拼词",
+      "name_en": "Word Bubble Pop",
+      "category": "vocabulary",
+      "subjects": ["英语"],
+      "description": "屏幕上方飘落字母泡泡，点击字母按顺序拼出目标单词，拼对即消除得分。",
+      "learning_goal": "通过趣味拼词强化单词字母序列记忆，提升拼写准确性和反应速度。",
+      "core_mechanisms": ["泡泡消除", "字母选择", "顺序拼词", "限时挑战"],
+      "data_sources": ["vocabulary/kaoyan-words.json"],
+      "difficulty_levels": ["easy", "medium", "hard"],
+      "session": {
+        "time_limit_sec": 60,
+        "lives": 3,
+        "combo_enabled": true
+      },
+      "rewards": {
+        "base_xp": 25,
+        "base_coin": 12,
+        "combo_multiplier": 2.0
+      },
+      "props": ["hint", "shuffle"],
+      "leaderboard": {
+        "enabled": true,
+        "scopes": ["friends", "global"]
+      },
+      "tech_notes": "使用 Canvas 动画实现泡泡飘落物理效果；字母序列校验需实时检测点击顺序；支持泡泡颜色/大小随机变化增加趣味性。",
+      "business_value": "休闲游戏化设计，降低学习门槛，适合拉新和低龄用户群体扩展。",
+      "stage": 2
+    },
+    {
+      "game_id": "synonym-antonym-match",
+      "name": "同反义连线",
+      "name_en": "Synonym & Antonym Match",
+      "category": "vocabulary",
+      "subjects": ["英语"],
+      "description": "左右两列单词，连线匹配同义词或反义词对，快速构建词汇语义网络。",
+      "learning_goal": "掌握词汇间的同义和反义关系，建立词汇语义网络，提升写作和阅读中的词汇替换能力。",
+      "core_mechanisms": ["连线匹配", "同义/反义判断", "限时作答", "连击计分"],
+      "data_sources": ["vocabulary/synonyms.json"],
+      "difficulty_levels": ["easy", "medium", "hard"],
+      "session": {
+        "time_limit_sec": 60,
+        "lives": 0,
+        "combo_enabled": true
+      },
+      "rewards": {
+        "base_xp": 30,
+        "base_coin": 15,
+        "combo_multiplier": 2.0
+      },
+      "props": ["hint"],
+      "leaderboard": {
+        "enabled": true,
+        "scopes": ["friends", "global"]
+      },
+      "tech_notes": "基于同义词词典数据构建匹配对；连线交互使用 Canvas/SVG 绘制贝塞尔曲线；支持触摸和鼠标事件。",
+      "business_value": "考研英语写作必备技能，可嵌入写作模块作为词汇升级推荐工具，提升产品矩阵价值。",
+      "stage": 2
+    },
+    {
+      "game_id": "picture-word-match",
+      "name": "图词配对",
+      "name_en": "Picture-Word Match",
+      "category": "vocabulary",
+      "subjects": ["英语"],
+      "description": "展示图片，从多个单词选项中选出与之匹配的正确单词，图像化记忆更深刻。",
+      "learning_goal": "建立图像与单词的直接关联，绕开中文翻译环节，培养英语思维习惯。",
+      "core_mechanisms": ["图文匹配", "多选一", "限时作答", "连击计分"],
+      "data_sources": ["vocabulary/kaoyan-words.json"],
+      "difficulty_levels": ["easy", "medium"],
+      "session": {
+        "time_limit_sec": 45,
+        "lives": 0,
+        "combo_enabled": true
+      },
+      "rewards": {
+        "base_xp": 25,
+        "base_coin": 12,
+        "combo_multiplier": 2.0
+      },
+      "props": ["hint"],
+      "leaderboard": {
+        "enabled": true,
+        "scopes": ["friends", "global"]
+      },
+      "tech_notes": "使用图库 API 或 AI 生成对应的示意图片；图片需缓存至 CDN 以保证加载速度；支持图片预加载和懒加载策略。",
+      "business_value": "视觉化学习体验独特，适合在社交媒体传播，可作为品牌差异化亮点。",
+      "stage": 2
+    },
+    {
+      "game_id": "crossword-quest",
+      "name": "纵横填词",
+      "name_en": "Crossword Quest",
+      "category": "vocabulary",
+      "subjects": ["英语"],
+      "description": "经典纵横填字游戏，根据英文提示填入正确的单词，交叉验证提升成就感。",
+      "learning_goal": "在解谜过程中综合运用词汇知识和推理能力，强化单词拼写和释义记忆。",
+      "core_mechanisms": ["纵横填字", "线索推理", "字母交叉验证", "逐步解锁"],
+      "data_sources": ["vocabulary/kaoyan-words.json"],
+      "difficulty_levels": ["medium", "hard"],
+      "session": {
+        "time_limit_sec": 180,
+        "lives": 0,
+        "combo_enabled": false
+      },
+      "rewards": {
+        "base_xp": 60,
+        "base_coin": 30,
+        "combo_multiplier": 1.0
+      },
+      "props": ["hint", "reveal"],
+      "leaderboard": {
+        "enabled": true,
+        "scopes": ["friends", "global"]
+      },
+      "tech_notes": "使用回溯算法自动生成填字网格；格子交互支持横竖切换输入；难度由网格大小和单词密度控制。",
+      "business_value": "高沉浸感游戏，单次时长长，适合周末推送，可设计付费解锁更多谜题关卡。",
+      "stage": 3
+    },
+    {
+      "game_id": "word-form-master",
+      "name": "词形变形闯关",
+      "name_en": "Word Form Master",
+      "category": "vocabulary",
+      "subjects": ["英语"],
+      "description": "根据句子语境，将给出的单词变为正确的词形（名词/动词/形容词/副词等变形），闯关晋级。",
+      "learning_goal": "掌握英语单词的词形变化规则（派生、屈折变化），能够根据语法语境正确使用不同词形。",
+      "core_mechanisms": ["词形变换", "语境填空", "关卡递进", "连击奖励"],
+      "data_sources": ["vocabulary/kaoyan-words.json"],
+      "difficulty_levels": ["medium", "hard"],
+      "session": {
+        "time_limit_sec": 90,
+        "lives": 0,
+        "combo_enabled": true
+      },
+      "rewards": {
+        "base_xp": 35,
+        "base_coin": 18,
+        "combo_multiplier": 2.0
+      },
+      "props": ["hint"],
+      "leaderboard": {
+        "enabled": true,
+        "scopes": ["friends", "global"]
+      },
+      "tech_notes": "基于词形变化规则库自动生成题目；需覆盖 -tion/-sion/-ment/-ness/-ful/-less 等常见后缀变化；支持不规则变化的特殊处理。",
+      "business_value": "针对考研完形填空和写作的词形变化考点，精准命中用户痛点，付费转化潜力高。",
+      "stage": 3
+    },
+    {
+      "game_id": "high-frequency-challenge",
+      "name": "真题高频词挑战",
+      "name_en": "High-Frequency Word Challenge",
+      "category": "vocabulary",
+      "subjects": ["英语"],
+      "description": "聚焦考研真题高频词汇，通过词义选择、拼写等多题型快速刷词，集中攻克重点词汇。",
+      "learning_goal": "优先掌握考研真题中出现频率最高的核心词汇，提升备考效率和命中率。",
+      "core_mechanisms": ["高频词筛选", "多题型混合", "限时挑战", "统计反馈"],
+      "data_sources": ["vocabulary/word-frequency.json", "vocabulary/kaoyan-words.json"],
+      "difficulty_levels": ["easy", "medium", "hard"],
+      "session": {
+        "time_limit_sec": 60,
+        "lives": 3,
+        "combo_enabled": true
+      },
+      "rewards": {
+        "base_xp": 30,
+        "base_coin": 15,
+        "combo_multiplier": 2.0
+      },
+      "props": ["hint", "skip"],
+      "leaderboard": {
+        "enabled": true,
+        "scopes": ["friends", "global"]
+      },
+      "tech_notes": "基于历年真题词频统计数据进行题目生成；权重算法优先推送高频且用户未掌握的单词；支持生成个人高频薄弱词报告。",
+      "business_value": "直击考研刚需，可作为付费会员的核心卖点功能，配合考前冲刺营销效果显著。",
+      "stage": 2
+    },
+    {
+      "game_id": "memory-flip-match",
+      "name": "记忆翻牌",
+      "name_en": "Memory Flip Match",
+      "category": "vocabulary",
+      "subjects": ["英语"],
+      "description": "经典翻牌记忆游戏，翻开卡片找到单词与释义的配对，考验记忆力与词汇量。",
+      "learning_goal": "通过配对记忆游戏强化单词与释义的关联记忆，锻炼短时记忆和注意力集中能力。",
+      "core_mechanisms": ["翻牌配对", "记忆挑战", "配对消除", "步数统计"],
+      "data_sources": ["vocabulary/kaoyan-words.json"],
+      "difficulty_levels": ["easy", "medium", "hard"],
+      "session": {
+        "time_limit_sec": 60,
+        "lives": 0,
+        "combo_enabled": true
+      },
+      "rewards": {
+        "base_xp": 25,
+        "base_coin": 12,
+        "combo_multiplier": 2.0
+      },
+      "props": ["hint", "shuffle"],
+      "leaderboard": {
+        "enabled": true,
+        "scopes": ["friends", "global"]
+      },
+      "tech_notes": "卡片翻转使用 CSS 3D transform 动画；网格大小随难度递增（4x3/4x4/6x4）；支持翻转音效和配对成功特效。",
+      "business_value": "经典玩法上手零门槛，适合作为新用户引导游戏，降低首次使用摩擦。",
+      "stage": 1
+    },
+    {
+      "game_id": "limit-blitz",
+      "name": "极限速算",
+      "name_en": "Limit Blitz",
+      "category": "math",
+      "subjects": ["数学"],
+      "description": "快速计算极限题目，在限定时间内完成尽可能多的计算，锻炼计算速度和准确率。",
+      "learning_goal": "提升极限计算的速度和准确率，熟练掌握极限的各种求解方法和技巧。",
+      "core_mechanisms": ["快速计算", "限时挑战", "连击得分", "题型递进"],
+      "data_sources": ["questions/math-examples.json", "questions/math-full.json"],
+      "difficulty_levels": ["easy", "medium", "hard"],
+      "session": {
+        "time_limit_sec": 60,
+        "lives": 0,
+        "combo_enabled": true
+      },
+      "rewards": {
+        "base_xp": 30,
+        "base_coin": 15,
+        "combo_multiplier": 2.0
+      },
+      "props": ["hint", "skip"],
+      "leaderboard": {
+        "enabled": true,
+        "scopes": ["friends", "global"]
+      },
+      "tech_notes": "使用 MathJax/KaTeX 渲染数学公式；题目需支持随机参数生成避免重复；答案校验支持等价表达式判断（如分数/小数/根号形式）。",
+      "business_value": "数学备考基础功能，高频使用场景，可配合考研数学专项课程进行推广。",
+      "stage": 1
+    },
+    {
+      "game_id": "formula-link",
+      "name": "公式连连看",
+      "name_en": "Formula Link",
+      "category": "math",
+      "subjects": ["数学"],
+      "description": "将公式名称与公式表达式进行连线匹配，快速巩固数学公式记忆，建立公式体系。",
+      "learning_goal": "系统记忆考研数学核心公式，建立公式名称与表达式的快速对应关系。",
+      "core_mechanisms": ["连线匹配", "公式识别", "分类整理", "限时挑战"],
+      "data_sources": ["formulas.json"],
+      "difficulty_levels": ["easy", "medium", "hard"],
+      "session": {
+        "time_limit_sec": 60,
+        "lives": 0,
+        "combo_enabled": true
+      },
+      "rewards": {
+        "base_xp": 25,
+        "base_coin": 12,
+        "combo_multiplier": 2.0
+      },
+      "props": ["hint"],
+      "leaderboard": {
+        "enabled": true,
+        "scopes": ["friends", "global"]
+      },
+      "tech_notes": "公式渲染使用 MathJax/KaTeX；连线校验支持 SVG 贝塞尔曲线绘制；按高数/线代/概率分类组织题库。",
+      "business_value": "公式记忆是数学备考痛点，可作为「公式手册」付费功能的入口导流。",
+      "stage": 2
+    },
+    {
+      "game_id": "proof-step-sort",
+      "name": "证明步骤排序",
+      "name_en": "Proof Step Sort",
+      "category": "math",
+      "subjects": ["数学"],
+      "description": "将打乱的证明步骤按正确逻辑顺序排列，训练数学证明思维和逻辑推理能力。",
+      "learning_goal": "理解数学定理的证明逻辑链条，培养严谨的数学推理和证明能力。",
+      "core_mechanisms": ["步骤排序", "逻辑推理", "拖拽排列", "逐步验证"],
+      "data_sources": ["questions/math-examples.json"],
+      "difficulty_levels": ["medium", "hard"],
+      "session": {
+        "time_limit_sec": 180,
+        "lives": 0,
+        "combo_enabled": false
+      },
+      "rewards": {
+        "base_xp": 50,
+        "base_coin": 25,
+        "combo_multiplier": 1.0
+      },
+      "props": ["hint", "reveal"],
+      "leaderboard": {
+        "enabled": false,
+        "scopes": []
+      },
+      "tech_notes": "证明步骤数据需人工标注逻辑依赖关系；支持拖拽排序和部分验证（检查已排步骤的正确性）；使用拓扑排序算法生成干扰项。",
+      "business_value": "高难度高价值内容，证明题是考研数学区分度最高的题型，可包装为付费精品课。",
+      "stage": 3
+    },
+    {
+      "game_id": "problem-quest-map",
+      "name": "解题闯关地图",
+      "name_en": "Problem Quest Map",
+      "category": "math",
+      "subjects": ["数学"],
+      "description": "以地图闯关形式呈现数学题目，逐关攻克知识点，解锁新区域，可视化学习进度。",
+      "learning_goal": "按知识点体系系统地完成数学题目练习，可视化追踪学习进度，建立完整知识图谱。",
+      "core_mechanisms": ["地图闯关", "知识点解锁", "星级评价", "进度可视化"],
+      "data_sources": ["knowledge-points/math.json", "questions/math-full.json"],
+      "difficulty_levels": ["easy", "medium", "hard"],
+      "session": {
+        "time_limit_sec": 0,
+        "lives": 0,
+        "combo_enabled": false
+      },
+      "rewards": {
+        "base_xp": 40,
+        "base_coin": 20,
+        "combo_multiplier": 1.0
+      },
+      "props": [],
+      "leaderboard": {
+        "enabled": true,
+        "scopes": ["friends", "global"]
+      },
+      "tech_notes": "使用 Canvas/SVG 绘制知识地图，节点间连线表示依赖关系；支持缩放和平移；进度数据需持久化存储并支持跨设备同步。",
+      "business_value": "游戏化学习路径设计，长期留存核心功能，可设置部分关卡付费解锁。",
+      "stage": 2
+    },
+    {
+      "game_id": "wrong-question-boss",
+      "name": "错题Boss战",
+      "name_en": "Wrong-Question Boss",
+      "category": "cross_subject",
+      "subjects": ["英语", "数学"],
+      "description": "将错题转化为Boss关卡，需要连续答对才能击败Boss，错题越多Boss越强，激励用户消灭错题。",
+      "learning_goal": "集中攻克个人错题，通过游戏化机制激励反复练习直至掌握薄弱知识点。",
+      "core_mechanisms": ["错题聚合", "Boss挑战", "血量机制", "突破奖励"],
+      "data_sources": ["user_wrong_questions"],
+      "difficulty_levels": ["easy", "medium", "hard"],
+      "session": {
+        "time_limit_sec": 0,
+        "lives": 0,
+        "combo_enabled": true
+      },
+      "rewards": {
+        "base_xp": 50,
+        "base_coin": 30,
+        "combo_multiplier": 3.0
+      },
+      "props": ["revive"],
+      "leaderboard": {
+        "enabled": true,
+        "scopes": ["friends", "global"]
+      },
+      "tech_notes": "从用户错题本中聚合数据，按知识点和错误次数加权生成题目；Boss 难度与错题数量正相关；击败 Boss 后错题标记为已掌握。",
+      "business_value": "个性化学习体验核心功能，显著提升学习效果，是用户付费转化的关键驱动力。",
+      "stage": 2
+    },
+    {
+      "game_id": "daily-quiz-arena",
+      "name": "每日答题擂台",
+      "name_en": "Daily Quiz Arena",
+      "category": "cross_subject",
+      "subjects": ["英语", "数学"],
+      "description": "每日更新的跨科目答题挑战，与全服玩家比拼排名，连续参与获得额外奖励。",
+      "learning_goal": "养成每日学习习惯，通过跨科目综合练习巩固各科知识，保持学习连续性。",
+      "core_mechanisms": ["每日更新", "全服排名", "连续签到", "跨科混合"],
+      "data_sources": ["all"],
+      "difficulty_levels": ["medium"],
+      "session": {
+        "time_limit_sec": 120,
+        "lives": 0,
+        "combo_enabled": true
+      },
+      "rewards": {
+        "base_xp": 40,
+        "base_coin": 25,
+        "combo_multiplier": 2.5
+      },
+      "props": [],
+      "leaderboard": {
+        "enabled": true,
+        "scopes": ["friends", "global"]
+      },
+      "tech_notes": "使用定时任务每日零点刷新题库；题目从各科题库中按权重随机抽取；排名使用 Redis Sorted Set 实现实时排行榜。",
+      "business_value": "DAU 核心驱动力，每日推送通知召回用户，连续签到体系提升用户粘性。",
+      "stage": 2
+    },
+    {
+      "game_id": "knowledge-combo-streak",
+      "name": "知识点连击",
+      "name_en": "Knowledge Combo Streak",
+      "category": "cross_subject",
+      "subjects": ["英语", "数学"],
+      "description": "跨科目混合出题，连续答对即可积累连击数，连击越高得分越多，断连则重新开始。",
+      "learning_goal": "在跨科目切换中保持思维灵活性，挑战高连击记录以激励持续专注学习。",
+      "core_mechanisms": ["跨科出题", "连击积累", "断连重置", "高分挑战"],
+      "data_sources": ["all"],
+      "difficulty_levels": ["easy", "medium", "hard"],
+      "session": {
+        "time_limit_sec": 90,
+        "lives": 0,
+        "combo_enabled": true
+      },
+      "rewards": {
+        "base_xp": 30,
+        "base_coin": 15,
+        "combo_multiplier": 3.0
+      },
+      "props": [],
+      "leaderboard": {
+        "enabled": true,
+        "scopes": ["friends", "global"]
+      },
+      "tech_notes": "题目从全科题库中随机抽取，需保证科目切换的平滑性；连击特效和音效强化反馈体验；支持分享连击记录到社交平台。",
+      "business_value": "高传播性玩法，连击数字适合截图分享，自然带动社交裂变和用户增长。",
+      "stage": 2
+    },
+    {
+      "game_id": "memory-maze",
+      "name": "记忆迷宫",
+      "name_en": "Memory Maze",
+      "category": "cross_subject",
+      "subjects": ["英语"],
+      "description": "在迷宫中行走，每走一步需要回答一个记忆型问题，答对前进答错退回，走出迷宫获得胜利。",
+      "learning_goal": "在趣味迷宫探索中反复巩固已学知识点，通过空间记忆强化知识回顾。",
+      "core_mechanisms": ["迷宫探索", "答题前进", "记忆挑战", "路径规划"],
+      "data_sources": ["user_word_progress"],
+      "difficulty_levels": ["easy", "medium", "hard"],
+      "session": {
+        "time_limit_sec": 0,
+        "lives": 0,
+        "combo_enabled": false
+      },
+      "rewards": {
+        "base_xp": 35,
+        "base_coin": 18,
+        "combo_multiplier": 1.0
+      },
+      "props": ["hint"],
+      "leaderboard": {
+        "enabled": true,
+        "scopes": ["friends", "global"]
+      },
+      "tech_notes": "使用递归回溯算法生成随机迷宫；迷宫格子数随难度递增；问题从用户已学单词中抽取，确保复习针对性。",
+      "business_value": "创新复习模式，提升用户复习积极性，减少复习枯燥感，降低用户流失率。",
+      "stage": 2
+    },
+    {
+      "game_id": "study-team-raid",
+      "name": "组队学习副本",
+      "name_en": "Study Team Raid",
+      "category": "cross_subject",
+      "subjects": ["英语", "数学"],
+      "description": "邀请好友组队挑战学习副本，每人贡献不同科目的知识，合力击败副本Boss获取稀有奖励。",
+      "learning_goal": "通过团队协作学习培养合作精神，在互助中共同进步，激发学习动力和责任感。",
+      "core_mechanisms": ["组队系统", "副本挑战", "角色分工", "团队奖励"],
+      "data_sources": ["all"],
+      "difficulty_levels": ["medium", "hard"],
+      "session": {
+        "time_limit_sec": 0,
+        "lives": 0,
+        "combo_enabled": false
+      },
+      "rewards": {
+        "base_xp": 80,
+        "base_coin": 50,
+        "combo_multiplier": 1.0
+      },
+      "props": [],
+      "leaderboard": {
+        "enabled": true,
+        "scopes": ["friends", "global"]
+      },
+      "tech_notes": "基于 WebSocket 实现多人实时协作；需设计房间系统（创建/加入/匹配）；副本进度需同步，支持断线重连和数据一致性保障。",
+      "business_value": "社交裂变终极形态，组队机制天然驱动用户邀请好友，是获客和留存的核心引擎。",
+      "stage": 3
+    }
+  ]
+}

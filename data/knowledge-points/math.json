@@ -405,6 +405,24 @@
               "importance": 4,
               "keywords": ["高阶导数", "莱布尼茨公式"],
               "prerequisites": ["kp-2-2-1"]
+            },
+            {
+              "id": "kp-2-2-12",
+              "name": "隐函数求导",
+              "description": "掌握隐函数求导的方法",
+              "difficulty": 3,
+              "importance": 5,
+              "keywords": ["隐函数", "隐函数求导"],
+              "prerequisites": ["kp-2-2-3"]
+            },
+            {
+              "id": "kp-2-2-13",
+              "name": "参数方程求导",
+              "description": "掌握参数方程确定函数的求导方法",
+              "difficulty": 3,
+              "importance": 5,
+              "keywords": ["参数方程", "参数求导"],
+              "prerequisites": ["kp-2-2-3"]
             }
           ]
         },
@@ -681,6 +699,24 @@
               "importance": 4,
               "keywords": ["瑕积分", "无界函数", "收敛"],
               "prerequisites": ["kp-3-2-1"]
+            },
+            {
+              "id": "kp-3-3-3",
+              "name": "拐点与凹凸性",
+              "description": "掌握函数拐点的判定和凹凸区间的确定",
+              "difficulty": 3,
+              "importance": 5,
+              "keywords": ["拐点", "凹凸性", "二阶导数"],
+              "prerequisites": ["kp-2-2-8"]
+            },
+            {
+              "id": "kp-3-3-4",
+              "name": "渐近线",
+              "description": "掌握函数图形的水平渐近线、垂直渐近线和斜渐近线的求法",
+              "difficulty": 3,
+              "importance": 5,
+              "keywords": ["渐近线", "水平渐近线", "垂直渐近线", "斜渐近线"],
+              "prerequisites": ["kp-1-4-1"]
             }
           ]
         },
@@ -1057,6 +1093,22 @@
               "importance": 5,
               "keywords": ["最值", "闭区域"],
               "prerequisites": ["kp-5-4-4"]
+            }
+          ]
+        },
+        {
+          "id": "ch5-s5",
+          "name": "反常积分",
+          "order": 5,
+          "points": [
+            {
+              "id": "kp-5-6-1",
+              "name": "反常积分",
+              "description": "掌握无穷限反常积分和无界函数反常积分的概念与收敛判别法",
+              "difficulty": 3,
+              "importance": 5,
+              "keywords": ["反常积分", "无穷限积分", "瑕积分", "收敛"],
+              "prerequisites": ["kp-3-2-1"]
             }
           ]
         }

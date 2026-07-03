@@ -1,0 +1,270 @@
+{
+  "subject": "英语",
+  "subject_code": "english",
+  "version": "1.0.0",
+  "last_updated": "2024-01-01",
+  "description": "考研英语完整知识点体系",
+  "chapters": [
+    {
+      "id": "en-ch1",
+      "name": "语法",
+      "order": 1,
+      "sections": [
+        {
+          "id": "en-ch1-s1",
+          "name": "时态与语态",
+          "order": 1,
+          "points": [
+            {
+              "id": "grammar-tense",
+              "name": "时态",
+              "description": "掌握英语16种时态的用法和区别",
+              "difficulty": 2,
+              "importance": 5,
+              "keywords": ["时态", "过去", "现在", "将来", "完成"],
+              "prerequisites": []
+            },
+            {
+              "id": "grammar-voice",
+              "name": "语态",
+              "description": "掌握主动语态和被动语态的转换",
+              "difficulty": 2,
+              "importance": 5,
+              "keywords": ["语态", "主动", "被动"],
+              "prerequisites": ["grammar-tense"]
+            }
+          ]
+        },
+        {
+          "id": "en-ch1-s2",
+          "name": "非谓语动词",
+          "order": 2,
+          "points": [
+            {
+              "id": "grammar-nonfinite",
+              "name": "非谓语动词",
+              "description": "掌握不定式、动名词、分词的用法",
+              "difficulty": 3,
+              "importance": 5,
+              "keywords": ["非谓语", "不定式", "动名词", "分词"],
+              "prerequisites": ["grammar-tense"]
+            }
+          ]
+        },
+        {
+          "id": "en-ch1-s3",
+          "name": "虚拟语气",
+          "order": 3,
+          "points": [
+            {
+              "id": "grammar-subjunctive",
+              "name": "虚拟语气",
+              "description": "掌握虚拟语气在各种从句中的用法",
+              "difficulty": 3,
+              "importance": 5,
+              "keywords": ["虚拟语气", "条件句", "wish"],
+              "prerequisites": ["grammar-tense"]
+            }
+          ]
+        },
+        {
+          "id": "en-ch1-s4",
+          "name": "情态动词",
+          "order": 4,
+          "points": [
+            {
+              "id": "grammar-modal",
+              "name": "情态动词",
+              "description": "掌握情态动词的用法和区别",
+              "difficulty": 2,
+              "importance": 4,
+              "keywords": ["情态动词", "can", "must", "should"],
+              "prerequisites": []
+            }
+          ]
+        },
+        {
+          "id": "en-ch1-s5",
+          "name": "主谓一致",
+          "order": 5,
+          "points": [
+            {
+              "id": "grammar-agreement",
+              "name": "主谓一致",
+              "description": "掌握主谓一致的规则和特殊情况",
+              "difficulty": 2,
+              "importance": 4,
+              "keywords": ["主谓一致", "单数", "复数"],
+              "prerequisites": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "en-ch2",
+      "name": "从句",
+      "order": 2,
+      "sections": [
+        {
+          "id": "en-ch2-s1",
+          "name": "名词性从句",
+          "order": 1,
+          "points": [
+            {
+              "id": "grammar-noun-clause",
+              "name": "名词性从句",
+              "description": "掌握主语从句、宾语从句、表语从句、同位语从句的用法",
+              "difficulty": 3,
+              "importance": 5,
+              "keywords": ["名词性从句", "主语从句", "宾语从句", "表语从句", "同位语从句"],
+              "prerequisites": []
+            }
+          ]
+        },
+        {
+          "id": "en-ch2-s2",
+          "name": "定语从句",
+          "order": 2,
+          "points": [
+            {
+              "id": "grammar-relative",
+              "name": "定语从句",
+              "description": "掌握关系代词和关系副词的用法，区分限制性和非限制性定语从句",
+              "difficulty": 3,
+              "importance": 5,
+              "keywords": ["定语从句", "关系代词", "关系副词"],
+              "prerequisites": []
+            }
+          ]
+        },
+        {
+          "id": "en-ch2-s3",
+          "name": "状语从句",
+          "order": 3,
+          "points": [
+            {
+              "id": "grammar-adverbial",
+              "name": "状语从句",
+              "description": "掌握时间、地点、原因、条件、让步、目的、结果、方式、比较等状语从句",
+              "difficulty": 3,
+              "importance": 5,
+              "keywords": ["状语从句", "时间", "条件", "让步", "原因"],
+              "prerequisites": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "en-ch3",
+      "name": "特殊句式",
+      "order": 3,
+      "sections": [
+        {
+          "id": "en-ch3-s1",
+          "name": "倒装与强调",
+          "order": 1,
+          "points": [
+            {
+              "id": "grammar-inversion",
+              "name": "倒装句",
+              "description": "掌握完全倒装和部分倒装的用法",
+              "difficulty": 3,
+              "importance": 5,
+              "keywords": ["倒装", "完全倒装", "部分倒装"],
+              "prerequisites": []
+            },
+            {
+              "id": "grammar-emphatic",
+              "name": "强调句",
+              "description": "掌握强调句结构和用法",
+              "difficulty": 2,
+              "importance": 4,
+              "keywords": ["强调句", "It is...that"],
+              "prerequisites": []
+            }
+          ]
+        },
+        {
+          "id": "en-ch3-s2",
+          "name": "比较结构",
+          "order": 2,
+          "points": [
+            {
+              "id": "grammar-comparative",
+              "name": "比较级",
+              "description": "掌握形容词和副词的比较级、最高级用法",
+              "difficulty": 2,
+              "importance": 4,
+              "keywords": ["比较级", "最高级", "as...as"],
+              "prerequisites": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "en-ch4",
+      "name": "词汇",
+      "order": 4,
+      "sections": [
+        {
+          "id": "en-ch4-s1",
+          "name": "词义辨析",
+          "order": 1,
+          "points": [
+            {
+              "id": "vocab-high-frequency",
+              "name": "高频词汇辨析",
+              "description": "掌握考研英语高频词汇的词义和用法辨析",
+              "difficulty": 2,
+              "importance": 5,
+              "keywords": ["高频词汇", "词义", "辨析"],
+              "prerequisites": []
+            }
+          ]
+        },
+        {
+          "id": "en-ch4-s2",
+          "name": "近义词辨析",
+          "order": 2,
+          "points": [
+            {
+              "id": "vocab-synonym",
+              "name": "近义词辨析",
+              "description": "掌握常见近义词的区别和用法",
+              "difficulty": 3,
+              "importance": 5,
+              "keywords": ["近义词", "同义词", "辨析"],
+              "prerequisites": ["vocab-high-frequency"]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "en-ch5",
+      "name": "阅读理解",
+      "order": 5,
+      "sections": [
+        {
+          "id": "en-ch5-s1",
+          "name": "阅读技巧",
+          "order": 1,
+          "points": [
+            {
+              "id": "reading-comprehension",
+              "name": "阅读理解",
+              "description": "掌握阅读理解的各种题型和解题技巧",
+              "difficulty": 3,
+              "importance": 5,
+              "keywords": ["阅读理解", "主旨", "细节", "推理"],
+              "prerequisites": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
