@@ -1,0 +1,80 @@
+{
+  "name": "lexi-strike-global",
+  "version": "2.0.0",
+  "private": true,
+  "description": "LexiStrike Global - 智能化三端学习平台",
+  "author": "LexiStrike Team",
+  "workspaces": [
+    "client",
+    "server",
+    "admin"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:client": "npm run dev --workspace=client",
+    "dev:server": "npm run dev --workspace=server",
+    "dev:admin": "npm run dev --workspace=admin",
+    "dev:all": "concurrently \"npm run dev:server\" \"npm run dev:client\" \"npm run dev:admin\"",
+    "build": "npm run build:client && npm run build:server",
+    "build:client": "npm run build --workspace=client",
+    "build:server": "npm run build --workspace=server",
+    "build:admin": "npm run build --workspace=admin",
+    "build:all": "npm run build:client && npm run build:server && npm run build:admin",
+    "db:setup": "npm run db:setup --workspace=server",
+    "db:seed": "npm run db:seed --workspace=server",
+    "db:studio": "npm run db:studio --workspace=server",
+    "electron:dev": "npm run build:client && electron electron/main.js",
+    "electron:build:win": "npm run build:client && electron-builder --win portable",
+    "electron:build:mac": "npm run build:client && electron-builder --mac",
+    "electron:build:linux": "npm run build:client && electron-builder --linux",
+    "android:sync": "npx cap sync android",
+    "android:open": "npx cap open android",
+    "android:build": "npm run build:client && npx cap sync android && npx cap open android",
+    "ios:sync": "npx cap sync ios",
+    "ios:open": "npx cap open ios",
+    "ios:build": "npm run build:client && npx cap sync ios && npx cap open ios",
+    "package:all": "npm run electron:build:win && npm run electron:build:mac && npm run android:build",
+    "lint": "npm run lint --workspace=client",
+    "deploy": "node scripts/deploy.js",
+    "docker:build": "docker build -t lexi-strike .",
+    "docker:run": "docker-compose up -d"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.0.0",
+    "@capacitor/cli": "^6.0.0",
+    "@capacitor/core": "^6.0.0",
+    "@capacitor/ios": "^6.0.0"
+  },
+  "build": {
+    "appId": "com.lexistrike.app",
+    "productName": "LexiStrike Global",
+    "directories": {
+      "output": "release/desktop"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*"
+    ],
+    "win": {
+      "target": ["portable", "nsis"],
+      "icon": "assets/icon.ico"
+    },
+    "mac": {
+      "target": ["dmg"],
+      "icon": "assets/icon.icns"
+    },
+    "linux": {
+      "target": ["AppImage"],
+      "icon": "assets/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
+}

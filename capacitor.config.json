@@ -1,0 +1,27 @@
+{
+  "appId": "com.lexistrike.app",
+  "appName": "LexiStrike Global",
+  "webDir": "client/dist",
+  "bundledWebRuntime": false,
+  "server": {
+    "url": "https://api.lexistrike.com",
+    "cleartext": false
+  },
+  "ios": {
+    "contentInset": "always",
+    "allowsLinkPreview": false
+  },
+  "android": {
+    "allowMixedContent": false,
+    "captureInput": true,
+    "backgroundColor": "#0A0A0A"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 2000,
+      "backgroundColor": "#0A0A0A",
+      "showSpinner": true,
+      "spinnerColor": "#00FF9C"
+    }
+  }
+}

@@ -1,0 +1,261 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model KnowledgePoint {
+  id            Int                      @id @default(autoincrement())
+  name          String
+  subject       String                   @default("math")
+  category      String
+  chapter       String
+  description   String
+  difficulty    Int                      @default(1)
+  examType      String                   @default("all")
+  parentId      Int?
+  parent        KnowledgePoint?          @relation("KnowledgePointHierarchy", fields: [parentId], references: [id])
+  children      KnowledgePoint[]         @relation("KnowledgePointHierarchy")
+  prerequisites KnowledgePointRelation[] @relation("PrerequisiteFor")
+  dependentOn   KnowledgePointRelation[] @relation("DependsOn")
+  questions     QuestionKnowledgePoint[]
+  userProgress  UserProgress[]
+  scaffoldHints ScaffoldHint[]
+  studyPlanItems StudyPlanItem[]
+}
+
+model KnowledgePointRelation {
+  id                Int             @id @default(autoincrement())
+  knowledgePointId  Int
+  prerequisiteId    Int
+  knowledgePoint    KnowledgePoint  @relation("PrerequisiteFor", fields: [knowledgePointId], references: [id])
+  prerequisite      KnowledgePoint  @relation("DependsOn", fields: [prerequisiteId], references: [id])
+
+  @@unique([knowledgePointId, prerequisiteId])
+}
+
+model Question {
+  id             Int                      @id @default(autoincrement())
+  content        String
+  questionType   String                   @default("choice")
+  options        String?
+  answer         String
+  solution       String
+  difficulty     Int                      @default(1)
+  source         String?
+  knowledgePoints QuestionKnowledgePoint[]
+  answerRecords  AnswerRecord[]
+}
+
+model QuestionKnowledgePoint {
+  id               Int             @id @default(autoincrement())
+  questionId       Int
+  knowledgePointId Int
+  question         Question        @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  knowledgePoint   KnowledgePoint  @relation(fields: [knowledgePointId], references: [id], onDelete: Cascade)
+
+  @@unique([questionId, knowledgePointId])
+}
+
+model User {
+  id              Int             @id @default(autoincrement())
+  username        String          @unique
+  email           String          @unique
+  passwordHash    String
+  targetExam      String?
+  currentSubject  String?         // "math" or "english"
+  englishLevel    String?         // "beginner", "intermediate", "advanced"
+  createdAt       DateTime        @default(now())
+  progress        UserProgress[]
+  answerRecords   AnswerRecord[]
+  userWords       UserWord[]
+  reviewQueue     ReviewQueue[]
+  studyPlans      StudyPlan[]
+  achievements    UserAchievement[]
+  checkIns        CheckIn[]
+  gameRecords     GameRecord[]
+}
+
+model UserProgress {
+  id               Int             @id @default(autoincrement())
+  userId           Int
+  knowledgePointId Int
+  masteryLevel     Float           @default(0)
+  theta            Float           @default(-1.2)
+  totalAttempts    Int             @default(0)
+  correctAttempts  Int             @default(0)
+  lastPracticedAt  DateTime?
+  nextReviewAt     DateTime?
+  reviewInterval   Float           @default(0)
+  reviewCount      Int             @default(0)
+  level            Int             @default(0)
+  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  knowledgePoint   KnowledgePoint  @relation(fields: [knowledgePointId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, knowledgePointId])
+}
+
+model AnswerRecord {
+  id            Int             @id @default(autoincrement())
+  userId        Int
+  questionId    Int
+  userAnswer    String
+  isCorrect     Boolean
+  timeSpent     Int?
+  analysis      String?
+  weakPointIds  String?
+  createdAt     DateTime        @default(now())
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question      Question        @relation(fields: [questionId], references: [id], onDelete: Cascade)
+}
+
+model ReviewQueue {
+  id               Int             @id @default(autoincrement())
+  userId           Int
+  knowledgePointId Int
+  questionId       Int?
+  status           String          @default("pending")
+  scheduledAt      DateTime
+  completedAt      DateTime?
+  createdAt        DateTime        @default(now())
+  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ScaffoldHint {
+  id               Int             @id @default(autoincrement())
+  knowledgePointId Int
+  step             Int
+  content          String
+  triggerCondition String?
+  knowledgePoint   KnowledgePoint  @relation(fields: [knowledgePointId], references: [id], onDelete: Cascade)
+}
+
+model StudyPlan {
+  id          Int              @id @default(autoincrement())
+  userId      Int
+  examType    String
+  startDate   DateTime
+  endDate     DateTime
+  currentWeek Int              @default(1)
+  totalWeeks  Int
+  createdAt   DateTime         @default(now())
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items       StudyPlanItem[]
+}
+
+model StudyPlanItem {
+  id               Int             @id @default(autoincrement())
+  planId           Int
+  knowledgePointId Int
+  weekNumber       Int
+  status           String          @default("pending")
+  plan             StudyPlan       @relation(fields: [planId], references: [id], onDelete: Cascade)
+  knowledgePoint   KnowledgePoint  @relation(fields: [knowledgePointId], references: [id], onDelete: Cascade)
+}
+
+model Word {
+  id              Int            @id @default(autoincrement())
+  word            String         @unique
+  phonetic        String?
+  definition      String
+  exampleSentence String?
+  partOfSpeech    String?
+  difficulty      String         @default("medium")
+  category        String         @default("考研英语")
+  userWords       UserWord[]
+  articleWords    ArticleWord[]
+}
+
+model UserWord {
+  id           Int       @id @default(autoincrement())
+  userId       Int
+  wordId       Int
+  memoryLevel  Int       @default(0)
+  reviewCount  Int       @default(0)
+  lastReviewed DateTime?
+  nextReview   DateTime?
+  createdAt    DateTime  @default(now())
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  word         Word      @relation(fields: [wordId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, wordId])
+}
+
+model GeneratedArticle {
+  id               Int               @id @default(autoincrement())
+  title            String
+  content          String
+  wordCount        Int
+  difficulty       String            @default("medium")
+  createdAt        DateTime          @default(now())
+  articleWords     ArticleWord[]
+  articleQuestions ArticleQuestion[]
+}
+
+model ArticleWord {
+  id        Int              @id @default(autoincrement())
+  articleId Int
+  wordId    Int
+  article   GeneratedArticle @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  word      Word             @relation(fields: [wordId], references: [id], onDelete: Cascade)
+
+  @@unique([articleId, wordId])
+}
+
+model ArticleQuestion {
+  id          Int              @id @default(autoincrement())
+  articleId   Int
+  question    String
+  questionType String          @default("choice")
+  options     String?
+  answer      String
+  explanation String?
+  article     GeneratedArticle @relation(fields: [articleId], references: [id], onDelete: Cascade)
+}
+
+model Achievement {
+  id          Int               @id @default(autoincrement())
+  key         String            @unique
+  name        String
+  description String
+  icon        String
+  category    String
+  condition   String
+  threshold   Int               @default(1)
+  userAchievements UserAchievement[]
+}
+
+model UserAchievement {
+  id            Int         @id @default(autoincrement())
+  userId        Int
+  achievementId Int
+  unlockedAt    DateTime    @default(now())
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement   Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, achievementId])
+}
+
+model CheckIn {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  date      DateTime @default(now())
+  streak    Int      @default(1)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+}
+
+model GameRecord {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  gameType  String   // "word_match", "speed_challenge", "word_puzzle"
+  score     Int      @default(0)
+  accuracy  Float?
+  timeSpent Int?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

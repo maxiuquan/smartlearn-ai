@@ -1,0 +1,182 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply bg-gray-50 text-gray-900 antialiased;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  }
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-400;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center px-4 py-2.5 bg-primary-600 text-white font-medium rounded-xl
+           hover:bg-primary-700 active:scale-[0.98] transition-all duration-200
+           disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100
+           focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center px-4 py-2.5 bg-gray-100 text-gray-700 font-medium rounded-xl
+           hover:bg-gray-200 active:scale-[0.98] transition-all duration-200
+           disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100;
+  }
+  .btn-danger {
+    @apply inline-flex items-center justify-center px-4 py-2.5 bg-red-600 text-white font-medium rounded-xl
+           hover:bg-red-700 active:scale-[0.98] transition-all duration-200;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center px-3 py-2 text-gray-600 font-medium rounded-lg
+           hover:bg-gray-100 transition-colors duration-200;
+  }
+  .card {
+    @apply bg-white rounded-2xl shadow-sm border border-gray-100 p-6 transition-all duration-200 hover:shadow-md;
+  }
+  .input-field {
+    @apply w-full px-4 py-3 rounded-xl border border-gray-200 text-sm
+           focus:border-primary-500 focus:ring-2 focus:ring-primary-100
+           outline-none transition-all placeholder:text-gray-400;
+  }
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+  .badge-primary {
+    @apply badge bg-primary-100 text-primary-700;
+  }
+  .badge-success {
+    @apply badge bg-green-100 text-green-700;
+  }
+  .badge-warning {
+    @apply badge bg-yellow-100 text-yellow-700;
+  }
+  .badge-danger {
+    @apply badge bg-red-100 text-red-700;
+  }
+}
+
+@layer utilities {
+  .animate-slide-in {
+    animation: slideIn 0.3s ease-out;
+  }
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out;
+  }
+  .animate-slide-up {
+    animation: slideUp 0.4s ease-out;
+  }
+  .animate-scale-in {
+    animation: scaleIn 0.3s ease-out;
+  }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(100%); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes pulse-ring {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.canvas-draw {
+  touch-action: none;
+}
+
+.math-content .katex {
+  font-size: 1.05em;
+}
+
+.math-content .katex-display {
+  margin: 0.75em 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.math-content .katex-display > .katex {
+  max-width: 100%;
+}
+
+.math-content .katex-html {
+  display: inline;
+}
+
+/* 响应式工具类 */
+@layer utilities {
+  .touch-target { min-height: 44px; min-width: 44px; }
+  .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
+  .safe-top { padding-top: env(safe-area-inset-top, 0px); }
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+}
+
+/* 底部导航栏样式 */
+.bottom-nav { @apply fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40 safe-bottom; }
+.bottom-nav .nav-item { @apply flex flex-col items-center justify-center py-1 px-2 text-xs touch-target; }
+.bottom-nav .nav-item.active { @apply text-primary-600; }
+.bottom-nav .nav-item:not(.active) { @apply text-gray-400; }
+
+/* 平板侧边栏hover效果 */
+.sidebar-group:hover .sidebar-label { @apply opacity-100 w-auto ml-3; }
+.sidebar-label { @apply opacity-0 w-0 overflow-hidden transition-all duration-200 whitespace-nowrap; }
+
+/* 游戏网格布局 */
+@media (max-width: 640px) {
+  .game-card { @apply col-span-1; }
+  .game-grid { @apply grid-cols-2; }
+}
+@media (min-width: 641px) and (max-width: 1024px) {
+  .game-grid { @apply grid-cols-3; }
+}
+@media (min-width: 1025px) {
+  .game-grid { @apply grid-cols-3; }
+}
+
+/* 赛博暗黑主题变量 */
+:root {
+  --cyber-bg: #0D0F14;
+  --cyber-green: #00FF9C;
+  --cyber-red: #FF4757;
+  --cyber-gray: #6C757D;
+}
+
+.lexiverse-gradient {
+  background: linear-gradient(135deg, #0D0F14 0%, #1a1d24 50%, #0D0F14 100%);
+}
+.lexiverse-glow {
+  box-shadow: 0 0 20px rgba(0, 255, 156, 0.15);
+}
+.lexiverse-border {
+  border: 1px solid rgba(0, 255, 156, 0.2);
+}
