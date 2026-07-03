@@ -193,54 +193,197 @@ smartlearn-ai/
 └── README.md
 ```
 
-## 快速开始
+## 部署指南
 
 ### 环境要求
 
 - Docker 20.10+
 - Docker Compose 2.0+
 - Make (可选)
+- 域名（生产环境需要）
 
-### 安装部署
+### 部署方式选择
 
-1. 克隆项目
+| 方式 | 适用场景 | 数据库 | 难度 |
+|------|---------|--------|------|
+| [本地开发](#本地开发-docker-compose) | 本地调试、功能验证 | 本地 PostgreSQL | 低 |
+| [VPS 单机部署](#vps-单机部署) | 个人项目、小规模用户 | 自建 PostgreSQL | 中 |
+| [Supabase 混合部署](#supabase-混合部署推荐) | 生产环境、零运维 | Supabase 托管 | 低 |
+
+---
+
+### 本地开发 (Docker Compose)
+
+适合本地开发调试，所有服务一键启动。
+
 ```bash
+# 1. 克隆项目
 git clone https://github.com/maxiuquan/smartlearn-ai.git
 cd smartlearn-ai
-```
 
-2. 配置环境变量
-```bash
+# 2. 配置环境变量
 cp .env.example .env
-# 编辑 .env 文件，填入必要的密钥和密码
-# 至少需要设置 POSTGRES_PASSWORD、REDIS_PASSWORD、JWT_SECRET、MINIO_ACCESS_KEY、MINIO_SECRET_KEY
-```
+# 编辑 .env 填入密码（本地开发可用默认值）
+# 必须设置: POSTGRES_PASSWORD, REDIS_PASSWORD, JWT_SECRET, MINIO_ACCESS_KEY, MINIO_SECRET_KEY
 
-3. 启动服务
-```bash
-# 使用 Makefile
-make up
+# 3. 启动开发环境（热重载 + 暴露数据库端口）
+make dev
 
-# 或直接使用 docker compose
-docker compose --env-file .env up -d
-```
-
-4. 运行数据库迁移
-```bash
+# 4. 运行数据库迁移
 make migrate
-```
 
-5. 导入数据
-```bash
+# 5. 导入数据
 make import-all
 ```
 
-6. 访问服务
+访问服务：
 - API 文档: http://localhost:8000/docs
 - AI 引擎文档: http://localhost:8001/docs
 - 管理后台: http://localhost:3000
-- Web 前端: http://localhost:3000 (通过 Nginx)
+- Web 前端: http://localhost:3000 (Nginx)
 - 移动端 Web: http://localhost:3001
+
+---
+
+### Supabase 混合部署（推荐）
+
+生产环境推荐方案：数据库和认证使用 Supabase 托管，其余服务部署在 VPS 上。
+
+**架构图：**
+
+```
+┌──────────────────────────────────────────────────┐
+│                    VPS (你的服务器)                │
+│  ┌─────────┐ ┌──────────┐ ┌────────┐ ┌────────┐ │
+│  │ AI 引擎  │ │ API 服务  │ │ Celery │ │ Nginx  │ │
+│  │ :8001   │ │ :8000    │ │ Worker │ │ :80    │ │
+│  └─────────┘ └──────────┘ └────────┘ └────────┘ │
+│       │            │                              │
+└───────┼────────────┼──────────────────────────────┘
+        │            │
+        ▼            ▼
+┌──────────────────────────────────────────────────┐
+│              Supabase (云端托管)                    │
+│  ┌──────────────┐ ┌──────────┐ ┌──────────────┐ │
+│  │ PostgreSQL   │ │  Auth    │ │   Storage    │ │
+│  │ (主数据库)   │ │ (认证)   │ │  (文件存储)   │ │
+│  └──────────────┘ └──────────┘ └──────────────┘ │
+└──────────────────────────────────────────────────┘
+```
+
+**步骤：**
+
+**1. 创建 Supabase 项目**
+
+访问 [supabase.com](https://supabase.com) 注册并创建项目，记录以下信息：
+- 项目 URL: `https://xxxxx.supabase.co`
+- 数据库连接字符串（Settings → Database → Connection string → URI）
+- `anon key`（Settings → API）
+
+**2. 配置 .env**
+
+```bash
+# ── 数据库（Supabase 托管）──
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=你的Supabase数据库密码
+POSTGRES_DB=postgres
+# 直连 PostgreSQL（用于 Alembic 迁移和 Celery）
+DATABASE_URL=postgresql://postgres.[项目ID]:[密码]@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres
+
+# ── 缓存（VPS 自建 Redis）──
+REDIS_PASSWORD=你的强密码
+
+# ── 认证（Supabase Auth）──
+SUPABASE_URL=https://xxxxx.supabase.co
+SUPABASE_ANON_KEY=你的anon_key
+JWT_SECRET=你的Supabase JWT Secret（Settings → API → JWT Settings）
+
+# ── AI 供应商（至少选一个）──
+GLM_API_KEY=你的智谱API密钥
+# 或 DEEPSEEK_API_KEY=你的DeepSeek密钥
+# 或 OPENAI_API_KEY=你的OpenAI密钥
+
+# ── 向量存储（使用内存模式，无需 Milvus）──
+VECTOR_STORE_TYPE=inmemory
+
+# ── 其他 ──
+ENVIRONMENT=production
+DEBUG=false
+CORS_ORIGINS=https://你的域名
+```
+
+**3. 在 VPS 上启动服务**
+
+```bash
+git clone https://github.com/maxiuquan/smartlearn-ai.git
+cd smartlearn-ai
+
+# 配置 .env（按上一步填写）
+cp .env.example .env
+vim .env
+
+# 仅启动应用服务（数据库用 Supabase，不需要 db/milvus/etcd/minio）
+docker compose up -d api ai-engine celery-worker celery-beat nginx
+
+# 运行迁移
+make migrate
+
+# 导入数据
+make import-all
+```
+
+> **优点：** 数据库免运维、自带备份、Supabase Auth 替代自建认证、Storage 替代 MinIO、免费额度 500MB 足够初期使用。
+
+---
+
+### VPS 单机部署
+
+适合自建所有服务，全部运行在一台 VPS 上。
+
+**推荐配置：** 4C8G 以上（需运行 PostgreSQL + Redis + Milvus + API + AI 引擎 + Celery）
+
+```bash
+# 1. 克隆项目
+git clone https://github.com/maxiuquan/smartlearn-ai.git
+cd smartlearn-ai
+
+# 2. 配置环境变量（必须使用强密码）
+cp .env.example .env
+# 生成强密码:
+#   openssl rand -hex 32  → JWT_SECRET
+#   openssl rand -hex 16  → POSTGRES_PASSWORD, REDIS_PASSWORD, MINIO_ACCESS_KEY, MINIO_SECRET_KEY
+vim .env
+
+# 3. 启动生产环境
+docker compose -f docker-compose.yml -f infra/docker/docker-compose.prod.yml --env-file .env up -d
+
+# 4. 运行迁移 + 导入数据
+make migrate
+make import-all
+```
+
+**生产环境配置要点：**
+
+- 生产环境使用 `docker-compose.prod.yml` 覆盖，关键区别：
+  - 不暴露数据库端口到宿主机
+  - 启用资源限制和日志轮转
+  - API/AI 引擎多副本运行
+  - `ENVIRONMENT=production`，`DEBUG=false`
+- 务必修改 `.env` 中所有默认密码
+- 开启防火墙，仅开放 80/443 端口
+- 配置 HTTPS（Nginx + Certbot）
+
+**HTTPS 配置（可选）：**
+
+```bash
+# 安装 certbot
+sudo apt install certbot python3-certbot-nginx -y
+
+# 获取证书
+sudo certbot --nginx -d your-domain.com
+```
+
+---
 
 ### 常用命令
 
