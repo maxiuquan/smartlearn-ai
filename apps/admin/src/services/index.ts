@@ -1,0 +1,11 @@
+export { default as request, api, pageApi } from './request';
+export * from './authService';
+export * from './userService';
+export * from './questionService';
+export * from './knowledgeService';
+export * from './subjectService';
+export * from './wordService';
+export * from './pastexamService';
+export * from './workbookService';
+export * from './statisticsService';
+export * from './systemService';

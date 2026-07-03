@@ -1,0 +1,750 @@
+{
+  "subject": "线性代数",
+  "subject_code": "linear-algebra",
+  "version": "1.0.0",
+  "last_updated": "2024-01-01",
+  "description": "考研线性代数完整知识点体系",
+  "chapters": [
+    {
+      "id": "la-ch1",
+      "name": "行列式",
+      "order": 1,
+      "sections": [
+        {
+          "id": "la-ch1-s1",
+          "name": "行列式的定义",
+          "order": 1,
+          "points": [
+            {
+              "id": "la-kp-1-1-1",
+              "name": "排列与逆序",
+              "description": "理解排列、逆序数、对换的概念",
+              "difficulty": 2,
+              "importance": 3,
+              "keywords": ["排列", "逆序数", "对换", "奇偶性"],
+              "prerequisites": []
+            },
+            {
+              "id": "la-kp-1-1-2",
+              "name": "n阶行列式的定义",
+              "description": "理解n阶行列式的定义，掌握展开式",
+              "difficulty": 3,
+              "importance": 5,
+              "keywords": ["行列式", "展开式", "代数余子式"],
+              "prerequisites": ["la-kp-1-1-1"]
+            },
+            {
+              "id": "la-kp-1-1-3",
+              "name": "特殊行列式",
+              "description": "掌握对角行列式、三角行列式的计算",
+              "difficulty": 1,
+              "importance": 4,
+              "keywords": ["对角行列式", "三角行列式"],
+              "prerequisites": ["la-kp-1-1-2"]
+            }
+          ]
+        },
+        {
+          "id": "la-ch1-s2",
+          "name": "行列式的性质",
+          "order": 2,
+          "points": [
+            {
+              "id": "la-kp-1-2-1",
+              "name": "行列式的基本性质",
+              "description": "掌握行列式的转置、交换、倍乘、倍加等性质",
+              "difficulty": 2,
+              "importance": 5,
+              "keywords": ["转置", "交换", "倍乘", "倍加"],
+              "prerequisites": ["la-kp-1-1-2"]
+            },
+            {
+              "id": "la-kp-1-2-2",
+              "name": "行列式按行（列）展开",
+              "description": "掌握行列式按行或列展开的定理",
+              "difficulty": 2,
+              "importance": 5,
+              "keywords": ["展开定理", "代数余子式"],
+              "prerequisites": ["la-kp-1-1-2"]
+            },
+            {
+              "id": "la-kp-1-2-3",
+              "name": "范德蒙德行列式",
+              "description": "掌握范德蒙德行列式的计算公式",
+              "difficulty": 3,
+              "importance": 4,
+              "keywords": ["范德蒙德", "公式"],
+              "prerequisites": ["la-kp-1-1-2"]
+            }
+          ]
+        },
+        {
+          "id": "la-ch1-s3",
+          "name": "行列式的计算",
+          "order": 3,
+          "points": [
+            {
+              "id": "la-kp-1-3-1",
+              "name": "化三角形法",
+              "description": "掌握利用初等变换化行列式为三角形的方法",
+              "difficulty": 2,
+              "importance": 5,
+              "keywords": ["初等变换", "三角形"],
+              "prerequisites": ["la-kp-1-2-1"]
+            },
+            {
+              "id": "la-kp-1-3-2",
+              "name": "降阶法",
+              "description": "掌握利用展开定理降阶计算行列式",
+              "difficulty": 2,
+              "importance": 5,
+              "keywords": ["展开", "降阶"],
+              "prerequisites": ["la-kp-1-2-2"]
+            },
+            {
+              "id": "la-kp-1-3-3",
+              "name": "分块行列式",
+              "description": "掌握分块对角行列式的计算",
+              "difficulty": 3,
+              "importance": 4,
+              "keywords": ["分块矩阵", "分块行列式"],
+              "prerequisites": ["la-kp-1-1-2"]
+            }
+          ]
+        },
+        {
+          "id": "la-ch1-s4",
+          "name": "克拉默法则",
+          "order": 4,
+          "points": [
+            {
+              "id": "la-kp-1-4-1",
+              "name": "克拉默法则",
+              "description": "掌握克拉默法则求解线性方程组",
+              "difficulty": 2,
+              "importance": 4,
+              "keywords": ["克拉默法则", "线性方程组"],
+              "prerequisites": ["la-kp-1-1-2"]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "la-ch2",
+      "name": "矩阵",
+      "order": 2,
+      "sections": [
+        {
+          "id": "la-ch2-s1",
+          "name": "矩阵的概念",
+          "order": 1,
+          "points": [
+            {
+              "id": "la-kp-2-1-1",
+              "name": "矩阵的定义",
+              "description": "理解矩阵的概念，掌握矩阵的表示方法",
+              "difficulty": 1,
+              "importance": 4,
+              "keywords": ["矩阵", "元素", "阶数"],
+              "prerequisites": []
+            },
+            {
+              "id": "la-kp-2-1-2",
+              "name": "特殊矩阵",
+              "description": "掌握零矩阵、单位矩阵、对角矩阵、三角矩阵等特殊矩阵",
+              "difficulty": 1,
+              "importance": 4,
+              "keywords": ["零矩阵", "单位矩阵", "对角矩阵", "三角矩阵"],
+              "prerequisites": ["la-kp-2-1-1"]
+            },
+            {
+              "id": "la-kp-2-1-3",
+              "name": "对称矩阵与反对称矩阵",
+              "description": "理解对称矩阵和反对称矩阵的概念和性质",
+              "difficulty": 2,
+              "importance": 4,
+              "keywords": ["对称矩阵", "反对称矩阵"],
+              "prerequisites": ["la-kp-2-1-1"]
+            }
+          ]
+        },
+        {
+          "id": "la-ch2-s2",
+          "name": "矩阵的运算",
+          "order": 2,
+          "points": [
+            {
+              "id": "la-kp-2-2-1",
+              "name": "矩阵的加法与数乘",
+              "description": "掌握矩阵加法和数乘的运算规则",
+              "difficulty": 1,
+              "importance": 4,
+              "keywords": ["加法", "数乘", "线性运算"],
+              "prerequisites": ["la-kp-2-1-1"]
+            },
+            {
+              "id": "la-kp-2-2-2",
+              "name": "矩阵的乘法",
+              "description": "掌握矩阵乘法的运算规则和性质",
+              "difficulty": 2,
+              "importance": 5,
+              "keywords": ["矩阵乘法", "结合律", "分配律"],
+              "prerequisites": ["la-kp-2-1-1"]
+            },
+            {
+              "id": "la-kp-2-2-3",
+              "name": "矩阵的转置",
+              "description": "掌握矩阵转置的定义和性质",
+              "difficulty": 1,
+              "importance": 4,
+              "keywords": ["转置", "转置性质"],
+              "prerequisites": ["la-kp-2-1-1"]
+            },
+            {
+              "id": "la-kp-2-2-4",
+              "name": "方阵的幂",
+              "description": "掌握方阵幂运算的定义和计算方法",
+              "difficulty": 2,
+              "importance": 4,
+              "keywords": ["方阵幂", "递推", "对角化"],
+              "prerequisites": ["la-kp-2-2-2"]
+            },
+            {
+              "id": "la-kp-2-2-5",
+              "name": "方阵的行列式",
+              "description": "掌握方阵行列式的性质",
+              "difficulty": 2,
+              "importance": 5,
+              "keywords": ["方阵行列式", "乘积性质"],
+              "prerequisites": ["la-kp-1-1-2", "la-kp-2-2-2"]
+            }
+          ]
+        },
+        {
+          "id": "la-ch2-s3",
+          "name": "逆矩阵",
+          "order": 3,
+          "points": [
+            {
+              "id": "la-kp-2-3-1",
+              "name": "逆矩阵的概念",
+              "description": "理解逆矩阵的定义和存在条件",
+              "difficulty": 2,
+              "importance": 5,
+              "keywords": ["逆矩阵", "可逆", "非奇异矩阵"],
+              "prerequisites": ["la-kp-2-2-2"]
+            },
+            {
+              "id": "la-kp-2-3-2",
+              "name": "伴随矩阵法求逆",
+              "description": "掌握利用伴随矩阵求逆矩阵的方法",
+              "difficulty": 3,
+              "importance": 4,
+              "keywords": ["伴随矩阵", "求逆公式"],
+              "prerequisites": ["la-kp-2-3-1", "la-kp-1-2-2"]
+            },
+            {
+              "id": "la-kp-2-3-3",
+              "name": "初等变换法求逆",
+              "description": "掌握利用初等变换求逆矩阵的方法",
+              "difficulty": 2,
+              "importance": 5,
+              "keywords": ["初等变换", "增广矩阵"],
+              "prerequisites": ["la-kp-2-3-1"]
+            },
+            {
+              "id": "la-kp-2-3-4",
+              "name": "逆矩阵的性质",
+              "description": "掌握逆矩阵的各种性质",
+              "difficulty": 2,
+              "importance": 5,
+              "keywords": ["逆矩阵性质", "乘积的逆", "转置的逆"],
+              "prerequisites": ["la-kp-2-3-1"]
+            }
+          ]
+        },
+        {
+          "id": "la-ch2-s4",
+          "name": "矩阵的初等变换",
+          "order": 4,
+          "points": [
+            {
+              "id": "la-kp-2-4-1",
+              "name": "初等变换",
+              "description": "理解三种初等变换的概念",
+              "difficulty": 1,
+              "importance": 4,
+              "keywords": ["初等变换", "行变换", "列变换"],
+              "prerequisites": []
+            },
+            {
+              "id": "la-kp-2-4-2",
+              "name": "初等矩阵",
+              "description": "理解初等矩阵的概念和性质",
+              "difficulty": 2,
+              "importance": 4,
+              "keywords": ["初等矩阵", "左乘", "右乘"],
+              "prerequisites": ["la-kp-2-4-1"]
+            },
+            {
+              "id": "la-kp-2-4-3",
+              "name": "矩阵等价",
+              "description": "理解矩阵等价的概念和判定条件",
+              "difficulty": 2,
+              "importance": 4,
+              "keywords": ["等价", "等价标准形"],
+              "prerequisites": ["la-kp-2-4-1"]
+            }
+          ]
+        },
+        {
+          "id": "la-ch2-s5",
+          "name": "矩阵的秩",
+          "order": 5,
+          "points": [
+            {
+              "id": "la-kp-2-5-1",
+              "name": "矩阵秩的定义",
+              "description": "理解矩阵秩的定义（子式定义）",
+              "difficulty": 3,
+              "importance": 5,
+              "keywords": ["秩", "最高阶非零子式"],
+              "prerequisites": ["la-kp-1-1-2"]
+            },
+            {
+              "id": "la-kp-2-5-2",
+              "name": "矩阵秩的计算",
+              "description": "掌握利用初等变换求矩阵秩的方法",
+              "difficulty": 2,
+              "importance": 5,
+              "keywords": ["初等变换", "行阶梯形"],
+              "prerequisites": ["la-kp-2-5-1", "la-kp-2-4-1"]
+            },
+            {
+              "id": "la-kp-2-5-3",
+              "name": "矩阵秩的性质",
+              "description": "掌握矩阵秩的各种性质和不等式",
+              "difficulty": 3,
+              "importance": 5,
+              "keywords": ["秩的性质", "秩不等式"],
+              "prerequisites": ["la-kp-2-5-1"]
+            }
+          ]
+        },
+        {
+          "id": "la-ch2-s6",
+          "name": "分块矩阵",
+          "order": 6,
+          "points": [
+            {
+              "id": "la-kp-2-6-1",
+              "name": "分块矩阵的概念",
+              "description": "理解分块矩阵的定义和表示",
+              "difficulty": 2,
+              "importance": 3,
+              "keywords": ["分块矩阵", "子块"],
+              "prerequisites": ["la-kp-2-1-1"]
+            },
+            {
+              "id": "la-kp-2-6-2",
+              "name": "分块矩阵的运算",
+              "description": "掌握分块矩阵的加法、乘法运算",
+              "difficulty": 2,
+              "importance": 4,
+              "keywords": ["分块运算", "分块乘法"],
+              "prerequisites": ["la-kp-2-6-1"]
+            },
+            {
+              "id": "la-kp-2-6-3",
+              "name": "分块对角矩阵",
+              "description": "掌握分块对角矩阵的性质和求逆",
+              "difficulty": 3,
+              "importance": 4,
+              "keywords": ["分块对角", "分块求逆"],
+              "prerequisites": ["la-kp-2-6-2"]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "la-ch3",
+      "name": "向量",
+      "order": 3,
+      "sections": [
+        {
+          "id": "la-ch3-s1",
+          "name": "向量的概念与运算",
+          "order": 1,
+          "points": [
+            {
+              "id": "la-kp-3-1-1",
+              "name": "n维向量",
+              "description": "理解n维向量的概念",
+              "difficulty": 1,
+              "importance": 3,
+              "keywords": ["向量", "分量", "维数"],
+              "prerequisites": []
+            },
+            {
+              "id": "la-kp-3-1-2",
+              "name": "向量的线性运算",
+              "description": "掌握向量的加法和数乘运算",
+              "difficulty": 1,
+              "importance": 4,
+              "keywords": ["向量加法", "数乘"],
+              "prerequisites": ["la-kp-3-1-1"]
+            }
+          ]
+        },
+        {
+          "id": "la-ch3-s2",
+          "name": "线性相关与线性无关",
+          "order": 2,
+          "points": [
+            {
+              "id": "la-kp-3-2-1",
+              "name": "线性组合",
+              "description": "理解线性组合的概念",
+              "difficulty": 2,
+              "importance": 4,
+              "keywords": ["线性组合", "线性表示"],
+              "prerequisites": ["la-kp-3-1-2"]
+            },
+            {
+              "id": "la-kp-3-2-2",
+              "name": "线性相关与线性无关",
+              "description": "理解线性相关、线性无关的定义和判定",
+              "difficulty": 3,
+              "importance": 5,
+              "keywords": ["线性相关", "线性无关", "齐次方程组"],
+              "prerequisites": ["la-kp-3-2-1"]
+            },
+            {
+              "id": "la-kp-3-2-3",
+              "name": "线性相关性的判定",
+              "description": "掌握判定线性相关性的各种方法",
+              "difficulty": 3,
+              "importance": 5,
+              "keywords": ["行列式判定", "秩判定"],
+              "prerequisites": ["la-kp-3-2-2"]
+            }
+          ]
+        },
+        {
+          "id": "la-ch3-s3",
+          "name": "向量组的秩",
+          "order": 3,
+          "points": [
+            {
+              "id": "la-kp-3-3-1",
+              "name": "极大线性无关组",
+              "description": "理解极大线性无关组的概念",
+              "difficulty": 3,
+              "importance": 5,
+              "keywords": ["极大线性无关组", "等价"],
+              "prerequisites": ["la-kp-3-2-2"]
+            },
+            {
+              "id": "la-kp-3-3-2",
+              "name": "向量组的秩",
+              "description": "理解向量组秩的定义和性质",
+              "difficulty": 3,
+              "importance": 5,
+              "keywords": ["向量组秩", "秩的性质"],
+              "prerequisites": ["la-kp-3-3-1"]
+            },
+            {
+              "id": "la-kp-3-3-3",
+              "name": "向量组秩的求法",
+              "description": "掌握求向量组秩和极大无关组的方法",
+              "difficulty": 3,
+              "importance": 5,
+              "keywords": ["初等变换", "极大无关组"],
+              "prerequisites": ["la-kp-3-3-2"]
+            }
+          ]
+        },
+        {
+          "id": "la-ch3-s4",
+          "name": "向量空间",
+          "order": 4,
+          "points": [
+            {
+              "id": "la-kp-3-4-1",
+              "name": "向量空间的概念",
+              "description": "理解向量空间的定义和性质",
+              "difficulty": 3,
+              "importance": 4,
+              "keywords": ["向量空间", "子空间"],
+              "prerequisites": ["la-kp-3-1-2"]
+            },
+            {
+              "id": "la-kp-3-4-2",
+              "name": "基与维数",
+              "description": "理解向量空间的基和维数的概念",
+              "difficulty": 3,
+              "importance": 5,
+              "keywords": ["基", "维数", "坐标"],
+              "prerequisites": ["la-kp-3-4-1", "la-kp-3-3-1"]
+            },
+            {
+              "id": "la-kp-3-4-3",
+              "name": "基变换与坐标变换",
+              "description": "掌握基变换公式和坐标变换公式",
+              "difficulty": 3,
+              "importance": 4,
+              "keywords": ["过渡矩阵", "坐标变换"],
+              "prerequisites": ["la-kp-3-4-2"]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "la-ch4",
+      "name": "线性方程组",
+      "order": 4,
+      "sections": [
+        {
+          "id": "la-ch4-s1",
+          "name": "线性方程组的解",
+          "order": 1,
+          "points": [
+            {
+              "id": "la-kp-4-1-1",
+              "name": "解的判定",
+              "description": "掌握线性方程组有解、无解、唯一解的判定条件",
+              "difficulty": 3,
+              "importance": 5,
+              "keywords": ["解的判定", "秩", "增广矩阵"],
+              "prerequisites": ["la-kp-2-5-1"]
+            },
+            {
+              "id": "la-kp-4-1-2",
+              "name": "齐次方程组的解",
+              "description": "理解齐次方程组解的结构",
+              "difficulty": 3,
+              "importance": 5,
+              "keywords": ["齐次方程组", "基础解系", "解空间"],
+              "prerequisites": ["la-kp-4-1-1"]
+            },
+            {
+              "id": "la-kp-4-1-3",
+              "name": "非齐次方程组的解",
+              "description": "理解非齐次方程组解的结构",
+              "difficulty": 3,
+              "importance": 5,
+              "keywords": ["非齐次方程组", "特解", "通解"],
+              "prerequisites": ["la-kp-4-1-2"]
+            }
+          ]
+        },
+        {
+          "id": "la-ch4-s2",
+          "name": "线性方程组的求解",
+          "order": 2,
+          "points": [
+            {
+              "id": "la-kp-4-2-1",
+              "name": "高斯消元法",
+              "description": "掌握高斯消元法求解线性方程组",
+              "difficulty": 2,
+              "importance": 5,
+              "keywords": ["消元法", "行阶梯形"],
+              "prerequisites": ["la-kp-2-4-1"]
+            },
+            {
+              "id": "la-kp-4-2-2",
+              "name": "基础解系的求法",
+              "description": "掌握求基础解系的方法",
+              "difficulty": 3,
+              "importance": 5,
+              "keywords": ["基础解系", "自由变量"],
+              "prerequisites": ["la-kp-4-1-2", "la-kp-4-2-1"]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "la-ch5",
+      "name": "特征值与特征向量",
+      "order": 5,
+      "sections": [
+        {
+          "id": "la-ch5-s1",
+          "name": "特征值与特征向量的概念",
+          "order": 1,
+          "points": [
+            {
+              "id": "la-kp-5-1-1",
+              "name": "特征值与特征向量的定义",
+              "description": "理解特征值和特征向量的定义",
+              "difficulty": 2,
+              "importance": 5,
+              "keywords": ["特征值", "特征向量", "特征方程"],
+              "prerequisites": ["la-kp-2-2-2"]
+            },
+            {
+              "id": "la-kp-5-1-2",
+              "name": "特征值与特征向量的求法",
+              "description": "掌握求特征值和特征向量的方法",
+              "difficulty": 3,
+              "importance": 5,
+              "keywords": ["特征多项式", "特征方程"],
+              "prerequisites": ["la-kp-5-1-1"]
+            },
+            {
+              "id": "la-kp-5-1-3",
+              "name": "特征值与特征向量的性质",
+              "description": "掌握特征值和特征向量的各种性质",
+              "difficulty": 3,
+              "importance": 5,
+              "keywords": ["迹", "行列式", "特征值性质"],
+              "prerequisites": ["la-kp-5-1-1"]
+            }
+          ]
+        },
+        {
+          "id": "la-ch5-s2",
+          "name": "相似矩阵",
+          "order": 2,
+          "points": [
+            {
+              "id": "la-kp-5-2-1",
+              "name": "相似矩阵的概念",
+              "description": "理解矩阵相似的定义和性质",
+              "difficulty": 2,
+              "importance": 5,
+              "keywords": ["相似", "相似变换"],
+              "prerequisites": ["la-kp-2-3-1"]
+            },
+            {
+              "id": "la-kp-5-2-2",
+              "name": "相似对角化",
+              "description": "掌握矩阵可对角化的条件和方法",
+              "difficulty": 4,
+              "importance": 5,
+              "keywords": ["对角化", "相似对角形"],
+              "prerequisites": ["la-kp-5-2-1", "la-kp-5-1-1"]
+            },
+            {
+              "id": "la-kp-5-2-3",
+              "name": "实对称矩阵的对角化",
+              "description": "掌握实对称矩阵可对角化的结论",
+              "difficulty": 3,
+              "importance": 5,
+              "keywords": ["实对称矩阵", "正交对角化"],
+              "prerequisites": ["la-kp-5-2-2"]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "la-ch6",
+      "name": "二次型",
+      "order": 6,
+      "sections": [
+        {
+          "id": "la-ch6-s1",
+          "name": "二次型的概念",
+          "order": 1,
+          "points": [
+            {
+              "id": "la-kp-6-1-1",
+              "name": "二次型的定义",
+              "description": "理解二次型的定义和矩阵表示",
+              "difficulty": 2,
+              "importance": 4,
+              "keywords": ["二次型", "矩阵表示"],
+              "prerequisites": ["la-kp-2-1-3"]
+            },
+            {
+              "id": "la-kp-6-1-2",
+              "name": "二次型的标准形",
+              "description": "理解二次型标准形的概念",
+              "difficulty": 2,
+              "importance": 5,
+              "keywords": ["标准形", "规范形"],
+              "prerequisites": ["la-kp-6-1-1"]
+            }
+          ]
+        },
+        {
+          "id": "la-ch6-s2",
+          "name": "化二次型为标准形",
+          "order": 2,
+          "points": [
+            {
+              "id": "la-kp-6-2-1",
+              "name": "配方法",
+              "description": "掌握用配方法化二次型为标准形",
+              "difficulty": 3,
+              "importance": 4,
+              "keywords": ["配方法", "完全平方"],
+              "prerequisites": ["la-kp-6-1-2"]
+            },
+            {
+              "id": "la-kp-6-2-2",
+              "name": "正交变换法",
+              "description": "掌握用正交变换化二次型为标准形",
+              "difficulty": 4,
+              "importance": 5,
+              "keywords": ["正交变换", "特征值"],
+              "prerequisites": ["la-kp-6-1-2", "la-kp-5-2-3"]
+            },
+            {
+              "id": "la-kp-6-2-3",
+              "name": "惯性定理",
+              "description": "理解惯性定理的内容",
+              "difficulty": 3,
+              "importance": 4,
+              "keywords": ["惯性定理", "正惯性指数", "负惯性指数"],
+              "prerequisites": ["la-kp-6-1-2"]
+            }
+          ]
+        },
+        {
+          "id": "la-ch6-s3",
+          "name": "正定二次型",
+          "order": 3,
+          "points": [
+            {
+              "id": "la-kp-6-3-1",
+              "name": "正定二次型的定义",
+              "description": "理解正定、负定、不定二次型的定义",
+              "difficulty": 2,
+              "importance": 5,
+              "keywords": ["正定", "负定", "不定"],
+              "prerequisites": ["la-kp-6-1-1"]
+            },
+            {
+              "id": "la-kp-6-3-2",
+              "name": "正定的判定",
+              "description": "掌握判定正定二次型的各种方法",
+              "difficulty": 3,
+              "importance": 5,
+              "keywords": ["正定判定", "顺序主子式", "特征值"],
+              "prerequisites": ["la-kp-6-3-1"]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "total_chapters": 6,
+    "total_sections": 15,
+    "total_points": 48,
+    "exam_weight": {
+      "数学一": 22,
+      "数学二": 22,
+      "数学三": 22
+    },
+    "created_by": "SmartLearn AI Team",
+    "created_at": "2024-01-01"
+  }
+}

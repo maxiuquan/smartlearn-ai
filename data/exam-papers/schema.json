@@ -1,0 +1,119 @@
+{
+  "version": "1.0.0",
+  "last_updated": "2024-01-01",
+  "description": "历年真题数据结构定义",
+  "subjects": [
+    {
+      "id": "math1",
+      "name": "数学一",
+      "code": "math1",
+      "years": ["2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023"],
+      "total_papers": 19,
+      "structure": {
+        "total_score": 150,
+        "total_time": 180,
+        "question_types": [
+          {"type": "choice", "count": 8, "score_each": 4, "total_score": 32},
+          {"type": "fill", "count": 6, "score_each": 4, "total_score": 24},
+          {"type": "calculation", "count": 9, "score_distribution": [10, 10, 10, 10, 10, 10, 10, 10, 10], "total_score": 90}
+        ]
+      }
+    },
+    {
+      "id": "math2",
+      "name": "数学二",
+      "code": "math2",
+      "years": ["2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023"],
+      "total_papers": 19,
+      "structure": {
+        "total_score": 150,
+        "total_time": 180,
+        "question_types": [
+          {"type": "choice", "count": 8, "score_each": 4, "total_score": 32},
+          {"type": "fill", "count": 6, "score_each": 4, "total_score": 24},
+          {"type": "calculation", "count": 9, "score_distribution": [10, 10, 10, 10, 10, 10, 10, 10, 10], "total_score": 90}
+        ]
+      }
+    },
+    {
+      "id": "math3",
+      "name": "数学三",
+      "code": "math3",
+      "years": ["2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023"],
+      "total_papers": 19,
+      "structure": {
+        "total_score": 150,
+        "total_time": 180,
+        "question_types": [
+          {"type": "choice", "count": 8, "score_each": 4, "total_score": 32},
+          {"type": "fill", "count": 6, "score_each": 4, "total_score": 24},
+          {"type": "calculation", "count": 9, "score_distribution": [10, 10, 10, 10, 10, 10, 10, 10, 10], "total_score": 90}
+        ]
+      }
+    }
+  ],
+  "paper_schema": {
+    "id": "string",
+    "subject": "string",
+    "year": "string",
+    "questions": [
+      {
+        "id": "string",
+        "number": "integer",
+        "type": "choice|fill|calculation",
+        "score": "integer",
+        "content": "string",
+        "options": ["A", "B", "C", "D"],
+        "answer": "string",
+        "solution": "string",
+        "analysis": "string",
+        "knowledge_points": ["string"],
+        "difficulty": "integer",
+        "tags": ["string"]
+      }
+    ],
+    "statistics": {
+      "avg_score": "float",
+      "difficulty_distribution": {},
+      "knowledge_point_coverage": {}
+    }
+  },
+  "sample_paper": {
+    "id": "math1-2023",
+    "subject": "数学一",
+    "year": "2023",
+    "questions": [
+      {
+        "id": "math1-2023-q1",
+        "number": 1,
+        "type": "choice",
+        "score": 4,
+        "content": "题目内容...",
+        "options": {
+          "A": "选项A",
+          "B": "选项B",
+          "C": "选项C",
+          "D": "选项D"
+        },
+        "answer": "C",
+        "solution": "解题过程...",
+        "analysis": "题目分析...",
+        "knowledge_points": ["kp-1-4-5"],
+        "difficulty": 3,
+        "tags": ["极限", "无穷小"]
+      }
+    ]
+  },
+  "features": {
+    "has_answer": true,
+    "has_solution": true,
+    "has_analysis": true,
+    "has_knowledge_points": true,
+    "has_difficulty": true,
+    "has_statistics": true
+  },
+  "metadata": {
+    "created_by": "SmartLearn AI Team",
+    "created_at": "2024-01-01"
+  }
+}

@@ -1,0 +1,778 @@
+// Prisma Schema for SmartLearn AI
+// 支持多学科智能学习系统
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== 用户相关 ====================
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  username      String    @unique
+  password      String
+  nickname      String?
+  avatar        String?
+  phone         String?
+  
+  // 用户设置
+  settings      Json?     // 用户偏好设置
+  
+  // 统计数据
+  totalStudyTime Int      @default(0)    // 总学习时长(分钟)
+  totalQuestions Int      @default(0)    // 总答题数
+  correctRate   Float     @default(0)    // 正确率
+  
+  // VIP相关
+  isVip         Boolean   @default(false)
+  vipExpireAt   DateTime?
+  
+  // 时间戳
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  lastLoginAt   DateTime?
+  
+  // 关联
+  learningRecords     LearningRecord[]
+  knowledgeProgress   KnowledgeProgress[]
+  reviewTasks         ReviewTask[]
+  studyPlans          StudyPlan[]
+  dailyPlans          DailyPlan[]
+  vocabularyProgress  VocabularyProgress[]
+  achievements        UserAchievement[]
+  exerciseProgress    ExerciseProgress[]
+  examRecords         ExamRecord[]
+  notes               Note[]
+  favorites           Favorite[]
+  errorBook           ErrorQuestion[]
+  
+  @@map("users")
+}
+
+// ==================== 学科相关 ====================
+
+model Subject {
+  id          String   @id @default(uuid())
+  name        String   @unique           // 数学、政治、英语、专业课
+  code        String   @unique           // math, politics, english, major
+  icon        String?
+  color       String?
+  description String?
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // 关联
+  categories      QuestionCategory[]
+  knowledgePoints KnowledgePoint[]
+  questions       Question[]
+  examPapers      ExamPaper[]
+  exerciseBooks   ExerciseBook[]
+  
+  @@map("subjects")
+}
+
+// ==================== 题库相关 ====================
+
+model QuestionCategory {
+  id          String   @id @default(uuid())
+  name        String
+  subjectId   String
+  parentId    String?
+  level       Int      @default(1)       // 层级
+  path        String                      // 路径: 1/2/3
+  sortOrder   Int      @default(0)
+  description String?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // 关联
+  subject     Subject       @relation(fields: [subjectId], references: [id])
+  parent      QuestionCategory?  @relation("CategoryTree", fields: [parentId], references: [id])
+  children    QuestionCategory[] @relation("CategoryTree")
+  questions   Question[]
+  
+  @@unique([subjectId, name, parentId])
+  @@map("question_categories")
+}
+
+model Question {
+  id            String   @id @default(uuid())
+  subjectId     String
+  categoryId    String?
+  
+  // 题目内容
+  type          QuestionType
+  difficulty    Difficulty  @default(MEDIUM)
+  content       String                      // 题目内容(JSON或富文本)
+  options       Json?                       // 选项(JSON数组)
+  answer        String                      // 答案
+  analysis      String?                     // 解析
+  
+  // 题目标签
+  tags          String[]                    // 标签
+  keywords      String[]                    // 关键词(用于搜索)
+  
+  // 来源信息
+  source        String?                     // 来源: 真题、习题册等
+  sourceYear    Int?                        // 年份(真题)
+  sourceBook    String?                     // 习题册名称
+  
+  // 统计
+  attemptCount  Int      @default(0)        // 作答次数
+  correctCount  Int      @default(0)        // 正确次数
+  favoriteCount Int      @default(0)        // 收藏次数
+  
+  // 审核状态
+  status        ContentStatus @default(DRAFT)
+  reviewedBy    String?
+  reviewedAt    DateTime?
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  // 关联
+  subject       Subject           @relation(fields: [subjectId], references: [id])
+  category      QuestionCategory? @relation(fields: [categoryId], references: [id])
+  knowledgePoints QuestionKnowledgePoint[]
+  learningRecords LearningRecord[]
+  errorQuestions  ErrorQuestion[]
+  favorites       Favorite[]
+  
+  @@index([subjectId])
+  @@index([categoryId])
+  @@index([type])
+  @@index([difficulty])
+  @@map("questions")
+}
+
+enum QuestionType {
+  SINGLE_CHOICE      // 单选
+  MULTIPLE_CHOICE    // 多选
+  TRUE_FALSE         // 判断
+  FILL_BLANK         // 填空
+  SHORT_ANSWER       // 简答
+  CALCULATION        // 计算
+  PROOF              // 证明
+  APPLICATION        // 应用题
+}
+
+enum Difficulty {
+  EASY        // 简单
+  MEDIUM      // 中等
+  HARD        // 困难
+  EXPERT      // 专家
+}
+
+enum ContentStatus {
+  DRAFT       // 草稿
+  PENDING     // 待审核
+  APPROVED    // 已通过
+  REJECTED    // 已拒绝
+}
+
+// ==================== 知识点相关 ====================
+
+model KnowledgePoint {
+  id          String   @id @default(uuid())
+  subjectId   String
+  name        String
+  code        String?                    // 知识点编码
+  description String?
+  content     String?                    // 详细内容/讲解
+  
+  // 层级结构
+  parentId    String?
+  level       Int      @default(1)
+  path        String                     // 路径
+  
+  // 重要性
+  importance  Int      @default(1)       // 1-5
+  frequency   Int      @default(0)       // 考频
+  
+  // 排序
+  sortOrder   Int      @default(0)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // 关联
+  subject     Subject          @relation(fields: [subjectId], references: [id])
+  parent      KnowledgePoint?  @relation("KnowledgeTree", fields: [parentId], references: [id])
+  children    KnowledgePoint[] @relation("KnowledgeTree")
+  dependencies KnowledgeDependency[]  @relation("KnowledgeDepends")
+  dependents  KnowledgeDependency[]  @relation("KnowledgeRequired")
+  questions   QuestionKnowledgePoint[]
+  progress    KnowledgeProgress[]
+  
+  @@unique([subjectId, name])
+  @@index([subjectId])
+  @@map("knowledge_points")
+}
+
+// 知识点依赖关系
+model KnowledgeDependency {
+  id              String   @id @default(uuid())
+  knowledgeId     String   // 当前知识点
+  dependsOnId     String   // 依赖的知识点
+  strength        Int      @default(1)    // 依赖强度 1-3
+  
+  createdAt       DateTime @default(now())
+  
+  knowledge       KnowledgePoint @relation("KnowledgeDepends", fields: [knowledgeId], references: [id])
+  dependsOn       KnowledgePoint @relation("KnowledgeRequired", fields: [dependsOnId], references: [id])
+  
+  @@unique([knowledgeId, dependsOnId])
+  @@map("knowledge_dependencies")
+}
+
+// 题目-知识点关联
+model QuestionKnowledgePoint {
+  id              String   @id @default(uuid())
+  questionId      String
+  knowledgeId     String
+  relevance       Int      @default(1)    // 相关度 1-3
+  
+  question        Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  knowledgePoint  KnowledgePoint @relation(fields: [knowledgeId], references: [id], onDelete: Cascade)
+  
+  @@unique([questionId, knowledgeId])
+  @@map("question_knowledge_points")
+}
+
+// ==================== 学习记录相关 ====================
+
+model LearningRecord {
+  id            String   @id @default(uuid())
+  userId        String
+  questionId    String
+  
+  // 答题信息
+  userAnswer    String                     // 用户答案
+  isCorrect     Boolean
+  timeSpent     Int                        // 用时(秒)
+  
+  // 答题模式
+  mode          LearningMode
+  
+  // 设备信息
+  deviceId      String?
+  platform      String?
+  
+  createdAt     DateTime @default(now())
+  
+  // 关联
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question      Question @relation(fields: [questionId], references: [id])
+  
+  @@index([userId])
+  @@index([questionId])
+  @@index([createdAt])
+  @@map("learning_records")
+}
+
+enum LearningMode {
+  PRACTICE       // 练习模式
+  EXAM           // 考试模式
+  REVIEW         // 复习模式
+  ERROR_BOOK     // 错题本
+  EXERCISE_BOOK  // 习题册
+}
+
+// 用户知识点掌握进度
+model KnowledgeProgress {
+  id              String   @id @default(uuid())
+  userId          String
+  knowledgeId     String
+  
+  // 掌握程度
+  masteryLevel    Float    @default(0)     // 0-100
+  attemptCount    Int      @default(0)     // 尝试次数
+  correctCount    Int      @default(0)     // 正确次数
+  
+  // 时间
+  lastPracticeAt  DateTime?
+  masteredAt      DateTime?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  knowledgePoint  KnowledgePoint @relation(fields: [knowledgeId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, knowledgeId])
+  @@map("knowledge_progress")
+}
+
+// ==================== 复习系统 ====================
+
+model ReviewTask {
+  id              String   @id @default(uuid())
+  userId          String
+  questionId      String?
+  knowledgeId     String?
+  
+  // 复习类型
+  type            ReviewType
+  
+  // 遗忘曲线参数
+  easeFactor      Float    @default(2.5)   // 难度因子
+  interval        Int      @default(1)     // 间隔天数
+  repetitions     Int      @default(0)     // 重复次数
+  
+  // 下次复习时间
+  nextReviewAt    DateTime
+  lastReviewAt    DateTime?
+  
+  // 状态
+  status          ReviewStatus @default(PENDING)
+  priority        Int      @default(0)     // 优先级
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId, nextReviewAt])
+  @@index([status])
+  @@map("review_tasks")
+}
+
+enum ReviewType {
+  QUESTION       // 题目复习
+  KNOWLEDGE      // 知识点复习
+  VOCABULARY     // 单词复习
+}
+
+enum ReviewStatus {
+  PENDING        // 待复习
+  COMPLETED      // 已完成
+  SKIPPED        // 已跳过
+  OVERDUE        // 已过期
+}
+
+// ==================== 备考规划 ====================
+
+model StudyPlan {
+  id              String   @id @default(uuid())
+  userId          String
+  
+  // 考试信息
+  examType        String                     // 考试类型: 考研、四六级等
+  examDate        DateTime                   // 考试日期
+  targetScore     Int?                       // 目标分数
+  
+  // 学科分配
+  subjectPlan     Json                       // 学科时间分配
+  
+  // 状态
+  status          PlanStatus @default(ACTIVE)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dailyPlans      DailyPlan[]
+  
+  @@map("study_plans")
+}
+
+model DailyPlan {
+  id              String   @id @default(uuid())
+  userId          String
+  planId          String
+  
+  // 日期
+  date            DateTime                   // 计划日期
+  
+  // 计划内容
+  tasks           Json                       // 当日任务列表
+  
+  // 完成情况
+  completedTasks  Int      @default(0)
+  totalTasks      Int      @default(0)
+  studyTime       Int      @default(0)       // 实际学习时长
+  
+  // 状态
+  status          DailyPlanStatus @default(PENDING)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan            StudyPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, date])
+  @@map("daily_plans")
+}
+
+enum PlanStatus {
+  DRAFT          // 草稿
+  ACTIVE         // 进行中
+  COMPLETED      // 已完成
+  ABANDONED      // 已放弃
+}
+
+enum DailyPlanStatus {
+  PENDING        // 待执行
+  IN_PROGRESS    // 进行中
+  COMPLETED      // 已完成
+  MISSED         // 未完成
+}
+
+// ==================== 单词模块 ====================
+
+model Vocabulary {
+  id              String   @id @default(uuid())
+  word            String
+  phonetic        String?                    // 音标
+  meaning         String                     // 含义(JSON数组)
+  example         String?                    // 例句(JSON)
+  audio           String?                    // 音频URL
+  
+  // 分类
+  category        String?                    // 分类: 四级、六级、考研等
+  level           Int      @default(1)       // 难度级别
+  
+  // 扩展
+  root            String?                    // 词根
+  affix           String?                    // 词缀
+  synonyms        String[]                   // 同义词
+  antonyms        String[]                   // 反义词
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  progress        VocabularyProgress[]
+  
+  @@unique([word, category])
+  @@map("vocabularies")
+}
+
+model VocabularyProgress {
+  id              String   @id @default(uuid())
+  userId          String
+  vocabularyId    String
+  
+  // 学习状态
+  status          VocabStatus @default(NEW)
+  
+  // 记忆曲线
+  easeFactor      Float    @default(2.5)
+  interval        Int      @default(1)
+  repetitions     Int      @default(0)
+  nextReviewAt    DateTime?
+  lastReviewAt    DateTime?
+  
+  // 统计
+  correctCount    Int      @default(0)
+  wrongCount      Int      @default(0)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vocabulary      Vocabulary @relation(fields: [vocabularyId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, vocabularyId])
+  @@map("vocabulary_progress")
+}
+
+enum VocabStatus {
+  NEW            // 生词
+  LEARNING       // 学习中
+  FAMILIAR       // 熟悉
+  MASTERED       // 已掌握
+}
+
+// ==================== 成就系统 ====================
+
+model Achievement {
+  id              String   @id @default(uuid())
+  code            String   @unique          // 成就代码
+  name            String
+  description     String
+  icon            String?                    // 图标
+  badge           String?                    // 徽章图片
+  
+  // 类型
+  type            AchievementType
+  category        String?                    // 分类
+  
+  // 条件
+  condition       Json                       // 达成条件
+  
+  // 奖励
+  points          Int      @default(0)       // 积分奖励
+  title           String?                    // 称号
+  
+  // 稀有度
+  rarity          Rarity   @default(COMMON)
+  
+  // 是否隐藏
+  isHidden        Boolean  @default(false)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  userAchievements UserAchievement[]
+  
+  @@map("achievements")
+}
+
+model UserAchievement {
+  id              String   @id @default(uuid())
+  userId          String
+  achievementId   String
+  
+  unlockedAt      DateTime @default(now())
+  
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement     Achievement @relation(fields: [achievementId], references: [id])
+  
+  @@unique([userId, achievementId])
+  @@map("user_achievements")
+}
+
+enum AchievementType {
+  STUDY_TIME     // 学习时长
+  QUESTION_COUNT // 答题数量
+  ACCURACY       // 正确率
+  STREAK         // 连续学习
+  SPECIAL        // 特殊成就
+}
+
+enum Rarity {
+  COMMON         // 普通
+  UNCOMMON       // 稀有
+  RARE           // 史诗
+  LEGENDARY      // 传说
+}
+
+// ==================== 真题模块 ====================
+
+model ExamPaper {
+  id              String   @id @default(uuid())
+  subjectId       String
+  name            String                     // 试卷名称
+  year            Int                        // 年份
+  examType        String                     // 考试类型: 考研、四六级等
+  
+  // 试卷信息
+  totalScore      Int                        // 总分
+  duration        Int                        // 时长(分钟)
+  sections        Json                       // 试卷结构
+  
+  // 来源
+  source          String?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  subject         Subject @relation(fields: [subjectId], references: [id])
+  questions       ExamQuestion[]
+  records         ExamRecord[]
+  
+  @@unique([subjectId, year, examType])
+  @@map("exam_papers")
+}
+
+model ExamQuestion {
+  id              String   @id @default(uuid())
+  paperId         String
+  questionId      String
+  
+  // 试卷中的位置
+  section         String?                    // 部分
+  order           Int                        // 题号
+  score           Int                        // 分值
+  
+  paper           ExamPaper @relation(fields: [paperId], references: [id], onDelete: Cascade)
+  
+  @@unique([paperId, order])
+  @@map("exam_questions")
+}
+
+model ExamRecord {
+  id              String   @id @default(uuid())
+  userId          String
+  paperId         String
+  
+  // 答题信息
+  answers         Json                       // 答案记录
+  score           Int?                       // 得分
+  
+  // 时间
+  startTime       DateTime
+  endTime         DateTime?
+  timeSpent       Int?                       // 用时(秒)
+  
+  // 状态
+  status          ExamStatus @default(IN_PROGRESS)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  paper           ExamPaper @relation(fields: [paperId], references: [id])
+  
+  @@map("exam_records")
+}
+
+enum ExamStatus {
+  IN_PROGRESS    // 进行中
+  COMPLETED      // 已完成
+  ABANDONED      // 已放弃
+}
+
+// ==================== 习题册模块 ====================
+
+model ExerciseBook {
+  id              String   @id @default(uuid())
+  subjectId       String
+  name            String                     // 习题册名称: 660题、880题等
+  code            String                     // 代码: 660, 880
+  
+  // 基本信息
+  author          String?
+  publisher       String?
+  year            Int?
+  description     String?
+  
+  // 统计
+  totalQuestions  Int      @default(0)
+  
+  // 封面
+  cover           String?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  subject         Subject @relation(fields: [subjectId], references: [id])
+  questions       ExerciseBookQuestion[]
+  
+  @@unique([subjectId, code])
+  @@map("exercise_books")
+}
+
+model ExerciseBookQuestion {
+  id              String   @id @default(uuid())
+  bookId          String
+  questionId      String
+  
+  // 位置
+  chapter         Int?                       // 章节
+  section         Int?                       // 小节
+  order           Int                        // 题号
+  
+  book            ExerciseBook @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  progress        ExerciseProgress[]
+  
+  @@unique([bookId, order])
+  @@map("exercise_book_questions")
+}
+
+model ExerciseProgress {
+  id              String   @id @default(uuid())
+  userId          String
+  bookQuestionId  String
+  
+  // 状态
+  status          ExerciseStatus @default(NOT_STARTED)
+  userAnswer      String?
+  isCorrect       Boolean?
+  timeSpent       Int?
+  
+  attemptedAt     DateTime?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  user            User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bookQuestion    ExerciseBookQuestion  @relation(fields: [bookQuestionId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, bookQuestionId])
+  @@map("exercise_progress")
+}
+
+enum ExerciseStatus {
+  NOT_STARTED    // 未开始
+  IN_PROGRESS    // 进行中
+  COMPLETED      // 已完成
+  MARKED         // 已标记
+}
+
+// ==================== 辅助功能 ====================
+
+// 笔记
+model Note {
+  id              String   @id @default(uuid())
+  userId          String
+  questionId      String?
+  knowledgeId     String?
+  
+  title           String?
+  content         String                     // 笔记内容
+  
+  // 标签
+  tags            String[]
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("notes")
+}
+
+// 收藏
+model Favorite {
+  id              String   @id @default(uuid())
+  userId          String
+  questionId      String
+  
+  // 分类
+  folder          String?                    // 收藏夹
+  
+  createdAt       DateTime @default(now())
+  
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question        Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, questionId])
+  @@map("favorites")
+}
+
+// 错题本
+model ErrorQuestion {
+  id              String   @id @default(uuid())
+  userId          String
+  questionId      String
+  
+  // 错误信息
+  wrongAnswer     String                     // 错误答案
+  wrongCount      Int      @default(1)       // 错误次数
+  lastWrongAt     DateTime @default(now())
+  
+  // 是否已掌握
+  mastered        Boolean  @default(false)
+  masteredAt      DateTime?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question        Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, questionId])
+  @@map("error_questions")
+}
