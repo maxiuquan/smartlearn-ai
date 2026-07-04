@@ -320,6 +320,36 @@ services:
           cpus: '0.25'
           memory: 64M
 
+  # ── 学生端 Web (React + Vite) ──
+  student-web:
+    build:
+      context: .
+      dockerfile: apps/student-web/Dockerfile.student
+    container_name: smartlearn-student-web
+    restart: unless-stopped
+    environment:
+      - API_BASE_URL=http://api:8000
+      - AI_ENGINE_URL=http://ai-engine:8001
+    depends_on:
+      - api
+      - ai-engine
+    networks:
+      - smartlearn-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 64M
+
   # ── Web 前端 (Next.js) ──
   web:
     build:
@@ -429,6 +459,7 @@ services:
       - mobile-web
       - admin
       - web
+      - student-web
     networks:
       - smartlearn-network
     healthcheck:

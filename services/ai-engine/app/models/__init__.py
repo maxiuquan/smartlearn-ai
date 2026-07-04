@@ -1,0 +1,36 @@
+"""AI 引擎数据模型"""
+from app.models.word_games import (
+    GameType,
+    GameDifficulty,
+    Word,
+    WordGameSession,
+    WordGameQuestion,
+    WordGameAnswer,
+    WordGameResult,
+    WordGameRequest,
+    WordGameResponse,
+    SubmitAnswerRequest,
+    SubmitAnswerResponse,
+    GameSummary,
+    LeaderboardEntry,
+    LeaderboardRequest,
+    LeaderboardResponse,
+)
+
+__all__ = [
+    "GameType",
+    "GameDifficulty",
+    "Word",
+    "WordGameSession",
+    "WordGameQuestion",
+    "WordGameAnswer",
+    "WordGameResult",
+    "WordGameRequest",
+    "WordGameResponse",
+    "SubmitAnswerRequest",
+    "SubmitAnswerResponse",
+    "GameSummary",
+    "LeaderboardEntry",
+    "LeaderboardRequest",
+    "LeaderboardResponse",
+]

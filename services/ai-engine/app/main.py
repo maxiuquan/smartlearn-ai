@@ -19,7 +19,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from config import settings
-from app.routers import chat_router, rag_router, study_router, media_router, moderation_router, prompt_router
+from app.routers import chat_router, rag_router, study_router, media_router, moderation_router, prompt_router, word_games_router
 from app.services.rag_service import get_rag_service
 
 
@@ -86,6 +86,7 @@ app.include_router(study_router)
 app.include_router(media_router)
 app.include_router(moderation_router)
 app.include_router(prompt_router)
+app.include_router(word_games_router)
 
 
 @app.get("/")
@@ -109,6 +110,7 @@ async def root():
             "media_image": "/media/image",
             "moderation": "/moderation",
             "prompts": "/prompts",
+            "word_games": "/word-games",
         },
     }
 

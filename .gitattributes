@@ -1,0 +1,20 @@
+# ============================================================
+# Git LFS 配置 - 管理大型数据文件
+# 安装 Git LFS: https://git-lfs.com
+#   git lfs install
+# ============================================================
+
+# 题目数据 (JSON > 1MB)
+data/questions/*.json filter=lfs diff=lfs merge=lfs -text
+
+# 词汇数据 (大型 JSON)
+data/vocabulary/*.json filter=lfs diff=lfs merge=lfs -text
+
+# 知识点数据 (大型 JSON)
+data/knowledge-points/*.json filter=lfs diff=lfs merge=lfs -text
+
+# 公式数据
+data/formulas.json filter=lfs diff=lfs merge=lfs -text
+
+# 词根数据
+data/roots.json filter=lfs diff=lfs merge=lfs -text
