@@ -17,6 +17,82 @@ router = APIRouter()
 
 
 @router.get(
+    "/search",
+    response_model=KnowledgeSearchResponse,
+    summary="搜索知识点",
+)
+async def search_knowledge_points(
+    q: str = Query(..., min_length=1, description="搜索关键词"),
+    subject: Optional[str] = Query(None, description="限制学科"),
+    limit: int = Query(20, ge=1, le=100),
+    db: AsyncSession = Depends(get_db),
+) -> KnowledgeSearchResponse:
+    """根据关键词搜索知识点。
+
+    - 支持按名称和描述模糊搜索
+    - 可限制学科范围
+    """
+    from sqlalchemy import Table, Column, Integer, String, Text, DateTime, MetaData, func
+    from sqlalchemy.dialects.postgresql import JSONB
+
+    metadata = MetaData()
+    kp = Table(
+        "knowledge_points",
+        metadata,
+        Column("id", Integer, primary_key=True),
+        Column("subject", String(50)),
+        Column("chapter", String(200)),
+        Column("section", String(200)),
+        Column("name", String(500)),
+        Column("description", Text),
+        Column("difficulty", Integer),
+        Column("importance", Integer),
+        Column("prerequisites", JSONB),
+        Column("keywords", JSONB),
+        Column("created_at", DateTime),
+    )
+
+    conditions = [kp.c.name.ilike(f"%{q}%")]
+    if subject:
+        conditions.append(kp.c.subject == subject)
+
+    # 计数
+    count_result = await db.execute(
+        select(func.count()).select_from(kp).where(*conditions)
+    )
+    total = count_result.scalar() or 0
+
+    # 查询
+    result = await db.execute(
+        select(kp).where(*conditions).order_by(kp.c.importance.desc()).limit(limit)
+    )
+    rows = result.fetchall()
+
+    results = [
+        KnowledgePointResponse(
+            id=row.id,
+            subject=row.subject,
+            chapter=row.chapter,
+            section=row.section,
+            name=row.name,
+            description=row.description,
+            difficulty=row.difficulty,
+            importance=row.importance,
+            prerequisites=row.prerequisites,
+            keywords=row.keywords,
+            created_at=row.created_at,
+        )
+        for row in rows
+    ]
+
+    return KnowledgeSearchResponse(
+        results=results,
+        total=total,
+        query=q,
+    )
+
+
+@router.get(
     "/{subject}",
     response_model=KnowledgeTreeResponse,
     summary="获取学科知识点树",
@@ -168,80 +244,4 @@ async def get_knowledge_point(
         keywords=row.keywords,
         created_at=row.created_at,
         prerequisite_details=prerequisite_details,
-    )
-
-
-@router.get(
-    "/search",
-    response_model=KnowledgeSearchResponse,
-    summary="搜索知识点",
-)
-async def search_knowledge_points(
-    q: str = Query(..., min_length=1, description="搜索关键词"),
-    subject: Optional[str] = Query(None, description="限制学科"),
-    limit: int = Query(20, ge=1, le=100),
-    db: AsyncSession = Depends(get_db),
-) -> KnowledgeSearchResponse:
-    """根据关键词搜索知识点。
-
-    - 支持按名称和描述模糊搜索
-    - 可限制学科范围
-    """
-    from sqlalchemy import Table, Column, Integer, String, Text, DateTime, MetaData, func
-    from sqlalchemy.dialects.postgresql import JSONB
-
-    metadata = MetaData()
-    kp = Table(
-        "knowledge_points",
-        metadata,
-        Column("id", Integer, primary_key=True),
-        Column("subject", String(50)),
-        Column("chapter", String(200)),
-        Column("section", String(200)),
-        Column("name", String(500)),
-        Column("description", Text),
-        Column("difficulty", Integer),
-        Column("importance", Integer),
-        Column("prerequisites", JSONB),
-        Column("keywords", JSONB),
-        Column("created_at", DateTime),
-    )
-
-    conditions = [kp.c.name.ilike(f"%{q}%")]
-    if subject:
-        conditions.append(kp.c.subject == subject)
-
-    # 计数
-    count_result = await db.execute(
-        select(func.count()).select_from(kp).where(*conditions)
-    )
-    total = count_result.scalar() or 0
-
-    # 查询
-    result = await db.execute(
-        select(kp).where(*conditions).order_by(kp.c.importance.desc()).limit(limit)
-    )
-    rows = result.fetchall()
-
-    results = [
-        KnowledgePointResponse(
-            id=row.id,
-            subject=row.subject,
-            chapter=row.chapter,
-            section=row.section,
-            name=row.name,
-            description=row.description,
-            difficulty=row.difficulty,
-            importance=row.importance,
-            prerequisites=row.prerequisites,
-            keywords=row.keywords,
-            created_at=row.created_at,
-        )
-        for row in rows
-    ]
-
-    return KnowledgeSearchResponse(
-        results=results,
-        total=total,
-        query=q,
     )

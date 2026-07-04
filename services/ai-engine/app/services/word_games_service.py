@@ -2,7 +2,6 @@
 单词游戏服务
 趣味单词游戏逻辑
 """
-import numpy as np
 from typing import List, Optional, Dict
 from datetime import datetime
 from collections import defaultdict

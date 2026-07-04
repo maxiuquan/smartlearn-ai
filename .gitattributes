@@ -18,3 +18,12 @@ data/formulas.json filter=lfs diff=lfs merge=lfs -text
 
 # 词根数据
 data/roots.json filter=lfs diff=lfs merge=lfs -text
+
+# 试卷数据 (大型 JSON)
+data/exam-papers/*.json filter=lfs diff=lfs merge=lfs -text
+
+# 练习册数据 (大型 JSON)
+data/exercise-books/*.json filter=lfs diff=lfs merge=lfs -text
+
+# 游戏配置数据 (大型 JSON)
+data/games/*.json filter=lfs diff=lfs merge=lfs -text

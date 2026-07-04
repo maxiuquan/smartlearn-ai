@@ -56,6 +56,9 @@ class RAGService:
     def _load_knowledge_points(self) -> None:
         """从 JSON 文件加载知识点，展平为 chunks"""
         self._knowledge_chunks = []
+        if not KNOWLEDGE_POINTS_DIR.exists():
+            print(f"警告: 知识点目录不存在: {KNOWLEDGE_POINTS_DIR}")
+            return
         for filename in os.listdir(KNOWLEDGE_POINTS_DIR):
             if not filename.endswith(".json"):
                 continue
@@ -94,6 +97,9 @@ class RAGService:
     def _load_questions(self) -> None:
         """从 JSON 文件加载题目"""
         self._question_chunks = []
+        if not QUESTIONS_DIR.exists():
+            print(f"警告: 题目目录不存在: {QUESTIONS_DIR}")
+            return
         for filename in os.listdir(QUESTIONS_DIR):
             if not filename.endswith(".json"):
                 continue

@@ -51,6 +51,8 @@ async def get_optional_user_id(
         return None
     token = credentials.credentials
     payload = decode_token(token)
+    if payload is None:
+        return None
     sub = payload.get("sub")
     if sub is None:
         return None

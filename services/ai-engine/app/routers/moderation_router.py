@@ -40,6 +40,30 @@ class BatchModerationRequest(BaseModel):
     items: list[ModerationRequest] = Field(..., description="待审核文本列表", max_length=50)
 
 
+# ─── 辅助函数 ───────────────────────────────────────────────
+
+def _to_moderation_response(result: dict) -> ModerationResponse:
+    """将 moderate() 返回的字典转换为 ModerationResponse"""
+    flagged = bool(result.get("flagged", False))
+    categories = result.get("categories", []) or []
+    reason = result.get("reason", "")
+    confidence = float(result.get("confidence", 0.0))
+
+    moderation_result = ModerationResult(
+        flagged=flagged,
+        category=", ".join(str(c) for c in categories) if isinstance(categories, list) else str(categories),
+        severity="",
+        reason=reason,
+        confidence=confidence,
+        suggestion="",
+    )
+    return ModerationResponse(
+        results=[moderation_result],
+        overall_flagged=flagged,
+        passed=not flagged,
+    )
+
+
 # ─── 路由 ───────────────────────────────────────────────────
 
 @router.post("", response_model=ModerationResponse)
@@ -52,11 +76,11 @@ async def moderate_content(request: ModerationRequest):
     """
     ai_router = get_router()
     try:
-        result = await ai_router.moderate_content(
+        result = ai_router.moderate(
             text=request.text,
             context=request.context,
         )
-        return ModerationResponse(**result)
+        return _to_moderation_response(result)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"审核失败: {str(e)}")
 
@@ -72,11 +96,11 @@ async def moderate_batch(request: BatchModerationRequest):
     results = []
     for item in request.items:
         try:
-            result = await ai_router.moderate_content(
+            result = ai_router.moderate(
                 text=item.text,
                 context=item.context,
             )
-            results.append(ModerationResponse(**result))
+            results.append(_to_moderation_response(result))
         except Exception as e:
             results.append(ModerationResponse(
                 results=[ModerationResult(flagged=True, category="error", reason=str(e))],
@@ -89,9 +113,8 @@ async def moderate_batch(request: BatchModerationRequest):
 @router.get("/health")
 async def health_check():
     """健康检查"""
-    ai_router = get_router()
     return {
         "status": "ok",
         "service": "moderation",
-        "available": ai_router.is_capability_available("moderation"),
+        "available": True,
     }

@@ -278,7 +278,7 @@ services:
     networks:
       - smartlearn-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost/"]
+      test: ["CMD", "wget", "-q", "-O-", "http://localhost/"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -306,7 +306,7 @@ services:
     networks:
       - smartlearn-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost/"]
+      test: ["CMD", "wget", "-q", "-O-", "http://localhost/"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -336,7 +336,7 @@ services:
     networks:
       - smartlearn-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost/"]
+      test: ["CMD", "wget", "-q", "-O-", "http://localhost/"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -366,7 +366,7 @@ services:
     networks:
       - smartlearn-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      test: ["CMD", "wget", "-q", "-O-", "http://localhost:3000"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -463,7 +463,7 @@ services:
     networks:
       - smartlearn-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost/nginx-health"]
+      test: ["CMD", "wget", "-q", "-O-", "http://localhost/nginx-health"]
       interval: 30s
       timeout: 10s
       retries: 3

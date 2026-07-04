@@ -24,6 +24,7 @@ function App() {
           <Route path="/math-game/:gameId" element={<MathGame />} />
           <Route path="/cross-game/:gameId" element={<CrossSubjectGame />} />
           <Route path="/result/:sessionId" element={<GameResult />} />
+          <Route path="*" element={<div className="text-center py-20"><p className="text-5xl mb-4">404</p><p className="text-gray-500 mb-4">页面不存在</p><a href="/" className="text-blue-500 hover:underline">返回首页</a></div>} />
         </Routes>
       </main>
     </div>

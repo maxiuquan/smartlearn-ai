@@ -295,7 +295,7 @@ class OpenAICompatProvider(BaseChatProvider, BaseEmbeddingProvider):
 
         dim = 1536
         vec = [0.0] * dim
-        for i, ch in enumerate(text):
+        for ch in text:
             h = int(hashlib.md5(ch.encode()).hexdigest()[:8], 16)
             idx = h % dim
             vec[idx] += 1.0

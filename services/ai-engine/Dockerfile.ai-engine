@@ -36,10 +36,8 @@ COPY --from=dependencies /usr/local/bin /usr/local/bin
 
 # 复制应用代码
 COPY services/ai-engine/app ./app
-COPY services/ai-engine/models ./models 2>/dev/null || true
-COPY services/ai-engine/routers ./routers 2>/dev/null || true
-COPY services/ai-engine/services ./services 2>/dev/null || true
-COPY services/ai-engine/config.py ./config.py 2>/dev/null || true
+COPY services/ai-engine/config.py ./config.py
+COPY data ./data
 
 # 创建模型缓存目录
 RUN mkdir -p /app/models

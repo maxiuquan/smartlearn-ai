@@ -6,7 +6,7 @@ import os
 import secrets
 import hashlib
 from datetime import datetime, timedelta, timezone
-from typing import Optional, Tuple
+from typing import Optional
 
 from passlib.context import CryptContext
 from jose import JWTError, jwt
@@ -21,10 +21,13 @@ pwd_context = CryptContext(
 )
 
 # ── JWT 配置 ──
-JWT_SECRET = os.environ.get("JWT_SECRET", "")
-JWT_ALGORITHM = os.environ.get("JWT_ALGORITHM", "HS256")
-ACCESS_TOKEN_EXPIRE_MINUTES = int(os.environ.get("JWT_ACCESS_EXPIRE_MINUTES", "30"))
-REFRESH_TOKEN_EXPIRE_DAYS = int(os.environ.get("JWT_REFRESH_EXPIRE_DAYS", "7"))
+# 统一从 app.core.config.settings 读取，避免双重来源
+from app.core.config import settings as _settings
+
+JWT_SECRET = _settings.JWT_SECRET
+JWT_ALGORITHM = _settings.JWT_ALGORITHM
+ACCESS_TOKEN_EXPIRE_MINUTES = _settings.JWT_ACCESS_TOKEN_EXPIRE_MINUTES
+REFRESH_TOKEN_EXPIRE_DAYS = _settings.JWT_REFRESH_TOKEN_EXPIRE_DAYS
 
 
 def hash_password(password: str) -> str:
@@ -113,47 +116,45 @@ def create_refresh_token(
     return jwt.encode(to_encode, JWT_SECRET, algorithm=JWT_ALGORITHM)
 
 
-def decode_token(token: str) -> Tuple[Optional[dict], Optional[str]]:
+def decode_token(token: str) -> Optional[dict]:
     """
     解码并验证 JWT 令牌
 
     Returns:
-        (payload, error_message)
-        成功时 payload 为 dict 且 error_message 为 None
-        失败时 payload 为 None 且 error_message 包含错误描述
+        payload dict (成功) 或 None (失败)
     """
     if not JWT_SECRET:
-        return None, "JWT_SECRET 未配置"
+        return None
 
     try:
         payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
-        return payload, None
+        return payload
     except jwt.ExpiredSignatureError:
-        return None, "令牌已过期"
+        return None
     except jwt.JWTClaimsError:
-        return None, "令牌 claims 无效"
+        return None
     except JWTError:
-        return None, "令牌验证失败"
+        return None
 
 
-def decode_access_token(token: str) -> Tuple[Optional[dict], Optional[str]]:
+def decode_access_token(token: str) -> Optional[dict]:
     """解码并验证 Access Token，额外检查 token type"""
-    payload, error = decode_token(token)
-    if error:
-        return None, error
-    if payload and payload.get("type") != "access":
-        return None, "令牌类型错误 (需要 access token)"
-    return payload, None
+    payload = decode_token(token)
+    if payload is None:
+        return None
+    if payload.get("type") != "access":
+        return None
+    return payload
 
 
-def decode_refresh_token(token: str) -> Tuple[Optional[dict], Optional[str]]:
+def decode_refresh_token(token: str) -> Optional[dict]:
     """解码并验证 Refresh Token，额外检查 token type"""
-    payload, error = decode_token(token)
-    if error:
-        return None, error
-    if payload and payload.get("type") != "refresh":
-        return None, "令牌类型错误 (需要 refresh token)"
-    return payload, None
+    payload = decode_token(token)
+    if payload is None:
+        return None
+    if payload.get("type") != "refresh":
+        return None
+    return payload
 
 
 # ── API Key 管理 ──

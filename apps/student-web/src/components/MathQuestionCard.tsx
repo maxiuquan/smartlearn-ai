@@ -127,7 +127,7 @@ export default function MathQuestionCard({
             type="text"
             autoComplete="off"
             disabled={submitting}
-            placeholder={isSpelling ? '请输入答案...' : '请输入答案...'}
+            placeholder={isSpelling ? '请输入单词拼写...' : '请输入答案...'}
             className="flex-1 px-4 py-3 border-2 border-orange-200 rounded-lg 
                        focus:border-orange-400 focus:outline-none text-lg
                        disabled:opacity-50 disabled:cursor-not-allowed"

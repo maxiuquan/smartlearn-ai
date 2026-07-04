@@ -172,7 +172,7 @@ async def get_due_words(
     db: AsyncSession = Depends(get_db),
 ) -> list[WordProgressResponse]:
     """获取当前用户今日需要复习的词汇列表。"""
-    from sqlalchemy import Table, Column, Integer, String, Float, DateTime, MetaData, func, text
+    from sqlalchemy import Table, Column, Integer, String, Text, Float, DateTime, MetaData, func, text
 
     metadata = MetaData()
     uwp = Table(

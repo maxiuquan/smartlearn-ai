@@ -2,7 +2,7 @@
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import func, select
+from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.deps import get_current_user_id, get_db, get_optional_user_id
@@ -102,6 +102,77 @@ async def list_questions(
         total=total,
         page=page,
         page_size=page_size,
+    )
+
+
+@router.get(
+    "/recommend",
+    response_model=RecommendResponse,
+    summary="获取推荐题目",
+)
+async def get_recommend_questions(
+    subject: Optional[str] = Query(None),
+    count: int = Query(10, ge=1, le=50),
+    user_id: int = Depends(get_current_user_id),
+    db: AsyncSession = Depends(get_db),
+) -> RecommendResponse:
+    """根据用户学习进度推荐题目。
+
+    - 优先推荐掌握度低的知识点相关题目
+    - 避开最近已答对的题目
+    """
+    from sqlalchemy import Table, Column, Integer, String, Text, DateTime, MetaData, func
+    from sqlalchemy.dialects.postgresql import JSONB
+
+    metadata = MetaData()
+    q = Table(
+        "questions",
+        metadata,
+        Column("id", Integer, primary_key=True),
+        Column("subject", String(50)),
+        Column("knowledge_points", JSONB),
+        Column("type", String(50)),
+        Column("difficulty", Integer),
+        Column("title", String(500)),
+        Column("content", Text),
+        Column("options", JSONB),
+        Column("answer", Text),
+        Column("solution", Text),
+        Column("created_at", DateTime),
+    )
+
+    conditions = []
+    if subject:
+        conditions.append(q.c.subject == subject)
+
+    result = await db.execute(
+        select(q)
+        .where(*conditions)
+        .order_by(func.random())
+        .limit(count)
+    )
+    rows = result.fetchall()
+
+    questions = [
+        QuestionResponse(
+            id=row.id,
+            subject=row.subject,
+            knowledge_points=row.knowledge_points,
+            type=row.type,
+            difficulty=row.difficulty,
+            title=row.title,
+            content=row.content,
+            options=row.options,
+            answer=None,
+            solution=None,
+            created_at=row.created_at,
+        )
+        for row in rows
+    ]
+
+    return RecommendResponse(
+        questions=questions,
+        recommendation_reason="基于你的学习进度，为你推荐以下题目",
     )
 
 
@@ -266,75 +337,4 @@ async def submit_attempt(
         correct_answer=row.answer if not correct else None,
         solution=row.solution if not correct else None,
         xp_gained=10 if correct else 0,
-    )
-
-
-@router.get(
-    "/recommend",
-    response_model=RecommendResponse,
-    summary="获取推荐题目",
-)
-async def get_recommend_questions(
-    subject: Optional[str] = Query(None),
-    count: int = Query(10, ge=1, le=50),
-    user_id: int = Depends(get_current_user_id),
-    db: AsyncSession = Depends(get_db),
-) -> RecommendResponse:
-    """根据用户学习进度推荐题目。
-
-    - 优先推荐掌握度低的知识点相关题目
-    - 避开最近已答对的题目
-    """
-    from sqlalchemy import Table, Column, Integer, String, Text, DateTime, MetaData, func
-    from sqlalchemy.dialects.postgresql import JSONB
-
-    metadata = MetaData()
-    q = Table(
-        "questions",
-        metadata,
-        Column("id", Integer, primary_key=True),
-        Column("subject", String(50)),
-        Column("knowledge_points", JSONB),
-        Column("type", String(50)),
-        Column("difficulty", Integer),
-        Column("title", String(500)),
-        Column("content", Text),
-        Column("options", JSONB),
-        Column("answer", Text),
-        Column("solution", Text),
-        Column("created_at", DateTime),
-    )
-
-    conditions = []
-    if subject:
-        conditions.append(q.c.subject == subject)
-
-    result = await db.execute(
-        select(q)
-        .where(*conditions)
-        .order_by(func.random())
-        .limit(count)
-    )
-    rows = result.fetchall()
-
-    questions = [
-        QuestionResponse(
-            id=row.id,
-            subject=row.subject,
-            knowledge_points=row.knowledge_points,
-            type=row.type,
-            difficulty=row.difficulty,
-            title=row.title,
-            content=row.content,
-            options=row.options,
-            answer=None,
-            solution=None,
-            created_at=row.created_at,
-        )
-        for row in rows
-    ]
-
-    return RecommendResponse(
-        questions=questions,
-        recommendation_reason="基于你的学习进度，为你推荐以下题目",
     )

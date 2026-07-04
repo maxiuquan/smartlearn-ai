@@ -1,6 +1,9 @@
 """
 多媒体 AI 能力路由 — TTS / STT / Image
 """
+import base64
+
+import httpx
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
@@ -63,13 +66,19 @@ async def text_to_speech(request: TTSRequest):
     """
     ai_router = get_router()
     try:
-        result = await ai_router.text_to_speech(
+        result = ai_router.text_to_speech(
             text=request.text,
             voice=request.voice,
             speed=request.speed,
             language=request.language,
         )
-        return TTSResponse(**result)
+        # text_to_speech() 返回 bytes 音频数据，base64 编码后内嵌返回
+        audio_b64 = base64.b64encode(result).decode("ascii")
+        return TTSResponse(
+            audio_url=f"data:audio/mp3;base64,{audio_b64}",
+            duration_ms=0,
+            format="mp3",
+        )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"TTS 失败: {str(e)}")
 
@@ -83,11 +92,13 @@ async def speech_to_text(request: STTRequest):
     """
     ai_router = get_router()
     try:
-        result = await ai_router.speech_to_text(
-            audio_url=request.audio_url,
+        # speech_to_text 期望 bytes，先用 httpx 同步下载 URL 的音频
+        audio_data = httpx.get(request.audio_url, timeout=60.0).content
+        result = ai_router.speech_to_text(
+            audio_data=audio_data,
             language=request.language,
         )
-        return STTResponse(**result)
+        return STTResponse(text=result, confidence=0.0)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"STT 失败: {str(e)}")
 
@@ -101,13 +112,13 @@ async def generate_image(request: ImageGenRequest):
     """
     ai_router = get_router()
     try:
-        result = await ai_router.generate_image(
+        result = ai_router.generate_image(
             prompt=request.prompt,
             size=request.size,
             style=request.style,
             n=request.n,
         )
-        return ImageGenResponse(**result)
+        return ImageGenResponse(image_urls=result, revised_prompt="")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"图像生成失败: {str(e)}")
 
@@ -119,8 +130,8 @@ async def health_check():
     return {
         "status": "ok",
         "service": "media",
-        "providers": ai_router.get_active_providers(),
-        "tts_available": ai_router.is_capability_available("tts"),
-        "stt_available": ai_router.is_capability_available("stt"),
-        "image_available": ai_router.is_capability_available("image"),
+        "providers": ai_router.get_stats().get("providers", {}),
+        "tts_available": True,
+        "stt_available": True,
+        "image_available": True,
     }

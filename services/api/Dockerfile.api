@@ -39,7 +39,7 @@ COPY services/api/app ./app
 COPY services/api/startup_check.py ./startup_check.py
 
 # 复制 alembic 迁移文件（如存在）
-COPY services/api/alembic* ./ 2>/dev/null || true
+COPY services/api/alembic ./alembic
 
 # 创建非 root 用户并设置权限
 RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app

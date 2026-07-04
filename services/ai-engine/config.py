@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     
     # Server Config
     HOST: str = "0.0.0.0"
-    PORT: int = 8000
+    PORT: int = 8001
     
     # AI Engine Config
     # Forgetting Curve (Ebbinghaus)

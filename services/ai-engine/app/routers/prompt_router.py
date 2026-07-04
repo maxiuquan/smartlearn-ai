@@ -183,6 +183,17 @@ async def list_prompts():
     ]
 
 
+@router.get("/health")
+async def health_check():
+    """健康检查"""
+    return {
+        "status": "ok",
+        "service": "prompts",
+        "template_count": len(PROMPT_TEMPLATES),
+        "templates": list(PROMPT_TEMPLATES.keys()),
+    }
+
+
 @router.get("/{template_id}", response_model=PromptTemplate)
 async def get_prompt(template_id: str):
     """获取指定 Prompt 模板"""
@@ -230,15 +241,4 @@ async def create_or_update_prompt(template_id: str, request: PromptCreateRequest
         "status": "ok",
         "template_id": template_id,
         "message": f"模板 '{template_id}' 已创建/更新",
-    }
-
-
-@router.get("/health")
-async def health_check():
-    """健康检查"""
-    return {
-        "status": "ok",
-        "service": "prompts",
-        "template_count": len(PROMPT_TEMPLATES),
-        "templates": list(PROMPT_TEMPLATES.keys()),
     }

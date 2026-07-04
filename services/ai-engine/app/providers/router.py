@@ -26,7 +26,7 @@ ROUTE_CONFIG: dict[tuple[str, str], dict[str, str]] = {
     ("tts", "*"): {"primary": "siliconflow"},
     ("stt", "*"): {"primary": "siliconflow"},
     ("image", "*"): {"primary": "cogview", "fallback": "siliconflow"},
-    ("moderation", "*"): {"primary": "glm"},
+    ("moderation", "*"): {"primary": "moderation"},
 }
 
 
