@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     # Service Info
     APP_NAME: str = "SmartLearn AI Engine"
     APP_VERSION: str = "1.0.0"
-    DEBUG: bool = True
+    DEBUG: bool = False
     
     # Server Config
     HOST: str = "0.0.0.0"
@@ -43,7 +43,7 @@ class Settings(BaseSettings):
     WORD_GAME_BATCH_SIZE: int = 10  # 单词游戏批次大小
     
     # CORS
-    CORS_ORIGINS: List[str] = ["*"]
+    CORS_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:3001", "http://localhost:5173"]
     
     # ============================================================
     # LLM / OpenAI 配置 (兼容旧版)
@@ -104,7 +104,7 @@ class Settings(BaseSettings):
     # 离线模式 (无任何 API Key 时使用模拟响应)
     @property
     def offline_mode(self) -> bool:
-        return not self.OPENAI_API_KEY
+        return not self.has_any_provider
     
     @property
     def has_any_provider(self) -> bool:

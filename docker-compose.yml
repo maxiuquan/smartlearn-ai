@@ -68,85 +68,83 @@ services:
           cpus: '0.25'
           memory: 128M
 
-  # ── etcd (Milvus 依赖) ──
-  etcd:
-    image: quay.io/coreos/etcd:v3.5.5
-    container_name: smartlearn-etcd
-    restart: unless-stopped
-    environment:
-      ETCD_AUTO_COMPACTION_MODE: revision
-      ETCD_AUTO_COMPACTION_RETENTION: "1000"
-      ETCD_QUOTA_BACKEND_BYTES: "4294967296"
-      ETCD_SNAPSHOT_COUNT: "50000"
-    volumes:
-      - etcddata:/etcd
-    command: etcd -advertise-client-urls=http://127.0.0.1:2379 -listen-client-urls http://0.0.0.0:2379 --data-dir /etcd
-    networks:
-      - smartlearn-network
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 512M
-        reservations:
-          cpus: '0.25'
-          memory: 128M
+  # ── etcd (Milvus 依赖, 初期可选) ──
+  # 注释原因: 初期 RAG 使用 inmemory 向量存储，Milvus 非必需
+  # 需切换时: 取消注释 etcd + minio + milvus，设置 VECTOR_STORE_TYPE=milvus
+  # etcd:
+  #   image: quay.io/coreos/etcd:v3.5.5
+  #   container_name: smartlearn-etcd
+  #   restart: unless-stopped
+  #   environment:
+  #     ETCD_AUTO_COMPACTION_MODE: revision
+  #     ETCD_AUTO_COMPACTION_RETENTION: "1000"
+  #     ETCD_QUOTA_BACKEND_BYTES: "4294967296"
+  #     ETCD_SNAPSHOT_COUNT: "50000"
+  #   volumes:
+  #     - etcddata:/etcd
+  #   command: etcd -advertise-client-urls=http://127.0.0.1:2379 -listen-client-urls http://0.0.0.0:2379 --data-dir /etcd
+  #   networks:
+  #     - smartlearn-network
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: '1'
+  #         memory: 512M
+  #       reservations:
+  #         cpus: '0.25'
+  #         memory: 128M
 
-  # ── MinIO (Milvus 依赖) ──
-  minio:
-    image: minio/minio:RELEASE.2023-03-20T20-16-18Z
-    container_name: smartlearn-minio
-    restart: unless-stopped
-    environment:
-      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:?err: MINIO_ACCESS_KEY 必须设置}
-      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:?err: MINIO_SECRET_KEY 必须设置}
-    volumes:
-      - miniodata:/minio_data
-    command: minio server /minio_data
-    networks:
-      - smartlearn-network
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 512M
-        reservations:
-          cpus: '0.25'
-          memory: 128M
+  # ── MinIO (Milvus 依赖, 初期可选) ──
+  # minio:
+  #   image: minio/minio:RELEASE.2023-03-20T20-16-18Z
+  #   container_name: smartlearn-minio
+  #   restart: unless-stopped
+  #   environment:
+  #     MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:?err: MINIO_ACCESS_KEY 必须设置}
+  #     MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:?err: MINIO_SECRET_KEY 必须设置}
+  #   volumes:
+  #     - miniodata:/minio_data
+  #   command: minio server /minio_data
+  #   networks:
+  #     - smartlearn-network
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: '1'
+  #         memory: 512M
+  #       reservations:
+  #         cpus: '0.25'
+  #         memory: 128M
 
-  # ── Milvus 向量数据库 ──
-  milvus:
-    image: milvusdb/milvus:v2.3.3
-    container_name: smartlearn-milvus
-    restart: unless-stopped
-    # 内部服务不暴露宿主机端口
-    # ports:
-    #   - "19530:19530"
-    #   - "9091:9091"
-    environment:
-      ETCD_ENDPOINTS: etcd:2379
-      MINIO_ADDRESS: minio:9000
-    volumes:
-      - milvusdata:/var/lib/milvus
-    depends_on:
-      - etcd
-      - minio
-    networks:
-      - smartlearn-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9091/healthz"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
-    deploy:
-      resources:
-        limits:
-          cpus: '2'
-          memory: 2G
-        reservations:
-          cpus: '0.5'
-          memory: 512M
+  # ── Milvus 向量数据库 (初期可选) ──
+  # milvus:
+  #   image: milvusdb/milvus:v2.3.3
+  #   container_name: smartlearn-milvus
+  #   restart: unless-stopped
+  #   environment:
+  #     ETCD_ENDPOINTS: etcd:2379
+  #     MINIO_ADDRESS: minio:9000
+  #   volumes:
+  #     - milvusdata:/var/lib/milvus
+  #   depends_on:
+  #     - etcd
+  #     - minio
+  #   networks:
+  #     - smartlearn-network
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:9091/healthz"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 30s
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: '2'
+  #         memory: 2G
+  #       reservations:
+  #         cpus: '0.5'
+  #         memory: 512M
 
   # ── API 服务 ──
   api:
@@ -238,14 +236,14 @@ services:
       - MILVUS_PORT=19530
       # 环境
       - ENVIRONMENT=${ENVIRONMENT:-development}
+      - DEBUG=${DEBUG:-false}
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:3000,http://localhost:3001,http://localhost:5173}
     volumes:
       - ./data:/app/data:ro
       - ai-models:/app/models
       - ai-logs:/app/logs
     depends_on:
       redis:
-        condition: service_healthy
-      milvus:
         condition: service_healthy
     networks:
       - smartlearn-network
@@ -458,9 +456,9 @@ networks:
 volumes:
   pgdata:
   redisdata:
-  etcddata:
-  miniodata:
-  milvusdata:
+  # etcddata:    # Milvus 依赖, 初期注释
+  # miniodata:   # Milvus 依赖, 初期注释
+  # milvusdata:  # Milvus 依赖, 初期注释
   api-logs:
   ai-models:
   ai-logs:
