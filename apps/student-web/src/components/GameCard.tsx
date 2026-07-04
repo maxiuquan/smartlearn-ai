@@ -37,6 +37,17 @@ interface GameCardProps {
   game: Game;
 }
 
+function getGameRoute(game: Game): string {
+  switch (game.category) {
+    case 'math':
+      return `/math-game/${game.game_id}`;
+    case 'cross_subject':
+      return `/cross-game/${game.game_id}`;
+    default:
+      return `/game/${game.game_id}`;
+  }
+}
+
 export default function GameCard({ game }: GameCardProps) {
   const navigate = useNavigate();
   const gameType = getGameDisplayName(game.game_id);
@@ -44,7 +55,7 @@ export default function GameCard({ game }: GameCardProps) {
   return (
     <div
       className="game-card bg-white rounded-xl shadow-md overflow-hidden cursor-pointer border border-gray-100"
-      onClick={() => navigate(`/game/${game.game_id}`)}
+      onClick={() => navigate(getGameRoute(game))}
     >
       {/* 顶部色条 */}
       <div className={`h-2 ${

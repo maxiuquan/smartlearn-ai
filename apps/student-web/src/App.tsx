@@ -1,6 +1,8 @@
 import { Routes, Route } from 'react-router-dom';
 import GameHall from './pages/GameHall';
 import WordGame from './pages/WordGame';
+import MathGame from './pages/MathGame';
+import CrossSubjectGame from './pages/CrossSubjectGame';
 import GameResult from './pages/GameResult';
 
 function App() {
@@ -19,6 +21,8 @@ function App() {
         <Routes>
           <Route path="/" element={<GameHall />} />
           <Route path="/game/:gameId" element={<WordGame />} />
+          <Route path="/math-game/:gameId" element={<MathGame />} />
+          <Route path="/cross-game/:gameId" element={<CrossSubjectGame />} />
           <Route path="/result/:sessionId" element={<GameResult />} />
         </Routes>
       </main>

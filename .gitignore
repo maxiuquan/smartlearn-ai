@@ -15,6 +15,7 @@ build/
 !.env.example
 **/.env
 **/.env.*
+!**/.env.example
 
 # Prisma
 **/prisma/dev.db
