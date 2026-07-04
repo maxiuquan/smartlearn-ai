@@ -5,16 +5,53 @@ from typing import Any, Optional
 from pydantic import BaseModel, Field
 
 
+class GameSessionConfig(BaseModel):
+    """游戏会话配置（单局规则）"""
+
+    time_limit_sec: int = 0
+    lives: int = 0
+    combo_enabled: bool = False
+
+
+class GameRewards(BaseModel):
+    """游戏奖励配置"""
+
+    base_xp: int = 0
+    base_coin: int = 0
+    combo_multiplier: float = 1.0
+
+
+class GameLeaderboardConfig(BaseModel):
+    """游戏排行榜配置"""
+
+    enabled: bool = False
+    scopes: list[str] = Field(default_factory=list)
+
+
 class GameConfigResponse(BaseModel):
     """游戏配置响应"""
 
     game_id: str
     name: str
+    name_en: Optional[str] = None
     description: str
-    type: str
+    category: Optional[str] = None
+    type: Optional[str] = None
     icon: Optional[str] = None
     min_level: int = 1
     subject: str = "english"
+    subjects: Optional[list[str]] = None
+    learning_goal: Optional[str] = None
+    core_mechanisms: Optional[list[str]] = None
+    data_sources: Optional[list[str]] = None
+    difficulty_levels: Optional[list[str]] = None
+    session: Optional[GameSessionConfig] = None
+    rewards: Optional[GameRewards] = None
+    props: Optional[list[str]] = None
+    leaderboard: Optional[GameLeaderboardConfig] = None
+    stage: Optional[int] = None
+    tech_notes: Optional[str] = None
+    business_value: Optional[str] = None
     config: Optional[dict[str, Any]] = None
 
 

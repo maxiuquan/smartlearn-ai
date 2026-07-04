@@ -1,5 +1,7 @@
 """游戏相关 API 路由"""
+import json
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -10,7 +12,10 @@ from app.core.deps import get_current_user_id, get_db
 from app.schemas.games import (
     GameConfigResponse,
     GameDetailResponse,
+    GameLeaderboardConfig,
     GameListResponse,
+    GameRewards,
+    GameSessionConfig,
     GameSessionRequest,
     GameSessionResponse,
     LeaderboardEntry,
@@ -18,6 +23,68 @@ from app.schemas.games import (
 )
 
 router = APIRouter()
+
+# JSON 配置文件路径：项目根目录 / data / games / games-config.json
+_GAMES_CONFIG_PATH = Path(__file__).resolve().parents[5] / "data" / "games" / "games-config.json"
+
+
+def _load_games_config() -> list[dict]:
+    """从 JSON 文件加载全部游戏配置。
+
+    Returns:
+        游戏配置字典列表，若文件不存在或解析失败则返回空列表。
+    """
+    try:
+        with open(_GAMES_CONFIG_PATH, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return data.get("games", [])
+    except (FileNotFoundError, json.JSONDecodeError):
+        return []
+
+
+def _build_game_config(game: dict) -> GameConfigResponse:
+    """将 JSON 字典转换为 GameConfigResponse 模型。
+
+    Args:
+        game: 从 JSON 配置中解析出的单个游戏字典。
+
+    Returns:
+        GameConfigResponse 实例。
+    """
+    session_raw = game.get("session") or {}
+    rewards_raw = game.get("rewards") or {}
+    leaderboard_raw = game.get("leaderboard") or {}
+
+    return GameConfigResponse(
+        game_id=game["game_id"],
+        name=game["name"],
+        name_en=game.get("name_en"),
+        description=game.get("description", ""),
+        category=game.get("category"),
+        subjects=game.get("subjects"),
+        learning_goal=game.get("learning_goal"),
+        core_mechanisms=game.get("core_mechanisms"),
+        data_sources=game.get("data_sources"),
+        difficulty_levels=game.get("difficulty_levels"),
+        session=GameSessionConfig(
+            time_limit_sec=session_raw.get("time_limit_sec", 0),
+            lives=session_raw.get("lives", 0),
+            combo_enabled=session_raw.get("combo_enabled", False),
+        ),
+        rewards=GameRewards(
+            base_xp=rewards_raw.get("base_xp", 0),
+            base_coin=rewards_raw.get("base_coin", 0),
+            combo_multiplier=rewards_raw.get("combo_multiplier", 1.0),
+        ),
+        props=game.get("props"),
+        leaderboard=GameLeaderboardConfig(
+            enabled=leaderboard_raw.get("enabled", False),
+            scopes=leaderboard_raw.get("scopes", []),
+        ),
+        stage=game.get("stage"),
+        tech_notes=game.get("tech_notes"),
+        business_value=game.get("business_value"),
+    )
 
 
 @router.get(
@@ -30,66 +97,11 @@ async def list_games(
 ) -> GameListResponse:
     """获取所有可用游戏的配置列表。
 
-    - 包含游戏名称、描述、类型、最低等级等信息
+    - 从 games-config.json 加载全部游戏配置
+    - 包含游戏名称、描述、分类、学习目标、核心机制等信息
     """
-    # TODO: 从 games-config.json 或数据库加载游戏配置
-    # 当前返回硬编码的游戏列表作为占位
-    games = [
-        GameConfigResponse(
-            game_id="word_match",
-            name="单词配对",
-            description="将单词与正确的中文释义配对，考验你的词汇记忆",
-            type="match",
-            icon="🧩",
-            min_level=1,
-            subject="english",
-        ),
-        GameConfigResponse(
-            game_id="speed_challenge",
-            name="速度挑战",
-            description="在限定时间内快速选择正确的单词释义",
-            type="speed",
-            icon="⚡",
-            min_level=1,
-            subject="english",
-        ),
-        GameConfigResponse(
-            game_id="word_puzzle",
-            name="单词拼图",
-            description="根据释义拼写正确的单词",
-            type="spell",
-            icon="🔤",
-            min_level=2,
-            subject="english",
-        ),
-        GameConfigResponse(
-            game_id="word_rain",
-            name="单词雨",
-            description="单词从屏幕上方落下，快速选出正确释义",
-            type="reaction",
-            icon="🌧️",
-            min_level=1,
-            subject="english",
-        ),
-        GameConfigResponse(
-            game_id="lexicon_defense",
-            name="词汇防御",
-            description="塔防式单词学习，用正确的单词击败敌人",
-            type="tower_defense",
-            icon="🏰",
-            min_level=3,
-            subject="english",
-        ),
-        GameConfigResponse(
-            game_id="entropy_merge",
-            name="熵值合并",
-            description="合并相同单词升级，挑战更高分数",
-            type="merge",
-            icon="🔮",
-            min_level=2,
-            subject="english",
-        ),
-    ]
+    games_raw = _load_games_config()
+    games = [_build_game_config(g) for g in games_raw]
     return GameListResponse(games=games)
 
 
@@ -103,73 +115,44 @@ async def get_game_detail(
     user_id: int = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db),
 ) -> GameDetailResponse:
-    """获取指定游戏的详细配置和用户最佳成绩。"""
-    # TODO: 从配置或数据库加载游戏详情
-    game_map = {
-        "word_match": GameDetailResponse(
-            game_id="word_match",
-            name="单词配对",
-            description="将单词与正确的中文释义配对，考验你的词汇记忆",
-            type="match",
-            icon="🧩",
-            min_level=1,
-            subject="english",
-        ),
-        "speed_challenge": GameDetailResponse(
-            game_id="speed_challenge",
-            name="速度挑战",
-            description="在限定时间内快速选择正确的单词释义",
-            type="speed",
-            icon="⚡",
-            min_level=1,
-            subject="english",
-        ),
-        "word_puzzle": GameDetailResponse(
-            game_id="word_puzzle",
-            name="单词拼图",
-            description="根据释义拼写正确的单词",
-            type="spell",
-            icon="🔤",
-            min_level=2,
-            subject="english",
-        ),
-        "word_rain": GameDetailResponse(
-            game_id="word_rain",
-            name="单词雨",
-            description="单词从屏幕上方落下，快速选出正确释义",
-            type="reaction",
-            icon="🌧️",
-            min_level=1,
-            subject="english",
-        ),
-        "lexicon_defense": GameDetailResponse(
-            game_id="lexicon_defense",
-            name="词汇防御",
-            description="塔防式单词学习，用正确的单词击败敌人",
-            type="tower_defense",
-            icon="🏰",
-            min_level=3,
-            subject="english",
-        ),
-        "entropy_merge": GameDetailResponse(
-            game_id="entropy_merge",
-            name="熵值合并",
-            description="合并相同单词升级，挑战更高分数",
-            type="merge",
-            icon="🔮",
-            min_level=2,
-            subject="english",
-        ),
-    }
+    """获取指定游戏的详细配置和用户最佳成绩。
 
-    game = game_map.get(game_id)
-    if not game:
+    - 从 games-config.json 加载游戏详情
+    """
+    games_raw = _load_games_config()
+    game_data = next((g for g in games_raw if g["game_id"] == game_id), None)
+
+    if not game_data:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"游戏 '{game_id}' 不存在",
         )
 
-    return game
+    base = _build_game_config(game_data)
+    return GameDetailResponse(
+        game_id=base.game_id,
+        name=base.name,
+        name_en=base.name_en,
+        description=base.description,
+        category=base.category,
+        type=base.type,
+        icon=base.icon,
+        min_level=base.min_level,
+        subject=base.subject,
+        subjects=base.subjects,
+        learning_goal=base.learning_goal,
+        core_mechanisms=base.core_mechanisms,
+        data_sources=base.data_sources,
+        difficulty_levels=base.difficulty_levels,
+        session=base.session,
+        rewards=base.rewards,
+        props=base.props,
+        leaderboard=base.leaderboard,
+        stage=base.stage,
+        tech_notes=base.tech_notes,
+        business_value=base.business_value,
+        config=base.config,
+    )
 
 
 @router.post(
