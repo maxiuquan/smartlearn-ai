@@ -1,10 +1,13 @@
 import { api, pageApi, PageParams } from './request';
-import { User, UserStats, PaginatedResponse } from '@/types';
+import { User, UserStats, UserRole, PaginatedResponse } from '@/types';
 
 // 获取用户列表
 export async function getUserList(params: PageParams): Promise<PaginatedResponse<User>> {
   return pageApi.get<User>('/users', params);
 }
+
+// getUsers 作为 getUserList 的别名
+export const getUsers = getUserList;
 
 // 获取用户详情
 export async function getUser(id: string): Promise<User> {
@@ -51,7 +54,25 @@ export async function importUsers(file: File): Promise<{ success: number; failed
 }
 
 // 导出用户
-export async function exportUsers(params: PageParams): Promise<Blob> {
-  const response = await fetch(`/api/users/export?${new URLSearchParams(params as any)}`);
+export async function exportUsers(params?: PageParams): Promise<Blob> {
+  const response = await fetch(`/api/v1/users/export${params ? '?' + new URLSearchParams(params as any) : ''}`);
   return response.blob();
+}
+
+// 重置用户密码
+export async function resetPassword(id: string, new_password: string): Promise<void> {
+  return api.post<void>(`/users/${id}/reset-password`, { new_password });
+}
+
+// 更新用户角色
+export async function updateUserRole(id: string, role: UserRole): Promise<void> {
+  return api.put<void>(`/users/${id}/role`, { role });
+}
+
+// 更新用户 VIP 信息
+export async function updateUserVip(
+  id: string,
+  data: { vip_level: number; vip_expire_at?: string; ai_quota_daily_override?: number }
+): Promise<void> {
+  return api.put<void>(`/users/${id}/vip`, data);
 }

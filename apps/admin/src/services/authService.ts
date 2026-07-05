@@ -11,14 +11,18 @@ export async function getCurrentUser(): Promise<User> {
   return api.get<User>('/auth/me');
 }
 
-// 退出登录
+// 退出登录（即使失败也清本地）
 export async function logout(): Promise<void> {
-  return api.post<void>('/auth/logout');
+  try {
+    await api.post<void>('/auth/logout');
+  } catch (error) {
+    // 即使请求失败也不抛出，调用方仍可清理本地状态
+  }
 }
 
 // 修改密码
-export async function changePassword(oldPassword: string, newPassword: string): Promise<void> {
-  return api.post<void>('/auth/change-password', { oldPassword, newPassword });
+export async function changePassword(params: { old_password: string; new_password: string }): Promise<void> {
+  return api.post<void>('/auth/change-password', params);
 }
 
 // 刷新Token

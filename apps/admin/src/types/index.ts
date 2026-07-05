@@ -12,11 +12,15 @@ export interface User {
   updatedAt: string;
   lastLoginAt?: string;
   profile?: UserProfile;
+  vip_level: number;
+  vip_expire_at?: string;
+  ai_quota_daily_override?: number;
+  last_login_at?: string;
 }
 
-export type UserRole = 'student' | 'teacher' | 'admin' | 'super_admin';
+export type UserRole = 'user' | 'teacher' | 'admin' | 'super_admin';
 
-export type UserStatus = 'active' | 'inactive' | 'banned';
+export type UserStatus = 'active' | 'banned';
 
 export interface UserProfile {
   grade?: string;
@@ -194,6 +198,21 @@ export interface SmsConfig {
   provider: string;
   accessKey: string;
   signName: string;
+}
+
+// 功能状态类型
+export interface FeatureStatus {
+  enabled: boolean;
+  label?: string;
+  description?: string;
+  config_keys?: string[];
+}
+
+// 测试结果类型
+export interface TestResult {
+  success: boolean;
+  message: string;
+  detail?: string;
 }
 
 // API响应类型

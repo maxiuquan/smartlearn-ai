@@ -12,14 +12,31 @@ import {
   Progress,
   message,
   Spin,
+  Modal,
+  Form,
+  Input,
+  Select,
+  InputNumber,
+  DatePicker,
 } from 'antd';
 import {
   ArrowLeftOutlined,
   EditOutlined,
   BanOutlined,
   CheckCircleOutlined,
+  CrownOutlined,
+  KeyOutlined,
+  UserOutlined,
 } from '@ant-design/icons';
-import { getUser, getUserStats, banUser, enableUser } from '@/services/userService';
+import {
+  getUser,
+  getUserStats,
+  banUser,
+  enableUser,
+  updateUserRole,
+  updateUserVip,
+  resetPassword,
+} from '@/services/userService';
 import { User, UserStats, UserRole, UserStatus } from '@/types';
 import { StatCard } from '@/components';
 import dayjs from 'dayjs';
@@ -30,6 +47,13 @@ const UserDetail: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [stats, setStats] = useState<UserStats | null>(null);
+  const [roleModalVisible, setRoleModalVisible] = useState(false);
+  const [vipModalVisible, setVipModalVisible] = useState(false);
+  const [resetPwdModalVisible, setResetPwdModalVisible] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [roleForm] = Form.useForm();
+  const [vipForm] = Form.useForm();
+  const [resetPwdForm] = Form.useForm();
 
   useEffect(() => {
     if (id) {
@@ -56,25 +80,23 @@ const UserDetail: React.FC = () => {
   // 状态颜色映射
   const statusColorMap: Record<UserStatus, string> = {
     active: 'green',
-    inactive: 'default',
     banned: 'red',
   };
 
   const statusTextMap: Record<UserStatus, string> = {
     active: '正常',
-    inactive: '未激活',
     banned: '已禁用',
   };
 
   const roleColorMap: Record<UserRole, string> = {
-    student: 'blue',
+    user: 'blue',
     teacher: 'orange',
     admin: 'purple',
     super_admin: 'red',
   };
 
   const roleTextMap: Record<UserRole, string> = {
-    student: '学生',
+    user: '用户',
     teacher: '教师',
     admin: '管理员',
     super_admin: '超级管理员',
@@ -97,6 +119,75 @@ const UserDetail: React.FC = () => {
       fetchUser();
     } catch (error) {
       // 错误已处理
+    }
+  };
+
+  // 打开修改角色弹窗
+  const openRoleModal = () => {
+    roleForm.setFieldsValue({ role: user?.role });
+    setRoleModalVisible(true);
+  };
+
+  // 提交修改角色
+  const handleRoleSubmit = async (values: { role: UserRole }) => {
+    setSubmitting(true);
+    try {
+      await updateUserRole(id!, values.role);
+      message.success('角色修改成功');
+      setRoleModalVisible(false);
+      fetchUser();
+    } catch (error) {
+      // 错误已处理
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // 打开修改 VIP 弹窗
+  const openVipModal = () => {
+    vipForm.setFieldsValue({
+      vip_level: user?.vip_level ?? 0,
+      vip_expire_at: user?.vip_expire_at ? dayjs(user.vip_expire_at) : undefined,
+      ai_quota_daily_override: user?.ai_quota_daily_override,
+    });
+    setVipModalVisible(true);
+  };
+
+  // 提交修改 VIP
+  const handleVipSubmit = async (values: {
+    vip_level: number;
+    vip_expire_at?: dayjs.Dayjs;
+    ai_quota_daily_override?: number;
+  }) => {
+    setSubmitting(true);
+    try {
+      await updateUserVip(id!, {
+        vip_level: values.vip_level,
+        vip_expire_at: values.vip_expire_at ? values.vip_expire_at.toISOString() : undefined,
+        ai_quota_daily_override: values.ai_quota_daily_override,
+      });
+      message.success('VIP 信息修改成功');
+      setVipModalVisible(false);
+      fetchUser();
+    } catch (error) {
+      // 错误已处理
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // 提交重置密码
+  const handleResetPwdSubmit = async (values: { new_password: string }) => {
+    setSubmitting(true);
+    try {
+      await resetPassword(id!, values.new_password);
+      message.success('密码重置成功');
+      setResetPwdModalVisible(false);
+      resetPwdForm.resetFields();
+    } catch (error) {
+      // 错误已处理
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -138,7 +229,7 @@ const UserDetail: React.FC = () => {
               </Tag>
             </Space>
           </div>
-          <Space>
+          <Space wrap>
             {user.status === 'banned' ? (
               <Button icon={<CheckCircleOutlined />} onClick={handleEnable}>
                 启用用户
@@ -148,6 +239,15 @@ const UserDetail: React.FC = () => {
                 禁用用户
               </Button>
             )}
+            <Button icon={<UserOutlined />} onClick={openRoleModal}>
+              修改角色
+            </Button>
+            <Button icon={<CrownOutlined />} onClick={openVipModal}>
+              修改 VIP
+            </Button>
+            <Button icon={<KeyOutlined />} onClick={() => setResetPwdModalVisible(true)}>
+              重置密码
+            </Button>
           </Space>
         </div>
       </Card>
@@ -199,6 +299,17 @@ const UserDetail: React.FC = () => {
                   <Descriptions.Item label="学校">
                     {user.profile?.school || '-'}
                   </Descriptions.Item>
+                  <Descriptions.Item label="VIP 等级">
+                    {user.vip_level ?? 0}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="VIP 到期">
+                    {user.vip_expire_at
+                      ? dayjs(user.vip_expire_at).format('YYYY-MM-DD HH:mm:ss')
+                      : '-'}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="AI 配额覆盖">
+                    {user.ai_quota_daily_override ?? '-'}
+                  </Descriptions.Item>
                 </Descriptions>
               ),
             },
@@ -241,6 +352,98 @@ const UserDetail: React.FC = () => {
           ]}
         />
       </Card>
+
+      {/* 修改角色弹窗 */}
+      <Modal
+        title="修改角色"
+        open={roleModalVisible}
+        onCancel={() => setRoleModalVisible(false)}
+        onOk={() => roleForm.submit()}
+        confirmLoading={submitting}
+      >
+        <Form form={roleForm} onFinish={handleRoleSubmit} layout="vertical">
+          <Form.Item
+            name="role"
+            label="角色"
+            rules={[{ required: true, message: '请选择角色' }]}
+          >
+            <Select placeholder="请选择角色">
+              <Select.Option value="user">用户</Select.Option>
+              <Select.Option value="teacher">教师</Select.Option>
+              <Select.Option value="admin">管理员</Select.Option>
+              <Select.Option value="super_admin">超级管理员</Select.Option>
+            </Select>
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      {/* 修改 VIP 弹窗 */}
+      <Modal
+        title="修改 VIP"
+        open={vipModalVisible}
+        onCancel={() => setVipModalVisible(false)}
+        onOk={() => vipForm.submit()}
+        confirmLoading={submitting}
+      >
+        <Form form={vipForm} onFinish={handleVipSubmit} layout="vertical">
+          <Form.Item
+            name="vip_level"
+            label="VIP 等级"
+            rules={[{ required: true, message: '请输入 VIP 等级' }]}
+          >
+            <InputNumber min={0} max={3} style={{ width: '100%' }} placeholder="0-3" />
+          </Form.Item>
+          <Form.Item name="vip_expire_at" label="VIP 到期时间">
+            <DatePicker showTime style={{ width: '100%' }} placeholder="选择到期时间" />
+          </Form.Item>
+          <Form.Item name="ai_quota_daily_override" label="每日 AI 配额覆盖（可空）">
+            <InputNumber min={0} style={{ width: '100%' }} placeholder="留空则使用默认配额" />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      {/* 重置密码弹窗 */}
+      <Modal
+        title="重置密码"
+        open={resetPwdModalVisible}
+        onCancel={() => {
+          setResetPwdModalVisible(false);
+          resetPwdForm.resetFields();
+        }}
+        onOk={() => resetPwdForm.submit()}
+        confirmLoading={submitting}
+      >
+        <Form form={resetPwdForm} onFinish={handleResetPwdSubmit} layout="vertical">
+          <Form.Item
+            name="new_password"
+            label="新密码"
+            rules={[
+              { required: true, message: '请输入新密码' },
+              { min: 6, message: '密码至少 6 位' },
+            ]}
+          >
+            <Input.Password placeholder="请输入新密码（至少 6 位）" />
+          </Form.Item>
+          <Form.Item
+            name="confirm_password"
+            label="确认新密码"
+            dependencies={['new_password']}
+            rules={[
+              { required: true, message: '请确认新密码' },
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  if (!value || getFieldValue('new_password') === value) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(new Error('两次输入的密码不一致'));
+                },
+              }),
+            ]}
+          >
+            <Input.Password placeholder="请再次输入新密码" />
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 };

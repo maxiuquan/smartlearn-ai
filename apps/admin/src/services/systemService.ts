@@ -1,5 +1,5 @@
 import { api } from './request';
-import { SystemConfig } from '@/types';
+import { SystemConfig, FeatureStatus, TestResult } from '@/types';
 
 // 获取系统配置
 export async function getSystemConfig(): Promise<SystemConfig> {
@@ -12,22 +12,23 @@ export async function updateSystemConfig(data: Partial<SystemConfig>): Promise<S
 }
 
 // 测试邮件配置
-export async function testEmailConfig(email: string): Promise<{ success: boolean; message: string }> {
-  return api.post('/system/test-email', { email });
+export async function testEmail(): Promise<TestResult> {
+  return api.post<TestResult>('/system/test-email');
 }
 
 // 测试短信配置
-export async function testSmsConfig(phone: string): Promise<{ success: boolean; message: string }> {
-  return api.post('/system/test-sms', { phone });
+export async function testSms(): Promise<TestResult> {
+  return api.post<TestResult>('/system/test-sms');
 }
 
 // 获取系统日志
 export async function getSystemLogs(params: {
   page?: number;
-  pageSize?: number;
-  type?: string;
-  startDate?: string;
-  endDate?: string;
+  page_size?: number;
+  level?: string;
+  action?: string;
+  start_date?: string;
+  end_date?: string;
 }): Promise<{
   list: {
     id: string;
@@ -58,12 +59,12 @@ export async function getSystemInfo(): Promise<{
 }
 
 // 备份数据库
-export async function backupDatabase(): Promise<{ taskId: string; message: string }> {
+export async function backup(): Promise<{ taskId: string; message: string }> {
   return api.post('/system/backup');
 }
 
 // 获取备份列表
-export async function getBackupList(): Promise<{
+export async function getBackups(): Promise<{
   id: string;
   filename: string;
   size: number;
@@ -73,6 +74,11 @@ export async function getBackupList(): Promise<{
 }
 
 // 恢复数据库
-export async function restoreDatabase(backupId: string): Promise<{ taskId: string; message: string }> {
+export async function restore(backupId: string): Promise<{ taskId: string; message: string }> {
   return api.post(`/system/restore/${backupId}`);
+}
+
+// 获取功能状态
+export async function getFeatureStatus(): Promise<Record<string, FeatureStatus>> {
+  return api.get<Record<string, FeatureStatus>>('/system/features');
 }

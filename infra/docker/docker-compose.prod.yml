@@ -26,6 +26,12 @@ services:
       options:
         max-size: "50m"
         max-file: "3"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-smartlearn_user}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   # ── Redis 缓存 ──
   redis:
@@ -44,6 +50,12 @@ services:
       options:
         max-size: "50m"
         max-file: "3"
+    healthcheck:
+      test: ["CMD", "redis-cli", "--no-auth-warning", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   # ── etcd ──
   etcd:
@@ -101,6 +113,12 @@ services:
       options:
         max-size: "100m"
         max-file: "5"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
   # ── AI 引擎服务 ──
   ai-engine:
@@ -121,6 +139,12 @@ services:
       options:
         max-size: "100m"
         max-file: "5"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   # ── 移动端 Web ──
   mobile-web:
@@ -139,6 +163,12 @@ services:
       options:
         max-size: "20m"
         max-file: "3"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O-", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
 
   # ── 管理后台 ──
   admin:
@@ -157,6 +187,12 @@ services:
       options:
         max-size: "20m"
         max-file: "3"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O-", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
 
   # ── Web 前端 (Next.js) ──
   web:
@@ -175,6 +211,12 @@ services:
       options:
         max-size: "50m"
         max-file: "3"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O-", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
 
   # ── Celery Worker ──
   celery-worker:
@@ -206,6 +248,16 @@ services:
   # ── Nginx 反向代理 ──
   nginx:
     restart: always
+    ports:
+      - "${NGINX_HTTP_PORT:-80}:80"
+      - "${NGINX_HTTPS_PORT:-443}:443"
+    volumes:
+      - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./infra/nginx/conf.d:/etc/nginx/conf.d:ro
+      - nginx-logs:/var/log/nginx
+      - ./infra/nginx/ssl:/etc/nginx/ssl:ro
+      - ./infra/nginx/certbot/www:/var/www/certbot:ro
+      - certbot-etc:/etc/letsencrypt:ro
     deploy:
       resources:
         limits:
@@ -219,3 +271,89 @@ services:
       options:
         max-size: "100m"
         max-file: "5"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O-", "http://localhost/nginx-health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  # ── Certbot (Let's Encrypt 证书申请与续期) ──
+  # 首次申请证书后即可退出，无需常驻
+  # 续期: docker compose -f docker-compose.yml -f infra/docker/docker-compose.prod.yml run --rm certbot renew
+  certbot:
+    image: certbot/certbot:latest
+    container_name: smartlearn-certbot
+    profiles: ["certbot"]
+    volumes:
+      - certbot-etc:/etc/letsencrypt
+      - certbot-var:/var/lib/letsencrypt
+      - ./infra/nginx/certbot/www:/var/www/certbot
+    entrypoint: >
+      sh -c "
+      if [ -d /etc/letsencrypt/live/$$DOMAIN ]; then
+        echo '证书已存在，尝试续期...';
+        certbot renew --non-interactive --no-random-sleep-on-renew;
+      else
+        echo '首次申请证书: '$$DOMAIN;
+        certbot certonly --webroot -w /var/www/certbot
+          --email $$EMAIL
+          --agree-tos --no-eff-email
+          --non-interactive
+          -d $$DOMAIN -d www.$$DOMAIN;
+      fi
+      "
+    environment:
+      - DOMAIN=${DOMAIN:-your-domain.com}
+      - EMAIL=${CERTBOT_EMAIL:-admin@your-domain.com}
+
+  # ── 数据库自动备份服务 ──
+  # 默认每天凌晨 2:00 执行 pg_dump，保留最近 7 天
+  # 手动触发: docker compose run --rm db-backup
+  db-backup:
+    image: postgres:16-alpine
+    container_name: smartlearn-db-backup
+    profiles: ["backup"]
+    restart: "no"
+    environment:
+      POSTGRES_HOST: ${POSTGRES_SERVER:-db}
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+      POSTGRES_USER: ${POSTGRES_USER:-smartlearn_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?err: POSTGRES_PASSWORD 必须设置}
+      POSTGRES_DB: ${POSTGRES_DB:-smartlearn}
+      # 备份计划 (cron 表达式: 分 时 日 月 周)，默认每天 02:00
+      BACKUP_CRON: ${BACKUP_CRON:-0 2 * * *}
+      # 备份保留天数
+      BACKUP_RETAIN_DAYS: ${BACKUP_RETAIN_DAYS:-7}
+    volumes:
+      - ./backups:/backups
+      - ./scripts/backup.sh:/backup.sh:ro
+    networks:
+      - smartlearn-network
+    entrypoint: >
+      sh -c "
+      echo '启动数据库备份服务，计划: '\$$BACKUP_CRON;
+      echo \"$${BACKUP_CRON} /backup.sh >> /backups/backup.log 2>&1\" > /etc/crontabs/root;
+      crond -f -l 2;
+      "
+
+networks:
+  smartlearn-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+
+volumes:
+  pgdata:
+  redisdata:
+  # etcddata:    # Milvus 依赖, 初期注释
+  # miniodata:   # Milvus 依赖, 初期注释
+  # milvusdata:  # Milvus 依赖, 初期注释
+  api-logs:
+  ai-models:
+  ai-logs:
+  nginx-logs:
+  backups:
+  certbot-etc:
+  certbot-var:

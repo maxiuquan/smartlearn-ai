@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { message } from 'antd';
 import { useAuthStore } from '@/stores/authStore';
+import { getCurrentUser } from '@/services/authService';
 import BasicLayout from '@/layouts/BasicLayout';
 import LoginLayout from '@/layouts/LoginLayout';
 
@@ -38,12 +40,49 @@ const Loading: React.FC = () => (
 
 // 受保护的路由
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isAuthenticated } = useAuthStore();
-  
+  const { isAuthenticated, token, user, isAdmin, setCurrentUser, logout } = useAuthStore();
+  const [loading, setLoading] = useState<boolean>(!!token && !user);
+
+  useEffect(() => {
+    // 已认证但有 token 无 user 时，加载当前用户
+    if (isAuthenticated && token && !user) {
+      setLoading(true);
+      getCurrentUser()
+        .then((u) => {
+          setCurrentUser(u);
+        })
+        .catch(() => {
+          message.error('获取用户信息失败，请重新登录');
+          logout();
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    } else {
+      setLoading(false);
+    }
+  }, [isAuthenticated, token, user, setCurrentUser, logout]);
+
+  useEffect(() => {
+    // 加载完成后非管理员，提示并登出
+    if (!loading && isAuthenticated && user && !isAdmin) {
+      message.error('需要管理员权限');
+      logout();
+    }
+  }, [loading, isAuthenticated, user, isAdmin, logout]);
+
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
-  
+
+  if (loading) {
+    return <Loading />;
+  }
+
+  if (!isAdmin) {
+    return <Navigate to="/login" replace />;
+  }
+
   return <>{children}</>;
 };
 

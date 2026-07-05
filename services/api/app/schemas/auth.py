@@ -11,13 +11,20 @@ class RegisterRequest(BaseModel):
     phone: Optional[str] = Field(None, max_length=20, pattern=r"^1[3-9]\d{9}$")
     email: Optional[EmailStr] = None
     password: str = Field(..., min_length=6, max_length=128)
+    nickname: Optional[str] = Field(None, max_length=100)
 
     model_config = {"extra": "forbid"}
 
 
 class LoginRequest(BaseModel):
-    """用户登录请求"""
+    """用户登录请求.
 
+    前端可传 username（自动判断为 phone 或 email）或直接传 phone/email。
+    """
+
+    username: Optional[str] = Field(
+        None, description="手机号或邮箱（兼容前端 username 字段）"
+    )
     phone: Optional[str] = Field(None, max_length=20)
     email: Optional[EmailStr] = None
     password: str = Field(..., min_length=1)
@@ -46,6 +53,13 @@ class WechatLoginRequest(BaseModel):
     code: str = Field(..., description="微信授权 code")
 
 
+class ChangePasswordRequest(BaseModel):
+    """修改密码请求"""
+
+    old_password: str = Field(..., min_length=1)
+    new_password: str = Field(..., min_length=6, max_length=128)
+
+
 class UserProfileResponse(BaseModel):
     """用户信息响应"""
 
@@ -53,6 +67,13 @@ class UserProfileResponse(BaseModel):
     phone: Optional[str] = None
     email: Optional[str] = None
     role: str
+    status: str = "active"
+    nickname: Optional[str] = None
+    avatar: Optional[str] = None
+    vip_level: int = 0
+    vip_expire_at: Optional[datetime] = None
+    ai_quota_daily_override: Optional[int] = None
+    last_login_at: Optional[datetime] = None
     created_at: datetime
     updated_at: datetime
 

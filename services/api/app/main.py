@@ -35,7 +35,7 @@ async def lifespan(app: FastAPI):
 
 
 def _startup_security_check() -> None:
-    """启动时安全检查"""
+    """启动时安全检查（可选模块未配置只 warning，不阻塞启动）"""
     if settings.JWT_SECRET == "change-me-in-production":
         logger.warning(
             "⚠️  JWT_SECRET 使用默认值，生产环境请设置环境变量 JWT_SECRET"
@@ -48,6 +48,23 @@ def _startup_security_check() -> None:
         logger.warning(
             "⚠️  REDIS_PASSWORD 使用默认值，生产环境请设置环境变量 REDIS_PASSWORD"
         )
+
+    # 可选第三方服务状态提示（不阻塞启动）
+    optional_status = [
+        ("对象存储 OSS", settings.is_oss_enabled),
+        ("微信支付", settings.is_wechat_pay_enabled),
+        ("支付宝", settings.is_alipay_enabled),
+        ("短信服务", settings.is_sms_enabled),
+        ("邮件服务", settings.is_email_enabled),
+    ]
+    disabled = [name for name, enabled in optional_status if not enabled]
+    if disabled:
+        logger.info(
+            "ℹ️  以下可选功能未配置（应用正常启动，对应功能将不可用）：%s",
+            "、".join(disabled),
+        )
+    else:
+        logger.info("✅ 所有可选第三方服务均已配置")
 
 
 app = FastAPI(
