@@ -6,9 +6,23 @@
 - AI 供应商支持 4 家（GLM/DeepSeek/SiliconFlow/CogView），至少配置一个即可
 - 通过 `app.services.feature_flags` 检测各功能是否可用
 """
+import os
 from typing import Optional
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+# 已知弱 / 默认 / 占位 JWT 密钥集合（精确匹配，用于 fail-fast 校验）
+KNOWN_WEAK_JWT_SECRETS = {
+    "change-me-in-production",
+    "change-me",
+    "change-me-to-a-strong-random-password",
+    "change-me-to-a-secure-random-jwt-secret-at-least-32-chars",
+    "your-jwt-secret-please-generate-with-openssl-rand-hex-32",
+    "changeme",
+    "secret",
+    "your-secret-key",
+}
 
 
 def _is_set(v: Optional[str]) -> bool:
@@ -249,6 +263,40 @@ class Settings(BaseSettings):
     @property
     def is_email_enabled(self) -> bool:
         return all(_is_set(x) for x in (self.SMTP_HOST, self.SMTP_USER, self.SMTP_PASS))
+
+    # ---------- 安全门槛（fail-fast）----------
+    @property
+    def is_production(self) -> bool:
+        """是否为生产环境（ENVIRONMENT=production/prod 或 PROD=true）。"""
+        if self.ENVIRONMENT and self.ENVIRONMENT.strip().lower() in ("production", "prod"):
+            return True
+        return os.environ.get("PROD", "").strip().lower() in ("1", "true", "yes", "on")
+
+    def validate_jwt_secret(self) -> None:
+        """校验 JWT 密钥强度。
+
+        在生产等需要强密钥的场景，若密钥为空、为已知弱/默认/占位值、
+        或长度 < 32，应由此方法抛出 ValueError 以触发 fail-fast。
+
+        Raises:
+            ValueError: 密钥为空 / 弱默认 / 占位值 / 长度不足 32。
+        """
+        secret = (self.JWT_SECRET or "").strip()
+        if not secret:
+            raise ValueError(
+                "JWT_SECRET 未设置（为空）。请通过环境变量设置长度 ≥ 32 的强随机密钥"
+                "（例如: openssl rand -hex 32）。"
+            )
+        if secret in KNOWN_WEAK_JWT_SECRETS:
+            raise ValueError(
+                f"JWT_SECRET 使用了弱默认/占位值 '{secret}'。"
+                "请替换为长度 ≥ 32 的强随机密钥（例如: openssl rand -hex 32）。"
+            )
+        if len(secret) < 32:
+            raise ValueError(
+                f"JWT_SECRET 长度不足 32 字符（当前 {len(secret)} 字符），"
+                "存在被暴力破解风险，请使用更长的随机密钥。"
+            )
 
 
 settings = Settings()

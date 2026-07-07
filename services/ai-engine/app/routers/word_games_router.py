@@ -1,7 +1,7 @@
 """
 单词游戏路由
 """
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
 from app.models.word_games import (
     WordGameRequest,
@@ -13,6 +13,7 @@ from app.models.word_games import (
     LeaderboardResponse
 )
 from app.services.word_games_service import WordGamesService
+from app.auth import require_auth
 
 router = APIRouter(prefix="/word-games", tags=["单词游戏"])
 
@@ -21,7 +22,7 @@ word_games_service = WordGamesService()
 
 
 @router.post("/start", response_model=WordGameResponse)
-async def start_game(request: WordGameRequest):
+async def start_game(request: WordGameRequest, _auth: dict = Depends(require_auth)):
     """
     开始单词游戏
 
@@ -34,7 +35,7 @@ async def start_game(request: WordGameRequest):
 
 
 @router.post("/submit", response_model=SubmitAnswerResponse)
-async def submit_answer(request: SubmitAnswerRequest):
+async def submit_answer(request: SubmitAnswerRequest, _auth: dict = Depends(require_auth)):
     """
     提交答案
 
@@ -61,7 +62,7 @@ async def get_game_summary(session_id: str):
 
 
 @router.post("/leaderboard", response_model=LeaderboardResponse)
-async def get_leaderboard(request: LeaderboardRequest):
+async def get_leaderboard(request: LeaderboardRequest, _auth: dict = Depends(require_auth)):
     """
     获取排行榜
 

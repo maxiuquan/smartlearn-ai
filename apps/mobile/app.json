@@ -30,7 +30,6 @@
       "favicon": "./src/assets/favicon.png"
     },
     "plugins": [
-      "expo-router",
       "expo-secure-store",
       "expo-haptics",
       [
@@ -45,9 +44,6 @@
           "photosPermission": "Allow $(PRODUCT_NAME) to access your photos to upload question images."
         }
       ]
-    ],
-    "experiments": {
-      "typedRoutes": true
-    }
+    ]
   }
 }

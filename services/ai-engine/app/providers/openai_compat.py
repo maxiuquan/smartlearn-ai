@@ -5,10 +5,13 @@ OpenAI 兼容接口适配器
 chat_completion_stream 和 generate_embedding 接口。
 """
 
+import logging
 import time
 from typing import Any, Generator
 
 from .base import BaseChatProvider, BaseEmbeddingProvider
+
+logger = logging.getLogger("ai_engine.providers.openai_compat")
 
 
 class OpenAICompatProvider(BaseChatProvider, BaseEmbeddingProvider):
@@ -113,9 +116,14 @@ class OpenAICompatProvider(BaseChatProvider, BaseEmbeddingProvider):
 
         except Exception as e:
             elapsed = time.time() - start_time
-            print(f"[{self._provider_name}] chat_completion 失败 "
-                  f"(耗时 {elapsed:.2f}s): {e}")
-            return self._mock_chat_response(messages)
+            # 在线调用异常：向上抛出，由 AIRouter 区分离线模拟与运行时故障
+            logger.error(
+                "[%s] chat_completion 在线调用失败 (耗时 %.2fs): %s",
+                self._provider_name,
+                elapsed,
+                e,
+            )
+            raise
 
     def chat_completion_stream(
         self,
@@ -159,9 +167,14 @@ class OpenAICompatProvider(BaseChatProvider, BaseEmbeddingProvider):
 
         except Exception as e:
             elapsed = time.time() - start_time
-            print(f"[{self._provider_name}] stream_completion 失败 "
-                  f"(耗时 {elapsed:.2f}s): {e}")
-            yield self._mock_chat_response(messages)
+            # 在线调用异常：向上抛出，由 AIRouter 区分离线模拟与运行时故障
+            logger.error(
+                "[%s] stream_completion 在线调用失败 (耗时 %.2fs): %s",
+                self._provider_name,
+                elapsed,
+                e,
+            )
+            raise
 
     # ── BaseEmbeddingProvider 实现 ───────────────────────────
 
@@ -195,9 +208,14 @@ class OpenAICompatProvider(BaseChatProvider, BaseEmbeddingProvider):
 
         except Exception as e:
             elapsed = time.time() - start_time
-            print(f"[{self._provider_name}] generate_embedding 失败 "
-                  f"(耗时 {elapsed:.2f}s): {e}")
-            return self._mock_embedding(text)
+            # 在线调用异常：向上抛出，绝不返回假向量
+            logger.error(
+                "[%s] generate_embedding 在线调用失败 (耗时 %.2fs): %s",
+                self._provider_name,
+                elapsed,
+                e,
+            )
+            raise
 
     def generate_embeddings(self, texts: list[str]) -> list[list[float]]:
         """批量生成嵌入向量"""
@@ -229,9 +247,14 @@ class OpenAICompatProvider(BaseChatProvider, BaseEmbeddingProvider):
 
         except Exception as e:
             elapsed = time.time() - start_time
-            print(f"[{self._provider_name}] batch_embedding 失败 "
-                  f"(耗时 {elapsed:.2f}s): {e}")
-            return [self._mock_embedding(t) for t in texts]
+            # 在线调用异常：向上抛出，绝不返回假向量
+            logger.error(
+                "[%s] batch_embedding 在线调用失败 (耗时 %.2fs): %s",
+                self._provider_name,
+                elapsed,
+                e,
+            )
+            raise
 
     # ── 健康检查 ─────────────────────────────────────────────
 

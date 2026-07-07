@@ -21,11 +21,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from config import settings
 from app.routers import chat_router, rag_router, study_router, media_router, moderation_router, prompt_router, word_games_router
 from app.services.rag_service import get_rag_service
+from app.auth import ensure_auth_configured
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """应用生命周期管理"""
+    # 启动期安全门槛：鉴权开启但缺密钥则拒绝启动（fail-fast）
+    ensure_auth_configured()
+
     # 启动时
     mode = "离线模式（模拟响应）" if settings.offline_mode else "在线模式"
     print(f"   {settings.APP_NAME} v{settings.APP_VERSION} 启动中...")

@@ -1,0 +1,23 @@
+# SmartLearn AI - 可选 HTTPS 叠加配置
+#
+# 用法:
+#   docker compose -f docker-compose.yml -f infra/docker/docker-compose.ssl.yml up -d
+#
+# 前置条件:
+#   1. 将证书放到 infra/nginx/ssl/ (fullchain.pem, privkey.pem)
+#   2. 本仓库已随附 infra/nginx/conf.d/ssl.conf
+#
+# 作用: 仅做"挂载叠加"——把 ssl.conf 挂入 /etc/nginx/conf.d，
+#       使 nginx 额外监听 443。默认 docker-compose.yml 只挂载
+#       default.conf / frontend.conf / api.conf，因此 ssl.conf 默认不加载，
+#       缺证书时 nginx 仍能以 80 端口正常启动（修复 P0-14）。
+
+services:
+  nginx:
+    volumes:
+      # 叠加挂载 ssl.conf（默认 compose 未挂载，避免缺证书导致启动失败）
+      - ./infra/nginx/conf.d/ssl.conf:/etc/nginx/conf.d/ssl.conf:ro
+      # 证书目录（请放置 fullchain.pem / privkey.pem）
+      - ./infra/nginx/ssl:/etc/nginx/ssl:ro
+      # Let's Encrypt 验证目录
+      - ./infra/nginx/certbot/www:/var/www/certbot:ro

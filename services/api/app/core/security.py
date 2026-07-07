@@ -22,7 +22,7 @@ pwd_context = CryptContext(
 
 # ── JWT 配置 ──
 # 统一从 app.core.config.settings 读取，避免双重来源
-from app.core.config import settings as _settings
+from app.core.config import KNOWN_WEAK_JWT_SECRETS, settings as _settings
 
 JWT_SECRET = _settings.JWT_SECRET
 JWT_ALGORITHM = _settings.JWT_ALGORITHM
@@ -155,6 +155,27 @@ def decode_refresh_token(token: str) -> Optional[dict]:
     if payload.get("type") != "refresh":
         return None
     return payload
+
+
+def assert_strong_jwt_secret(secret: Optional[str] = None) -> None:
+    """精确相等 + 强度校验 JWT 密钥（取代任何"前缀匹配"的弱校验）。
+
+    供启动时或需要显式校验的场景调用。
+
+    Args:
+        secret: 待校验密钥；为 None 时使用当前 settings.JWT_SECRET。
+
+    Raises:
+        ValueError: 密钥为空 / 为已知弱默认 / 占位值 / 长度 < 32。
+    """
+    target = secret if secret is not None else JWT_SECRET
+    cleaned = (target or "").strip()
+    if not cleaned:
+        raise ValueError("JWT_SECRET 为空，请设置长度 ≥ 32 的强随机密钥")
+    if cleaned in KNOWN_WEAK_JWT_SECRETS:
+        raise ValueError(f"JWT_SECRET 为弱默认/占位值 '{cleaned}'，请更换为强随机密钥")
+    if len(cleaned) < 32:
+        raise ValueError("JWT_SECRET 长度不足 32 字符，存在暴力破解风险")
 
 
 # ── API Key 管理 ──

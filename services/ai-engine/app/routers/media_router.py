@@ -4,10 +4,13 @@
 import base64
 
 import httpx
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
+from config import settings
 from app.providers import get_router
+from app.auth import require_auth
+from app.security.ssrf import is_safe_url, safe_http_get_bytes
 
 router = APIRouter(prefix="/media", tags=["多媒体 AI"])
 
@@ -58,7 +61,7 @@ class ImageGenResponse(BaseModel):
 # ─── 路由 ───────────────────────────────────────────────────
 
 @router.post("/tts", response_model=TTSResponse)
-async def text_to_speech(request: TTSRequest):
+async def text_to_speech(request: TTSRequest, _auth: dict = Depends(require_auth)):
     """
     文本转语音 (TTS)
 
@@ -79,32 +82,53 @@ async def text_to_speech(request: TTSRequest):
             duration_ms=0,
             format="mp3",
         )
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"TTS 失败: {str(e)}")
 
 
 @router.post("/stt", response_model=STTResponse)
-async def speech_to_text(request: STTRequest):
+async def speech_to_text(request: STTRequest, _auth: dict = Depends(require_auth)):
     """
     语音转文本 (STT)
 
     将语音音频识别为文本，用于口语跟读评测、听写练习等。
+    服务端代抓外部音频前先经 SSRF 校验，禁止访问内网/元数据地址。
     """
     ai_router = get_router()
+
+    # SSRF 防护：下载外部音频前先校验 URL
+    if not is_safe_url(request.audio_url, allowlist=settings.ssrf_allowlist_list):
+        raise HTTPException(
+            status_code=400,
+            detail="音频 URL 不被允许（SSRF 防护拦截：仅允许公网 http/https 地址）",
+        )
+
     try:
-        # speech_to_text 期望 bytes，先用 httpx 同步下载 URL 的音频
-        audio_data = httpx.get(request.audio_url, timeout=60.0).content
+        # 安全下载：再次校验 + 禁止跨网段重定向 + 响应大小上限
+        audio_data = safe_http_get_bytes(
+            request.audio_url,
+            allowlist=settings.ssrf_allowlist_list,
+            max_bytes=25 * 1024 * 1024,
+            timeout=30.0,
+        )
         result = ai_router.speech_to_text(
             audio_data=audio_data,
             language=request.language,
         )
         return STTResponse(text=result, confidence=0.0)
+    except ValueError as e:
+        # SSRF 不安全 / 重定向不安全 / 响应超上限
+        raise HTTPException(status_code=400, detail=f"音频获取失败: {str(e)}")
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"STT 失败: {str(e)}")
 
 
 @router.post("/image", response_model=ImageGenResponse)
-async def generate_image(request: ImageGenRequest):
+async def generate_image(request: ImageGenRequest, _auth: dict = Depends(require_auth)):
     """
     生成图像
 
@@ -119,6 +143,8 @@ async def generate_image(request: ImageGenRequest):
             n=request.n,
         )
         return ImageGenResponse(image_urls=result, revised_prompt="")
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"图像生成失败: {str(e)}")
 

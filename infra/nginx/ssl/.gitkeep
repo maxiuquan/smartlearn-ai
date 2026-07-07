@@ -1,0 +1,4 @@
+# 占位文件：使 /etc/nginx/ssl 目录存在于仓库中。
+# 将 TLS 证书(fullchain.pem / privkey.pem)放到此目录后，通过
+# infra/docker/docker-compose.ssl.yml 叠加挂载启用 443。
+# 注意：真实证书与私钥请勿提交到版本库（已被 .gitignore 的 *.pem/*.key 忽略）。

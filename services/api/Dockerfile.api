@@ -41,6 +41,9 @@ COPY services/api/startup_check.py ./startup_check.py
 # 复制 alembic 迁移文件（如存在）
 COPY services/api/alembic ./alembic
 
+# 复制数据导入/初始化脚本（组B 约定位置 services/api/scripts，容器内 /app/scripts）
+COPY services/api/scripts /app/scripts
+
 # 创建非 root 用户并设置权限
 RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
 USER appuser

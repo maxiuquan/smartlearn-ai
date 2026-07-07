@@ -5,9 +5,12 @@ LLM 大语言模型服务
 支持离线模式（无 API Key 时使用模拟响应）。
 """
 
+import logging
 import sys
 from pathlib import Path
 from typing import Any
+
+logger = logging.getLogger("ai_engine.services.llm")
 
 # 添加项目根目录到路径，以便导入 config 和 app 内模块
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
@@ -137,8 +140,14 @@ class LLMService:
                 temperature=temperature,
             )
         except Exception as e:
-            print(f"LLM 调用失败: {e}")
-            return self._mock_response(messages)
+            # 安全整改 C4：运行时故障不再静默伪装成成功。
+            # 离线模式由 AIRouter 直接返回模拟响应（不会进入此分支）。
+            logger.error(
+                "LLM 调用失败（运行时故障，不再静默 mock）: %s",
+                e,
+                exc_info=True,
+            )
+            raise
 
     def _mock_response(self, messages: list[dict[str, str]]) -> str:
         """离线模式：生成模拟响应"""

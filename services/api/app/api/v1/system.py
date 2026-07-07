@@ -6,6 +6,7 @@
 import json
 import logging
 import os
+import re
 import subprocess
 import time
 from datetime import datetime, timezone
@@ -34,6 +35,9 @@ from app.services.sms_service import sms_service
 router = APIRouter()
 
 logger = logging.getLogger(__name__)
+
+# 备份 ID 白名单：仅允许字母、数字、下划线、连字符、点（覆盖 .sql.gz 文件名）
+_BACKUP_ID_PATTERN = re.compile(r"^[A-Za-z0-9_.-]+$")
 
 # ── Redis 客户端（懒加载，导入失败也不影响模块加载）──
 _redis_client = None
@@ -551,8 +555,23 @@ async def restore_backup(
             detail="恢复数据库需要超级管理员权限",
         )
 
+    # ── 路径遍历防护 ──
+    # 1) 白名单：禁止包含 / \ 或任何非法字符（仅允许字母数字 _ - .）
+    if not _BACKUP_ID_PATTERN.match(backup_id or ""):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="非法的备份 ID（仅允许字母、数字、下划线、连字符、点）",
+        )
+    # 2) 安全拼接 + 真实路径必须仍位于备份根目录内
+    #    （禁止 ".." 逃逸、禁止绝对路径越界）
     bdir = _backups_dir()
-    filepath = bdir / backup_id
+    bdir_resolved = bdir.resolve()
+    filepath = (bdir_resolved / backup_id).resolve()
+    if bdir_resolved != filepath and bdir_resolved not in filepath.parents:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="非法的备份路径（试图逃逸备份目录）",
+        )
     if not filepath.exists() or not filepath.is_file():
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

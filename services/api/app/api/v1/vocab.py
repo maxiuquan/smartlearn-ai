@@ -105,7 +105,7 @@ async def get_progress(
 
     - 包含掌握数、学习中、新词、今日待复习等
     """
-    from sqlalchemy import Table, Column, Integer, String, Float, DateTime, MetaData, func, text
+    from sqlalchemy import Table, Column, Integer, String, Float, DateTime, MetaData, func, text, case
 
     metadata = MetaData()
     uwp = Table(
@@ -126,13 +126,13 @@ async def get_progress(
         select(
             func.count().label("total"),
             func.sum(
-                func.case((uwp.c.status == "mastered", 1), else_=0)
+                case((uwp.c.status == "mastered", 1), else_=0)
             ).label("mastered"),
             func.sum(
-                func.case((uwp.c.status == "learning", 1), else_=0)
+                case((uwp.c.status == "learning", 1), else_=0)
             ).label("learning"),
             func.sum(
-                func.case((uwp.c.status == "new", 1), else_=0)
+                case((uwp.c.status == "new", 1), else_=0)
             ).label("new_words"),
             func.avg(uwp.c.mastery_level).label("avg_mastery"),
         ).where(uwp.c.user_id == user_id)

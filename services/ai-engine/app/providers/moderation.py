@@ -4,6 +4,7 @@
 使用 GLM 模型进行内容安全审核。
 """
 
+import logging
 import sys
 import time
 from pathlib import Path
@@ -13,6 +14,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
 from config import settings
 from .base import BaseModerationProvider
+
+logger = logging.getLogger("ai_engine.providers.moderation")
 
 
 class ModerationProvider(BaseModerationProvider):
@@ -108,12 +111,18 @@ class ModerationProvider(BaseModerationProvider):
             try:
                 result = json.loads(content)
             except json.JSONDecodeError:
-                # 如果返回的不是有效 JSON，构造一个默认结果
+                # fail-closed：解析失败视为风险内容，标记为 flagged=True 而非放行
+                logger.warning(
+                    "[moderation] 审核结果解析失败（fail-closed），"
+                    "视为风险内容, model=%s, content=%s",
+                    self._model_name,
+                    content[:200],
+                )
                 result = {
-                    "flagged": False,
-                    "categories": [],
-                    "reason": "无法解析审核结果",
-                    "confidence": 0.0,
+                    "flagged": True,
+                    "categories": ["parse_error"],
+                    "reason": "无法解析审核结果（fail-closed）",
+                    "confidence": 1.0,
                 }
 
             print(
@@ -126,8 +135,13 @@ class ModerationProvider(BaseModerationProvider):
 
         except Exception as e:
             elapsed = time.time() - start_time
-            print(f"[moderation] moderate 失败 (耗时 {elapsed:.2f}s): {e}")
-            return self._mock_moderate(text)
+            # 在线调用异常：向上抛出，由 AIRouter 统一 fail-closed（flagged=True）
+            logger.error(
+                "[moderation] moderate 在线调用失败 (耗时 %.2fs): %s",
+                elapsed,
+                e,
+            )
+            raise
 
     def _mock_moderate(self, text: str) -> dict[str, Any]:
         """离线模式：始终放行"""

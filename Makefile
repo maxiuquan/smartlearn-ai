@@ -12,7 +12,7 @@ YELLOW = \033[0;33m
 RED = \033[0;31m
 NC = \033[0m
 
-.PHONY: help up down restart build rebuild logs logs-api logs-ai logs-mobile logs-admin ps clean migrate seed import-knowledge import-questions import-vocabulary import-all test lint format dev shell-api shell-ai backup restore status
+.PHONY: help up down restart build rebuild logs logs-api logs-ai logs-student logs-admin ps clean migrate seed import-knowledge import-questions import-vocabulary import-all test lint format dev shell-api shell-ai backup restore status
 
 # 默认目标
 help:
@@ -30,7 +30,7 @@ help:
 	@echo "  make logs            查看所有日志"
 	@echo "  make logs-api        查看API服务日志"
 	@echo "  make logs-ai         查看AI引擎日志"
-	@echo "  make logs-mobile     查看移动端日志"
+	@echo "  make logs-student     查看学生端 Web 日志"
 	@echo "  make logs-admin      查看管理后台日志"
 	@echo ""
 	@echo "数据管理:"
@@ -61,8 +61,8 @@ up:
 	$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE) --env-file $(ENV_FILE) up -d
 	@echo "$(GREEN)服务启动完成！$(NC)"
 	@echo "API文档: http://localhost:8000/docs"
-	@echo "管理后台: http://localhost:3000"
-	@echo "移动端: http://localhost:3001"
+	@echo "管理后台: http://localhost:3000 (admin)"
+	@echo "学生端 Web: http://localhost (student-web, 经 nginx 80)"
 
 down:
 	@echo "$(YELLOW)停止所有服务...$(NC)"
@@ -98,8 +98,8 @@ logs-api:
 logs-ai:
 	$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE) --env-file $(ENV_FILE) logs -f ai-engine
 
-logs-mobile:
-	$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE) --env-file $(ENV_FILE) logs -f mobile-web
+logs-student:
+	$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE) --env-file $(ENV_FILE) logs -f student-web
 
 logs-admin:
 	$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE) --env-file $(ENV_FILE) logs -f admin
@@ -112,23 +112,23 @@ migrate:
 
 seed:
 	@echo "$(GREEN)填充初始数据...$(NC)"
-	$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE) --env-file $(ENV_FILE) exec api python scripts/seed.py
+	$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE) --env-file $(ENV_FILE) exec api python /app/scripts/seed.py
 
 import-kp:
 	@echo "$(GREEN)导入知识点数据...$(NC)"
-	$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE) --env-file $(ENV_FILE) exec api python scripts/import_knowledge.py
+	$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE) --env-file $(ENV_FILE) exec api python /app/scripts/import_knowledge.py
 
 import-q:
 	@echo "$(GREEN)导入题目数据...$(NC)"
-	$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE) --env-file $(ENV_FILE) exec api python scripts/import_questions.py
+	$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE) --env-file $(ENV_FILE) exec api python /app/scripts/import_questions.py
 
 import-vocab:
 	@echo "$(GREEN)导入词汇数据...$(NC)"
-	$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE) --env-file $(ENV_FILE) exec api python scripts/import_vocabulary.py
+	$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE) --env-file $(ENV_FILE) exec api python /app/scripts/import_vocabulary.py
 
 import-all:
 	@echo "$(GREEN)导入所有数据...$(NC)"
-	$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE) --env-file $(ENV_FILE) exec api python scripts/import_all.py
+	$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE) --env-file $(ENV_FILE) exec api python /app/scripts/import_all.py
 
 # ==================== 开发调试 ====================
 

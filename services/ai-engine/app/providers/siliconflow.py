@@ -5,6 +5,7 @@ SiliconFlow 供应商
 所有嵌入向量统一使用 BAAI/bge-m3 模型。
 """
 
+import logging
 import sys
 import time
 from pathlib import Path
@@ -15,6 +16,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 from config import settings
 from .base import BaseEmbeddingProvider, BaseTTSProvider, BaseSTTProvider
 from .openai_compat import OpenAICompatProvider
+
+logger = logging.getLogger("ai_engine.providers.siliconflow")
 
 
 class SiliconFlowProvider(OpenAICompatProvider, BaseTTSProvider, BaseSTTProvider):
@@ -99,9 +102,13 @@ class SiliconFlowProvider(OpenAICompatProvider, BaseTTSProvider, BaseSTTProvider
 
         except Exception as e:
             elapsed = time.time() - start_time
-            print(f"[siliconflow] generate_embedding 失败 "
-                  f"(耗时 {elapsed:.2f}s): {e}")
-            return self._mock_embedding(text)
+            # 在线调用异常：向上抛出，绝不返回假向量
+            logger.error(
+                "[siliconflow] generate_embedding 在线调用失败 (耗时 %.2fs): %s",
+                elapsed,
+                e,
+            )
+            raise
 
     def generate_embeddings(self, texts: list[str]) -> list[list[float]]:
         """批量生成嵌入向量"""
@@ -133,9 +140,13 @@ class SiliconFlowProvider(OpenAICompatProvider, BaseTTSProvider, BaseSTTProvider
 
         except Exception as e:
             elapsed = time.time() - start_time
-            print(f"[siliconflow] batch_embedding 失败 "
-                  f"(耗时 {elapsed:.2f}s): {e}")
-            return [self._mock_embedding(t) for t in texts]
+            # 在线调用异常：向上抛出，绝不返回假向量
+            logger.error(
+                "[siliconflow] batch_embedding 在线调用失败 (耗时 %.2fs): %s",
+                elapsed,
+                e,
+            )
+            raise
 
     # ── BaseTTSProvider 实现 ─────────────────────────────────
 
@@ -181,8 +192,13 @@ class SiliconFlowProvider(OpenAICompatProvider, BaseTTSProvider, BaseSTTProvider
             return resp.content
         except Exception as e:
             elapsed = time.time() - start_time
-            print(f"[siliconflow] TTS 失败 (耗时 {elapsed:.2f}s): {e}")
-            return self._mock_tts(text)
+            # 在线调用异常：向上抛出，由 AIRouter 处理（不静默返回空音频）
+            logger.error(
+                "[siliconflow] TTS 在线调用失败 (耗时 %.2fs): %s",
+                elapsed,
+                e,
+            )
+            raise
 
     def _mock_tts(self, text: str) -> bytes:
         """离线模式：返回空音频"""
@@ -234,8 +250,13 @@ class SiliconFlowProvider(OpenAICompatProvider, BaseTTSProvider, BaseSTTProvider
             return result
         except Exception as e:
             elapsed = time.time() - start_time
-            print(f"[siliconflow] STT 失败 (耗时 {elapsed:.2f}s): {e}")
-            return self._mock_stt()
+            # 在线调用异常：向上抛出，由 AIRouter 处理（不静默返回空文本）
+            logger.error(
+                "[siliconflow] STT 在线调用失败 (耗时 %.2fs): %s",
+                elapsed,
+                e,
+            )
+            raise
 
     def _mock_stt(self) -> str:
         """离线模式：返回空识别结果"""

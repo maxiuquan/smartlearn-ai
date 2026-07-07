@@ -1,48 +1,47 @@
 # SmartLearn AI - 智能学习平台
 
+> ⚠️ 文档状态说明：本文档已根据 2026-07-08 全量代码审查与整改设计进行**事实校正**。所有数据规模、技术栈、部署拓扑均来自当前仓库真实状态，未做夸大。带「*规划中*」标记的部分尚未纳入生产编排。
+
 ## 项目简介
 
-SmartLearn AI 是一个基于人工智能的智能学习平台，专为考研学生设计。平台整合了知识点管理、智能题库、词汇学习、历年真题分析、游戏化学习等功能，通过多 AI 供应商架构提供个性化学习路径和智能辅导。
+SmartLearn AI 是一个基于人工智能的智能学习平台，面向考研学生，整合知识点管理、智能题库、词汇学习、历年真题与习题样例、游戏化学习，并通过多 AI 供应商架构提供个性化学习路径与智能辅导。
 
 ## 核心功能
 
 ### 1. 知识点管理
-- 完整的学科知识体系（高等数学、线性代数、概率论、英语）
-- 层级化的知识点结构，支持依赖关系
+- 学科知识体系覆盖数学（高等数学 / 线性代数 / 概率论）与英语
+- 层级化知识点结构（章节 → 小节 → 知识点），支持依赖关系
 - 知识点关联与学习进度追踪
-- 287 个知识点，覆盖数学和英语核心考点
+- **287 个知识点**（`data/knowledge-points/*`，递归统计实际条目数）
 
 ### 2. 智能题库
-- 8300+ 精选题目（数学 5575 题、英语 3224 题）
-- 智能推荐算法，基于能力评估
-- 错题本与薄弱点分析
-- 题目解析与知识点关联（100% 引用完整性）
+- **数学 5026 题**（`data/questions/math-full.json`）
+- **英语 3224 题**（`data/questions/english-full.json`）
+- 另有 `math-examples.json`（50 道示例题，用于联调与演示）
+- 智能推荐、错题本、薄弱点分析
+- 题目解析与知识点关联（`knowledge_points` 字段引用 `kp-*` / `grammar-*`）
 
 ### 3. 词汇学习
-- 考研核心词汇库（4541 CET4 单词 + 考研词汇）
-- 多种单词书支持
-- 艾宾浩斯遗忘曲线复习（SRS 算法）
-- 词汇测试与评估
+- 目标词库：CET4 / 考研核心 **4541+** 词
+- **当前已录入约 528 条**（考研核心词 220 + 同义词 100 + 单词书配置 8 + 词频数据 200），持续扩充中
+- 多种单词书、艾宾浩斯遗忘曲线复习（SRS）、词汇测试与评估
+- 详见 `data/vocabulary/README.md`
 
-### 4. 历年真题
-- 数学与英语历年真题分类
-- 答题技巧总结
-- 出题规律分析
-- 模拟考试功能
+### 4. 历年真题与习题（样例）
+- 提供**数据 schema + 代表性样例**，便于对接与校验：
+  - 真题：`data/exam-papers/math-sample.json`（3 套样例）、`english-sample.json`（2 套样例），配套 `schema.json`
+  - 习题：`data/exercise-books/workbook-sample.json`（5 道样例），配套 `schema.json`
+- 完整真题 / 习题库（大规模数据）为后续扩充计划，**当前样例仅作结构与字段示范，不含编造数据**
 
 ### 5. AI 智能辅导
 - 多 AI 供应商架构（OpenAI / GLM / DeepSeek / SiliconFlow / CogView）
-- 智能答疑系统（RAG 检索增强生成）
-- 学习计划生成
-- 知识点讲解与解题思路引导
-- TTS 语音合成、STT 语音识别、图像生成
-- 内容安全审核
+- 智能答疑（RAG 检索增强生成）
+- 学习计划生成、知识点讲解与解题思路引导
+- TTS / STT / 图像生成、内容安全审核
 
 ### 6. 游戏化学习
-- 25 款学习游戏（16 款英语单词游戏、4 款数学游戏、5 款跨科目/社交游戏）
-- 统一单词进度系统
-- 排行榜与段位系统
-- 成就系统
+- **25 款学习游戏**（`data/games/games-config.json`：16 款英语单词游戏、4 款数学游戏、5 款跨科目 / 社交游戏）
+- 统一单词进度系统、排行榜与段位、成就系统
 
 ## 技术架构
 
@@ -50,13 +49,14 @@ SmartLearn AI 是一个基于人工智能的智能学习平台，专为考研学
 ┌─────────────────────────────────────────────────────────────┐
 │                    前端层 (Frontend)                          │
 ├───────────────┬───────────────┬───────────────┬─────────────┤
-│  mobile-web   │    admin      │     web       │   mobile    │
-│  (React)      │  (Vue.js)     │  (Next.js)    │ (React Native)│
+│    admin      │  student-web  │  mobile (*)   │ web(*)/      │
+│ (React+AntD)  │ (React+Vite)  │ (RN+Expo,规划中)│ mobile-web(*),规划中 │
 └───────────────┴───────────────┴───────────────┴─────────────┘
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────┐
-│                   Nginx 反向代理                              │
+│            Nginx 反向代理（默认 80；443 为可选覆盖）            │
+│  健康检查: GET /nginx-health → 200                            │
 └─────────────────────────────────────────────────────────────┘
                               │
                               ▼
@@ -64,7 +64,7 @@ SmartLearn AI 是一个基于人工智能的智能学习平台，专为考研学
 │                    服务层 (Services)                          │
 ├─────────────────┬─────────────────┬─────────────────────────┤
 │   API Service   │   AI Engine     │   异步任务               │
-│   (FastAPI)     │   (FastAPI)     │   (Celery Worker/Beat)  │
+│   (FastAPI)     │  (FastAPI+RAG)  │  (Celery Worker/Beat)   │
 │   Port 8000     │   Port 8001     │                         │
 └─────────────────┴─────────────────┴─────────────────────────┘
                               │
@@ -74,121 +74,66 @@ SmartLearn AI 是一个基于人工智能的智能学习平台，专为考研学
 ├───────────────┬───────────────┬───────────────┬─────────────┤
 │  PostgreSQL   │    Redis      │    Milvus     │   MinIO     │
 │  (主数据库)   │  (缓存/队列)  │  (向量存储)   │  (对象存储)  │
-└───────────────┴───────────────┴───────────────┴─────────────┘
+└───────────────┴───────────────┴─────────────────────────────┘
 ```
+
+> （*）`mobile`（React Native + Expo）、`web`（用户端 Next.js）、`mobile-web`（移动端 Web）当前为**规划中**，未纳入 `docker-compose.yml` 生产编排，避免空壳服务导致构建失败。
+
+### 真实技术栈（已校正）
+| 层 | 技术 | 说明 |
+|----|------|------|
+| API 服务 | **FastAPI**（Python） | 无 NestJS；REST + Pydantic |
+| AI 引擎 | **FastAPI + RAG** | 检索增强生成、多供应商抽象层 |
+| 管理后台 admin | **React + Ant Design** | （非 Vue） |
+| 学生端 student-web | **React + Vite** | 经 nginx 80 暴露 |
+| 移动端 mobile | React Native + Expo | 规划中 |
+| 反向代理 | nginx:alpine | 默认 80，443 可选覆盖 |
+| 数据库 | PostgreSQL + Redis | 主库 + 缓存 / 消息 |
+| 向量 / 对象存储 | Milvus + MinIO | 向量检索 / 文件存储 |
 
 ## 项目结构
 
 ```
 smartlearn-ai/
 ├── apps/                              # 前端应用
-│   ├── admin/                         # 管理后台 (Vue.js + Vite)
-│   │   ├── src/
-│   │   │   ├── pages/                 # 页面 (dashboard, knowledge, question, word, user...)
-│   │   │   ├── components/            # 组件 (StatCard, Chart, KnowledgeTreeSelect...)
-│   │   │   ├── services/              # API 服务层
-│   │   │   └── stores/                # 状态管理
-│   │   ├── Dockerfile.admin
-│   │   └── package.json
-│   ├── mobile/                        # 移动端 (React Native)
-│   │   ├── src/
-│   │   │   ├── screens/               # 页面 (auth, home, knowledge, learn, word, profile)
-│   │   │   ├── components/            # 组件 (common, question, word)
-│   │   │   ├── services/              # API 服务层
-│   │   │   └── stores/                # 状态管理
-│   │   ├── App.tsx
-│   │   └── package.json
-│   ├── mobile-web/                    # 移动端 Web 版 (React)
-│   │   ├── Dockerfile.mobile
-│   │   └── package.json
-│   └── web/                           # 用户端 Web (Next.js)
-│       ├── Dockerfile.web
-│       └── package.json
+│   ├── admin/                         # 管理后台 (React + Ant Design)
+│   ├── student-web/                   # 学生端 Web (React + Vite)
+│   ├── mobile/                        # 移动端 (React Native + Expo，*规划中*)
+│   ├── web/                           # 用户端 Web (Next.js，*规划中*)
+│   └── mobile-web/                    # 移动端 Web (React，*规划中*)
 ├── data/                              # 数据文件
-│   ├── knowledge-points/              # 知识点数据
-│   │   ├── math.json                  # 高等数学知识点
-│   │   ├── linear-algebra.json        # 线性代数知识点
-│   │   ├── probability.json           # 概率论知识点
-│   │   └── english.json               # 英语知识点
-│   ├── questions/                     # 题目数据
-│   │   ├── math-full.json             # 数学完整题库 (5575题)
-│   │   ├── math-examples.json         # 数学示例题目
-│   │   └── english-full.json          # 英语完整题库 (3224题)
-│   ├── vocabulary/                    # 词汇数据
-│   │   ├── kaoyan-words.json          # 考研核心词汇
-│   │   ├── word-books.json            # 单词书配置
-│   │   ├── word-frequency.json        # 词频数据
-│   │   └── synonyms.json              # 同义词数据
-│   ├── exam-papers/                   # 历年真题
-│   │   ├── math-real-exams.json
-│   │   ├── english-real-exams.json
-│   │   └── schema.json
-│   ├── exercise-books/                # 习题册数据
-│   │   ├── math-exercise-books.json
-│   │   ├── english-exercise-books.json
-│   │   └── schema.json
-│   ├── games/                         # 游戏配置
-│   │   ├── games-config.json          # 25款游戏配置
-│   │   └── leaderboard-config.json    # 排行榜配置
+│   ├── knowledge-points/              # 知识点 (math/linear-algebra/probability/english.json，共 287)
+│   ├── questions/                     # 题目 (math-full.json 5026 / english-full.json 3224 / math-examples.json 50)
+│   ├── vocabulary/                    # 词汇 (~528 条，含 README.md 说明)
+│   ├── exam-papers/                   # 真题样例 + schema (math-sample/english-sample/schema)
+│   ├── exercise-books/                # 习题样例 + schema (workbook-sample/schema)
+│   ├── games/                         # 25 款游戏配置 + 排行榜配置
 │   ├── formulas.json                  # 数学公式库
 │   └── roots.json                     # 词根词缀库
 ├── services/                          # 后端服务
-│   ├── api/                           # API 服务 (FastAPI + NestJS)
-│   │   ├── app/
-│   │   │   ├── api/v1/                # API 路由 (auth, games, knowledge, questions, vocab)
-│   │   │   ├── core/                  # 核心模块 (config, security, deps)
-│   │   │   ├── db/                    # 数据库会话
-│   │   │   ├── models/                # 数据模型
-│   │   │   ├── schemas/               # Pydantic 模式
-│   │   │   ├── tasks/                 # Celery 异步任务
-│   │   │   ├── main.py                # FastAPI 入口
-│   │   │   └── celery_app.py          # Celery 配置
+│   ├── api/                           # API 服务 (FastAPI)
+│   │   ├── app/                       # 应用代码 (routers/core/db/models/schemas/tasks/main.py)
 │   │   ├── alembic/                   # 数据库迁移
-│   │   ├── src/                       # NestJS 模块
-│   │   │   └── modules/               # (achievements, auth, knowledge-points, questions,
-│   │   │                              #  vocabulary, real-exam, study-plan, users...)
-│   │   ├── scripts/                   # 数据导入脚本
+│   │   ├── scripts/                   # 数据导入 / 初始化脚本（容器内 /app/scripts）
+│   │   │   ├── seed.py
+│   │   │   ├── import_knowledge.py
+│   │   │   ├── import_questions.py
+│   │   │   ├── import_vocabulary.py
+│   │   │   └── import_all.py
 │   │   ├── Dockerfile.api
 │   │   └── requirements.txt
-│   └── ai-engine/                     # AI 引擎服务 (FastAPI)
-│       ├── app/
-│       │   ├── routers/               # API 路由
-│       │   │   ├── chat_router.py     # 对话接口
-│       │   │   ├── rag_router.py      # RAG 检索增强
-│       │   │   ├── study_router.py    # 学习计划
-│       │   │   ├── media_router.py    # TTS/STT/图像生成
-│       │   │   ├── moderation_router.py  # 内容审核
-│       │   │   └── prompt_router.py   # Prompt 模板管理
-│       │   ├── providers/             # AI 供应商抽象层
-│       │   └── main.py                # FastAPI 入口
+│   └── ai-engine/                     # AI 引擎 (FastAPI + RAG)
+│       ├── app/ (routers/providers/main.py)
 │       ├── Dockerfile.ai-engine
 │       └── requirements.txt
-├── infra/                             # 基础设施配置
-│   ├── docker/                        # Docker 开发/生产覆盖配置
-│   │   ├── docker-compose.dev.yml     # 开发环境覆盖
-│   │   └── docker-compose.prod.yml    # 生产环境覆盖
-│   └── nginx/                         # Nginx 配置
-│       ├── nginx.conf                 # 主配置
-│       └── conf.d/                    # 站点配置
-├── scripts/                           # 工具脚本
-│   ├── import_knowledge.py            # 导入知识点
-│   ├── import_questions.py            # 导入题目
-│   ├── import_vocabulary.py           # 导入词汇
-│   ├── import_all.py                  # 导入全部数据
-│   ├── seed.py                        # 初始数据填充
-│   ├── verify-kp-refs.ts              # 验证知识点引用完整性
-│   ├── validate-data.ts               # 数据校验
-│   ├── generate-math-questions.ts     # 数学题目生成
-│   ├── generate-english-questions.ts  # 英语题目生成
-│   ├── generate-cet4-words.ts         # CET4 词汇生成
-│   └── fix-kp-refs.ts                 # 知识点引用修复
-├── docs/                              # 项目文档
-│   ├── SmartLearn AI —— 商业可用级完善方案（精读版）.md
-│   └── SmartLearn AI —— AI 能力接入全景方案.md
-├── docker-compose.yml                 # Docker Compose 编排（主配置）
+├── infra/                             # 基础设施
+│   ├── docker/                        # 覆盖配置 (dev / prod / ssl 可选覆盖)
+│   └── nginx/                         # nginx 配置 (nginx.conf + conf.d/ + ssl/)
+├── docs/                              # 文档
+├── docker-compose.yml                 # 主编排（不含 web/mobile-web）
+├── infra/docker/                      # 覆盖配置（dev / prod / 可选 ssl 叠加 docker-compose.ssl.yml）
 ├── Makefile                           # 常用命令
-├── .env                               # 环境变量（开发环境）
-├── .env.example                       # 环境变量模板
+├── .env.example                       # 环境变量模板（含必填密钥）
 ├── .gitignore
 └── README.md
 ```
@@ -196,348 +141,141 @@ smartlearn-ai/
 ## 部署指南
 
 ### 环境要求
+- Docker 20.10+ / Docker Compose 2.0+
+- Make（可选，命令封装）
+- 域名（生产环境 HTTPS 需要）
 
-- Docker 20.10+
-- Docker Compose 2.0+
-- Make (可选)
-- 域名（生产环境需要）
+### 安全基线：缺失密钥即 fail-fast（重要）
+生产环境**不允许使用不安全默认值**。以下密钥在 `docker-compose.yml` 中以 `:?err` 声明，**缺失将导致对应容器启动失败**：
+- `JWT_SECRET`（API 鉴权签名密钥）
+- `AI_ENGINE_API_KEY`（AI 引擎调用密钥，默认 `AI_ENGINE_AUTH_ENABLED=true` 启用鉴权）
+- `POSTGRES_PASSWORD`、`REDIS_PASSWORD`
+- `MINIO_ACCESS_KEY`、`MINIO_SECRET_KEY`
 
-### 部署方式选择
+`AI_ENGINE_AUTH_ENABLED` 默认为 `true`，API 访问 AI 引擎需携带合法 API Key。缺失密钥时容器直接退出，**不会**以空密钥或 mock 模式静默运行。
 
-| 方式 | 适用场景 | 数据库 | 难度 |
-|------|---------|--------|------|
-| [本地开发](#本地开发-docker-compose) | 本地调试、功能验证 | 本地 PostgreSQL | 低 |
-| [VPS 单机部署](#vps-单机部署) | 个人项目、小规模用户 | 自建 PostgreSQL | 中 |
-| [Supabase 混合部署](#supabase-混合部署推荐) | 生产环境、零运维 | Supabase 托管 | 低 |
-
----
-
-### 本地开发 (Docker Compose)
-
-适合本地开发调试，所有服务一键启动。
-
+复制模板并填写后再启动：
 ```bash
-# 1. 克隆项目
-git clone https://github.com/maxiuquan/smartlearn-ai.git
-cd smartlearn-ai
-
-# 2. 配置环境变量
 cp .env.example .env
-# 编辑 .env 填入密码（本地开发可用默认值）
-# 必须设置: POSTGRES_PASSWORD, REDIS_PASSWORD, JWT_SECRET, MINIO_ACCESS_KEY, MINIO_SECRET_KEY
+# 必须设置上述所有 :?err 变量；可用 openssl rand -hex 32 生成强随机值
+```
 
-# 3. 启动开发环境（热重载 + 暴露数据库端口）
+### 本地开发（Docker Compose）
+```bash
+# 1. 准备环境变量
+cp .env.example .env
+#   编辑 .env，至少填写 POSTGRES_PASSWORD / REDIS_PASSWORD / JWT_SECRET / AI_ENGINE_API_KEY
+
+# 2. 启动（热重载 + 暴露数据库端口）
 make dev
 
-# 4. 运行数据库迁移
+# 3. 迁移 + 导入数据
 make migrate
-
-# 5. 导入数据
 make import-all
 ```
 
-访问服务：
+访问地址：
 - API 文档: http://localhost:8000/docs
 - AI 引擎文档: http://localhost:8001/docs
-- 管理后台: http://localhost:3000
-- Web 前端: http://localhost:3000 (Nginx)
-- 移动端 Web: http://localhost:3001
+- 管理后台 admin: http://localhost:3000
+- 学生端 Web: http://localhost （student-web，经 nginx 80；`/nginx-health` 为健康检查）
 
----
-
-### Supabase 混合部署（推荐）
-
-生产环境推荐方案：数据库和认证使用 Supabase 托管，其余服务部署在 VPS 上。
-
-**架构图：**
-
-```
-┌──────────────────────────────────────────────────┐
-│                    VPS (你的服务器)                │
-│  ┌─────────┐ ┌──────────┐ ┌────────┐ ┌────────┐ │
-│  │ AI 引擎  │ │ API 服务  │ │ Celery │ │ Nginx  │ │
-│  │ :8001   │ │ :8000    │ │ Worker │ │ :80    │ │
-│  └─────────┘ └──────────┘ └────────┘ └────────┘ │
-│       │            │                              │
-└───────┼────────────┼──────────────────────────────┘
-        │            │
-        ▼            ▼
-┌──────────────────────────────────────────────────┐
-│              Supabase (云端托管)                    │
-│  ┌──────────────┐ ┌──────────┐ ┌──────────────┐ │
-│  │ PostgreSQL   │ │  Auth    │ │   Storage    │ │
-│  │ (主数据库)   │ │ (认证)   │ │  (文件存储)   │ │
-│  └──────────────┘ └──────────┘ └──────────────┘ │
-└──────────────────────────────────────────────────┘
-```
-
-**步骤：**
-
-**1. 创建 Supabase 项目**
-
-访问 [supabase.com](https://supabase.com) 注册并创建项目，记录以下信息：
-- 项目 URL: `https://xxxxx.supabase.co`
-- 数据库连接字符串（Settings → Database → Connection string → URI）
-- `anon key`（Settings → API）
-
-**2. 配置 .env**
-
-```bash
-# ── 数据库（Supabase 托管）──
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=你的Supabase数据库密码
-POSTGRES_DB=postgres
-# 直连 PostgreSQL（用于 Alembic 迁移和 Celery）
-DATABASE_URL=postgresql://postgres.[项目ID]:[密码]@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres
-
-# ── 缓存（VPS 自建 Redis）──
-REDIS_PASSWORD=你的强密码
-
-# ── 认证（Supabase Auth）──
-SUPABASE_URL=https://xxxxx.supabase.co
-SUPABASE_ANON_KEY=你的anon_key
-JWT_SECRET=你的Supabase JWT Secret（Settings → API → JWT Settings）
-
-# ── AI 供应商（至少选一个）──
-GLM_API_KEY=你的智谱API密钥
-# 或 DEEPSEEK_API_KEY=你的DeepSeek密钥
-# 或 OPENAI_API_KEY=你的OpenAI密钥
-
-# ── 向量存储（使用内存模式，无需 Milvus）──
-VECTOR_STORE_TYPE=inmemory
-
-# ── 其他 ──
-ENVIRONMENT=production
-DEBUG=false
-CORS_ORIGINS=https://你的域名
-```
-
-**3. 在 VPS 上启动服务**
-
-```bash
-git clone https://github.com/maxiuquan/smartlearn-ai.git
-cd smartlearn-ai
-
-# 配置 .env（按上一步填写）
-cp .env.example .env
-vim .env
-
-# 仅启动应用服务（数据库用 Supabase，不需要 db/milvus/etcd/minio）
-docker compose up -d api ai-engine celery-worker celery-beat nginx
-
-# 运行迁移
-make migrate
-
-# 导入数据
-make import-all
-```
-
-> **优点：** 数据库免运维、自带备份、Supabase Auth 替代自建认证、Storage 替代 MinIO、免费额度 500MB 足够初期使用。
-
----
+> 用户端 `web`（:3001）与 `mobile-web`（:3001）为*规划中*，当前未编排，请勿直接访问。
 
 ### VPS 单机部署
-
-适合自建所有服务，全部运行在一台 VPS 上。
-
-**推荐配置：** 4C8G 以上（需运行 PostgreSQL + Redis + Milvus + API + AI 引擎 + Celery）
-
 ```bash
-# 1. 克隆项目
-git clone https://github.com/maxiuquan/smartlearn-ai.git
-cd smartlearn-ai
-
-# 2. 配置环境变量（必须使用强密码）
 cp .env.example .env
-# 生成强密码:
-#   openssl rand -hex 32  → JWT_SECRET
-#   openssl rand -hex 16  → POSTGRES_PASSWORD, REDIS_PASSWORD, MINIO_ACCESS_KEY, MINIO_SECRET_KEY
-vim .env
+# 生成强密码: openssl rand -hex 32 → JWT_SECRET / AI_ENGINE_API_KEY
+#            openssl rand -hex 16 → POSTGRES_PASSWORD / REDIS_PASSWORD / MINIO_*
 
-# 3. 启动生产环境
-docker compose -f docker-compose.yml -f infra/docker/docker-compose.prod.yml --env-file .env up -d
-
-# 4. 运行迁移 + 导入数据
+docker compose up -d
 make migrate
 make import-all
 ```
+- 生产建议关闭 `DEBUG`，`ENVIRONMENT=production`
+- 仅开放 80/443，启用防火墙
 
-**生产环境配置要点：**
-
-- 生产环境使用 `docker-compose.prod.yml` 覆盖，关键区别：
-  - 不暴露数据库端口到宿主机
-  - 启用资源限制和日志轮转
-  - API/AI 引擎多副本运行
-  - `ENVIRONMENT=production`，`DEBUG=false`
-- 务必修改 `.env` 中所有默认密码
-- 开启防火墙，仅开放 80/443 端口
-- 配置 HTTPS（Nginx + Certbot）
-
-**HTTPS 配置（可选）：**
-
+### HTTPS（可选覆盖）
+默认 nginx 仅监听 80。启用 443 需提供证书并叠加可选覆盖：
 ```bash
-# 安装 certbot
-sudo apt install certbot python3-certbot-nginx -y
+# 将证书放入 infra/nginx/ssl/（fullchain.pem / privkey.pem）
+docker compose -f docker-compose.yml -f infra/docker/docker-compose.ssl.yml up -d
+```
+未提供证书时请勿挂载 ssl 覆盖，避免 nginx 因缺失证书文件崩溃。
 
-# 获取证书
-sudo certbot --nginx -d your-domain.com
+### Supabase 混合部署（可选）
+生产可将 PostgreSQL / Auth / Storage 托管至 Supabase，VPS 仅运行应用层：
+```bash
+docker compose up -d api ai-engine celery-worker celery-beat nginx
+make migrate && make import-all
 ```
 
----
-
 ### 常用命令
-
 ```bash
-# 服务管理
 make up              # 启动所有服务
 make down            # 停止所有服务
-make restart         # 重启所有服务
-make build           # 构建所有镜像
-make rebuild         # 重新构建并启动
-make ps              # 查看服务状态
+make restart         # 重启
+make build           # 构建镜像
+make ps              # 服务状态
 
-# 日志查看
-make logs            # 查看所有日志
-make logs-api        # 查看 API 服务日志
-make logs-ai         # 查看 AI 引擎日志
-make logs-mobile     # 查看移动端日志
-make logs-admin      # 查看管理后台日志
+make logs-api        # API 日志
+make logs-ai         # AI 引擎日志
+make logs-student    # 学生端 Web 日志
+make logs-admin      # 管理后台日志
 
-# 数据管理
-make migrate         # 运行数据库迁移
-make seed            # 填充初始数据
-make import-kp       # 导入知识点数据
-make import-q        # 导入题目数据
-make import-vocab    # 导入词汇数据
-make import-all      # 导入所有数据
+make migrate         # 数据库迁移
+make seed            # 初始数据
+make import-kp       # 导入知识点
+make import-q        # 导入题目
+make import-vocab    # 导入词汇
+make import-all      # 导入全部
 
-# 开发调试
-make dev             # 启动开发环境（热重载）
-make test            # 运行测试
-make lint            # 代码检查
-make format          # 代码格式化
-make shell-api       # 进入 API 容器
-make shell-ai        # 进入 AI 引擎容器
-
-# 备份恢复
-make backup          # 备份数据库
-make restore         # 恢复数据
-make clean           # 清理无用数据
+make test / lint / format / shell-api / shell-ai
+make backup / restore / clean
 ```
 
 ## AI 供应商配置
-
-SmartLearn AI 支持多 AI 供应商架构，按需配置即可：
-
 | 供应商 | 用途 | 环境变量 |
 |--------|------|----------|
 | OpenAI | 通用 LLM / 嵌入 | `OPENAI_API_KEY` |
 | GLM (智谱 AI) | 默认聊天主供应商 | `GLM_API_KEY` |
-| DeepSeek | 高难度数学问题 | `DEEPSEEK_API_KEY` |
-| SiliconFlow (硅基流动) | 嵌入 / TTS / STT | `SILICONFLOW_API_KEY` |
+| DeepSeek | 高难度数学 | `DEEPSEEK_API_KEY` |
+| SiliconFlow | 嵌入 / TTS / STT | `SILICONFLOW_API_KEY` |
 | CogView (智谱 AI) | 图像生成 | `COGVIEW_API_KEY` |
 
-至少配置一个供应商即可启用 AI 功能。未配置任何 API Key 时，AI 引擎将运行在离线模式（使用模拟响应）。
+至少配置一个供应商即可启用 AI 功能。
 
 ## 游戏模块
-
-平台内置 25 款学习游戏：
-
-| 类别 | 游戏数量 | 示例 |
-|------|---------|------|
-| 英语单词游戏 | 16 | 单词拼写、词义匹配、单词雨、听音选词、闪卡速记 |
-| 数学游戏 | 4 | 速算挑战、公式配对、几何拼图、函数绘图 |
-| 跨科目/社交游戏 | 5 | 知识竞赛、组队挑战、排行榜对战、每日挑战、成就收集 |
-
-游戏配置位于 `data/games/games-config.json`，排行榜配置位于 `data/games/leaderboard-config.json`。
+平台内置 **25 款**学习游戏（`data/games/games-config.json`）：
+- 英语单词游戏 16 款、数学游戏 4 款、跨科目 / 社交游戏 5 款
+- 排行榜配置：`data/games/leaderboard-config.json`
 
 ## API 文档
-
-启动服务后，访问以下地址查看 API 文档：
-
-### API 服务 (Port 8000)
-- Swagger UI: http://localhost:8000/docs
-- ReDoc: http://localhost:8000/redoc
-
-主要端点：
-- `/api/v1/auth` - 认证
-- `/api/v1/knowledge` - 知识点管理
-- `/api/v1/questions` - 题库管理
-- `/api/v1/vocab` - 词汇学习
-- `/api/v1/games` - 游戏管理
-- `/api/v1/wrong-questions` - 错题本
-
-### AI 引擎 (Port 8001)
-- Swagger UI: http://localhost:8001/docs
-- ReDoc: http://localhost:8001/redoc
-
-主要端点：
-- `/chat` - AI 对话
-- `/rag/query` - 知识库检索
-- `/rag/explain` - 知识点讲解
-- `/rag/similar` - 相似题目检索
-- `/study/plan` - 学习计划生成
-- `/media/tts` - 文本转语音
-- `/media/stt` - 语音转文本
-- `/media/image` - 图像生成
-- `/moderation` - 内容审核
-- `/prompts` - Prompt 模板管理
+- API 服务 (8000): Swagger `http://localhost:8000/docs`，ReDoc `http://localhost:8000/redoc`
+  - `/api/v1/auth`、`/api/v1/knowledge`、`/api/v1/questions`、`/api/v1/vocab`、`/api/v1/games`、`/api/v1/wrong-questions`
+- AI 引擎 (8001): Swagger `http://localhost:8001/docs`
+  - `/chat`、`/rag/query`、`/rag/explain`、`/rag/similar`、`/study/plan`、`/media/tts`、`/media/stt`、`/media/image`、`/moderation`、`/prompts`
 
 ## 开发指南
-
-### 本地开发
-
-1. 安装依赖
+### 本地依赖
 ```bash
-# API 服务
-cd services/api
-pip install -r requirements.txt
-
-# AI 引擎
-cd services/ai-engine
-pip install -r requirements.txt
+cd services/api && pip install -r requirements.txt
+cd services/ai-engine && pip install -r requirements.txt
 ```
-
-2. 启动开发环境（热重载）
-```bash
-make dev
-```
-
-### 开发环境覆盖
-
-开发环境使用 `infra/docker/docker-compose.dev.yml` 覆盖配置，自动挂载源代码目录并启用热重载，同时暴露数据库和 Redis 端口到宿主机。
-
 ### 代码规范
-
-- Python: 遵循 PEP 8 规范
-- TypeScript: 使用 ESLint + Prettier
-- 提交信息: 遵循 Conventional Commits 规范
+- Python: PEP 8
+- TypeScript: ESLint + Prettier
+- 提交信息: Conventional Commits
 
 ## 数据校验
-
-项目包含完整的数据质量保障脚本：
-
-```bash
-# 验证知识点引用完整性
-npx tsx scripts/verify-kp-refs.ts
-
-# 数据格式校验
-npx tsx scripts/validate-data.ts
-```
+数据导入脚本（`services/api/scripts/`）在导入时会校验知识点引用完整性（`knowledge_points` 必须存在于 `data/knowledge-points/*`）。真题 / 习题样例遵循 `data/exam-papers/schema.json`、`data/exercise-books/schema.json`。
 
 ## 许可证
-
 MIT License
 
 ## 贡献指南
-
-欢迎提交 Issue 和 Pull Request。请确保：
-
-1. 代码通过所有测试
-2. 遵循代码规范
-3. 提交信息清晰明确
+欢迎提交 Issue 与 Pull Request。请确保代码通过测试、遵循规范、提交信息清晰。
 
 ## 联系方式
-
 - 项目主页: https://github.com/maxiuquan/smartlearn-ai
 - 问题反馈: https://github.com/maxiuquan/smartlearn-ai/issues

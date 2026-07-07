@@ -124,3 +124,7 @@ node_modules/.bin/electron
 local.config.js
 local.config.json
 *.py,cover
+
+# WorkBuddy local state (never commit)
+.workbuddy/
+**/.workbuddy/

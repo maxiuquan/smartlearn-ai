@@ -1,8 +1,14 @@
 """
 Prompt 管理与评测路由
 """
-from fastapi import APIRouter, HTTPException
+import logging
+
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
+
+from app.auth import require_auth, require_service_or_admin
+
+logger = logging.getLogger("ai_engine.routers.prompt")
 
 router = APIRouter(prefix="/prompts", tags=["Prompt 管理"])
 
@@ -209,7 +215,7 @@ async def get_prompt(template_id: str):
 
 
 @router.post("/render", response_model=PromptRenderResponse)
-async def render_prompt(request: PromptRenderRequest):
+async def render_prompt(request: PromptRenderRequest, _auth: dict = Depends(require_auth)):
     """
     渲染 Prompt 模板
 
@@ -229,16 +235,40 @@ async def render_prompt(request: PromptRenderRequest):
 
 
 @router.post("/{template_id}")
-async def create_or_update_prompt(template_id: str, request: PromptCreateRequest):
-    """创建或更新 Prompt 模板"""
+async def create_or_update_prompt(
+    template_id: str,
+    request: PromptCreateRequest,
+    creds: dict = Depends(require_service_or_admin),
+):
+    """
+    更新 Prompt 模板（C3 越权写防护）
+
+    仅允许持有 service key（X-Api-Key=AI_ENGINE_API_KEY）或
+    `role=admin` 的 JWT 修改；普通用户 JWT → 403。
+    目标不存在 → 404（不泄露存在性）。
+    成功修改记录审计日志。
+    """
+    # 不泄露存在性：目标不存在统一返回 404
+    if template_id not in PROMPT_TEMPLATES:
+        raise HTTPException(status_code=404, detail=f"模板不存在: {template_id}")
+
     PROMPT_TEMPLATES[template_id] = {
         "name": request.name,
         "version": request.version,
         "description": request.description,
         "template": request.template,
     }
+
+    # 审计日志
+    actor = creds.get("sub") or creds.get("auth_type")
+    logger.warning(
+        "审计[AUDIT]: prompt 模板被修改 template_id=%s actor=%s role=%s",
+        template_id,
+        actor,
+        creds.get("role"),
+    )
     return {
         "status": "ok",
         "template_id": template_id,
-        "message": f"模板 '{template_id}' 已创建/更新",
+        "message": f"模板 '{template_id}' 已更新",
     }

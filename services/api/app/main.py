@@ -3,6 +3,7 @@ SmartLearn AI - FastAPI 主服务
 """
 import logging
 import os
+import sys
 
 from contextlib import asynccontextmanager
 
@@ -36,9 +37,16 @@ async def lifespan(app: FastAPI):
 
 def _startup_security_check() -> None:
     """启动时安全检查（可选模块未配置只 warning，不阻塞启动）"""
-    if settings.JWT_SECRET == "change-me-in-production":
+    # JWT 密钥强度校验（生产环境 fail-fast）
+    try:
+        settings.validate_jwt_secret()
+    except ValueError as exc:
+        if settings.is_production:
+            logger.error("❌ 生产环境启动失败（JWT 安全校验未通过）：%s", exc)
+            sys.exit(1)
         logger.warning(
-            "⚠️  JWT_SECRET 使用默认值，生产环境请设置环境变量 JWT_SECRET"
+            "⚠️  JWT 安全校验未通过（非生产环境仅告警，生产环境将拒绝启动）：%s",
+            exc,
         )
     if not settings.DATABASE_URL and settings.DB_PASSWORD == "postgres":
         logger.warning(

@@ -19,7 +19,7 @@ services:
     #   - "5432:5432"
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-smartlearn_user}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?err: POSTGRES_PASSWORD 必须设置}
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:?err: POSTGRES_PASSWORD 必须设置"
       POSTGRES_DB: ${POSTGRES_DB:-smartlearn}
     volumes:
       - pgdata:/var/lib/postgresql/data
@@ -48,7 +48,7 @@ services:
     # 内部服务不暴露宿主机端口
     # ports:
     #   - "6379:6379"
-    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:?err: REDIS_PASSWORD 必须设置}
+    command: "redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:?err: REDIS_PASSWORD 必须设置"
     volumes:
       - redisdata:/data
     networks:
@@ -159,21 +159,19 @@ services:
       - POSTGRES_SERVER=db
       - POSTGRES_PORT=5432
       - POSTGRES_USER=${POSTGRES_USER:-smartlearn_user}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?err: POSTGRES_PASSWORD 必须设置}
+      - "POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?err: POSTGRES_PASSWORD 必须设置"
       - POSTGRES_DB=${POSTGRES_DB:-smartlearn}
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - REDIS_PASSWORD=${REDIS_PASSWORD:?err: REDIS_PASSWORD 必须设置}
+      - "REDIS_PASSWORD=${REDIS_PASSWORD:?err: REDIS_PASSWORD 必须设置"
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - OPENAI_API_BASE=${OPENAI_API_BASE:-https://api.openai.com/v1}
-      - JWT_SECRET=${JWT_SECRET:?err: JWT_SECRET 必须设置}
+      - "JWT_SECRET=${JWT_SECRET:?err: JWT_SECRET 必须设置"
       - JWT_ALGORITHM=${JWT_ALGORITHM:-HS256}
       - JWT_ACCESS_EXPIRE_MINUTES=${JWT_ACCESS_EXPIRE_MINUTES:-30}
       - JWT_REFRESH_EXPIRE_DAYS=${JWT_REFRESH_EXPIRE_DAYS:-7}
       - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:3000,http://localhost:3001}
       - ENVIRONMENT=${ENVIRONMENT:-development}
-      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY:?err: MINIO_ACCESS_KEY 必须设置}
-      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY:?err: MINIO_SECRET_KEY 必须设置}
     volumes:
       - ./data:/app/data:ro
       - api-logs:/app/logs
@@ -211,7 +209,7 @@ services:
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - REDIS_PASSWORD=${REDIS_PASSWORD:?err: REDIS_PASSWORD 必须设置}
+      - "REDIS_PASSWORD=${REDIS_PASSWORD:?err: REDIS_PASSWORD 必须设置"
       # OpenAI 兼容
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       - OPENAI_BASE_URL=${OPENAI_BASE_URL:-https://api.openai.com/v1}
@@ -238,6 +236,11 @@ services:
       - ENVIRONMENT=${ENVIRONMENT:-development}
       - DEBUG=${DEBUG:-false}
       - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:3000,http://localhost:3001,http://localhost:5173}
+      # ── 鉴权（与 api 共享 JWT_SECRET；AI_ENGINE_AUTH_ENABLED=true 时缺密钥即启动失败）──
+      - "JWT_SECRET=${JWT_SECRET:?err: JWT_SECRET 必须设置"
+      - JWT_ALGORITHM=${JWT_ALGORITHM:-HS256}
+      - AI_ENGINE_AUTH_ENABLED=${AI_ENGINE_AUTH_ENABLED:-true}
+      - "AI_ENGINE_API_KEY=${AI_ENGINE_API_KEY:?err: AI_ENGINE_API_KEY 必须设置"
     volumes:
       - ./data:/app/data:ro
       - ai-models:/app/models
@@ -261,36 +264,6 @@ services:
         reservations:
           cpus: '1'
           memory: 1G
-
-  # ── 移动端 Web ──
-  mobile-web:
-    build:
-      context: .
-      dockerfile: apps/mobile-web/Dockerfile.mobile
-    container_name: smartlearn-mobile-web
-    restart: unless-stopped
-    environment:
-      - API_BASE_URL=http://api:8000
-      - AI_ENGINE_URL=http://ai-engine:8001
-    depends_on:
-      - api
-      - ai-engine
-    networks:
-      - smartlearn-network
-    healthcheck:
-      test: ["CMD", "wget", "-q", "-O-", "http://localhost/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 256M
-        reservations:
-          cpus: '0.25'
-          memory: 64M
 
   # ── 管理后台 ──
   admin:
@@ -330,6 +303,8 @@ services:
     environment:
       - API_BASE_URL=http://api:8000
       - AI_ENGINE_URL=http://ai-engine:8001
+      # 透传给 nginx 启动脚本，用于向 /word-games 反代注入 service key 以通过 ai-engine 鉴权（C1）。
+      - AI_ENGINE_API_KEY=${AI_ENGINE_API_KEY}
     depends_on:
       - api
       - ai-engine
@@ -350,36 +325,6 @@ services:
           cpus: '0.25'
           memory: 64M
 
-  # ── Web 前端 (Next.js) ──
-  web:
-    build:
-      context: .
-      dockerfile: apps/web/Dockerfile.web
-    container_name: smartlearn-web
-    restart: unless-stopped
-    environment:
-      - API_BASE_URL=http://api:8000
-      - AI_ENGINE_URL=http://ai-engine:8001
-    depends_on:
-      - api
-      - ai-engine
-    networks:
-      - smartlearn-network
-    healthcheck:
-      test: ["CMD", "wget", "-q", "-O-", "http://localhost:3000"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 15s
-    deploy:
-      resources:
-        limits:
-          cpus: '2'
-          memory: 512M
-        reservations:
-          cpus: '0.5'
-          memory: 128M
-
   # ── Celery Worker (异步任务) ──
   celery-worker:
     build:
@@ -394,11 +339,11 @@ services:
       - POSTGRES_SERVER=db
       - POSTGRES_PORT=5432
       - POSTGRES_USER=${POSTGRES_USER:-smartlearn_user}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?err: POSTGRES_PASSWORD 必须设置}
+      - "POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?err: POSTGRES_PASSWORD 必须设置"
       - POSTGRES_DB=${POSTGRES_DB:-smartlearn}
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - REDIS_PASSWORD=${REDIS_PASSWORD:?err: REDIS_PASSWORD 必须设置}
+      - "REDIS_PASSWORD=${REDIS_PASSWORD:?err: REDIS_PASSWORD 必须设置"
     depends_on:
       - db
       - redis
@@ -426,7 +371,7 @@ services:
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - REDIS_PASSWORD=${REDIS_PASSWORD:?err: REDIS_PASSWORD 必须设置}
+      - "REDIS_PASSWORD=${REDIS_PASSWORD:?err: REDIS_PASSWORD 必须设置"
     depends_on:
       - redis
     networks:
@@ -450,15 +395,15 @@ services:
       - "${NGINX_HTTPS_PORT:-443}:443"
     volumes:
       - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./infra/nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./infra/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./infra/nginx/conf.d/frontend.conf:/etc/nginx/conf.d/frontend.conf:ro
+      - ./infra/nginx/conf.d/api.conf:/etc/nginx/conf.d/api.conf:ro
       - nginx-logs:/var/log/nginx
       - ./infra/nginx/ssl:/etc/nginx/ssl:ro
       - ./infra/nginx/certbot/www:/var/www/certbot:ro
     depends_on:
       - api
-      - mobile-web
       - admin
-      - web
       - student-web
     networks:
       - smartlearn-network

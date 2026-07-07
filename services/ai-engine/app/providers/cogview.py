@@ -5,6 +5,7 @@ CogView 图像生成供应商
 通过智谱 API 调用（非 OpenAI 兼容接口）。
 """
 
+import logging
 import sys
 import time
 from pathlib import Path
@@ -14,6 +15,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
 from config import settings
 from .base import BaseImageProvider, BaseProvider
+
+logger = logging.getLogger("ai_engine.providers.cogview")
 
 
 class CogViewProvider(BaseImageProvider):
@@ -88,6 +91,12 @@ class CogViewProvider(BaseImageProvider):
 
             data = resp.json()
             urls = [img.get("url", "") for img in data.get("data", [])]
+            if not any(urls):
+                # 在线模式返回不合法（无有效图片 URL）时，明确抛出而非静默占位
+                raise RuntimeError(
+                    f"[cogview] 图像生成返回不合法：响应中未包含有效图片 URL，"
+                    f"model={self._model_name}"
+                )
             print(
                 f"[cogview] image_generation | "
                 f"model={self._model_name} | "
@@ -98,8 +107,15 @@ class CogViewProvider(BaseImageProvider):
 
         except Exception as e:
             elapsed = time.time() - start_time
-            print(f"[cogview] image_generation 失败 (耗时 {elapsed:.2f}s): {e}")
-            return self._mock_image(prompt)
+            logger.error(
+                "[cogview] image_generation 在线调用失败 (耗时 %.2fs): %s",
+                elapsed,
+                e,
+            )
+            # 在线模式：异常时不再静默返回占位 SVG，直接抛出清晰异常
+            raise RuntimeError(
+                f"[cogview] 图像生成在线调用失败: {e}"
+            ) from e
 
     def _mock_image(self, prompt: str) -> list[str]:
         """离线模式：返回占位图"""

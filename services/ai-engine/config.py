@@ -44,7 +44,31 @@ class Settings(BaseSettings):
     
     # CORS
     CORS_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:3001", "http://localhost:5173"]
-    
+
+    # ============================================================
+    # 鉴权与安全防护
+    # ============================================================
+    # 全局鉴权开关（默认开启；生产环境必须开启）
+    AI_ENGINE_AUTH_ENABLED: bool = True
+    # 服务间 / 网关凭证：请求头 X-Api-Key 等于此值即通过鉴权
+    AI_ENGINE_API_KEY: str = ""
+    # 复用 api 服务的 JWT 签名密钥（同一密钥，由 compose 注入相同值）
+    JWT_SECRET: str = ""
+    JWT_ALGORITHM: str = "HS256"
+    # SSRF 防护：允许服务端出网抓取的域名白名单（逗号分隔）
+    AI_ENGINE_SSRF_ALLOWLIST: str = ""
+
+    @property
+    def ssrf_allowlist_list(self) -> List[str]:
+        """将逗号分隔的 SSRF 白名单解析为列表。"""
+        if not self.AI_ENGINE_SSRF_ALLOWLIST:
+            return []
+        return [
+            item.strip()
+            for item in self.AI_ENGINE_SSRF_ALLOWLIST.split(",")
+            if item.strip()
+        ]
+
     # ============================================================
     # LLM / OpenAI 配置 (兼容旧版)
     # ============================================================

@@ -6,11 +6,11 @@ FROM node:20-alpine AS build
 
 WORKDIR /app
 
-# 复制依赖定义文件
+# 复制依赖定义文件（无 package-lock.json，使用 npm install 兜底）
 COPY apps/admin/package*.json ./
 
 # 安装依赖
-RUN npm ci
+RUN npm install
 
 # 复制源代码
 COPY apps/admin .
@@ -24,12 +24,12 @@ FROM nginx:alpine
 # 复制构建产物
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# 复制 nginx 配置
+# 复制本地 nginx 配置（SPA fallback + /api 反向代理）
 COPY apps/admin/nginx.conf /etc/nginx/conf.d/default.conf
 
-# 健康检查
+# 健康检查（nginx:alpine 无 curl，使用 wget）
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost/ || exit 1
+    CMD wget -q -O- http://localhost/ || exit 1
 
 EXPOSE 80
 

@@ -1,10 +1,11 @@
 """
 内容安全审核路由
 """
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
 from app.providers import get_router
+from app.auth import require_auth
 
 router = APIRouter(prefix="/moderation", tags=["内容安全"])
 
@@ -67,7 +68,7 @@ def _to_moderation_response(result: dict) -> ModerationResponse:
 # ─── 路由 ───────────────────────────────────────────────────
 
 @router.post("", response_model=ModerationResponse)
-async def moderate_content(request: ModerationRequest):
+async def moderate_content(request: ModerationRequest, _auth: dict = Depends(require_auth)):
     """
     内容安全审核
 
@@ -86,7 +87,7 @@ async def moderate_content(request: ModerationRequest):
 
 
 @router.post("/batch", response_model=list[ModerationResponse])
-async def moderate_batch(request: BatchModerationRequest):
+async def moderate_batch(request: BatchModerationRequest, _auth: dict = Depends(require_auth)):
     """
     批量内容审核
 
