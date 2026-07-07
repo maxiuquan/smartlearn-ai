@@ -469,16 +469,9 @@ async def create_backup(
     filename = f"{ts}.sql.gz"
     filepath = bdir / filename
 
-    # 用同步 URL（不含 +asyncpg）
+    # 用同步 URL（不含 +asyncpg），pg_dump 直接用连接串
     db_url = settings.database_url_sync
-    # 设置环境变量传密码，避免命令行暴露
     env = os.environ.copy()
-    env["PGPASSWORD"] = settings.POSTGRES_PASSWORD or settings.DB_PASSWORD
-
-    host = settings.POSTGRES_SERVER or settings.DB_HOST
-    port = str(settings.POSTGRES_PORT or settings.DB_PORT)
-    user = settings.POSTGRES_USER or settings.DB_USER
-    name = settings.POSTGRES_DB or settings.DB_NAME
 
     try:
         # pg_dump | gzip > file
@@ -492,14 +485,7 @@ async def create_backup(
             dump_proc = subprocess.Popen(
                 [
                     "pg_dump",
-                    "-h",
-                    host,
-                    "-p",
-                    port,
-                    "-U",
-                    user,
-                    "-d",
-                    name,
+                    db_url,
                 ],
                 stdout=proc.stdin,
                 stderr=subprocess.PIPE,
@@ -574,12 +560,7 @@ async def restore_backup(
         )
 
     env = os.environ.copy()
-    env["PGPASSWORD"] = settings.POSTGRES_PASSWORD or settings.DB_PASSWORD
-
-    host = settings.POSTGRES_SERVER or settings.DB_HOST
-    port = str(settings.POSTGRES_PORT or settings.DB_PORT)
-    user = settings.POSTGRES_USER or settings.DB_USER
-    name = settings.POSTGRES_DB or settings.DB_NAME
+    db_url = settings.database_url_sync
 
     try:
         with filepath.open("rb") as f_in:
@@ -592,14 +573,7 @@ async def restore_backup(
             psql_proc = subprocess.Popen(
                 [
                     "psql",
-                    "-h",
-                    host,
-                    "-p",
-                    port,
-                    "-U",
-                    user,
-                    "-d",
-                    name,
+                    db_url,
                     "--set",
                     "ON_ERROR_STOP=on",
                 ],

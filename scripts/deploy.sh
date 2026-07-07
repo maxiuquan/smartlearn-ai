@@ -11,7 +11,7 @@
 #
 # 前置条件:
 #   - 已安装 Docker 与 Docker Compose v2
-#   - 已配置好 .env 文件 (POSTGRES_PASSWORD/REDIS_PASSWORD/JWT_SECRET 等)
+#   - 已配置好 .env 文件 (DATABASE_URL / REDIS_URL / JWT_SECRET 等)
 #   - 域名 A 记录已指向本机 IP (如需 HTTPS)
 # ============================================================
 set -euo pipefail
@@ -68,7 +68,7 @@ if [ ! -f .env ]; then
     cp .env.example .env
     error "已生成 .env，请先编辑填入真实配置后重新运行本脚本:"
     error "  nano .env"
-    error "重点设置: POSTGRES_PASSWORD / REDIS_PASSWORD / JWT_SECRET / CORS_ORIGINS"
+    error "重点设置: DATABASE_URL / REDIS_URL / JWT_SECRET / CORS_ORIGINS"
     exit 1
   else
     error ".env 与 .env.example 均不存在，请先创建 .env"
@@ -115,8 +115,8 @@ check_secret() {
   esac
 }
 
-check_secret POSTGRES_PASSWORD
-check_secret REDIS_PASSWORD
+check_secret DATABASE_URL
+check_secret REDIS_URL
 check_secret JWT_SECRET
 ok "必要密钥校验通过"
 

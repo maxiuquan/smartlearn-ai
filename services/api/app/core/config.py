@@ -1,7 +1,10 @@
 """Application configuration via Pydantic settings.
 
-所有可选第三方服务（支付/短信/邮件/对象存储）均为 Optional，未配置时不阻塞启动。
-通过 `app.services.feature_flags` 检测各功能是否可用。
+配置策略：
+- 数据库/Redis 支持单一 URL 连接串（推荐），也兼容分散字段（向后兼容）
+- 所有可选第三方服务（支付/短信/邮件/对象存储）均为 Optional，未配置时不阻塞启动
+- AI 供应商支持 4 家（GLM/DeepSeek/SiliconFlow/CogView），至少配置一个即可
+- 通过 `app.services.feature_flags` 检测各功能是否可用
 """
 from typing import Optional
 
@@ -35,13 +38,18 @@ class Settings(BaseSettings):
     APP_VERSION: str = "1.0.0"
     DEBUG: bool = False
 
-    # ---------- Database ----------
+    # ---------- 数据库 (PostgreSQL) ----------
+    # 推荐：直接填完整连接串，自动优先于下面的分散字段
+    # 格式: postgresql://用户名:密码@主机:端口/数据库名
+    DATABASE_URL: Optional[str] = None
+
+    # 兼容：使用 compose 自带 db 容器时，由 POSTGRES_* 初始化数据库
+    # 若已填 DATABASE_URL，以下字段仅用于 db 容器初始化，应用连接以 DATABASE_URL 为准
     DB_HOST: str = "localhost"
     DB_PORT: int = 5432
     DB_USER: str = "smartlearn_user"
     DB_PASSWORD: str = "postgres"
     DB_NAME: str = "smartlearn"
-    # 兼容 docker-compose 注入的 POSTGRES_* 变量名
     POSTGRES_SERVER: Optional[str] = None
     POSTGRES_PORT: Optional[int] = None
     POSTGRES_USER: Optional[str] = None
@@ -49,6 +57,9 @@ class Settings(BaseSettings):
     POSTGRES_DB: Optional[str] = None
 
     # ---------- Redis ----------
+    # 推荐：直接填完整连接串，自动优先于分散字段
+    # 格式: redis://:密码@主机:端口/0  或  redis://主机:端口/0（无密码）
+    REDIS_URL: Optional[str] = None
     REDIS_HOST: str = "localhost"
     REDIS_PORT: int = 6379
     REDIS_PASSWORD: str = "redis"
@@ -62,17 +73,42 @@ class Settings(BaseSettings):
     # ---------- CORS ----------
     CORS_ORIGINS: str = "http://localhost:3000,http://localhost:3001"
 
-    # ---------- AI 服务（可选，至少一个即可）----------
+    # ---------- AI 供应商 (4 家，至少配置一个) ----------
+    # 1) GLM (智谱 AI) — 默认聊天主供应商，glm-4-flash 永久免费
+    GLM_API_KEY: Optional[str] = None
+    GLM_BASE_URL: str = "https://open.bigmodel.cn/api/paas/v4/"
+    GLM_MODEL: str = "glm-4-flash"
+
+    # 2) DeepSeek — 高难度推理，极低成本
+    DEEPSEEK_API_KEY: Optional[str] = None
+    DEEPSEEK_BASE_URL: str = "https://api.deepseek.com/v1"
+    DEEPSEEK_MODEL: str = "deepseek-chat"
+
+    # 3) SiliconFlow (硅基流动) — 嵌入/TTS/语音识别
+    SILICONFLOW_API_KEY: Optional[str] = None
+    SILICONFLOW_BASE_URL: str = "https://api.siliconflow.cn/v1"
+    SILICONFLOW_EMBEDDING_MODEL: str = "BAAI/bge-m3"
+    SILICONFLOW_TTS_MODEL: str = "CosyVoice"
+    SILICONFLOW_STT_MODEL: str = "SenseVoice"
+
+    # 4) CogView (智谱 AI) — 图像生成
+    COGVIEW_API_KEY: Optional[str] = None
+    COGVIEW_BASE_URL: str = "https://open.bigmodel.cn/api/paas/v4/"
+    COGVIEW_MODEL: str = "cogview-3-flash"
+
+    # 兼容旧字段（OpenAI 风格），保留但不再推荐
     OPENAI_API_KEY: Optional[str] = None
     OPENAI_API_BASE: str = "https://api.openai.com/v1"
     LLM_MODEL_NAME: str = "gpt-4o-mini"
     EMBEDDING_MODEL_NAME: str = "text-embedding-3-small"
 
-    # ---------- 对象存储 OSS（可选）----------
+    # ---------- 对象存储 OSS / S3 兼容（可选）----------
+    # 支持 S3 兼容协议：Cloudflare R2 / Backblaze B2 / 阿里云 OSS / MinIO
     OSS_ENDPOINT: Optional[str] = None
     OSS_ACCESS_KEY: Optional[str] = None
     OSS_SECRET_KEY: Optional[str] = None
     OSS_BUCKET: Optional[str] = None
+    OSS_REGION: Optional[str] = None  # R2 用 account_id，B2 用 region，阿里云可空
 
     # ---------- 支付（可选，未配置则支付功能不可用）----------
     WECHAT_APP_ID: Optional[str] = None
@@ -97,7 +133,21 @@ class Settings(BaseSettings):
     # ---------- 便捷属性 ----------
     @property
     def database_url(self) -> str:
-        """Build the async database URL."""
+        """异步数据库 URL（asyncpg 驱动）.
+
+        优先使用 DATABASE_URL 单一连接串；未配置则回退到分散字段拼接。
+        """
+        if self.DATABASE_URL:
+            url = self.DATABASE_URL.strip()
+            # 用户可能填的是 postgresql:// 或 postgres://
+            if url.startswith("postgresql://"):
+                return url.replace("postgresql://", "postgresql+asyncpg://", 1)
+            if url.startswith("postgres://"):
+                return url.replace("postgres://", "postgresql+asyncpg://", 1)
+            if url.startswith("postgresql+asyncpg://"):
+                return url
+            return url  # 兜底直接返回
+        # 回退：分散字段
         host = self.POSTGRES_SERVER or self.DB_HOST
         port = self.POSTGRES_PORT or self.DB_PORT
         user = self.POSTGRES_USER or self.DB_USER
@@ -107,7 +157,16 @@ class Settings(BaseSettings):
 
     @property
     def database_url_sync(self) -> str:
-        """Build the sync database URL for Celery/Alembic."""
+        """同步数据库 URL（用于 Celery/Alembic）."""
+        if self.DATABASE_URL:
+            url = self.DATABASE_URL.strip()
+            if url.startswith("postgresql+asyncpg://"):
+                return url.replace("postgresql+asyncpg://", "postgresql://", 1)
+            if url.startswith("postgresql://"):
+                return url
+            if url.startswith("postgres://"):
+                return url.replace("postgres://", "postgresql://", 1)
+            return url
         host = self.POSTGRES_SERVER or self.DB_HOST
         port = self.POSTGRES_PORT or self.DB_PORT
         user = self.POSTGRES_USER or self.DB_USER
@@ -117,7 +176,12 @@ class Settings(BaseSettings):
 
     @property
     def redis_url(self) -> str:
-        """Build the Redis connection URL."""
+        """Redis 连接 URL.
+
+        优先使用 REDIS_URL 单一连接串；未配置则回退到分散字段拼接。
+        """
+        if self.REDIS_URL:
+            return self.REDIS_URL.strip()
         return f"redis://:{self.REDIS_PASSWORD}@{self.REDIS_HOST}:{self.REDIS_PORT}/0"
 
     @property
@@ -131,6 +195,37 @@ class Settings(BaseSettings):
         return self.SMTP_FROM or self.SMTP_USER or "noreply@smartlearn.local"
 
     # ---------- 可选功能开关（运行时检测）----------
+    @property
+    def is_glm_enabled(self) -> bool:
+        return _is_set(self.GLM_API_KEY)
+
+    @property
+    def is_deepseek_enabled(self) -> bool:
+        return _is_set(self.DEEPSEEK_API_KEY)
+
+    @property
+    def is_siliconflow_enabled(self) -> bool:
+        return _is_set(self.SILICONFLOW_API_KEY)
+
+    @property
+    def is_cogview_enabled(self) -> bool:
+        return _is_set(self.COGVIEW_API_KEY)
+
+    @property
+    def is_openai_enabled(self) -> bool:
+        return _is_set(self.OPENAI_API_KEY)
+
+    @property
+    def is_ai_enabled(self) -> bool:
+        """任一 AI 供应商可用即视为启用."""
+        return any([
+            self.is_glm_enabled,
+            self.is_deepseek_enabled,
+            self.is_siliconflow_enabled,
+            self.is_cogview_enabled,
+            self.is_openai_enabled,
+        ])
+
     @property
     def is_oss_enabled(self) -> bool:
         return all(_is_set(x) for x in (self.OSS_ENDPOINT, self.OSS_ACCESS_KEY, self.OSS_SECRET_KEY, self.OSS_BUCKET))

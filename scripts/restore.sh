@@ -23,12 +23,22 @@ ok()    { echo -e "${GREEN}[OK]${NC} $*"; }
 warn()  { echo -e "${YELLOW}[WARN]${NC} $*"; }
 error() { echo -e "${RED}[ERROR]${NC} $*"; }
 
-# ── 数据库连接参数 ──
-DB_HOST="${DB_HOST:-${POSTGRES_HOST:-${POSTGRES_SERVER:-db}}}"
-DB_PORT="${DB_PORT:-${POSTGRES_PORT:-5432}}"
-DB_USER="${DB_USER:-${POSTGRES_USER:-smartlearn_user}}"
-DB_PASSWORD="${DB_PASSWORD:-${POSTGRES_PASSWORD:-}}"
-DB_NAME="${DB_NAME:-${POSTGRES_DB:-smartlearn}}"
+# ── 数据库连接 (优先使用 DATABASE_URL 单一连接串) ──
+if [ -n "${DATABASE_URL:-}" ]; then
+  DB_CONN="$DATABASE_URL"
+else
+  DB_HOST="${DB_HOST:-${POSTGRES_HOST:-${POSTGRES_SERVER:-db}}}"
+  DB_PORT="${DB_PORT:-${POSTGRES_PORT:-5432}}"
+  DB_USER="${DB_USER:-${POSTGRES_USER:-smartlearn_user}}"
+  DB_PASSWORD="${DB_PASSWORD:-${POSTGRES_PASSWORD:-}}"
+  DB_NAME="${DB_NAME:-${POSTGRES_DB:-smartlearn}}"
+  if [ -z "$DB_PASSWORD" ]; then
+    error "DATABASE_URL 未设置，且 DB_PASSWORD/POSTGRES_PASSWORD 也为空"
+    exit 1
+  fi
+  export PGPASSWORD="$DB_PASSWORD"
+  DB_CONN="host=$DB_HOST port=$DB_PORT user=$DB_USER dbname=$DB_NAME"
+fi
 
 # 项目根目录
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -47,7 +57,6 @@ TARGET="$1"
 
 # ── 解析备份文件路径 ──
 if [ "$TARGET" = "latest" ]; then
-  # 找最近的 .sql.gz
   BACKUP_FILE="$(ls -t "$BACKUP_DIR"/*.sql.gz 2>/dev/null | head -n 1 || true)"
   if [ -z "$BACKUP_FILE" ]; then
     error "在 $BACKUP_DIR 中未找到任何 .sql.gz 备份文件"
@@ -55,10 +64,8 @@ if [ "$TARGET" = "latest" ]; then
   fi
   info "已选择最近备份: $BACKUP_FILE"
 elif [[ "$TARGET" = /* ]]; then
-  # 绝对路径
   BACKUP_FILE="$TARGET"
 else
-  # 相对文件名，从 backups/ 下查找
   BACKUP_FILE="${BACKUP_DIR}/${TARGET}"
 fi
 
@@ -75,15 +82,13 @@ if [ ! -s "$BACKUP_FILE" ]; then
   exit 1
 fi
 
-# 文件大小
 FILE_SIZE="$(du -h "$BACKUP_FILE" | cut -f1)"
 
 # ── 二次确认 ──
 echo ""
 warn "============================================================"
 warn "  ⚠️  恢复操作将覆盖数据库现有数据!"
-warn "  目标数据库: $DB_NAME @ $DB_HOST:$DB_PORT"
-warn "  备份文件:   $BACKUP_FILE ($FILE_SIZE)"
+warn "  备份文件: $BACKUP_FILE ($FILE_SIZE)"
 warn "============================================================"
 echo ""
 read -r -p "确认要继续恢复吗? 输入 yes 继续，其他取消: " CONFIRM
@@ -92,44 +97,26 @@ if [ "$CONFIRM" != "yes" ]; then
   exit 0
 fi
 
-# ── 校验密码 ──
-if [ -z "$DB_PASSWORD" ]; then
-  error "DB_PASSWORD / POSTGRES_PASSWORD 未设置"
-  exit 1
-fi
-
 info "开始恢复数据库..."
 info "  备份文件: $BACKUP_FILE ($FILE_SIZE)"
-info "  目标:     $DB_NAME @ $DB_HOST:$DB_PORT"
-
-export PGPASSWORD="$DB_PASSWORD"
 
 # ── 执行恢复 (gunzip 解压 + psql 导入) ──
 if command -v psql >/dev/null 2>&1; then
-  gunzip -c "$BACKUP_FILE" | psql \
-    -h "$DB_HOST" \
-    -p "$DB_PORT" \
-    -U "$DB_USER" \
-    -d "$DB_NAME" \
-    -v ON_ERROR_STOP=0
+  gunzip -c "$BACKUP_FILE" | psql "$DB_CONN" -v ON_ERROR_STOP=0
 else
-  # 通过 docker compose 在 db 容器中执行
   COMPOSE="docker compose -f ${PROJECT_ROOT}/docker-compose.yml -f ${PROJECT_ROOT}/infra/docker/docker-compose.prod.yml"
   error "未找到 psql 命令，请通过 docker compose 调用:"
-  error "  gunzip -c \"$BACKUP_FILE\" | $COMPOSE exec -T db psql -U $DB_USER -d $DB_NAME"
-  error ""
-  error "或先安装 postgresql-client: apt-get install -y postgresql-client"
+  error "  gunzip -c \"$BACKUP_FILE\" | $COMPOSE exec -T db psql \"\$DATABASE_URL\""
   exit 1
 fi
 
-unset PGPASSWORD
+unset PGPASSWORD 2>/dev/null || true
 
 echo ""
 ok "============================================================"
 ok "  数据库恢复完成!"
 ok "============================================================"
 ok "  恢复来源: $BACKUP_FILE"
-ok "  目标数据库: $DB_NAME @ $DB_HOST:$DB_PORT"
 echo ""
 info "建议执行以下检查:"
 info "  1. 查看服务日志: docker compose logs -f api"

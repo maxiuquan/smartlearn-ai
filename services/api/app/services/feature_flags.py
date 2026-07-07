@@ -7,6 +7,26 @@ from typing import Any
 from app.core.config import settings
 
 
+def is_ai_enabled() -> bool:
+    return settings.is_ai_enabled
+
+
+def is_glm_enabled() -> bool:
+    return settings.is_glm_enabled
+
+
+def is_deepseek_enabled() -> bool:
+    return settings.is_deepseek_enabled
+
+
+def is_siliconflow_enabled() -> bool:
+    return settings.is_siliconflow_enabled
+
+
+def is_cogview_enabled() -> bool:
+    return settings.is_cogview_enabled
+
+
 def is_oss_enabled() -> bool:
     return settings.is_oss_enabled
 
@@ -34,6 +54,17 @@ def is_email_enabled() -> bool:
 def get_feature_status() -> dict[str, Any]:
     """返回所有可选功能的可用性状态（供 admin 系统设置页展示）."""
     return {
+        "ai": {
+            "enabled": is_ai_enabled(),
+            "label": "AI 服务",
+            "description": "至少配置一家 AI 供应商即可",
+            "providers": {
+                "glm": is_glm_enabled(),
+                "deepseek": is_deepseek_enabled(),
+                "siliconflow": is_siliconflow_enabled(),
+                "cogview": is_cogview_enabled(),
+            },
+        },
         "oss": {
             "enabled": is_oss_enabled(),
             "label": "对象存储 (OSS)",

@@ -316,10 +316,12 @@ services:
     profiles: ["backup"]
     restart: "no"
     environment:
+      # 优先使用单一连接串；未设置则回退到分散字段
+      DATABASE_URL: ${DATABASE_URL:-}
       POSTGRES_HOST: ${POSTGRES_SERVER:-db}
       POSTGRES_PORT: ${POSTGRES_PORT:-5432}
       POSTGRES_USER: ${POSTGRES_USER:-smartlearn_user}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?err: POSTGRES_PASSWORD 必须设置}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-}
       POSTGRES_DB: ${POSTGRES_DB:-smartlearn}
       # 备份计划 (cron 表达式: 分 时 日 月 周)，默认每天 02:00
       BACKUP_CRON: ${BACKUP_CRON:-0 2 * * *}

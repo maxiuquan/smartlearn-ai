@@ -40,16 +40,33 @@ def _startup_security_check() -> None:
         logger.warning(
             "⚠️  JWT_SECRET 使用默认值，生产环境请设置环境变量 JWT_SECRET"
         )
-    if settings.DB_PASSWORD == "postgres":
+    if not settings.DATABASE_URL and settings.DB_PASSWORD == "postgres":
         logger.warning(
-            "⚠️  DB_PASSWORD 使用默认值，生产环境请设置环境变量 POSTGRES_PASSWORD"
+            "⚠️  数据库密码使用默认值，生产环境请设置 DATABASE_URL 或 POSTGRES_PASSWORD"
         )
-    if settings.REDIS_PASSWORD == "redis":
+    if not settings.REDIS_URL and settings.REDIS_PASSWORD == "redis":
         logger.warning(
-            "⚠️  REDIS_PASSWORD 使用默认值，生产环境请设置环境变量 REDIS_PASSWORD"
+            "⚠️  Redis 密码使用默认值，生产环境请设置 REDIS_URL 或 REDIS_PASSWORD"
         )
 
     # 可选第三方服务状态提示（不阻塞启动）
+    if not settings.is_ai_enabled:
+        logger.warning(
+            "⚠️  未配置任何 AI 供应商 API Key（GLM/DeepSeek/SiliconFlow/CogView），"
+            "AI 相关功能将不可用"
+        )
+    else:
+        ai_providers = []
+        if settings.is_glm_enabled:
+            ai_providers.append("GLM")
+        if settings.is_deepseek_enabled:
+            ai_providers.append("DeepSeek")
+        if settings.is_siliconflow_enabled:
+            ai_providers.append("SiliconFlow")
+        if settings.is_cogview_enabled:
+            ai_providers.append("CogView")
+        logger.info("✅ AI 供应商已配置：%s", "、".join(ai_providers))
+
     optional_status = [
         ("对象存储 OSS", settings.is_oss_enabled),
         ("微信支付", settings.is_wechat_pay_enabled),

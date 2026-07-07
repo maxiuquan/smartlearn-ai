@@ -23,12 +23,24 @@ ok()    { echo -e "${GREEN}[OK]${NC} $*"; }
 warn()  { echo -e "${YELLOW}[WARN]${NC} $*"; }
 error() { echo -e "${RED}[ERROR]${NC} $*"; }
 
-# ── 数据库连接参数 (从环境变量读，有默认值) ──
-DB_HOST="${DB_HOST:-${POSTGRES_HOST:-${POSTGRES_SERVER:-db}}}"
-DB_PORT="${DB_PORT:-${POSTGRES_PORT:-5432}}"
-DB_USER="${DB_USER:-${POSTGRES_USER:-smartlearn_user}}"
-DB_PASSWORD="${DB_PASSWORD:-${POSTGRES_PASSWORD:-}}"
-DB_NAME="${DB_NAME:-${POSTGRES_DB:-smartlearn}}"
+# ── 数据库连接 (优先使用 DATABASE_URL 单一连接串) ──
+# 若设置了 DATABASE_URL，直接用它；否则从分散字段拼接
+if [ -n "${DATABASE_URL:-}" ]; then
+  DB_CONN="$DATABASE_URL"
+else
+  DB_HOST="${DB_HOST:-${POSTGRES_HOST:-${POSTGRES_SERVER:-db}}}"
+  DB_PORT="${DB_PORT:-${POSTGRES_PORT:-5432}}"
+  DB_USER="${DB_USER:-${POSTGRES_USER:-smartlearn_user}}"
+  DB_PASSWORD="${DB_PASSWORD:-${POSTGRES_PASSWORD:-}}"
+  DB_NAME="${DB_NAME:-${POSTGRES_DB:-smartlearn}}"
+  if [ -z "$DB_PASSWORD" ]; then
+    error "DATABASE_URL 未设置，且 DB_PASSWORD/POSTGRES_PASSWORD 也为空"
+    error "请在 .env 中配置 DATABASE_URL 或 POSTGRES_PASSWORD"
+    exit 1
+  fi
+  export PGPASSWORD="$DB_PASSWORD"
+  DB_CONN="host=$DB_HOST port=$DB_PORT user=$DB_USER dbname=$DB_NAME"
+fi
 
 # 保留天数 (默认 7 天)
 RETAIN_DAYS="${BACKUP_RETAIN_DAYS:-7}"
@@ -42,42 +54,23 @@ mkdir -p "$BACKUP_DIR"
 TIMESTAMP="$(date +%Y%m%d_%H%M%S)"
 BACKUP_FILE="${BACKUP_DIR}/${TIMESTAMP}.sql.gz"
 
-# ── 校验参数 ──
-if [ -z "$DB_PASSWORD" ]; then
-  error "DB_PASSWORD / POSTGRES_PASSWORD 未设置"
-  error "请通过环境变量或 .env 提供"
-  exit 1
-fi
-
 info "开始备份 PostgreSQL 数据库..."
-info "  主机:   $DB_HOST:$DB_PORT"
-info "  用户:   $DB_USER"
-info "  数据库: $DB_NAME"
 info "  目标:   $BACKUP_FILE"
 
 # ── 执行 pg_dump 并压缩 ──
-# 检测是否在容器内运行 (有 PGPASSWORD 环境且能直连 pg_dump)
-export PGPASSWORD="$DB_PASSWORD"
-
 if command -v pg_dump >/dev/null 2>&1; then
-  # 宿主机有 pg_dump (本地或 db-backup 容器内)
-  pg_dump \
-    -h "$DB_HOST" \
-    -p "$DB_PORT" \
-    -U "$DB_USER" \
-    -d "$DB_NAME" \
+  pg_dump "$DB_CONN" \
     --no-owner --no-privileges \
     --clean --if-exists \
     | gzip -9 > "$BACKUP_FILE"
 else
-  # 通过 docker compose 在 db 容器中执行
   error "未找到 pg_dump 命令，请通过 docker compose 调用:"
   error "  docker compose -f docker-compose.yml -f infra/docker/docker-compose.prod.yml exec -T db \\"
-  error "    pg_dump -U $DB_USER $DB_NAME | gzip -9 > $BACKUP_FILE"
+  error "    pg_dump \"\$DATABASE_URL\" | gzip -9 > $BACKUP_FILE"
   exit 1
 fi
 
-unset PGPASSWORD
+unset PGPASSWORD 2>/dev/null || true
 
 # ── 校验备份文件 ──
 if [ ! -s "$BACKUP_FILE" ]; then
