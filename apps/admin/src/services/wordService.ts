@@ -1,4 +1,4 @@
-import { api, pageApi, PageParams } from './request';
+import request, { api, pageApi, PageParams } from './request';
 import { Word, WordBook, PaginatedResponse } from '@/types';
 
 // ========== 单词管理 ==========
@@ -45,8 +45,11 @@ export async function importWords(file: File, bookId: string): Promise<{ success
 
 // 导出单词
 export async function exportWords(bookId: string): Promise<Blob> {
-  const response = await fetch(`/api/words/export?bookId=${bookId}`);
-  return response.blob();
+  const response = await request.get('/words/export', {
+    params: { bookId },
+    responseType: 'blob',
+  });
+  return response.data as Blob;
 }
 
 // ========== 词书管理 ==========

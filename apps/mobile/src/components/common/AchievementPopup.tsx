@@ -2,7 +2,6 @@ import React from 'react';
 import { View, StyleSheet, Modal, TouchableWithoutFeedback } from 'react-native';
 import { Text, Button, useTheme } from 'react-native-paper';
 import { MaterialCommunityIcons } from 'react-native-vector-icons';
-import LottieView from 'lottie-react-native';
 import { theme, spacing, borderRadius } from '../../utils/theme';
 
 interface AchievementPopupProps {

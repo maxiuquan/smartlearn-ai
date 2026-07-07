@@ -3,8 +3,12 @@ RAG (Retrieval Augmented Generation) 服务
 
 从知识库中检索相关知识内容和相似题目，为 LLM 提供上下文增强。
 通过多供应商 AI 路由层获取嵌入向量（全局统一使用 SiliconFlow BAAI/bge-m3）。
+
+嵌入方法为 async（通过路由层异步调用），检索方法也为 async。
+初始化方法保持同步，内部使用 asyncio.run() 调用异步嵌入。
 """
 
+import asyncio
 import json
 import os
 import sys
@@ -41,12 +45,12 @@ class RAGService:
     # ── 初始化 ──────────────────────────────────────────────
 
     def initialize(self) -> None:
-        """加载所有知识数据并构建索引"""
+        """加载所有知识数据并构建索引（同步，内部用 asyncio.run 调用异步嵌入）"""
         if self._initialized:
             return
         self._load_knowledge_points()
         self._load_questions()
-        self._build_embeddings()
+        self._build_embeddings_sync()
         self._initialized = True
         print(
             f"RAG 服务已初始化: {len(self._knowledge_chunks)} 个知识点, "
@@ -144,14 +148,14 @@ class RAGService:
                 }
                 self._question_chunks.append(chunk)
 
-    def _build_embeddings(self) -> None:
-        """构建文本嵌入向量（通过路由层获取嵌入）"""
+    def _build_embeddings_sync(self) -> None:
+        """构建文本嵌入向量（同步包装，内部用 asyncio.run 调用异步嵌入）"""
         use_ai = settings.has_any_provider
 
         # 构建知识点嵌入
         if self._knowledge_chunks:
             if use_ai:
-                self._knowledge_embeddings = self._embed_texts(
+                self._knowledge_embeddings = self._embed_texts_sync(
                     [c["text"] for c in self._knowledge_chunks]
                 )
             else:
@@ -165,7 +169,7 @@ class RAGService:
         # 构建题目嵌入
         if self._question_chunks:
             if use_ai:
-                self._question_embeddings = self._embed_texts(
+                self._question_embeddings = self._embed_texts_sync(
                     [c["text"] for c in self._question_chunks]
                 )
             else:
@@ -178,10 +182,19 @@ class RAGService:
 
     # ── 嵌入方法 ────────────────────────────────────────────
 
-    def _embed_texts(self, texts: list[str]) -> np.ndarray:
-        """使用路由层生成文本嵌入（全局统一嵌入模型）"""
+    def _embed_texts_sync(self, texts: list[str]) -> np.ndarray:
+        """同步包装：使用路由层异步生成文本嵌入（用于初始化阶段）"""
         try:
-            embeddings = self._router.generate_embeddings(texts)
+            embeddings = asyncio.run(self._router.generate_embeddings(texts))
+            return np.array(embeddings, dtype=np.float32)
+        except Exception as e:
+            print(f"嵌入生成失败，回退到关键词向量: {e}")
+            return self._simple_keyword_embed(texts, [[] for _ in texts])
+
+    async def _embed_texts(self, texts: list[str]) -> np.ndarray:
+        """异步：使用路由层生成文本嵌入"""
+        try:
+            embeddings = await self._router.generate_embeddings(texts)
             return np.array(embeddings, dtype=np.float32)
         except Exception as e:
             print(f"嵌入生成失败，回退到关键词向量: {e}")
@@ -228,10 +241,10 @@ class RAGService:
                 vectors[i] /= norm
         return vectors
 
-    def _embed_query(self, query: str) -> np.ndarray:
-        """为查询文本生成嵌入向量（通过路由层）"""
+    async def _embed_query(self, query: str) -> np.ndarray:
+        """异步：为查询文本生成嵌入向量（通过路由层）"""
         try:
-            embedding = self._router.generate_embedding(query)
+            embedding = await self._router.generate_embedding(query)
             return np.array(embedding, dtype=np.float32)
         except Exception:
             pass
@@ -258,14 +271,14 @@ class RAGService:
         top_indices = np.argsort(scores)[::-1][:top_k]
         return [(int(i), float(scores[i])) for i in top_indices]
 
-    def retrieve_context(self, query: str, top_k: int | None = None) -> list[dict[str, Any]]:
-        """检索与查询最相关的知识点"""
+    async def retrieve_context(self, query: str, top_k: int | None = None) -> list[dict[str, Any]]:
+        """异步检索与查询最相关的知识点"""
         if not self._initialized:
             self.initialize()
         if top_k is None:
             top_k = settings.RAG_TOP_K
 
-        query_vec = self._embed_query(query)
+        query_vec = await self._embed_query(query)
         results = self._cosine_similarity_search(
             query_vec, self._knowledge_embeddings, top_k
         )
@@ -279,16 +292,16 @@ class RAGService:
             contexts.append(chunk)
         return contexts
 
-    def search_similar_questions(
+    async def search_similar_questions(
         self, query: str, top_k: int | None = None
     ) -> list[dict[str, Any]]:
-        """检索与查询最相似的题目"""
+        """异步检索与查询最相似的题目"""
         if not self._initialized:
             self.initialize()
         if top_k is None:
             top_k = settings.RAG_TOP_K
 
-        query_vec = self._embed_query(query)
+        query_vec = await self._embed_query(query)
         results = self._cosine_similarity_search(
             query_vec, self._question_embeddings, top_k
         )

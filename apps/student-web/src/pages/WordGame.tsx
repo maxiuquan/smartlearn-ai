@@ -79,7 +79,7 @@ export default function WordGame() {
         if (prev <= 1) {
           clearInterval(timerRef.current);
           // 时间到，自动结束
-          navigate(`/result/${sessionId}`, { replace: true });
+          navigate(`/result/${sessionId}?from=/game/${gameId}`, { replace: true });
           return 0;
         }
         return prev - 1;
@@ -131,7 +131,7 @@ export default function WordGame() {
             setGameOver(true);
             clearInterval(timerRef.current);
             setTimeout(() => {
-              navigate(`/result/${sessionId}`, { replace: true });
+              navigate(`/result/${sessionId}?from=/game/${gameId}`, { replace: true });
             }, 500);
           } else if (data.next_question) {
             setQuestion(data.next_question);
@@ -168,7 +168,7 @@ export default function WordGame() {
         <p className="text-5xl mb-4">😵</p>
         <p className="text-red-500 text-lg mb-4">{error}</p>
         <button
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/games')}
           className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
         >
           返回游戏大厅

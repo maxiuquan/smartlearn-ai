@@ -1,33 +1,160 @@
 import { Routes, Route } from 'react-router-dom';
+import Layout from './components/Layout';
+import ProtectedRoute from './components/ProtectedRoute';
+
+// 现有游戏页面
 import GameHall from './pages/GameHall';
 import WordGame from './pages/WordGame';
 import MathGame from './pages/MathGame';
 import CrossSubjectGame from './pages/CrossSubjectGame';
 import GameResult from './pages/GameResult';
 
+// 新增功能页面
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
+import VocabLearning from './pages/VocabLearning';
+import QuestionPractice from './pages/QuestionPractice';
+import PastExam from './pages/PastExam';
+import AITutor from './pages/AITutor';
+import Profile from './pages/Profile';
+
 function App() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <a href="/" className="text-2xl font-bold text-blue-600 hover:text-blue-700 transition-colors">
-            SmartLearn AI
-          </a>
-          <span className="text-sm text-gray-500">学生端 · 趣味学习</span>
-        </div>
-      </header>
+    <Routes>
+      {/* 登录页不需要 Layout / ProtectedRoute */}
+      <Route path="/login" element={<Login />} />
 
-      <main className="max-w-6xl mx-auto px-4 py-8">
-        <Routes>
-          <Route path="/" element={<GameHall />} />
-          <Route path="/game/:gameId" element={<WordGame />} />
-          <Route path="/math-game/:gameId" element={<MathGame />} />
-          <Route path="/cross-game/:gameId" element={<CrossSubjectGame />} />
-          <Route path="/result/:sessionId" element={<GameResult />} />
-          <Route path="*" element={<div className="text-center py-20"><p className="text-5xl mb-4">404</p><p className="text-gray-500 mb-4">页面不存在</p><a href="/" className="text-blue-500 hover:underline">返回首页</a></div>} />
-        </Routes>
-      </main>
-    </div>
+      {/* 受保护路由 — 共享 Layout 布局 */}
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <Dashboard />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/vocab"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <VocabLearning />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/practice"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <QuestionPractice />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/exam"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <PastExam />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/ai-tutor"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <AITutor />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <Profile />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* 游戏路由 — 受保护，但保留原有无 Layout 的全屏体验 */}
+      <Route
+        path="/games"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <GameHall />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/game/:gameId"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <WordGame />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/math-game/:gameId"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <MathGame />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/cross-game/:gameId"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <CrossSubjectGame />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/result/:sessionId"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <GameResult />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* 根路径重定向到 Dashboard */}
+      <Route path="/" element={<ProtectedRoute><Layout><Dashboard /></Layout></ProtectedRoute>} />
+
+      {/* 404 */}
+      <Route
+        path="*"
+        element={
+          <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
+            <p className="text-6xl mb-4">🔍</p>
+            <p className="text-2xl text-gray-600 mb-4">页面不存在</p>
+            <a href="/dashboard" className="text-blue-500 hover:underline">
+              返回首页
+            </a>
+          </div>
+        }
+      />
+    </Routes>
   );
 }
 

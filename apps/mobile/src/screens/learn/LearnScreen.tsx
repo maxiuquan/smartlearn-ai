@@ -33,8 +33,12 @@ export const LearnScreen: React.FC = () => {
     setIsLoading(true);
     try {
       const params = questionType !== 'all' ? { type: questionType } : {};
-      const response = await questionService.getRandomQuestions(10);
+      const response = await questionService.getRandomQuestions(10, params);
       useQuestionStore.getState().setQuestions(response);
+      // Reset the start time immediately after questions are loaded so that
+      // the first question's timeSpent is calculated from this point forward
+      // (previously startTime was 0, causing timeSpent ≈ 1.7 billion seconds).
+      setStartTime(Date.now());
     } catch (error) {
       console.error('Failed to load questions:', error);
     } finally {

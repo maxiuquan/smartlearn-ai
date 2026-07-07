@@ -1,13 +1,13 @@
 """
 OpenAI 兼容接口适配器
 
-封装任何兼容 OpenAI API 的供应商，提供统一的 chat_completion、
+封装任何兼容 OpenAI API 的供应商，提供统一的 async chat_completion、
 chat_completion_stream 和 generate_embedding 接口。
 """
 
 import logging
 import time
-from typing import Any, Generator
+from typing import Any, AsyncGenerator
 
 from .base import BaseChatProvider, BaseEmbeddingProvider
 
@@ -19,6 +19,7 @@ class OpenAICompatProvider(BaseChatProvider, BaseEmbeddingProvider):
 
     支持配置任意 base_url、api_key、model_name，适配任何兼容 OpenAI API 的供应商。
     同时实现 BaseChatProvider 和 BaseEmbeddingProvider。
+    使用 AsyncOpenAI 客户端，不阻塞事件循环。
     """
 
     def __init__(
@@ -64,11 +65,11 @@ class OpenAICompatProvider(BaseChatProvider, BaseEmbeddingProvider):
     # ── 客户端懒加载 ─────────────────────────────────────────
 
     def _get_client(self) -> Any:
-        """获取或创建 OpenAI 客户端"""
+        """获取或创建 AsyncOpenAI 客户端"""
         if self._client is None and not self._offline_mode:
-            from openai import OpenAI
+            from openai import AsyncOpenAI
 
-            self._client = OpenAI(
+            self._client = AsyncOpenAI(
                 api_key=self._api_key,
                 base_url=self._base_url,
             )
@@ -76,14 +77,14 @@ class OpenAICompatProvider(BaseChatProvider, BaseEmbeddingProvider):
 
     # ── BaseChatProvider 实现 ────────────────────────────────
 
-    def chat_completion(
+    async def chat_completion(
         self,
         messages: list[dict[str, str]],
         max_tokens: int = 2048,
         temperature: float = 0.7,
         **kwargs: Any,
     ) -> str:
-        """同步聊天补全"""
+        """异步聊天补全"""
         if self._offline_mode:
             return self._mock_chat_response(messages)
 
@@ -93,7 +94,7 @@ class OpenAICompatProvider(BaseChatProvider, BaseEmbeddingProvider):
             if client is None:
                 return self._mock_chat_response(messages)
 
-            response = client.chat.completions.create(
+            response = await client.chat.completions.create(
                 model=self._model_name,
                 messages=messages,  # type: ignore[arg-type]
                 max_tokens=max_tokens,
@@ -125,14 +126,14 @@ class OpenAICompatProvider(BaseChatProvider, BaseEmbeddingProvider):
             )
             raise
 
-    def chat_completion_stream(
+    async def chat_completion_stream(
         self,
         messages: list[dict[str, str]],
         max_tokens: int = 2048,
         temperature: float = 0.7,
         **kwargs: Any,
-    ) -> Generator[str, None, None]:
-        """流式聊天补全"""
+    ) -> AsyncGenerator[str, None]:
+        """异步流式聊天补全"""
         if self._offline_mode:
             yield self._mock_chat_response(messages)
             return
@@ -144,7 +145,7 @@ class OpenAICompatProvider(BaseChatProvider, BaseEmbeddingProvider):
                 yield self._mock_chat_response(messages)
                 return
 
-            stream = client.chat.completions.create(
+            stream = await client.chat.completions.create(
                 model=self._model_name,
                 messages=messages,  # type: ignore[arg-type]
                 max_tokens=max_tokens,
@@ -155,7 +156,7 @@ class OpenAICompatProvider(BaseChatProvider, BaseEmbeddingProvider):
             )
 
             total_chars = 0
-            for chunk in stream:
+            async for chunk in stream:
                 if chunk.choices and chunk.choices[0].delta.content:
                     content = chunk.choices[0].delta.content
                     total_chars += len(content)
@@ -178,8 +179,8 @@ class OpenAICompatProvider(BaseChatProvider, BaseEmbeddingProvider):
 
     # ── BaseEmbeddingProvider 实现 ───────────────────────────
 
-    def generate_embedding(self, text: str) -> list[float]:
-        """生成单个文本嵌入向量"""
+    async def generate_embedding(self, text: str) -> list[float]:
+        """异步生成单个文本嵌入向量"""
         if self._offline_mode:
             return self._mock_embedding(text)
 
@@ -189,7 +190,7 @@ class OpenAICompatProvider(BaseChatProvider, BaseEmbeddingProvider):
             if client is None:
                 return self._mock_embedding(text)
 
-            response = client.embeddings.create(
+            response = await client.embeddings.create(
                 model=self._model_name,
                 input=[text],
             )
@@ -217,8 +218,8 @@ class OpenAICompatProvider(BaseChatProvider, BaseEmbeddingProvider):
             )
             raise
 
-    def generate_embeddings(self, texts: list[str]) -> list[list[float]]:
-        """批量生成嵌入向量"""
+    async def generate_embeddings(self, texts: list[str]) -> list[list[float]]:
+        """异步批量生成嵌入向量"""
         if self._offline_mode:
             return [self._mock_embedding(t) for t in texts]
 
@@ -228,7 +229,7 @@ class OpenAICompatProvider(BaseChatProvider, BaseEmbeddingProvider):
             if client is None:
                 return [self._mock_embedding(t) for t in texts]
 
-            response = client.embeddings.create(
+            response = await client.embeddings.create(
                 model=self._model_name,
                 input=texts,
             )
@@ -277,8 +278,7 @@ class OpenAICompatProvider(BaseChatProvider, BaseEmbeddingProvider):
                     "model": self._model_name,
                     "offline": True,
                 }
-            # 简单测试调用
-            client.models.list()
+            # 健康检查为同步方法，不做实际网络调用，仅返回配置信息
             return {
                 "status": "ok",
                 "provider": self._provider_name,

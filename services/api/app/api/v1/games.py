@@ -2,13 +2,14 @@
 import json
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import func, select
+from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.deps import get_current_user_id, get_db
+from app.models.business import GameSession, UserGameProfile
 from app.schemas.games import (
     GameConfigResponse,
     GameDetailResponse,
@@ -61,6 +62,10 @@ def _build_game_config(game: dict) -> GameConfigResponse:
         name_en=game.get("name_en"),
         description=game.get("description", ""),
         category=game.get("category"),
+        type=game.get("type"),
+        icon=game.get("icon"),
+        min_level=game.get("min_level", 1),
+        subject=game.get("subject", "english"),
         subjects=game.get("subjects"),
         learning_goal=game.get("learning_goal"),
         core_mechanisms=game.get("core_mechanisms"),
@@ -84,6 +89,7 @@ def _build_game_config(game: dict) -> GameConfigResponse:
         stage=game.get("stage"),
         tech_notes=game.get("tech_notes"),
         business_value=game.get("business_value"),
+        config=game.get("config"),
     )
 
 
@@ -129,6 +135,16 @@ async def get_game_detail(
         )
 
     base = _build_game_config(game_data)
+
+    # 查询用户该游戏的最佳成绩
+    best_score_result = await db.execute(
+        select(func.max(GameSession.score)).where(
+            GameSession.user_id == user_id,
+            GameSession.game_id == game_id,
+        )
+    )
+    user_best_score = best_score_result.scalar()
+
     return GameDetailResponse(
         game_id=base.game_id,
         name=base.name,
@@ -152,6 +168,7 @@ async def get_game_detail(
         tech_notes=base.tech_notes,
         business_value=base.business_value,
         config=base.config,
+        user_best_score=user_best_score,
     )
 
 
@@ -172,62 +189,27 @@ async def submit_game_session(
     - 更新用户等级
     - 检查成就解锁
     """
-    from sqlalchemy import Table, Column, Integer, String, Float, DateTime, MetaData, func, text
-    from sqlalchemy.dialects.postgresql import JSONB
-
-    metadata = MetaData()
-
     # 计算经验值和金币
     xp_gained = max(1, body.score // 10)
     coins_gained = max(1, body.score // 20)
 
     # 记录游戏会话
-    gs = Table(
-        "game_sessions",
-        metadata,
-        Column("id", Integer, primary_key=True),
-        Column("user_id", Integer),
-        Column("game_id", String(100)),
-        Column("score", Integer),
-        Column("xp_gained", Integer),
-        Column("coins_gained", Integer),
-        Column("accuracy", Float),
-        Column("duration", Integer),
-        Column("started_at", DateTime),
-        Column("finished_at", DateTime),
+    new_session = GameSession(
+        user_id=user_id,
+        game_id=body.game_id,
+        score=body.score,
+        xp_gained=xp_gained,
+        coins_gained=coins_gained,
+        accuracy=body.accuracy,
+        duration=body.duration,
+        started_at=body.started_at,
+        finished_at=body.finished_at or datetime.now(timezone.utc),
     )
-
-    insert_result = await db.execute(
-        gs.insert()
-        .values(
-            user_id=user_id,
-            game_id=body.game_id,
-            score=body.score,
-            xp_gained=xp_gained,
-            coins_gained=coins_gained,
-            accuracy=body.accuracy,
-            duration=body.duration,
-            started_at=body.started_at,
-            finished_at=body.finished_at or datetime.now(timezone.utc),
-        )
-        .returning(gs.c.id)
-    )
-    session_id = insert_result.scalar_one()
+    db.add(new_session)
+    await db.flush()  # 获取自增 ID
+    session_id = new_session.id
 
     # 更新用户游戏档案
-    ugp = Table(
-        "user_game_profile",
-        metadata,
-        Column("user_id", Integer, primary_key=True),
-        Column("level", Integer),
-        Column("total_xp", Integer),
-        Column("coins", Integer),
-        Column("streak_days", Integer),
-        Column("badges", JSONB),
-        Column("rank", Integer),
-        Column("updated_at", DateTime),
-    )
-
     await db.execute(
         text(
             """
@@ -271,29 +253,12 @@ async def get_leaderboard(
             detail=f"无效的排行榜范围: {scope}，可选值: friends, global, daily, weekly",
         )
 
-    from sqlalchemy import Table, Column, Integer, String, Float, DateTime, MetaData, func, text
-    from sqlalchemy.dialects.postgresql import JSONB
-
-    metadata = MetaData()
-    ugp = Table(
-        "user_game_profile",
-        metadata,
-        Column("user_id", Integer, primary_key=True),
-        Column("level", Integer),
-        Column("total_xp", Integer),
-        Column("coins", Integer),
-        Column("streak_days", Integer),
-        Column("badges", JSONB),
-        Column("rank", Integer),
-        Column("updated_at", DateTime),
-    )
-
     result = await db.execute(
-        select(ugp)
-        .order_by(ugp.c.total_xp.desc())
+        select(UserGameProfile)
+        .order_by(UserGameProfile.total_xp.desc())
         .limit(50)
     )
-    rows = result.fetchall()
+    rows = result.scalars().all()
 
     entries = [
         LeaderboardEntry(
@@ -306,7 +271,7 @@ async def get_leaderboard(
     ]
 
     # 查找当前用户排名
-    user_rank = None
+    user_rank: Optional[int] = None
     for entry in entries:
         if entry.user_id == user_id:
             user_rank = entry.rank

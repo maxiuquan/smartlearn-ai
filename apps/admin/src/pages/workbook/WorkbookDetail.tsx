@@ -22,7 +22,7 @@ import {
   addQuestions,
   removeQuestions,
 } from '@/services/workbookService';
-import { getQuestionList } from '@/services/questionService';
+import { getQuestionList, getQuestion } from '@/services/questionService';
 import { Workbook, Question } from '@/types';
 import dayjs from 'dayjs';
 
@@ -50,8 +50,8 @@ const WorkbookDetail: React.FC = () => {
 
       // 获取题目详情
       if (workbookRes.questions && workbookRes.questions.length > 0) {
-        const questionPromises = workbookRes.questions.map((qId: string) => 
-          fetch(`/api/questions/${qId}`).then(r => r.json()).then(r => r.data)
+        const questionPromises = workbookRes.questions.map((qId: string) =>
+          getQuestion(qId)
         );
         const questionResults = await Promise.all(questionPromises);
         setQuestions(questionResults.filter(Boolean));

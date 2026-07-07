@@ -3,7 +3,6 @@
 """
 import base64
 
-import httpx
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
@@ -69,7 +68,7 @@ async def text_to_speech(request: TTSRequest, _auth: dict = Depends(require_auth
     """
     ai_router = get_router()
     try:
-        result = ai_router.text_to_speech(
+        result = await ai_router.text_to_speech(
             text=request.text,
             voice=request.voice,
             speed=request.speed,
@@ -113,7 +112,7 @@ async def speech_to_text(request: STTRequest, _auth: dict = Depends(require_auth
             max_bytes=25 * 1024 * 1024,
             timeout=30.0,
         )
-        result = ai_router.speech_to_text(
+        result = await ai_router.speech_to_text(
             audio_data=audio_data,
             language=request.language,
         )
@@ -136,7 +135,7 @@ async def generate_image(request: ImageGenRequest, _auth: dict = Depends(require
     """
     ai_router = get_router()
     try:
-        result = ai_router.generate_image(
+        result = await ai_router.generate_image(
             prompt=request.prompt,
             size=request.size,
             style=request.style,

@@ -77,7 +77,7 @@ async def moderate_content(request: ModerationRequest, _auth: dict = Depends(req
     """
     ai_router = get_router()
     try:
-        result = ai_router.moderate(
+        result = await ai_router.moderate(
             text=request.text,
             context=request.context,
         )
@@ -97,7 +97,7 @@ async def moderate_batch(request: BatchModerationRequest, _auth: dict = Depends(
     results = []
     for item in request.items:
         try:
-            result = ai_router.moderate(
+            result = await ai_router.moderate(
                 text=item.text,
                 context=item.context,
             )

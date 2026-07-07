@@ -26,10 +26,18 @@ class QuestionService {
     return response.data;
   }
 
-  async getRandomQuestions(count: number, knowledgePointId?: string): Promise<Question[]> {
-    const response = await apiClient.get<Question[]>('/questions/random', { 
-      count, 
-      knowledgePointId 
+  /**
+   * Fetch a batch of random questions, optionally filtered by type and difficulty.
+   * @param count - Number of questions to retrieve.
+   * @param params - Optional filter parameters (type, difficulty, knowledgePointId).
+   */
+  async getRandomQuestions(
+    count: number,
+    params?: { type?: string; difficulty?: string; knowledgePointId?: string }
+  ): Promise<Question[]> {
+    const response = await apiClient.get<Question[]>('/questions/random', {
+      count,
+      ...params,
     });
     if (!response.success || !response.data) {
       throw new Error(response.error || 'Failed to get random questions');

@@ -44,6 +44,9 @@
           "photosPermission": "Allow $(PRODUCT_NAME) to access your photos to upload question images."
         }
       ]
-    ]
+    ],
+    "extra": {
+      "apiBaseUrl": "http://localhost:8000/api/v1"
+    }
   }
 }

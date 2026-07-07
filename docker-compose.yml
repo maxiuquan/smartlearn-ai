@@ -241,12 +241,16 @@ services:
       - JWT_ALGORITHM=${JWT_ALGORITHM:-HS256}
       - AI_ENGINE_AUTH_ENABLED=${AI_ENGINE_AUTH_ENABLED:-true}
       - "AI_ENGINE_API_KEY=${AI_ENGINE_API_KEY:?err: AI_ENGINE_API_KEY 必须设置"
+      # ── 数据库（共享 PostgreSQL，用于游戏 session/排行榜/对话历史持久化）──
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-smartlearn_user}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-smartlearn}
     volumes:
       - ./data:/app/data:ro
       - ai-models:/app/models
       - ai-logs:/app/logs
     depends_on:
       redis:
+        condition: service_healthy
+      db:
         condition: service_healthy
     networks:
       - smartlearn-network

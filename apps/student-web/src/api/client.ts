@@ -6,6 +6,37 @@ const client = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
+const TOKEN_KEY = 'smartlearn_token';
+
+// ─── 请求拦截器：从 localStorage 读取 token 并注入 Authorization 头 ───
+client.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem(TOKEN_KEY);
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// ─── 响应拦截器：401 时清除 token 并跳转登录页 ───
+client.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error?.response?.status === 401) {
+      // 清除无效 token
+      localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem('smartlearn_refresh_token');
+      // 避免在 /login 页面死循环跳转
+      if (!window.location.pathname.startsWith('/login')) {
+        window.location.href = '/login';
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 // 游戏类型映射：gameId → API 支持的 game_type
 const GAME_TYPE_MAP: Record<string, string> = {
   'word-match-blast': 'multiple_choice',
@@ -62,6 +93,7 @@ export async function startGame(params: StartGameParams) {
   const res = await client.post('/word-games/start', {
     user_id: params.userId || 'student_001',
     game_type: gameType,
+    game_id: params.gameId,  // E04: 增加 game_id 参数，后端可按 game_id 差异化配置
     difficulty: params.difficulty || 'medium',
     word_count: params.wordCount || 10,
   });

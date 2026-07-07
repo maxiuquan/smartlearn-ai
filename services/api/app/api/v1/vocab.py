@@ -3,10 +3,11 @@ from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import func, select
+from sqlalchemy import case, func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.deps import get_current_user_id, get_db
+from app.models.business import UserWordProgress, VocabularyWord
 from app.schemas.vocab import (
     WordEventRequest,
     WordListResponse,
@@ -31,43 +32,24 @@ async def list_words(
     db: AsyncSession = Depends(get_db),
 ) -> WordListResponse:
     """分页获取词汇列表，支持按标签和词频筛选。"""
-    from sqlalchemy import Table, Column, Integer, String, Text, DateTime, MetaData, func
-    from sqlalchemy.dialects.postgresql import JSONB
-
-    metadata = MetaData()
-    vw = Table(
-        "vocabulary_words",
-        metadata,
-        Column("word_id", String(100), primary_key=True),
-        Column("headword", String(200)),
-        Column("meaning", Text),
-        Column("phonetic", String(200)),
-        Column("tags", JSONB),
-        Column("frequency", Integer),
-        Column("synonyms", JSONB),
-        Column("antonyms", JSONB),
-        Column("examples", JSONB),
-        Column("created_at", DateTime),
-    )
-
     conditions = []
     if frequency is not None:
-        conditions.append(vw.c.frequency >= frequency)
+        conditions.append(VocabularyWord.frequency >= frequency)
 
     count_result = await db.execute(
-        select(func.count()).select_from(vw).where(*conditions)
+        select(func.count()).select_from(VocabularyWord).where(*conditions)
     )
     total = count_result.scalar() or 0
 
     offset = (page - 1) * page_size
     result = await db.execute(
-        select(vw)
+        select(VocabularyWord)
         .where(*conditions)
-        .order_by(vw.c.frequency.desc(), vw.c.headword)
+        .order_by(VocabularyWord.frequency.desc(), VocabularyWord.headword)
         .offset(offset)
         .limit(page_size)
     )
-    rows = result.fetchall()
+    rows = result.scalars().all()
 
     items = [
         WordResponse(
@@ -105,37 +87,21 @@ async def get_progress(
 
     - 包含掌握数、学习中、新词、今日待复习等
     """
-    from sqlalchemy import Table, Column, Integer, String, Float, DateTime, MetaData, func, text, case
-
-    metadata = MetaData()
-    uwp = Table(
-        "user_word_progress",
-        metadata,
-        Column("user_id", Integer),
-        Column("word_id", String(100)),
-        Column("status", String(20)),
-        Column("mastery_level", Float),
-        Column("next_review_at", DateTime),
-        Column("review_count", Integer),
-        Column("correct_count", Integer),
-        Column("wrong_count", Integer),
-    )
-
     # 统计各状态数量
     result = await db.execute(
         select(
             func.count().label("total"),
             func.sum(
-                case((uwp.c.status == "mastered", 1), else_=0)
+                case((UserWordProgress.status == "mastered", 1), else_=0)
             ).label("mastered"),
             func.sum(
-                case((uwp.c.status == "learning", 1), else_=0)
+                case((UserWordProgress.status == "learning", 1), else_=0)
             ).label("learning"),
             func.sum(
-                case((uwp.c.status == "new", 1), else_=0)
+                case((UserWordProgress.status == "new", 1), else_=0)
             ).label("new_words"),
-            func.avg(uwp.c.mastery_level).label("avg_mastery"),
-        ).where(uwp.c.user_id == user_id)
+            func.avg(UserWordProgress.mastery_level).label("avg_mastery"),
+        ).where(UserWordProgress.user_id == user_id)
     )
     stats = result.first()
 
@@ -143,10 +109,10 @@ async def get_progress(
     now = datetime.now(timezone.utc)
     due_result = await db.execute(
         select(func.count())
-        .select_from(uwp)
+        .select_from(UserWordProgress)
         .where(
-            uwp.c.user_id == user_id,
-            uwp.c.next_review_at <= now,
+            UserWordProgress.user_id == user_id,
+            UserWordProgress.next_review_at <= now,
         )
     )
     due_today = due_result.scalar() or 0
@@ -172,48 +138,30 @@ async def get_due_words(
     db: AsyncSession = Depends(get_db),
 ) -> list[WordProgressResponse]:
     """获取当前用户今日需要复习的词汇列表。"""
-    from sqlalchemy import Table, Column, Integer, String, Text, Float, DateTime, MetaData, func, text
-
-    metadata = MetaData()
-    uwp = Table(
-        "user_word_progress",
-        metadata,
-        Column("user_id", Integer),
-        Column("word_id", String(100)),
-        Column("status", String(20)),
-        Column("mastery_level", Float),
-        Column("next_review_at", DateTime),
-        Column("review_count", Integer),
-        Column("correct_count", Integer),
-        Column("wrong_count", Integer),
-    )
-    vw = Table(
-        "vocabulary_words",
-        metadata,
-        Column("word_id", String(100), primary_key=True),
-        Column("headword", String(200)),
-        Column("meaning", Text),
-    )
-
     now = datetime.now(timezone.utc)
     result = await db.execute(
         select(
-            uwp.c.word_id,
-            uwp.c.status,
-            uwp.c.mastery_level,
-            uwp.c.next_review_at,
-            uwp.c.review_count,
-            uwp.c.correct_count,
-            uwp.c.wrong_count,
-            vw.c.headword,
-            vw.c.meaning,
+            UserWordProgress.word_id,
+            UserWordProgress.status,
+            UserWordProgress.mastery_level,
+            UserWordProgress.next_review_at,
+            UserWordProgress.review_count,
+            UserWordProgress.correct_count,
+            UserWordProgress.wrong_count,
+            VocabularyWord.headword,
+            VocabularyWord.meaning,
         )
-        .select_from(uwp.join(vw, uwp.c.word_id == vw.c.word_id))
+        .select_from(
+            UserWordProgress.join(
+                VocabularyWord,
+                UserWordProgress.word_id == VocabularyWord.word_id,
+            )
+        )
         .where(
-            uwp.c.user_id == user_id,
-            uwp.c.next_review_at <= now,
+            UserWordProgress.user_id == user_id,
+            UserWordProgress.next_review_at <= now,
         )
-        .order_by(uwp.c.next_review_at.asc())
+        .order_by(UserWordProgress.next_review_at.asc())
         .limit(limit)
     )
     rows = result.fetchall()
@@ -249,36 +197,17 @@ async def submit_word_event(
     - 支持的事件类型: learned, reviewed, correct, wrong, mastered, forgotten
     - 所有单词游戏通过此接口提交学习结果
     """
-    from sqlalchemy import Table, Column, Integer, String, Float, DateTime, MetaData, func, text
-
-    metadata = MetaData()
-    uwp = Table(
-        "user_word_progress",
-        metadata,
-        Column("user_id", Integer),
-        Column("word_id", String(100)),
-        Column("status", String(20)),
-        Column("mastery_level", Float),
-        Column("ease_factor", Float),
-        Column("interval_days", Integer),
-        Column("next_review_at", DateTime),
-        Column("review_count", Integer),
-        Column("correct_count", Integer),
-        Column("wrong_count", Integer),
-        Column("updated_at", DateTime),
-    )
-
     event_type = body.event_type
     now = datetime.now(timezone.utc)
 
     # 查询当前进度
     result = await db.execute(
-        select(uwp).where(
-            uwp.c.user_id == user_id,
-            uwp.c.word_id == body.word_id,
+        select(UserWordProgress).where(
+            UserWordProgress.user_id == user_id,
+            UserWordProgress.word_id == body.word_id,
         )
     )
-    existing = result.first()
+    existing = result.scalars().first()
 
     if existing:
         # 更新现有记录
@@ -353,8 +282,8 @@ async def submit_word_event(
         initial_interval = 1
         next_review = now + timedelta(days=1)
 
-        await db.execute(
-            uwp.insert().values(
+        db.add(
+            UserWordProgress(
                 user_id=user_id,
                 word_id=body.word_id,
                 status=initial_status,

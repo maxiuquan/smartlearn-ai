@@ -77,7 +77,7 @@ export default function MathGame() {
       setTimeLeft((prev) => {
         if (prev <= 1) {
           clearInterval(timerRef.current);
-          navigate(`/result/${sessionId}`, { replace: true });
+          navigate(`/result/${sessionId}?from=/math-game/${gameId}`, { replace: true });
           return 0;
         }
         return prev - 1;
@@ -125,7 +125,7 @@ export default function MathGame() {
           if (data.is_game_over) {
             clearInterval(timerRef.current);
             setTimeout(() => {
-              navigate(`/result/${sessionId}`, { replace: true });
+              navigate(`/result/${sessionId}?from=/math-game/${gameId}`, { replace: true });
             }, 500);
           } else if (data.next_question) {
             setQuestion(data.next_question);
@@ -160,7 +160,7 @@ export default function MathGame() {
         <p className="text-5xl mb-4">😵</p>
         <p className="text-red-500 text-lg mb-4">{error}</p>
         <button
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/games')}
           className="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
         >
           返回游戏大厅

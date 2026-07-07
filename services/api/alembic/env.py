@@ -14,6 +14,12 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from app.core.config import settings
 from app.models.base import Base
 
+# 导入全部 ORM 模型，使 alembic revision --autogenerate 能检测全部表
+import app.models.business  # noqa: F401
+import app.models.user  # noqa: F401
+import app.models.subscription  # noqa: F401
+import app.models.audit_log  # noqa: F401
+
 # Alembic Config 对象
 config = context.config
 

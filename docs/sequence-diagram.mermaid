@@ -1,0 +1,115 @@
+%% SmartLearn AI 第二轮优化 — 关键调用序列图
+%% 日期: 2026-07-08  作者: 高见远（架构师）
+
+%% ─── 序列图 1: student-web 登录→词汇学习 端到端流程 ───
+sequenceDiagram
+    participant U as 学生用户
+    participant SW as student-web 前端
+    participant AC as AuthContext + axios 拦截器
+    participant API as api 后端
+    participant DB as PostgreSQL
+
+    U->>SW: 访问 /vocab（未登录）
+    SW->>AC: 路由守卫检查 token
+    AC-->>SW: 无 token → 重定向 /login
+    U->>SW: 输入账号密码
+    SW->>AC: login(username, password)
+    AC->>API: POST /api/v1/auth/login {username, password}
+    API->>DB: 验证用户凭据
+    DB-->>API: 用户记录
+    API-->>AC: {access_token, refresh_token, expires_in}
+    AC->>AC: 存 token 到 localStorage
+    AC->>API: GET /api/v1/auth/me (Authorization: Bearer <token>)
+    API-->>AC: {id, email, role, nickname, avatar, vip_level}
+    AC-->>SW: 登录成功，导航 /dashboard
+
+    U->>SW: 点击「词汇学习」
+    SW->>AC: GET /api/v1/vocab/words?page=1 (带 Authorization)
+    AC->>API: 请求转发（拦截器注入 Bearer token）
+    API->>DB: SELECT * FROM vocabulary_words ...
+    DB-->>API: 2000+ 词条分页结果
+    API-->>SW: {items, total, page, page_size}
+    SW-->>U: 展示翻卡界面（正面单词+音标）
+
+    U->>SW: 翻卡查看释义 → 标记「已掌握」
+    SW->>AC: POST /api/v1/vocab/progress {word_id, event}
+    AC->>API: 请求转发
+    API->>DB: UPSERT user_word_progress (SRS 算法更新)
+    DB-->>API: OK
+    API-->>SW: 204 No Content
+    SW-->>U: 进度更新成功
+
+%% ─── 序列图 2: 单词游戏 全流程（DB 持久化） ───
+sequenceDiagram
+    participant C as 客户端(student-web / mobile)
+    participant AER as ai-engine word_games_router
+    participant WGS as WordGamesService
+    participant DB as PostgreSQL (共享)
+
+    C->>AER: POST /word-games/start {user_id, game_type, difficulty}
+    AER->>WGS: start_game(request)
+    WGS->>DB: 从 vocabulary_words 按 difficulty→frequency 区间随机取 N 词
+    DB-->>WGS: 真实词条列表（来自 2000+ 词库）
+    WGS->>DB: INSERT INTO word_game_sessions (session_id, words_json, ...) 
+    DB-->>WGS: 持久化会话状态
+    WGS-->>AER: WordGameResponse(session, first_question, ...)
+    AER-->>C: 游戏开始，展示第一题
+
+    C->>AER: POST /word-games/submit {session_id, answer}
+    AER->>WGS: submit_answer(request)
+    WGS->>DB: SELECT * FROM word_game_sessions WHERE session_id=?
+    DB-->>WGS: 会话状态（跨 worker 可恢复）
+    WGS->>WGS: 判分 + 计算得分
+    WGS->>DB: UPDATE word_game_sessions SET current_index++, score+=...
+    DB-->>WGS: OK
+
+    alt 游戏结束
+        WGS->>DB: INSERT INTO game_sessions (score, accuracy, duration)
+        WGS->>DB: UPSERT user_game_profile (total_xp+=, coins+=)
+        WGS->>DB: UPDATE word_game_sessions SET is_active=false
+        WGS-->>AER: GameSummary(rank, badge, ...)
+    else 继续
+        WGS->>WGS: 生成下一题
+        WGS-->>AER: SubmitAnswerResponse(next_question, ...)
+    end
+    AER-->>C: 返回结果/下一题
+
+    C->>AER: POST /word-games/leaderboard {game_type}
+    AER->>WGS: get_leaderboard(request)
+    WGS->>DB: SELECT user_id, MAX(score) FROM game_sessions GROUP BY user_id ORDER BY score DESC LIMIT N
+    DB-->>WGS: 排行榜数据（持久化，跨 worker 一致）
+    WGS-->>AER: LeaderboardResponse
+    AER-->>C: 排行榜展示
+
+%% ─── 序列图 3: AI 对话（异步 + 历史持久化） ───
+sequenceDiagram
+    participant C as 客户端
+    participant CR as chat_router (async)
+    participant LS as LLMService (async)
+    participant AR as AIRouter (async)
+    participant P as AsyncOpenAI Provider
+    participant CS as ConversationService
+    participant DB as PostgreSQL
+
+    C->>CR: POST /chat {messages, context}
+    CR->>LS: await llm.chat(messages, context)
+    LS->>LS: RAG 检索上下文（如未提供）
+    LS->>AR: await router.chat_completion(messages, subject)
+    
+    alt 离线模式（无 API Key）
+        AR-->>LS: 模拟响应 (simulated=true)
+    else 在线模式
+        AR->>P: await provider.chat_completion(messages)
+        P->>P: AsyncOpenAI await client.chat.completions.create(...)
+        P-->>AR: 真实 AI 回复
+    end
+    
+    AR-->>LS: 回复文本
+    LS-->>CR: reply
+
+    CR->>CS: await conversation_service.save(user_id, messages, reply, provider, model)
+    CS->>DB: INSERT INTO ai_conversations (user_id, messages_json, provider, model, ...)
+    DB-->>CS: OK
+    CS-->>CR: 保存成功
+
+    CR-->>C: ChatResponse(reply, model, simulated, reason)

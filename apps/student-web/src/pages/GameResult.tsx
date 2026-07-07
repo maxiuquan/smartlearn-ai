@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { getGameSummary } from '../api/client';
 
 interface SummaryData {
@@ -31,6 +31,10 @@ const GAME_TYPE_NAMES: Record<string, string> = {
 export default function GameResult() {
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  // 从 URL search params 读取原始游戏路径，用于「再来一局」
+  const returnPath = searchParams.get('from') || '/games';
 
   const [summary, setSummary] = useState<SummaryData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -67,7 +71,7 @@ export default function GameResult() {
         <p className="text-5xl mb-4">😵</p>
         <p className="text-red-500 text-lg mb-4">{error}</p>
         <button
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/games')}
           className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
         >
           返回游戏大厅
@@ -217,11 +221,18 @@ export default function GameResult() {
       {/* 操作按钮 */}
       <div className="flex gap-3 justify-center">
         <button
-          onClick={() => navigate('/')}
+          onClick={() => navigate(returnPath, { replace: true })}
           className="px-8 py-3 bg-blue-500 text-white rounded-xl font-medium 
                      hover:bg-blue-600 transition-colors shadow-md shadow-blue-200"
         >
           再来一局
+        </button>
+        <button
+          onClick={() => navigate('/games', { replace: true })}
+          className="px-8 py-3 bg-gray-100 text-gray-600 rounded-xl font-medium 
+                     hover:bg-gray-200 transition-colors"
+        >
+          返回大厅
         </button>
       </div>
     </div>

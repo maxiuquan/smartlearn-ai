@@ -13,6 +13,7 @@ from app.models.business import (
     UserQuestionAttempt,
     UserWordProgress,
     VocabularyWord,
+    WordGameSession,
     WrongQuestion,
 )
 from app.models.subscription import Subscription
@@ -32,4 +33,5 @@ __all__ = [
     "AIConversation",
     "GameSession",
     "UserGameProfile",
+    "WordGameSession",
 ]

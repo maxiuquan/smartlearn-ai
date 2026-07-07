@@ -1,4 +1,4 @@
-import { api, pageApi, PageParams } from './request';
+import request, { api, pageApi, PageParams } from './request';
 import { User, UserStats, UserRole, PaginatedResponse } from '@/types';
 
 // 获取用户列表
@@ -55,8 +55,11 @@ export async function importUsers(file: File): Promise<{ success: number; failed
 
 // 导出用户
 export async function exportUsers(params?: PageParams): Promise<Blob> {
-  const response = await fetch(`/api/v1/users/export${params ? '?' + new URLSearchParams(params as any) : ''}`);
-  return response.blob();
+  const response = await request.get('/v1/users/export', {
+    params,
+    responseType: 'blob',
+  });
+  return response.data as Blob;
 }
 
 // 重置用户密码

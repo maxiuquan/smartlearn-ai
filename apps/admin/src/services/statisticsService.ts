@@ -1,4 +1,4 @@
-import { api, pageApi, PageParams } from './request';
+import request, { api, pageApi, PageParams } from './request';
 import { DashboardStats, UserStats, PaginatedResponse } from '@/types';
 
 // 获取仪表盘统计数据
@@ -70,6 +70,9 @@ export async function getUserDetailStats(userId: string): Promise<{
 
 // 导出统计报告
 export async function exportStatisticsReport(type: string, params: any): Promise<Blob> {
-  const response = await fetch(`/api/statistics/export/${type}?${new URLSearchParams(params)}`);
-  return response.blob();
+  const response = await request.get(`/statistics/export/${type}`, {
+    params,
+    responseType: 'blob',
+  });
+  return response.data as Blob;
 }

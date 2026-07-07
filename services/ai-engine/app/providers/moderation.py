@@ -2,8 +2,10 @@
 内容审核供应商
 
 使用 GLM 模型进行内容安全审核。
+使用 AsyncOpenAI，不阻塞事件循环。
 """
 
+import json
 import logging
 import sys
 import time
@@ -22,6 +24,7 @@ class ModerationProvider(BaseModerationProvider):
     """内容审核供应商
 
     使用 LLM 进行内容安全审核，检测违规内容。
+    使用 AsyncOpenAI 客户端。
     """
 
     MODERATION_PROMPT = """你是一个内容安全审核助手。请审核以下文本，判断是否包含以下违规内容：
@@ -56,6 +59,7 @@ class ModerationProvider(BaseModerationProvider):
         self._model_name = model_name or settings.GLM_MODEL
         self._provider_name = "moderation"
         self._offline_mode = not self._api_key
+        self._client: Any = None
 
     # ── 属性 ─────────────────────────────────────────────────
 
@@ -71,28 +75,37 @@ class ModerationProvider(BaseModerationProvider):
     def is_offline(self) -> bool:
         return self._offline_mode
 
+    def _get_client(self) -> Any:
+        """获取或创建 AsyncOpenAI 客户端"""
+        if self._client is None and not self._offline_mode:
+            from openai import AsyncOpenAI
+
+            self._client = AsyncOpenAI(
+                api_key=self._api_key,
+                base_url=self._base_url,
+            )
+        return self._client
+
     # ── BaseModerationProvider 实现 ──────────────────────────
 
-    def moderate(
+    async def moderate(
         self,
         text: str,
         **kwargs: Any,
     ) -> dict[str, Any]:
-        """审核文本内容"""
+        """异步审核文本内容"""
         if self._offline_mode:
             return self._mock_moderate(text)
 
         start_time = time.time()
         try:
-            from openai import OpenAI
+            client = self._get_client()
+            if client is None:
+                return self._mock_moderate(text)
 
-            client = OpenAI(
-                api_key=self._api_key,
-                base_url=self._base_url,
-            )
             prompt = self.MODERATION_PROMPT.format(text=text)
 
-            response = client.chat.completions.create(
+            response = await client.chat.completions.create(
                 model=self._model_name,
                 messages=[
                     {"role": "system", "content": "你是一个内容安全审核助手。请始终以 JSON 格式返回审核结果。"},
@@ -104,10 +117,8 @@ class ModerationProvider(BaseModerationProvider):
             elapsed = time.time() - start_time
 
             content = response.choices[0].message.content or "{}"
-            usage = response.usage
 
             # 尝试解析 JSON
-            import json
             try:
                 result = json.loads(content)
             except json.JSONDecodeError:
@@ -166,30 +177,13 @@ class ModerationProvider(BaseModerationProvider):
                 "supports": ["moderation"],
             }
 
-        try:
-            from openai import OpenAI
-
-            client = OpenAI(
-                api_key=self._api_key,
-                base_url=self._base_url,
-            )
-            client.models.list()
-            return {
-                "status": "ok",
-                "provider": self._provider_name,
-                "model": self._model_name,
-                "offline": False,
-                "supports": ["moderation"],
-            }
-        except Exception as e:
-            return {
-                "status": "error",
-                "provider": self._provider_name,
-                "model": self._model_name,
-                "offline": False,
-                "supports": ["moderation"],
-                "error": str(e),
-            }
+        return {
+            "status": "ok",
+            "provider": self._provider_name,
+            "model": self._model_name,
+            "offline": False,
+            "supports": ["moderation"],
+        }
 
 
 def create_moderation_provider() -> ModerationProvider:

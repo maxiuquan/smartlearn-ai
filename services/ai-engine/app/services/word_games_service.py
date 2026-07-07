@@ -1,12 +1,17 @@
 """
 单词游戏服务
 趣味单词游戏逻辑
+
+G02: 动态取词 — 从 data/vocabulary/*.json 或 DB vocabulary_words 表加载
+G03: session/leaderboard 持久化到 DB（asyncpg）
 """
-from typing import List, Optional, Dict
-from datetime import datetime
-from collections import defaultdict
-import uuid
+import json
+import os
+import logging
 import random
+import uuid
+from datetime import datetime
+from typing import List, Optional, Dict, Any
 
 from config import settings
 from app.models.word_games import (
@@ -24,22 +29,235 @@ from app.models.word_games import (
     Word,
     LeaderboardRequest,
     LeaderboardResponse,
-    LeaderboardEntry
+    LeaderboardEntry,
 )
+
+logger = logging.getLogger("ai_engine.word_games")
+
+# 词汇 JSON 文件目录（相对于 ai-engine 工作目录）
+_VOCAB_DIR = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))),
+    "data", "vocabulary",
+)
+
+# difficulty → frequency 区间映射
+_DIFFICULTY_FREQ_MAP: Dict[GameDifficulty, tuple] = {
+    GameDifficulty.EASY: (4, 5),    # freq >= 4
+    GameDifficulty.MEDIUM: (2, 3),  # freq 2-3
+    GameDifficulty.HARD: (1, 1),    # freq 1
+}
 
 
 class WordGamesService:
-    """单词游戏服务"""
+    """单词游戏服务（动态取词 + DB 持久化）"""
 
     def __init__(self):
         self.time_limit = settings.WORD_GAME_TIME_LIMIT
         self.batch_size = settings.WORD_GAME_BATCH_SIZE
-        # 模拟单词库
-        self._word_bank = self._init_word_bank()
-        # 活跃会话
-        self._sessions: Dict[str, WordGameSession] = {}
-        # 排行榜数据
-        self._leaderboard: List[LeaderboardEntry] = []
+        # 词库缓存：{difficulty: [Word, ...]}
+        self._word_bank: Optional[Dict[GameDifficulty, List[Word]]] = None
+        # 全量词库（用于选择题干扰项）
+        self._all_words: List[Word] = []
+
+    # ──────────────────────────────────────────────
+    #  词汇加载（G02）
+    # ──────────────────────────────────────────────
+
+    async def _load_word_bank(self) -> Dict[GameDifficulty, List[Word]]:
+        """从 data/vocabulary/*.json 加载词汇，按 difficulty 映射 frequency 区间。
+
+        优先从 JSON 文件加载；若文件不可用则尝试从 DB 查询。
+        结果缓存到 ``self._word_bank``。
+        """
+        if self._word_bank is not None:
+            return self._word_bank
+
+        # 尝试从 JSON 文件加载
+        try:
+            bank = self._load_from_json()
+            if bank and any(len(v) > 0 for v in bank.values()):
+                self._word_bank = bank
+                self._all_words = [w for words in bank.values() for w in words]
+                logger.info(
+                    "Word bank loaded from JSON: %d words total",
+                    len(self._all_words),
+                )
+                return self._word_bank
+        except Exception as e:
+            logger.warning("Failed to load word bank from JSON: %s", e)
+
+        # 回退到 DB 查询
+        try:
+            bank = await self._load_from_db()
+            if bank and any(len(v) > 0 for v in bank.values()):
+                self._word_bank = bank
+                self._all_words = [w for words in bank.values() for w in words]
+                logger.info(
+                    "Word bank loaded from DB: %d words total",
+                    len(self._all_words),
+                )
+                return self._word_bank
+        except Exception as e:
+            logger.error("Failed to load word bank from DB: %s", e)
+
+        # 最终回退：极少量内置词（仅防止服务完全不可用）
+        logger.warning("Using fallback minimal word bank")
+        fallback = self._fallback_word_bank()
+        self._word_bank = fallback
+        self._all_words = [w for words in fallback.values() for w in words]
+        return self._word_bank
+
+    def _load_from_json(self) -> Dict[GameDifficulty, List[Word]]:
+        """从 data/vocabulary/*.json 文件加载词汇。"""
+        bank: Dict[GameDifficulty, List[Word]] = {
+            GameDifficulty.EASY: [],
+            GameDifficulty.MEDIUM: [],
+            GameDifficulty.HARD: [],
+        }
+
+        if not os.path.isdir(_VOCAB_DIR):
+            logger.warning("Vocabulary directory not found: %s", _VOCAB_DIR)
+            return bank
+
+        json_files = [
+            f for f in os.listdir(_VOCAB_DIR)
+            if f.endswith(".json") and f != "word-books.json"
+        ]
+
+        for filename in json_files:
+            filepath = os.path.join(_VOCAB_DIR, filename)
+            try:
+                with open(filepath, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+
+                words = data if isinstance(data, list) else data.get("words", [])
+                for w in words:
+                    if not isinstance(w, dict):
+                        continue
+                    headword = w.get("headword", w.get("word", ""))
+                    if not headword:
+                        continue
+
+                    freq = int(w.get("frequency", 3) or 3)
+                    word_obj = Word(
+                        word_id=w.get("word_id", w.get("id", "")),
+                        word=headword,
+                        meaning=w.get("meaning", w.get("definition", "")),
+                        pronunciation=w.get("phonetic", ""),
+                        example_sentence=(
+                            w.get("examples", [{}])[0].get("en", "")
+                            if w.get("examples")
+                            else w.get("example", "")
+                        ),
+                        part_of_speech=None,
+                        difficulty=min(max(freq / 5.0, 0.1), 1.0),
+                        category=(
+                            w.get("tags", [None])[0]
+                            if w.get("tags") else w.get("category")
+                        ),
+                    )
+
+                    # 按 frequency 映射到 difficulty
+                    for diff, (lo, hi) in _DIFFICULTY_FREQ_MAP.items():
+                        if lo <= freq <= hi:
+                            bank[diff].append(word_obj)
+                            break
+                    else:
+                        # 默认归入 MEDIUM
+                        bank[GameDifficulty.MEDIUM].append(word_obj)
+
+            except (json.JSONDecodeError, IOError) as e:
+                logger.warning("Failed to load %s: %s", filename, e)
+
+        return bank
+
+    async def _load_from_db(self) -> Dict[GameDifficulty, List[Word]]:
+        """从 DB vocabulary_words 表加载词汇（回退方案）。"""
+        from app.db import get_pool
+
+        pool = await get_pool()
+        bank: Dict[GameDifficulty, List[Word]] = {
+            GameDifficulty.EASY: [],
+            GameDifficulty.MEDIUM: [],
+            GameDifficulty.HARD: [],
+        }
+
+        async with pool.acquire() as conn:
+            rows = await conn.fetch(
+                """
+                SELECT word_id, headword, meaning, phonetic, tags, frequency,
+                       synonyms, antonyms, examples
+                FROM vocabulary_words
+                ORDER BY frequency DESC
+                LIMIT 3000
+                """
+            )
+
+        for r in rows:
+            freq = int(r["frequency"] or 3)
+            examples = r["examples"]
+            if isinstance(examples, str):
+                examples = json.loads(examples)
+            ex_en = ""
+            if examples and isinstance(examples, list) and len(examples) > 0:
+                ex = examples[0]
+                if isinstance(ex, dict):
+                    ex_en = ex.get("en", "")
+                elif isinstance(ex, str):
+                    ex_en = ex
+
+            tags = r["tags"]
+            if isinstance(tags, str):
+                tags = json.loads(tags)
+
+            word_obj = Word(
+                word_id=r["word_id"],
+                word=r["headword"],
+                meaning=r["meaning"],
+                pronunciation=r["phonetic"] or "",
+                example_sentence=ex_en,
+                part_of_speech=None,
+                difficulty=min(max(freq / 5.0, 0.1), 1.0),
+                category=tags[0] if tags else None,
+            )
+
+            for diff, (lo, hi) in _DIFFICULTY_FREQ_MAP.items():
+                if lo <= freq <= hi:
+                    bank[diff].append(word_obj)
+                    break
+            else:
+                bank[GameDifficulty.MEDIUM].append(word_obj)
+
+        return bank
+
+    def _fallback_word_bank(self) -> Dict[GameDifficulty, List[Word]]:
+        """最终回退：极少量内置词（防止 JSON/DB 都不可用时服务完全不可用）。"""
+        return {
+            GameDifficulty.EASY: [
+                Word(word_id="fb1", word="apple", meaning="苹果",
+                     pronunciation="ˈæpl", difficulty=0.2, category="fruit"),
+                Word(word_id="fb2", word="water", meaning="水",
+                     pronunciation="ˈwɔːtə", difficulty=0.2, category="nature"),
+                Word(word_id="fb3", word="book", meaning="书",
+                     pronunciation="bʊk", difficulty=0.2, category="object"),
+            ],
+            GameDifficulty.MEDIUM: [
+                Word(word_id="fb4", word="important", meaning="重要的",
+                     pronunciation="ɪmˈpɔːrtnt", difficulty=0.5, category="adj"),
+                Word(word_id="fb5", word="develop", meaning="发展",
+                     pronunciation="dɪˈveləp", difficulty=0.5, category="verb"),
+            ],
+            GameDifficulty.HARD: [
+                Word(word_id="fb6", word="phenomenon", meaning="现象",
+                     pronunciation="fəˈnɒmɪnən", difficulty=0.8, category="noun"),
+                Word(word_id="fb7", word="sophisticated", meaning="复杂的",
+                     pronunciation="səˈfɪstɪkeɪtɪd", difficulty=0.8, category="adj"),
+            ],
+        }
+
+    # ──────────────────────────────────────────────
+    #  游戏 API（G02 + G03）
+    # ──────────────────────────────────────────────
 
     async def start_game(
         self,
@@ -47,7 +265,8 @@ class WordGamesService:
     ) -> WordGameResponse:
         """开始游戏"""
 
-        # 选择单词
+        # 加载词库并选择单词
+        await self._load_word_bank()
         words = await self._select_words(
             count=request.word_count,
             difficulty=request.difficulty,
@@ -77,7 +296,8 @@ class WordGamesService:
             is_active=True
         )
 
-        self._sessions[session.session_id] = session
+        # 持久化会话到 DB
+        await self._persist_session(session)
 
         # 生成第一个问题
         first_question = await self._generate_question(
@@ -102,7 +322,8 @@ class WordGamesService:
     ) -> SubmitAnswerResponse:
         """提交答案"""
 
-        session = self._sessions.get(request.session_id)
+        # 从 DB 恢复会话（跨 worker 可恢复）
+        session = await self._restore_session(request.session_id)
         if not session:
             raise ValueError(f"Session {request.session_id} not found")
 
@@ -122,12 +343,9 @@ class WordGamesService:
         points_earned = 0
         if is_correct:
             base_points = 10
-            # 时间奖励
             time_bonus = max(0, 5 - answer.time_spent_seconds // 10)
-            # 不使用提示奖励
             hint_bonus = 3 if not answer.used_hint else 0
             points_earned = base_points + time_bonus + hint_bonus
-
             session.correct_count += 1
         else:
             session.wrong_count += 1
@@ -161,6 +379,13 @@ class WordGamesService:
         if is_game_over:
             session.is_active = False
 
+        # 更新 DB 中的会话状态
+        await self._update_session(session)
+
+        # 如果游戏结束，写入最终成绩
+        if is_game_over:
+            await self._finalize_session(session)
+
         # 获取下一题
         next_question = None
         if not is_game_over:
@@ -187,7 +412,7 @@ class WordGamesService:
     ) -> GameSummary:
         """获取游戏总结"""
 
-        session = self._sessions.get(session_id)
+        session = await self._restore_session(session_id)
         if not session:
             raise ValueError(f"Session {session_id} not found")
 
@@ -203,19 +428,16 @@ class WordGamesService:
         # 分类正确和错误的单词
         correct_words = []
         wrong_words = []
-
-        # 简化处理：假设前correct_count个是正确的
         for i, word in enumerate(session.words):
             if i < session.correct_count:
                 correct_words.append(word.word)
             else:
                 wrong_words.append(word.word)
 
-        # 确定需要加强的单词
         improvement_words = wrong_words[:5]
 
-        # 计算排名
-        rank = self._update_leaderboard(session)
+        # 计算排名（从 DB 查询）
+        rank = await self._get_user_rank(session.user_id, session.game_type)
 
         # 确定徽章
         badge = self._award_badge(session, accuracy)
@@ -225,7 +447,7 @@ class WordGamesService:
             user_id=session.user_id,
             game_type=session.game_type,
             total_score=session.score,
-            max_score=total_questions * 18,  # 最大可能得分
+            max_score=total_questions * 18,
             accuracy=round(accuracy, 3),
             total_time_seconds=total_time,
             average_time_per_question=round(avg_time, 2),
@@ -241,63 +463,285 @@ class WordGamesService:
         self,
         request: LeaderboardRequest
     ) -> LeaderboardResponse:
-        """获取排行榜"""
+        """获取排行榜（从 DB 聚合查询）"""
 
-        # 过滤排行榜
-        filtered = self._leaderboard
-
-        if request.game_type:
-            filtered = [e for e in filtered if e.game_type == request.game_type]
-
-        # 排序并限制数量
-        filtered = sorted(filtered, key=lambda x: -x.score)[:request.limit]
+        entries = await self._query_leaderboard(
+            game_type=request.game_type,
+            limit=request.limit
+        )
 
         return LeaderboardResponse(
-            entries=filtered,
-            total_players=len(self._leaderboard),
+            entries=entries,
+            total_players=len(entries),
             generated_at=datetime.now()
         )
 
-    def _init_word_bank(self) -> Dict[GameDifficulty, List[Word]]:
-        """初始化单词库"""
-        return {
-            GameDifficulty.EASY: [
-                Word(word_id="w1", word="apple", meaning="苹果", pronunciation="ˈæpl",
-                     difficulty=0.2, category="fruit"),
-                Word(word_id="w2", word="book", meaning="书", pronunciation="bʊk",
-                     difficulty=0.2, category="object"),
-                Word(word_id="w3", word="cat", meaning="猫", pronunciation="kæt",
-                     difficulty=0.2, category="animal"),
-                Word(word_id="w4", word="dog", meaning="狗", pronunciation="dɔːɡ",
-                     difficulty=0.2, category="animal"),
-                Word(word_id="w5", word="egg", meaning="鸡蛋", pronunciation="eɡ",
-                     difficulty=0.2, category="food"),
-            ],
-            GameDifficulty.MEDIUM: [
-                Word(word_id="w6", word="beautiful", meaning="美丽的", pronunciation="ˈbjuːtɪfl",
-                     difficulty=0.5, category="adjective"),
-                Word(word_id="w7", word="computer", meaning="电脑", pronunciation="kəmˈpjuːtər",
-                     difficulty=0.5, category="technology"),
-                Word(word_id="w8", word="important", meaning="重要的", pronunciation="ɪmˈpɔːrtənt",
-                     difficulty=0.5, category="adjective"),
-                Word(word_id="w9", word="knowledge", meaning="知识", pronunciation="ˈnɑːlɪdʒ",
-                     difficulty=0.5, category="abstract"),
-                Word(word_id="w10", word="language", meaning="语言", pronunciation="ˈlæŋɡwɪdʒ",
-                     difficulty=0.5, category="abstract"),
-            ],
-            GameDifficulty.HARD: [
-                Word(word_id="w11", word="accomplish", meaning="完成", pronunciation="əˈkɑːmplɪʃ",
-                     difficulty=0.8, category="verb"),
-                Word(word_id="w12", word="phenomenon", meaning="现象", pronunciation="fəˈnɑːmɪnən",
-                     difficulty=0.8, category="abstract"),
-                Word(word_id="w13", word="sophisticated", meaning="复杂的", pronunciation="səˈfɪstɪkeɪtɪd",
-                     difficulty=0.8, category="adjective"),
-                Word(word_id="w14", word="entrepreneur", meaning="企业家", pronunciation="ˌɑːntrəprəˈnɜːr",
-                     difficulty=0.8, category="business"),
-                Word(word_id="w15", word="psychology", meaning="心理学", pronunciation="saɪˈkɑːlədʒi",
-                     difficulty=0.8, category="science"),
-            ]
-        }
+    # ──────────────────────────────────────────────
+    #  DB 持久化（G03）
+    # ──────────────────────────────────────────────
+
+    async def _persist_session(self, session: WordGameSession) -> None:
+        """将新会话写入 word_game_sessions 表。"""
+        try:
+            from app.db import get_pool
+            pool = await get_pool()
+            async with pool.acquire() as conn:
+                await conn.execute(
+                    """
+                    INSERT INTO word_game_sessions
+                        (session_id, user_id, game_type, difficulty, words,
+                         current_index, score, correct_count, wrong_count,
+                         time_limit_seconds, started_at, is_active)
+                    VALUES
+                        ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+                    ON CONFLICT (session_id) DO UPDATE SET
+                        words = EXCLUDED.words,
+                        current_index = EXCLUDED.current_index,
+                        score = EXCLUDED.score,
+                        is_active = EXCLUDED.is_active
+                    """,
+                    session.session_id,
+                    session.user_id,
+                    session.game_type.value,
+                    session.difficulty.value,
+                    json.dumps(
+                        [w.model_dump() for w in session.words],
+                        ensure_ascii=False
+                    ),
+                    session.current_index,
+                    session.score,
+                    session.correct_count,
+                    session.wrong_count,
+                    session.time_limit_seconds,
+                    session.started_at,
+                    session.is_active,
+                )
+        except Exception as e:
+            logger.warning("Failed to persist session %s: %s", session.session_id, e)
+
+    async def _restore_session(self, session_id: str) -> Optional[WordGameSession]:
+        """从 DB 恢复会话状态（跨 worker 可恢复）。"""
+        try:
+            from app.db import get_pool
+            pool = await get_pool()
+            async with pool.acquire() as conn:
+                row = await conn.fetchrow(
+                    """
+                    SELECT session_id, user_id, game_type, difficulty, words,
+                           current_index, score, correct_count, wrong_count,
+                           time_limit_seconds, started_at, is_active
+                    FROM word_game_sessions
+                    WHERE session_id = $1
+                    """,
+                    session_id,
+                )
+            if not row:
+                logger.warning("Session %s not found in DB", session_id)
+                return None
+
+            words_data = row["words"]
+            if isinstance(words_data, str):
+                words_data = json.loads(words_data)
+
+            words = [Word(**w) for w in words_data]
+
+            return WordGameSession(
+                session_id=row["session_id"],
+                user_id=row["user_id"],
+                game_type=GameType(row["game_type"]),
+                difficulty=GameDifficulty(row["difficulty"]),
+                words=words,
+                current_index=row["current_index"],
+                score=row["score"],
+                correct_count=row["correct_count"],
+                wrong_count=row["wrong_count"],
+                time_limit_seconds=row["time_limit_seconds"],
+                started_at=row["started_at"],
+                is_active=row["is_active"],
+            )
+        except Exception as e:
+            logger.error("Failed to restore session %s: %s", session_id, e)
+            return None
+
+    async def _update_session(self, session: WordGameSession) -> None:
+        """更新 DB 中的会话状态。"""
+        try:
+            from app.db import get_pool
+            pool = await get_pool()
+            async with pool.acquire() as conn:
+                await conn.execute(
+                    """
+                    UPDATE word_game_sessions SET
+                        current_index = $2,
+                        score = $3,
+                        correct_count = $4,
+                        wrong_count = $5,
+                        is_active = $6,
+                        updated_at = NOW()
+                    WHERE session_id = $1
+                    """,
+                    session.session_id,
+                    session.current_index,
+                    session.score,
+                    session.correct_count,
+                    session.wrong_count,
+                    session.is_active,
+                )
+        except Exception as e:
+            logger.warning("Failed to update session %s: %s", session.session_id, e)
+
+    async def _finalize_session(self, session: WordGameSession) -> None:
+        """游戏结束：写入 game_sessions 最终成绩 + 更新 user_game_profile。"""
+        try:
+            from app.db import get_pool
+            pool = await get_pool()
+            async with pool.acquire() as conn:
+                # 写入 game_sessions 最终成绩
+                total_questions = len(session.words)
+                accuracy = (
+                    session.correct_count / total_questions
+                    if total_questions > 0 else 0.0
+                )
+                elapsed = datetime.now() - session.started_at
+                duration = int(elapsed.total_seconds())
+
+                # XP 和金币：每正确 1 题 10 XP + 5 金币
+                xp_gained = session.correct_count * 10
+                coins_gained = session.correct_count * 5
+
+                await conn.execute(
+                    """
+                    INSERT INTO game_sessions
+                        (user_id, game_id, score, xp_gained, coins_gained,
+                         accuracy, duration, started_at, finished_at)
+                    VALUES
+                        ($1, $2, $3, $4, $5, $6, $7, $8, NOW())
+                    """,
+                    int(session.user_id) if session.user_id.isdigit() else 0,
+                    session.game_type.value,
+                    session.score,
+                    xp_gained,
+                    coins_gained,
+                    accuracy,
+                    duration,
+                    session.started_at,
+                )
+
+                # 更新 user_game_profile（upsert）
+                user_id_int = int(session.user_id) if session.user_id.isdigit() else 0
+                if user_id_int > 0:
+                    await conn.execute(
+                        """
+                        INSERT INTO user_game_profile
+                            (user_id, level, total_xp, coins, streak_days, badges, rank)
+                        VALUES
+                            ($1, 1, $2, $3, 0, '[]'::jsonb, NULL)
+                        ON CONFLICT (user_id) DO UPDATE SET
+                            total_xp = user_game_profile.total_xp + EXCLUDED.total_xp,
+                            coins = user_game_profile.coins + EXCLUDED.coins,
+                            updated_at = NOW()
+                        """,
+                        user_id_int,
+                        xp_gained,
+                        coins_gained,
+                    )
+
+                # 标记 word_game_sessions 为 inactive
+                await conn.execute(
+                    "UPDATE word_game_sessions SET is_active = false WHERE session_id = $1",
+                    session.session_id,
+                )
+
+                logger.info(
+                    "Finalized session %s: score=%d, xp=%d, coins=%d",
+                    session.session_id, session.score, xp_gained, coins_gained,
+                )
+        except Exception as e:
+            logger.error("Failed to finalize session %s: %s", session.session_id, e)
+
+    async def _query_leaderboard(
+        self,
+        game_type: Optional[GameType] = None,
+        limit: int = 10,
+    ) -> List[LeaderboardEntry]:
+        """从 game_sessions 表聚合查询排行榜。"""
+        try:
+            from app.db import get_pool
+            pool = await get_pool()
+            async with pool.acquire() as conn:
+                if game_type:
+                    rows = await conn.fetch(
+                        """
+                        SELECT user_id, MAX(score) as best_score, MAX(finished_at) as achieved_at
+                        FROM game_sessions
+                        WHERE game_id = $1
+                        GROUP BY user_id
+                        ORDER BY best_score DESC
+                        LIMIT $2
+                        """,
+                        game_type.value,
+                        limit,
+                    )
+                else:
+                    rows = await conn.fetch(
+                        """
+                        SELECT user_id, MAX(score) as best_score, MAX(finished_at) as achieved_at
+                        FROM game_sessions
+                        GROUP BY user_id
+                        ORDER BY best_score DESC
+                        LIMIT $1
+                        """,
+                        limit,
+                    )
+
+            entries = []
+            for i, r in enumerate(rows):
+                entries.append(LeaderboardEntry(
+                    rank=i + 1,
+                    user_id=str(r["user_id"]),
+                    username=f"用户{str(r['user_id'])[:6]}",
+                    score=r["best_score"] or 0,
+                    game_type=game_type or GameType.MULTIPLE_CHOICE,
+                    achieved_at=r["achieved_at"] or datetime.now(),
+                ))
+            return entries
+        except Exception as e:
+            logger.error("Failed to query leaderboard: %s", e)
+            return []
+
+    async def _get_user_rank(
+        self,
+        user_id: str,
+        game_type: GameType,
+    ) -> Optional[int]:
+        """获取用户在排行榜中的排名。"""
+        try:
+            from app.db import get_pool
+            pool = await get_pool()
+            async with pool.acquire() as conn:
+                # 查询该用户在指定游戏类型下的最高分排名
+                row = await conn.fetchrow(
+                    """
+                    SELECT rank FROM (
+                        SELECT user_id, MAX(score) as best_score,
+                               RANK() OVER (ORDER BY MAX(score) DESC) as rank
+                        FROM game_sessions
+                        WHERE game_id = $1
+                        GROUP BY user_id
+                    ) ranked
+                    WHERE user_id = $2
+                    """,
+                    game_type.value,
+                    int(user_id) if user_id.isdigit() else 0,
+                )
+                return row["rank"] if row else None
+        except Exception as e:
+            logger.warning("Failed to get user rank: %s", e)
+            return None
+
+    # ──────────────────────────────────────────────
+    #  选题与题目生成
+    # ──────────────────────────────────────────────
 
     async def _select_words(
         self,
@@ -306,10 +750,12 @@ class WordGamesService:
         categories: Optional[List[str]],
         exclude_words: List[str]
     ) -> List[Word]:
-        """选择单词"""
+        """从词库随机选择单词"""
+
+        bank = await self._load_word_bank()
 
         # 获取对应难度的单词
-        word_pool = self._word_bank.get(difficulty, self._word_bank[GameDifficulty.MEDIUM])
+        word_pool = list(bank.get(difficulty, bank[GameDifficulty.MEDIUM]))
 
         # 过滤排除的单词
         word_pool = [w for w in word_pool if w.word not in exclude_words]
@@ -322,16 +768,26 @@ class WordGamesService:
         if len(word_pool) < count:
             for diff in [GameDifficulty.EASY, GameDifficulty.MEDIUM, GameDifficulty.HARD]:
                 if diff != difficulty:
-                    additional = [w for w in self._word_bank[diff]
-                                 if w.word not in exclude_words]
+                    additional = [
+                        w for w in bank.get(diff, [])
+                        if w.word not in exclude_words and w not in word_pool
+                    ]
                     word_pool.extend(additional)
 
         # 随机选择
-        selected = random.sample(word_pool, min(count, len(word_pool)))
+        if not word_pool:
+            # 最终回退
+            word_pool = self._all_words[:count] if self._all_words else []
+
+        selected = random.sample(
+            word_pool, min(count, len(word_pool))
+        )
 
         # 如果还是不够，重复选择
-        while len(selected) < count:
-            selected.extend(random.sample(word_pool, min(count - len(selected), len(word_pool))))
+        while len(selected) < count and word_pool:
+            selected.extend(
+                random.sample(word_pool, min(count - len(selected), len(word_pool)))
+            )
 
         return selected[:count]
 
@@ -423,22 +879,27 @@ class WordGamesService:
         correct_word: Word,
         all_words: List[Word]
     ) -> List[str]:
-        """生成选择题选项"""
+        """生成选择题选项（干扰项从同难度词库取，非假选项）。"""
         options = [correct_word.word]
 
-        # 从其他单词中选择干扰项
+        # 从会话中的其他单词选取干扰项
         other_words = [w.word for w in all_words if w.word_id != correct_word.word_id]
+
+        # 如果不够 3 个干扰项，从全量词库补充
+        if len(other_words) < 3:
+            pool = [w.word for w in self._all_words
+                    if w.word != correct_word.word
+                    and w.word not in other_words]
+            random.shuffle(pool)
+            other_words.extend(pool[:3 - len(other_words)])
 
         if len(other_words) >= 3:
             options.extend(random.sample(other_words, 3))
         else:
-            # 如果不够，添加一些假选项
-            fake_options = ["option1", "option2", "option3"]
-            options.extend(fake_options[:3 - len(other_words)])
             options.extend(other_words)
 
         random.shuffle(options)
-        return options
+        return options[:4]  # 确保最多 4 个选项
 
     def _check_answer(
         self,
@@ -447,10 +908,8 @@ class WordGamesService:
         game_type: GameType
     ) -> bool:
         """检查答案"""
-        # 标准化答案
         user_normalized = user_answer.strip().lower()
         correct_normalized = correct_answer.strip().lower()
-
         return user_normalized == correct_normalized
 
     def _generate_feedback(
@@ -483,33 +942,6 @@ class WordGamesService:
             GameType.CROSSWORD: "完成填字游戏",
         }
         return instructions.get(game_type, "完成单词游戏")
-
-    def _update_leaderboard(self, session: WordGameSession) -> int:
-        """更新排行榜"""
-        entry = LeaderboardEntry(
-            rank=0,
-            user_id=session.user_id,
-            username=f"用户{session.user_id[:6]}",
-            score=session.score,
-            game_type=session.game_type,
-            achieved_at=datetime.now()
-        )
-
-        self._leaderboard.append(entry)
-
-        # 重新排序
-        self._leaderboard.sort(key=lambda x: -x.score)
-
-        # 更新排名
-        for i, e in enumerate(self._leaderboard):
-            e.rank = i + 1
-
-        # 返回当前排名
-        for e in self._leaderboard:
-            if e.user_id == session.user_id and e.score == session.score:
-                return e.rank
-
-        return len(self._leaderboard)
 
     def _award_badge(
         self,

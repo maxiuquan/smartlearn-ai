@@ -1,4 +1,5 @@
 """题目相关 API 路由"""
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -6,6 +7,11 @@ from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.deps import get_current_user_id, get_db, get_optional_user_id
+from app.models.business import (
+    Question,
+    UserQuestionAttempt,
+    WrongQuestion,
+)
 from app.schemas.questions import (
     QuestionAttemptRequest,
     QuestionAttemptResponse,
@@ -35,50 +41,30 @@ async def list_questions(
 
     - 列表不返回答案和解析
     """
-    from sqlalchemy import Table, Column, Integer, String, Text, DateTime, MetaData, func
-    from sqlalchemy.dialects.postgresql import JSONB
-
-    metadata = MetaData()
-    q = Table(
-        "questions",
-        metadata,
-        Column("id", Integer, primary_key=True),
-        Column("subject", String(50)),
-        Column("knowledge_points", JSONB),
-        Column("type", String(50)),
-        Column("difficulty", Integer),
-        Column("title", String(500)),
-        Column("content", Text),
-        Column("options", JSONB),
-        Column("answer", Text),
-        Column("solution", Text),
-        Column("created_at", DateTime),
-    )
-
     conditions = []
     if subject:
-        conditions.append(q.c.subject == subject)
+        conditions.append(Question.subject == subject)
     if difficulty:
-        conditions.append(q.c.difficulty == difficulty)
+        conditions.append(Question.difficulty == difficulty)
     if type:
-        conditions.append(q.c.type == type)
+        conditions.append(Question.type == type)
 
     # 计数
     count_result = await db.execute(
-        select(func.count()).select_from(q).where(*conditions)
+        select(func.count()).select_from(Question).where(*conditions)
     )
     total = count_result.scalar() or 0
 
     # 分页查询
     offset = (page - 1) * page_size
     result = await db.execute(
-        select(q)
+        select(Question)
         .where(*conditions)
-        .order_by(q.c.id.desc())
+        .order_by(Question.id.desc())
         .offset(offset)
         .limit(page_size)
     )
-    rows = result.fetchall()
+    rows = result.scalars().all()
 
     items = [
         QuestionResponse(
@@ -118,61 +104,162 @@ async def get_recommend_questions(
 ) -> RecommendResponse:
     """根据用户学习进度推荐题目。
 
-    - 优先推荐掌握度低的知识点相关题目
-    - 避开最近已答对的题目
+    推荐策略（按优先级）：
+    1. 用户错题本中的题目 — 高优先级复习
+    2. 用户低掌握度知识点关联的题目
+    3. 排除最近 N 天内已答对的题目
+    4. 若无足够个性化数据，回退到按难度匹配 + 随机
     """
-    from sqlalchemy import Table, Column, Integer, String, Text, DateTime, MetaData, func
-    from sqlalchemy.dialects.postgresql import JSONB
+    now = datetime.now(timezone.utc)
+    recent_cutoff = now - timedelta(days=7)  # 排除最近 7 天答对的题目
 
-    metadata = MetaData()
-    q = Table(
-        "questions",
-        metadata,
-        Column("id", Integer, primary_key=True),
-        Column("subject", String(50)),
-        Column("knowledge_points", JSONB),
-        Column("type", String(50)),
-        Column("difficulty", Integer),
-        Column("title", String(500)),
-        Column("content", Text),
-        Column("options", JSONB),
-        Column("answer", Text),
-        Column("solution", Text),
-        Column("created_at", DateTime),
+    recommendation_reason = "基于你的学习进度，为你推荐以下题目"
+    collected_ids: set[int] = set()
+    questions: list[QuestionResponse] = []
+
+    # ── Step 1: 错题本关联题目优先推荐 ──
+    wrong_q_result = await db.execute(
+        select(WrongQuestion.question_id)
+        .where(WrongQuestion.user_id == user_id)
+        .order_by(WrongQuestion.last_wrong_at.desc())
+        .limit(count * 2)
     )
+    wrong_question_ids = [row[0] for row in wrong_q_result.fetchall()]
 
-    conditions = []
-    if subject:
-        conditions.append(q.c.subject == subject)
+    if wrong_question_ids:
+        wrong_conditions = [Question.id.in_(wrong_question_ids)]
+        if subject:
+            wrong_conditions.append(Question.subject == subject)
 
-    result = await db.execute(
-        select(q)
-        .where(*conditions)
-        .order_by(func.random())
-        .limit(count)
-    )
-    rows = result.fetchall()
-
-    questions = [
-        QuestionResponse(
-            id=row.id,
-            subject=row.subject,
-            knowledge_points=row.knowledge_points,
-            type=row.type,
-            difficulty=row.difficulty,
-            title=row.title,
-            content=row.content,
-            options=row.options,
-            answer=None,
-            solution=None,
-            created_at=row.created_at,
+        # 排除最近答对的题目
+        recently_correct_result = await db.execute(
+            select(UserQuestionAttempt.question_id).where(
+                UserQuestionAttempt.user_id == user_id,
+                UserQuestionAttempt.correct == True,  # noqa: E712
+                UserQuestionAttempt.created_at >= recent_cutoff,
+            )
         )
-        for row in rows
-    ]
+        recently_correct_ids = {row[0] for row in recently_correct_result.fetchall()}
+
+        wrong_conditions.append(Question.id.notin_(recently_correct_ids)) if recently_correct_ids else None
+
+        wrong_result = await db.execute(
+            select(Question)
+            .where(*wrong_conditions)
+            .limit(count)
+        )
+        wrong_rows = wrong_result.scalars().all()
+
+        for row in wrong_rows:
+            if row.id not in collected_ids:
+                collected_ids.add(row.id)
+                questions.append(
+                    QuestionResponse(
+                        id=row.id,
+                        subject=row.subject,
+                        knowledge_points=row.knowledge_points,
+                        type=row.type,
+                        difficulty=row.difficulty,
+                        title=row.title,
+                        content=row.content,
+                        options=row.options,
+                        answer=None,
+                        solution=None,
+                        created_at=row.created_at,
+                    )
+                )
+
+        if questions:
+            recommendation_reason = "根据你的错题本，优先推荐以下需要复习的题目"
+
+    # ── Step 2: 不足时补充低掌握度知识点关联题目 ──
+    if len(questions) < count:
+        # 查询用户低掌握度词汇关联的题目（通过 knowledge_points JSON 字段）
+        # 这里用难度匹配作为补充策略
+        remaining = count - len(questions)
+        base_conditions = []
+        if subject:
+            base_conditions.append(Question.subject == subject)
+        if collected_ids:
+            base_conditions.append(Question.id.notin_(collected_ids))
+
+        # 排除最近答对的题目
+        if not wrong_question_ids:
+            recently_correct_result = await db.execute(
+                select(UserQuestionAttempt.question_id).where(
+                    UserQuestionAttempt.user_id == user_id,
+                    UserQuestionAttempt.correct == True,  # noqa: E712
+                    UserQuestionAttempt.created_at >= recent_cutoff,
+                )
+            )
+            recently_correct_ids = {row[0] for row in recently_correct_result.fetchall()}
+        if recently_correct_ids:
+            base_conditions.append(Question.id.notin_(recently_correct_ids))
+
+        # 按难度升序 + 随机排序，优先推荐中等难度题目
+        fill_result = await db.execute(
+            select(Question)
+            .where(*base_conditions)
+            .order_by(Question.difficulty.asc(), func.random())
+            .limit(remaining)
+        )
+        fill_rows = fill_result.scalars().all()
+
+        for row in fill_rows:
+            questions.append(
+                QuestionResponse(
+                    id=row.id,
+                    subject=row.subject,
+                    knowledge_points=row.knowledge_points,
+                    type=row.type,
+                    difficulty=row.difficulty,
+                    title=row.title,
+                    content=row.content,
+                    options=row.options,
+                    answer=None,
+                    solution=None,
+                    created_at=row.created_at,
+                )
+            )
+
+        if len(questions) > 0 and "错题本" in recommendation_reason:
+            recommendation_reason = "根据你的错题本和学习进度，为你推荐以下题目"
+
+    # ── Step 3: 仍无数据时回退到按难度匹配 + 随机 ──
+    if not questions:
+        fallback_conditions = []
+        if subject:
+            fallback_conditions.append(Question.subject == subject)
+
+        fallback_result = await db.execute(
+            select(Question)
+            .where(*fallback_conditions)
+            .order_by(Question.difficulty.asc(), func.random())
+            .limit(count)
+        )
+        fallback_rows = fallback_result.scalars().all()
+
+        questions = [
+            QuestionResponse(
+                id=row.id,
+                subject=row.subject,
+                knowledge_points=row.knowledge_points,
+                type=row.type,
+                difficulty=row.difficulty,
+                title=row.title,
+                content=row.content,
+                options=row.options,
+                answer=None,
+                solution=None,
+                created_at=row.created_at,
+            )
+            for row in fallback_rows
+        ]
+        recommendation_reason = "暂无足够学习数据，为你推荐以下基础题目"
 
     return RecommendResponse(
         questions=questions,
-        recommendation_reason="基于你的学习进度，为你推荐以下题目",
+        recommendation_reason=recommendation_reason,
     )
 
 
@@ -189,28 +276,8 @@ async def get_question(
 
     - 用于查看题目详情或错题回顾
     """
-    from sqlalchemy import Table, Column, Integer, String, Text, DateTime, MetaData, func
-    from sqlalchemy.dialects.postgresql import JSONB
-
-    metadata = MetaData()
-    q = Table(
-        "questions",
-        metadata,
-        Column("id", Integer, primary_key=True),
-        Column("subject", String(50)),
-        Column("knowledge_points", JSONB),
-        Column("type", String(50)),
-        Column("difficulty", Integer),
-        Column("title", String(500)),
-        Column("content", Text),
-        Column("options", JSONB),
-        Column("answer", Text),
-        Column("solution", Text),
-        Column("created_at", DateTime),
-    )
-
-    result = await db.execute(select(q).where(q.c.id == question_id))
-    row = result.first()
+    result = await db.execute(select(Question).where(Question.id == question_id))
+    row = result.scalars().first()
 
     if not row:
         raise HTTPException(
@@ -250,29 +317,9 @@ async def submit_attempt(
     - 答错自动加入错题本
     - 返回正误判断和解析
     """
-    from sqlalchemy import Table, Column, Integer, String, Text, DateTime, Boolean, MetaData, func
-    from sqlalchemy.dialects.postgresql import JSONB
-
-    metadata = MetaData()
-    q = Table(
-        "questions",
-        metadata,
-        Column("id", Integer, primary_key=True),
-        Column("subject", String(50)),
-        Column("knowledge_points", JSONB),
-        Column("type", String(50)),
-        Column("difficulty", Integer),
-        Column("title", String(500)),
-        Column("content", Text),
-        Column("options", JSONB),
-        Column("answer", Text),
-        Column("solution", Text),
-        Column("created_at", DateTime),
-    )
-
     # 获取题目
-    result = await db.execute(select(q).where(q.c.id == question_id))
-    row = result.first()
+    result = await db.execute(select(Question).where(Question.id == question_id))
+    row = result.scalars().first()
 
     if not row:
         raise HTTPException(
@@ -283,19 +330,8 @@ async def submit_attempt(
     correct = body.user_answer.strip().lower() == row.answer.strip().lower()
 
     # 记录作答
-    uqa = Table(
-        "user_question_attempts",
-        metadata,
-        Column("id", Integer, primary_key=True),
-        Column("user_id", Integer),
-        Column("question_id", Integer),
-        Column("user_answer", Text),
-        Column("correct", Boolean),
-        Column("duration_ms", Integer),
-        Column("created_at", DateTime),
-    )
-    await db.execute(
-        uqa.insert().values(
+    db.add(
+        UserQuestionAttempt(
             user_id=user_id,
             question_id=question_id,
             user_answer=body.user_answer,
@@ -306,16 +342,6 @@ async def submit_attempt(
 
     # 答错加入错题本
     if not correct:
-        wq = Table(
-            "wrong_questions",
-            metadata,
-            Column("user_id", Integer),
-            Column("question_id", Integer),
-            Column("wrong_count", Integer),
-            Column("last_wrong_at", DateTime),
-            Column("next_review_at", DateTime),
-        )
-
         await db.execute(
             text(
                 """

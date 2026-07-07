@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
+import { View, StyleSheet, ScrollView, TextInput, Alert } from 'react-native';
 import { Text, Button, useTheme } from 'react-native-paper';
 import { DrawingBoard } from '../common/DrawingBoard';
 import { Question } from '../../types';
@@ -20,6 +20,22 @@ export const CalculateQuestion: React.FC<CalculateQuestionProps> = ({
 }) => {
   const { colors } = useTheme();
   const [showDrawing, setShowDrawing] = useState(false);
+  const [userInput, setUserInput] = useState(userAnswer ?? '');
+
+  /**
+   * Handle "查看答案" button press.
+   * Submits the user's actual input for grading. If the user has not
+   * entered anything, prompts them to input an answer first instead
+   * of submitting an empty string (which would always be graded wrong).
+   */
+  const handleSubmitAnswer = () => {
+    const trimmed = userInput.trim();
+    if (!trimmed) {
+      Alert.alert('提示', '请先输入答案', [{ text: '确定' }]);
+      return;
+    }
+    onAnswer(trimmed);
+  };
 
   return (
     <View style={styles.container}>
@@ -31,6 +47,32 @@ export const CalculateQuestion: React.FC<CalculateQuestionProps> = ({
             计算区域
           </Text>
           <DrawingBoard height={200} />
+        </View>
+      )}
+
+      {/* Answer input field — only visible before the answer is revealed */}
+      {!showAnswer && (
+        <View style={styles.inputSection}>
+          <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>
+            你的答案
+          </Text>
+          <TextInput
+            style={[
+              styles.input,
+              {
+                backgroundColor: colors.surface,
+                borderColor: colors.border,
+                color: colors.text,
+              },
+            ]}
+            value={userInput}
+            onChangeText={setUserInput}
+            placeholder="请输入计算结果"
+            placeholderTextColor={colors.textSecondary}
+            keyboardType="default"
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
         </View>
       )}
 
@@ -46,6 +88,11 @@ export const CalculateQuestion: React.FC<CalculateQuestionProps> = ({
               {question.answer}
             </Text>
           </View>
+          {userAnswer && (
+            <Text style={[styles.userAnswerText, { color: colors.textSecondary }]}>
+              你的答案: {userAnswer}
+            </Text>
+          )}
         </View>
       )}
 
@@ -71,7 +118,7 @@ export const CalculateQuestion: React.FC<CalculateQuestionProps> = ({
           </Button>
           <Button
             mode="contained"
-            onPress={() => onAnswer('')}
+            onPress={handleSubmitAnswer}
           >
             查看答案
           </Button>
@@ -96,6 +143,20 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '500',
   },
+  inputSection: {
+    gap: spacing.sm,
+  },
+  inputLabel: {
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  input: {
+    padding: spacing.md,
+    borderRadius: borderRadius.md,
+    borderWidth: 1,
+    fontSize: 18,
+    textAlign: 'center',
+  },
   answerSection: {
     gap: spacing.sm,
   },
@@ -114,6 +175,10 @@ const styles = StyleSheet.create({
   answerText: {
     fontSize: 16,
     lineHeight: 24,
+  },
+  userAnswerText: {
+    fontSize: 14,
+    fontStyle: 'italic',
   },
   analysisSection: {
     gap: spacing.sm,

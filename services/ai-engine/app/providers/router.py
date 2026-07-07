@@ -4,6 +4,8 @@ AI 路由层
 根据 (capability, subject) 元组将请求路由到最合适的 AI 供应商。
 支持主/备供应商切换、配额跟踪、延迟统计和错误计数。
 
+所有方法均为 async，适配 FastAPI 异步事件循环。
+
 ## 安全整改（C4）核心语义
 
 本模块严格区分两类结果，杜绝「运行时故障被静默伪装成成功」：
@@ -24,7 +26,7 @@ AI 路由层
 import logging
 import time
 import uuid
-from typing import Any, Generator, Optional
+from typing import Any, AsyncGenerator, Optional
 
 from .registry import get_registry
 
@@ -75,6 +77,7 @@ class AIRouter:
 
     根据能力和学科将请求路由到最佳供应商。
     支持主/备切换、配额跟踪、延迟和错误统计。
+    所有方法均为 async。
     """
 
     def __init__(self) -> None:
@@ -165,7 +168,7 @@ class AIRouter:
 
     # ── 聊天路由 ─────────────────────────────────────────────
 
-    def chat_completion(
+    async def chat_completion(
         self,
         messages: list[dict[str, str]],
         subject: str = "default",
@@ -173,7 +176,7 @@ class AIRouter:
         temperature: float = 0.7,
         **kwargs: Any,
     ) -> str:
-        """路由聊天补全请求
+        """路由聊天补全请求（async）
 
         Args:
             messages: 消息列表
@@ -196,7 +199,7 @@ class AIRouter:
         if provider is not None and not provider.is_offline:
             start = time.time()
             try:
-                result = provider.chat_completion(
+                result = await provider.chat_completion(
                     messages, max_tokens, temperature, **kwargs
                 )
                 self._record_request(primary_name, True, time.time() - start)
@@ -217,7 +220,7 @@ class AIRouter:
             if provider is not None and not provider.is_offline:
                 start = time.time()
                 try:
-                    result = provider.chat_completion(
+                    result = await provider.chat_completion(
                         messages, max_tokens, temperature, **kwargs
                     )
                     self._record_request(fallback_name, True, time.time() - start)
@@ -241,7 +244,8 @@ class AIRouter:
                     "[AIRouter] 离线模式：返回模拟响应（主供应商 %s）",
                     primary_name,
                 )
-                return provider.chat_completion(messages, max_tokens, temperature, **kwargs)
+                result = await provider.chat_completion(messages, max_tokens, temperature, **kwargs)
+                return result
             return "（离线模拟）AI 服务当前处于离线模式，未配置任何供应商。"
 
         # 运行时故障：所有在线供应商均失败，向上抛出（不再静默 mock）
@@ -252,15 +256,15 @@ class AIRouter:
             message=str(last_exc),
         )
 
-    def chat_completion_stream(
+    async def chat_completion_stream(
         self,
         messages: list[dict[str, str]],
         subject: str = "default",
         max_tokens: int = 2048,
         temperature: float = 0.7,
         **kwargs: Any,
-    ) -> Generator[str, None, None]:
-        """路由流式聊天请求（与 chat_completion 同样的故障语义）
+    ) -> AsyncGenerator[str, None]:
+        """路由流式聊天请求（async generator，与 chat_completion 同样的故障语义）
 
         Raises:
             ProviderUnavailableError: 所有在线供应商均运行时故障。
@@ -273,7 +277,7 @@ class AIRouter:
         if provider is not None and not provider.is_offline:
             start = time.time()
             try:
-                for chunk in provider.chat_completion_stream(
+                async for chunk in provider.chat_completion_stream(
                     messages, max_tokens, temperature, **kwargs
                 ):
                     yield chunk
@@ -295,7 +299,7 @@ class AIRouter:
             if provider is not None and not provider.is_offline:
                 start = time.time()
                 try:
-                    for chunk in provider.chat_completion_stream(
+                    async for chunk in provider.chat_completion_stream(
                         messages, max_tokens, temperature, **kwargs
                     ):
                         yield chunk
@@ -323,8 +327,8 @@ class AIRouter:
 
     # ── 嵌入路由 ─────────────────────────────────────────────
 
-    def generate_embedding(self, text: str) -> list[float]:
-        """路由嵌入向量请求（全局统一使用 SiliconFlow）
+    async def generate_embedding(self, text: str) -> list[float]:
+        """路由嵌入向量请求（async，全局统一使用 SiliconFlow）
 
         Raises:
             ProviderUnavailableError: 嵌入调用异常时抛出，绝不返回假向量。
@@ -341,7 +345,7 @@ class AIRouter:
 
         start = time.time()
         try:
-            result = provider.generate_embedding(text)
+            result = await provider.generate_embedding(text)
             self._record_request(primary_name, True, time.time() - start)
             return result
         except Exception as e:
@@ -358,8 +362,8 @@ class AIRouter:
                 message=str(e),
             )
 
-    def generate_embeddings(self, texts: list[str]) -> list[list[float]]:
-        """路由批量嵌入向量请求
+    async def generate_embeddings(self, texts: list[str]) -> list[list[float]]:
+        """路由批量嵌入向量请求（async）
 
         Raises:
             ProviderUnavailableError: 嵌入调用异常时抛出，绝不返回假向量。
@@ -376,9 +380,9 @@ class AIRouter:
         start = time.time()
         try:
             if hasattr(provider, "generate_embeddings"):
-                result = provider.generate_embeddings(texts)
+                result = await provider.generate_embeddings(texts)
             else:
-                result = [provider.generate_embedding(t) for t in texts]
+                result = [await provider.generate_embedding(t) for t in texts]
             self._record_request(primary_name, True, time.time() - start)
             return result
         except Exception as e:
@@ -412,14 +416,14 @@ class AIRouter:
 
     # ── TTS 路由 ─────────────────────────────────────────────
 
-    def text_to_speech(
+    async def text_to_speech(
         self,
         text: str,
         voice: str = "default",
         speed: float = 1.0,
         **kwargs: Any,
     ) -> bytes:
-        """路由 TTS 请求
+        """路由 TTS 请求（async）
 
         Raises:
             ProviderUnavailableError: 供应商已配置但调用异常时抛出（不静默返回空音频）。
@@ -433,7 +437,7 @@ class AIRouter:
 
         start = time.time()
         try:
-            result = provider.text_to_speech(text, voice, speed, **kwargs)
+            result = await provider.text_to_speech(text, voice, speed, **kwargs)
             self._record_request(primary_name, True, time.time() - start)
             return result
         except Exception as e:
@@ -452,13 +456,13 @@ class AIRouter:
 
     # ── STT 路由 ─────────────────────────────────────────────
 
-    def speech_to_text(
+    async def speech_to_text(
         self,
         audio_data: bytes,
         language: str = "zh",
         **kwargs: Any,
     ) -> str:
-        """路由 STT 请求
+        """路由 STT 请求（async）
 
         Raises:
             ProviderUnavailableError: 供应商已配置但调用异常时抛出（不静默返回空文本）。
@@ -472,7 +476,7 @@ class AIRouter:
 
         start = time.time()
         try:
-            result = provider.speech_to_text(audio_data, language, **kwargs)
+            result = await provider.speech_to_text(audio_data, language, **kwargs)
             self._record_request(primary_name, True, time.time() - start)
             return result
         except Exception as e:
@@ -491,14 +495,14 @@ class AIRouter:
 
     # ── 图像路由 ─────────────────────────────────────────────
 
-    def generate_image(
+    async def generate_image(
         self,
         prompt: str,
         size: str = "1024x1024",
         n: int = 1,
         **kwargs: Any,
     ) -> list[str]:
-        """路由图像生成请求
+        """路由图像生成请求（async）
 
         Raises:
             ProviderUnavailableError: 供应商已配置但调用异常时抛出。
@@ -510,7 +514,7 @@ class AIRouter:
         if provider is not None and not provider.is_offline:
             start = time.time()
             try:
-                result = provider.generate_image(prompt, size, n, **kwargs)
+                result = await provider.generate_image(prompt, size, n, **kwargs)
                 self._record_request(primary_name, True, time.time() - start)
                 return result
             except Exception as e:
@@ -528,7 +532,7 @@ class AIRouter:
             if provider is not None and not provider.is_offline:
                 start = time.time()
                 try:
-                    result = provider.generate_image(prompt, size, n, **kwargs)
+                    result = await provider.generate_image(prompt, size, n, **kwargs)
                     self._record_request(fallback_name, True, time.time() - start)
                     return result
                 except Exception as e:
@@ -553,12 +557,12 @@ class AIRouter:
 
     # ── 审核路由 ─────────────────────────────────────────────
 
-    def moderate(
+    async def moderate(
         self,
         text: str,
         **kwargs: Any,
     ) -> dict[str, Any]:
-        """路由内容审核请求（fail-closed）
+        """路由内容审核请求（async，fail-closed）
 
         审核供应商调用异常时，返回 `flagged=True` 并告警，而非静默放行
         （漏放违规内容）。未配置审核供应商时也按 fail-closed 标记。
@@ -582,7 +586,7 @@ class AIRouter:
 
         start = time.time()
         try:
-            result = provider.moderate(text, **kwargs)
+            result = await provider.moderate(text, **kwargs)
             self._record_request(primary_name, True, time.time() - start)
             # 确保返回结构完整
             result.setdefault("flagged", False)

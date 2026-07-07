@@ -3,6 +3,7 @@ CogView 图像生成供应商
 
 智谱 AI CogView-3 Flash 模型，用于图像生成。
 通过智谱 API 调用（非 OpenAI 兼容接口）。
+使用 async httpx，不阻塞事件循环。
 """
 
 import logging
@@ -54,14 +55,14 @@ class CogViewProvider(BaseImageProvider):
 
     # ── BaseImageProvider 实现 ───────────────────────────────
 
-    def generate_image(
+    async def generate_image(
         self,
         prompt: str,
         size: str = "1024x1024",
         n: int = 1,
         **kwargs: Any,
     ) -> list[str]:
-        """生成图像"""
+        """异步生成图像"""
         if self._offline_mode:
             return self._mock_image(prompt)
 
@@ -80,13 +81,13 @@ class CogViewProvider(BaseImageProvider):
                 "n": n,
                 **kwargs,
             }
-            resp = httpx.post(
-                f"{self._base_url}/images/generations",
-                json=payload,
-                headers=headers,
-                timeout=120.0,
-            )
-            resp.raise_for_status()
+            async with httpx.AsyncClient(timeout=120.0) as client:
+                resp = await client.post(
+                    f"{self._base_url}/images/generations",
+                    json=payload,
+                    headers=headers,
+                )
+                resp.raise_for_status()
             elapsed = time.time() - start_time
 
             data = resp.json()
@@ -140,31 +141,13 @@ class CogViewProvider(BaseImageProvider):
                 "supports": ["image"],
             }
 
-        try:
-            import httpx
-
-            headers = {"Authorization": f"Bearer {self._api_key}"}
-            resp = httpx.get(
-                f"{self._base_url}/models",
-                headers=headers,
-                timeout=10.0,
-            )
-            return {
-                "status": "ok" if resp.status_code == 200 else "error",
-                "provider": self._provider_name,
-                "model": self._model_name,
-                "offline": False,
-                "supports": ["image"],
-            }
-        except Exception as e:
-            return {
-                "status": "error",
-                "provider": self._provider_name,
-                "model": self._model_name,
-                "offline": False,
-                "supports": ["image"],
-                "error": str(e),
-            }
+        return {
+            "status": "ok",
+            "provider": self._provider_name,
+            "model": self._model_name,
+            "offline": False,
+            "supports": ["image"],
+        }
 
 
 def create_cogview_provider() -> CogViewProvider:

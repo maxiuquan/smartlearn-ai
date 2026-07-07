@@ -5,7 +5,7 @@
 from datetime import datetime
 from typing import Any, Optional
 
-from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, Text, func
+from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, Text, Boolean, func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -178,6 +178,31 @@ class UserGameProfile(Base):
     streak_days: Mapped[int] = mapped_column(Integer, server_default="0", nullable=False)
     badges: Mapped[Optional[list[Any]]] = mapped_column(JSONB, nullable=True)
     rank: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, server_default=func.now(), onupdate=func.now(), nullable=False
+    )
+
+
+class WordGameSession(Base):
+    """单词游戏活跃会话状态（跨 worker 可恢复）.
+
+    由 ai-engine asyncpg 读写；ORM 定义在此供 Alembic 迁移创建表。
+    """
+
+    __tablename__ = "word_game_sessions"
+
+    session_id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    user_id: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
+    game_type: Mapped[str] = mapped_column(String(50), nullable=False)
+    difficulty: Mapped[str] = mapped_column(String(20), nullable=False)
+    words: Mapped[list[Any]] = mapped_column(JSONB, nullable=False)
+    current_index: Mapped[int] = mapped_column(Integer, server_default="0", nullable=False)
+    score: Mapped[int] = mapped_column(Integer, server_default="0", nullable=False)
+    correct_count: Mapped[int] = mapped_column(Integer, server_default="0", nullable=False)
+    wrong_count: Mapped[int] = mapped_column(Integer, server_default="0", nullable=False)
+    time_limit_seconds: Mapped[int] = mapped_column(Integer, server_default="60", nullable=False)
+    started_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, server_default="true", nullable=False)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.now(), onupdate=func.now(), nullable=False
     )

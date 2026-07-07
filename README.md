@@ -23,7 +23,7 @@ SmartLearn AI 是一个基于人工智能的智能学习平台，面向考研学
 
 ### 3. 词汇学习
 - 目标词库：CET4 / 考研核心 **4541+** 词
-- **当前已录入约 528 条**（考研核心词 220 + 同义词 100 + 单词书配置 8 + 词频数据 200），持续扩充中
+- **当前已录入 3000+ 条**（CET4 核心词 2760 + 考研高频词 499 + 考研核心词 220 + 同义词/反义词 100 + 词频数据 200），持续扩充中
 - 多种单词书、艾宾浩斯遗忘曲线复习（SRS）、词汇测试与评估
 - 详见 `data/vocabulary/README.md`
 
@@ -42,6 +42,16 @@ SmartLearn AI 是一个基于人工智能的智能学习平台，面向考研学
 ### 6. 游戏化学习
 - **25 款学习游戏**（`data/games/games-config.json`：16 款英语单词游戏、4 款数学游戏、5 款跨科目 / 社交游戏）
 - 统一单词进度系统、排行榜与段位、成就系统
+
+### 7. 学生端 Web（student-web）
+- 仪表盘（Dashboard）：学习概览、进度追踪
+- 词汇学习（VocabLearning）：艾宾浩斯复习、SRS 间隔重复
+- 题目练习（QuestionPractice）：智能推荐、错题回顾
+- AI 导师（AITutor）：实时问答、RAG 知识检索增强
+- 游戏大厅（GameHall）：25 款学习游戏入口
+- 单词游戏（WordGame）/ 数学游戏（MathGame）/ 跨科目游戏（CrossSubjectGame）
+- 历年真题（PastExam）：真题样例浏览与练习
+- 个人中心（Profile）：学习统计、成就展示
 
 ## 技术架构
 
@@ -104,7 +114,7 @@ smartlearn-ai/
 ├── data/                              # 数据文件
 │   ├── knowledge-points/              # 知识点 (math/linear-algebra/probability/english.json，共 287)
 │   ├── questions/                     # 题目 (math-full.json 5026 / english-full.json 3224 / math-examples.json 50)
-│   ├── vocabulary/                    # 词汇 (~528 条，含 README.md 说明)
+│   ├── vocabulary/                    # 词汇 (3000+ 条，含 README.md 说明)
 │   ├── exam-papers/                   # 真题样例 + schema (math-sample/english-sample/schema)
 │   ├── exercise-books/                # 习题样例 + schema (workbook-sample/schema)
 │   ├── games/                         # 25 款游戏配置 + 排行榜配置

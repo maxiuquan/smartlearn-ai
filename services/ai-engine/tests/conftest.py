@@ -2,11 +2,12 @@
 pytest 共享 fixtures
 
 提供 mock settings、mock providers、mock registry 等测试基础设施。
+所有 mock provider 方法使用 AsyncMock，适配异步 provider 接口。
 """
 
 import sys
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, AsyncMock, patch
 
 import pytest
 
@@ -51,40 +52,46 @@ def mock_offline_settings():
 
 
 # ═══════════════════════════════════════════════════════════════
-# Mock Providers
+# Mock Providers（异步版）
 # ═══════════════════════════════════════════════════════════════
 
+async def _async_iter(items):
+    """将列表转为异步生成器。"""
+    for item in items:
+        yield item
+
+
 def _create_mock_provider(name: str, is_offline: bool = False) -> MagicMock:
-    """创建一个 mock 供应商实例，具备完整的接口方法。"""
+    """创建一个 mock 供应商实例，具备完整的异步接口方法。"""
     provider = MagicMock()
     provider.name = name
     provider.is_offline = is_offline
     provider.model_name = f"{name}-model"
 
-    # 聊天接口
-    provider.chat_completion.return_value = f"来自 {name} 的回复"
-    provider.chat_completion_stream.return_value = iter([f"来自 {name} 的流式回复"])
+    # 聊天接口（异步）
+    provider.chat_completion = AsyncMock(return_value=f"来自 {name} 的回复")
+    provider.chat_completion_stream = AsyncMock(return_value=_async_iter([f"来自 {name} 的流式回复"]))
 
-    # 嵌入接口
-    provider.generate_embedding.return_value = [0.1] * 1536
-    provider.generate_embeddings.return_value = [[0.1] * 1536]
+    # 嵌入接口（异步）
+    provider.generate_embedding = AsyncMock(return_value=[0.1] * 1536)
+    provider.generate_embeddings = AsyncMock(return_value=[[0.1] * 1536])
 
-    # TTS / STT
-    provider.text_to_speech.return_value = b"fake-audio-data"
-    provider.speech_to_text.return_value = "识别结果"
+    # TTS / STT（异步）
+    provider.text_to_speech = AsyncMock(return_value=b"fake-audio-data")
+    provider.speech_to_text = AsyncMock(return_value="识别结果")
 
-    # 图像
-    provider.generate_image.return_value = ["https://example.com/img.png"]
+    # 图像（异步）
+    provider.generate_image = AsyncMock(return_value=["https://example.com/img.png"])
 
-    # 审核
-    provider.moderate.return_value = {
+    # 审核（异步）
+    provider.moderate = AsyncMock(return_value={
         "flagged": False,
         "categories": [],
         "reason": "无违规",
         "confidence": 0.0,
-    }
+    })
 
-    # 健康检查
+    # 健康检查（同步）
     provider.health_check.return_value = {
         "status": "ok",
         "provider_name": name,
@@ -225,11 +232,14 @@ def patched_llm_service(mock_settings, mock_registry):
                             from app.services.llm_service import LLMService
 
                             service = LLMService()
-                            # 替换内部 router 为 mock
+                            # 替换内部 router 为 mock（异步）
                             service._router = MagicMock()
-                            service._router.chat_completion.return_value = "mock 路由回复"
+                            service._router.chat_completion = AsyncMock(return_value="mock 路由回复")
+                            service._router.chat_completion_stream = AsyncMock(
+                                return_value=_async_iter(["mock 流式回复"])
+                            )
                             service._rag = MagicMock()
-                            service._rag.retrieve_context.return_value = []
+                            service._rag.retrieve_context = AsyncMock(return_value=[])
                             service._rag.format_context_for_llm.return_value = ""
                             return service
 
@@ -255,11 +265,12 @@ def patched_llm_service_offline(mock_offline_settings, mock_offline_registry):
 
                             service = LLMService()
                             service._router = MagicMock()
-                            service._router.chat_completion.side_effect = Exception(
-                                "离线模式"
+                            service._router.chat_completion = AsyncMock(side_effect=Exception("离线模式"))
+                            service._router.chat_completion_stream = AsyncMock(
+                                side_effect=Exception("离线模式")
                             )
                             service._rag = MagicMock()
-                            service._rag.retrieve_context.return_value = []
+                            service._rag.retrieve_context = AsyncMock(return_value=[])
                             service._rag.format_context_for_llm.return_value = ""
                             return service
 
@@ -277,8 +288,6 @@ def patched_rag_service(mock_settings, mock_registry):
                 service = RAGService()
                 # 不调用 initialize，单独测试各个方法
                 service._router = MagicMock()
-                service._router.generate_embedding.return_value = [0.1] * 1536
-                service._router.generate_embeddings.return_value = [
-                    [0.1] * 1536
-                ]
+                service._router.generate_embedding = AsyncMock(return_value=[0.1] * 1536)
+                service._router.generate_embeddings = AsyncMock(return_value=[[0.1] * 1536])
                 return service

@@ -91,7 +91,7 @@ async def query_knowledge(request: RAGQueryRequest):
     可用于学习时查找相关知识点。
     """
     rag = get_rag_service()
-    contexts = rag.retrieve_context(request.query, top_k=request.top_k)
+    contexts = await rag.retrieve_context(request.query, top_k=request.top_k)
 
     results = [
         KnowledgePointItem(
@@ -126,7 +126,7 @@ async def explain_question(request: ExplainRequest):
     from config import settings
 
     llm = get_llm_service()
-    explanation = llm.generate_explanation(
+    explanation = await llm.generate_explanation(
         question=request.question,
         answer=request.answer,
         context=request.context,
@@ -147,7 +147,7 @@ async def similar_questions(request: SimilarQuestionsRequest):
     根据查询文本检索相似的题目。
     """
     rag = get_rag_service()
-    questions = rag.search_similar_questions(request.query, top_k=request.top_k)
+    questions = await rag.search_similar_questions(request.query, top_k=request.top_k)
 
     results = [
         SimilarQuestionItem(

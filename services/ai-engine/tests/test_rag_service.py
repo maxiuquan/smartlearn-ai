@@ -283,18 +283,20 @@ class TestFormatContext:
 # ═══════════════════════════════════════════════════════════════
 
 class TestEmbedQuery:
-    """测试 _embed_query 方法"""
+    """测试 _embed_query 方法（异步）"""
 
-    def test_embed_query_online(self, patched_rag_service):
+    @pytest.mark.asyncio
+    async def test_embed_query_online(self, patched_rag_service):
         """在线生成查询嵌入"""
-        result = patched_rag_service._embed_query("测试查询")
+        result = await patched_rag_service._embed_query("测试查询")
         assert isinstance(result, np.ndarray)
         assert len(result) == 1536
 
-    def test_embed_query_fallback(self, patched_rag_service):
+    @pytest.mark.asyncio
+    async def test_embed_query_fallback(self, patched_rag_service):
         """路由失败时回退到关键词嵌入"""
         patched_rag_service._router.generate_embedding.side_effect = Exception("失败")
-        result = patched_rag_service._embed_query("测试查询")
+        result = await patched_rag_service._embed_query("测试查询")
         assert isinstance(result, np.ndarray)
         assert len(result) == patched_rag_service._embedding_dim
 
@@ -304,17 +306,19 @@ class TestEmbedQuery:
 # ═══════════════════════════════════════════════════════════════
 
 class TestEmbedTexts:
-    """测试 _embed_texts 方法"""
+    """测试 _embed_texts 方法（异步）"""
 
-    def test_embed_texts_online(self, patched_rag_service):
+    @pytest.mark.asyncio
+    async def test_embed_texts_online(self, patched_rag_service):
         """在线批量嵌入"""
-        result = patched_rag_service._embed_texts(["文本1", "文本2"])
+        result = await patched_rag_service._embed_texts(["文本1", "文本2"])
         assert isinstance(result, np.ndarray)
         assert result.shape == (2, 1536)
 
-    def test_embed_texts_fallback(self, patched_rag_service):
+    @pytest.mark.asyncio
+    async def test_embed_texts_fallback(self, patched_rag_service):
         """路由失败时回退到关键词嵌入"""
         patched_rag_service._router.generate_embeddings.side_effect = Exception("失败")
-        result = patched_rag_service._embed_texts(["文本1", "文本2"])
+        result = await patched_rag_service._embed_texts(["文本1", "文本2"])
         assert isinstance(result, np.ndarray)
         assert result.shape[0] == 2

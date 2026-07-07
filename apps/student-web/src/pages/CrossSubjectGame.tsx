@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { startGame, submitAnswer, type SubmitAnswerParams } from '../api/client';
 import QuestionCard from '../components/QuestionCard';
+import MathQuestionCard from '../components/MathQuestionCard';
 import ScoreBoard from '../components/ScoreBoard';
 import ProgressBar from '../components/ProgressBar';
 
@@ -77,7 +78,7 @@ export default function CrossSubjectGame() {
       setTimeLeft((prev) => {
         if (prev <= 1) {
           clearInterval(timerRef.current);
-          navigate(`/result/${sessionId}`, { replace: true });
+          navigate(`/result/${sessionId}?from=/cross-game/${gameId}`, { replace: true });
           return 0;
         }
         return prev - 1;
@@ -125,7 +126,7 @@ export default function CrossSubjectGame() {
           if (data.is_game_over) {
             clearInterval(timerRef.current);
             setTimeout(() => {
-              navigate(`/result/${sessionId}`, { replace: true });
+              navigate(`/result/${sessionId}?from=/cross-game/${gameId}`, { replace: true });
             }, 500);
           } else if (data.next_question) {
             setQuestion(data.next_question);
@@ -160,7 +161,7 @@ export default function CrossSubjectGame() {
         <p className="text-5xl mb-4">😵</p>
         <p className="text-red-500 text-lg mb-4">{error}</p>
         <button
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/games')}
           className="px-6 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors"
         >
           返回游戏大厅
@@ -196,15 +197,26 @@ export default function CrossSubjectGame() {
         />
       </div>
 
-      {/* 题目卡片 */}
-      <QuestionCard
-        question={question}
-        questionIndex={questionIndex}
-        totalQuestions={totalQuestions}
-        onAnswer={handleAnswer}
-        feedback={feedback}
-        submitting={submitting}
-      />
+      {/* 题目卡片 — 数学类题目（无 word 信息）用 MathQuestionCard 渲染 LaTeX */}
+      {!question.word ? (
+        <MathQuestionCard
+          question={question}
+          questionIndex={questionIndex}
+          totalQuestions={totalQuestions}
+          onAnswer={handleAnswer}
+          feedback={feedback}
+          submitting={submitting}
+        />
+      ) : (
+        <QuestionCard
+          question={question}
+          questionIndex={questionIndex}
+          totalQuestions={totalQuestions}
+          onAnswer={handleAnswer}
+          feedback={feedback}
+          submitting={submitting}
+        />
+      )}
     </div>
   );
 }

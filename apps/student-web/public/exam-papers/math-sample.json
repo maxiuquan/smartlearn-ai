@@ -1,0 +1,283 @@
+{
+  "subject": "考研数学",
+  "subject_code": "math",
+  "version": "1.0.0",
+  "last_updated": "2026-07-08",
+  "description": "考研数学历年真题样例（代表性样例，真实大规模真题由版权方后续提供）",
+  "notice": "本文件为样例数据：papers 含数学一/二/三各 1 份代表性样例题（每卷 4 题），仅用于 schema 演示与前端展示，不进入 make import-* 流程。真实历年真题规模数据后续由版权方提供。",
+  "schema_reference": "参见 data/exam-papers/schema.json 的 paper_schema",
+  "papers": [
+    {
+      "id": "math1-2023-sample",
+      "year": "2023",
+      "subject": "数学一",
+      "category": "math1",
+      "paper_name": "2023年考研数学一（样例题）",
+      "questions": [
+        {
+          "id": "math1-2023-sample-q1",
+          "number": 1,
+          "type": "choice",
+          "score": 4,
+          "content": "设函数 $f(x)$ 在 $x=0$ 处连续，且 $\\lim_{x\\to 0}\\frac{f(x)}{x}=2$，则 $f'(0)=$",
+          "options": {
+            "A": "0",
+            "B": "1",
+            "C": "2",
+            "D": "不存在"
+          },
+          "answer": "C",
+          "solution": "由 $f$ 在 $x=0$ 连续且极限存在，得 $f(0)=\\lim_{x\\to0}f(x)=\\lim_{x\\to0}x\\cdot\\frac{f(x)}{x}=0$。于是 $f'(0)=\\lim_{x\\to0}\\frac{f(x)-f(0)}{x-0}=\\lim_{x\\to0}\\frac{f(x)}{x}=2$。",
+          "analysis": "先由连续性求 $f(0)=0$，再代入导数定义式。",
+          "knowledge_points": [
+            "kp-2-1-1"
+          ],
+          "difficulty": 2,
+          "tags": [
+            "导数定义",
+            "连续性"
+          ]
+        },
+        {
+          "id": "math1-2023-sample-q2",
+          "number": 2,
+          "type": "fill",
+          "score": 4,
+          "content": "计算 $\\int_0^1 x^2\\,dx = $",
+          "options": {},
+          "answer": "$\\frac{1}{3}$",
+          "solution": "$\\int_0^1 x^2\\,dx=\\left[\\frac{x^3}{3}\\right]_0^1=\\frac{1}{3}$。",
+          "analysis": "直接套用幂函数积分公式。",
+          "knowledge_points": [
+            "kp-1-5-2"
+          ],
+          "difficulty": 1,
+          "tags": [
+            "定积分"
+          ]
+        },
+        {
+          "id": "math1-2023-sample-q3",
+          "number": 3,
+          "type": "calculation",
+          "score": 10,
+          "content": "求极限 $\\lim_{x\\to0}\\frac{\\sin x-x\\cos x}{x^3}$。",
+          "options": {},
+          "answer": "$\\frac{1}{3}$",
+          "solution": "利用泰勒展开：$\\sin x=x-\\frac{x^3}{6}+o(x^3),\\ \\cos x=1-\\frac{x^2}{2}+o(x^2)$，则 $\\sin x-x\\cos x=\\frac{x^3}{3}+o(x^3)$，故原式 $=\\frac{1}{3}$。",
+          "analysis": "分子展开到 $x^3$ 项后约分。",
+          "knowledge_points": [
+            "kp-1-4-5"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "极限",
+            "泰勒展开"
+          ]
+        },
+        {
+          "id": "math1-2023-sample-q4",
+          "number": 4,
+          "type": "calculation",
+          "score": 10,
+          "content": "设 $y=y(x)$ 由方程 $e^y+xy=e$ 确定，求 $y'(0)$。",
+          "options": {},
+          "answer": "$-\\frac{1}{e}$",
+          "solution": "当 $x=0$ 时 $e^y=e\\Rightarrow y(0)=1$。方程两边对 $x$ 求导：$e^y y'+y+xy'=0$，代入 $x=0,y=1$ 得 $e\\cdot y'(0)+1=0$，故 $y'(0)=-\\frac{1}{e}$。",
+          "analysis": "隐函数求导，注意代入初值。",
+          "knowledge_points": [
+            "kp-2-2-4"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "隐函数求导"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "math2-2023-sample",
+      "year": "2023",
+      "subject": "数学二",
+      "category": "math2",
+      "paper_name": "2023年考研数学二（样例题）",
+      "questions": [
+        {
+          "id": "math2-2023-sample-q1",
+          "number": 1,
+          "type": "choice",
+          "score": 4,
+          "content": "$\\lim_{n\\to\\infty}\\left(1+\\frac{1}{n}\\right)^n = $",
+          "options": {
+            "A": "$e$",
+            "B": "1",
+            "C": "$\\infty$",
+            "D": "0"
+          },
+          "answer": "A",
+          "solution": "这是自然对数底数 $e$ 的定义式，故极限为 $e$。",
+          "analysis": "重要极限之一。",
+          "knowledge_points": [
+            "kp-1-4-5"
+          ],
+          "difficulty": 2,
+          "tags": [
+            "极限",
+            "重要极限"
+          ]
+        },
+        {
+          "id": "math2-2023-sample-q2",
+          "number": 2,
+          "type": "fill",
+          "score": 4,
+          "content": "函数 $f(x)=x^3-3x$ 的极小值点为 $x=$",
+          "options": {},
+          "answer": "1",
+          "solution": "$f'(x)=3x^2-3=3(x-1)(x+1)$，$f''(x)=6x$。$x=1$ 时 $f''(1)=6>0$ 为极小值点。",
+          "analysis": "用一阶导定驻点，二阶导判极值。",
+          "knowledge_points": [
+            "kp-2-4-1"
+          ],
+          "difficulty": 2,
+          "tags": [
+            "导数应用",
+            "极值"
+          ]
+        },
+        {
+          "id": "math2-2023-sample-q3",
+          "number": 3,
+          "type": "calculation",
+          "score": 10,
+          "content": "求 $\\int_0^{\\pi/2}\\sin x\\,dx$。",
+          "options": {},
+          "answer": "1",
+          "solution": "$\\int_0^{\\pi/2}\\sin x\\,dx=\\left[-\\cos x\\right]_0^{\\pi/2}=-(0-1)=1$。",
+          "analysis": "基本三角函数积分。",
+          "knowledge_points": [
+            "kp-1-5-2"
+          ],
+          "difficulty": 1,
+          "tags": [
+            "定积分"
+          ]
+        },
+        {
+          "id": "math2-2023-sample-q4",
+          "number": 4,
+          "type": "choice",
+          "score": 4,
+          "content": "设 $f(x)=\\ln x$，则 $f'(1)=$",
+          "options": {
+            "A": "0",
+            "B": "1",
+            "C": "$e$",
+            "D": "$\\frac{1}{e}$"
+          },
+          "answer": "B",
+          "solution": "$f'(x)=\\frac{1}{x}$，故 $f'(1)=1$。",
+          "analysis": "对数函数求导。",
+          "knowledge_points": [
+            "kp-2-1-1"
+          ],
+          "difficulty": 1,
+          "tags": [
+            "导数"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "math3-2023-sample",
+      "year": "2023",
+      "subject": "数学三",
+      "category": "math3",
+      "paper_name": "2023年考研数学三（样例题）",
+      "questions": [
+        {
+          "id": "math3-2023-sample-q1",
+          "number": 1,
+          "type": "choice",
+          "score": 4,
+          "content": "设 $f(x)=e^{2x}$，则 $f'(0)=$",
+          "options": {
+            "A": "1",
+            "B": "2",
+            "C": "$e^2$",
+            "D": "0"
+          },
+          "answer": "B",
+          "solution": "$f'(x)=2e^{2x}$，故 $f'(0)=2$。",
+          "analysis": "复合函数求导。",
+          "knowledge_points": [
+            "kp-2-1-1"
+          ],
+          "difficulty": 1,
+          "tags": [
+            "导数"
+          ]
+        },
+        {
+          "id": "math3-2023-sample-q2",
+          "number": 2,
+          "type": "fill",
+          "score": 4,
+          "content": "$\\int_0^1 2x\\,dx = $",
+          "options": {},
+          "answer": "1",
+          "solution": "$\\int_0^1 2x\\,dx=\\left[x^2\\right]_0^1=1$。",
+          "analysis": "幂函数积分。",
+          "knowledge_points": [
+            "kp-1-5-2"
+          ],
+          "difficulty": 1,
+          "tags": [
+            "定积分"
+          ]
+        },
+        {
+          "id": "math3-2023-sample-q3",
+          "number": 3,
+          "type": "calculation",
+          "score": 10,
+          "content": "求极限 $\\lim_{x\\to0}\\frac{e^x-1}{x}$。",
+          "options": {},
+          "answer": "1",
+          "solution": "由导数定义或等价无穷小 $e^x-1\\sim x$（$x\\to0$），得极限为 $1$。",
+          "analysis": "等价无穷小替换。",
+          "knowledge_points": [
+            "kp-1-4-5"
+          ],
+          "difficulty": 2,
+          "tags": [
+            "极限"
+          ]
+        },
+        {
+          "id": "math3-2023-sample-q4",
+          "number": 4,
+          "type": "choice",
+          "score": 4,
+          "content": "函数 $f(x)=x^2$ 在区间 $[0,1]$ 上的平均值为",
+          "options": {
+            "A": "$\\frac{1}{2}$",
+            "B": "$\\frac{1}{3}$",
+            "C": "1",
+            "D": "$\\frac{2}{3}$"
+          },
+          "answer": "B",
+          "solution": "平均值 $=\\int_0^1 x^2\\,dx=\\frac{1}{3}$。",
+          "analysis": "函数平均值为积分除以区间长度。",
+          "knowledge_points": [
+            "kp-2-4-1"
+          ],
+          "difficulty": 2,
+          "tags": [
+            "积分应用"
+          ]
+        }
+      ]
+    }
+  ]
+}

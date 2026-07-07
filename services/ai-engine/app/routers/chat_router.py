@@ -45,7 +45,7 @@ class ChatResponse(BaseModel):
 # ─── 路由 ───────────────────────────────────────────────────
 
 @router.post("", response_model=ChatResponse)
-async def chat(request: ChatRequest, _auth: dict = Depends(require_auth)):
+async def chat(request: ChatRequest, auth: dict = Depends(require_auth)):
     """
     AI 导师对话
 
@@ -58,7 +58,7 @@ async def chat(request: ChatRequest, _auth: dict = Depends(require_auth)):
     messages = [{"role": m.role, "content": m.content} for m in request.messages]
 
     try:
-        reply = llm.chat(messages, context=request.context)
+        reply = await llm.chat(messages, context=request.context)
     except ProviderUnavailableError as e:
         # 运行时故障：返回 503 + 结构化错误体，使故障可见（不再静默 mock）
         trace_id = e.trace_id or uuid.uuid4().hex

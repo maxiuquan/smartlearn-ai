@@ -1,4 +1,4 @@
-import { api, pageApi, PageParams } from './request';
+import request, { api, pageApi, PageParams } from './request';
 import { Question, PaginatedResponse } from '@/types';
 
 // 获取题目列表
@@ -42,8 +42,11 @@ export async function importQuestions(file: File): Promise<{ success: number; fa
 
 // 导出题目
 export async function exportQuestions(params: PageParams): Promise<Blob> {
-  const response = await fetch(`/api/questions/export?${new URLSearchParams(params as any)}`);
-  return response.blob();
+  const response = await request.get('/questions/export', {
+    params,
+    responseType: 'blob',
+  });
+  return response.data as Blob;
 }
 
 // 获取题目统计

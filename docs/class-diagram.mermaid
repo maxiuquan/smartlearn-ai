@@ -1,0 +1,219 @@
+%% SmartLearn AI 第二轮优化 — 类图（数据结构与接口）
+%% 日期: 2026-07-08  作者: 高见远（架构师）
+
+classDiagram
+    direction LR
+
+    %% ─── student-web 前端 ───
+    class AuthContext {
+        +user: User | null
+        +token: string | null
+        +isAuthenticated: boolean
+        +login(username, password) Promise~void~
+        +logout() void
+        +getToken() string | null
+    }
+
+    class ApiClient {
+        -instance: AxiosInstance
+        +setupInterceptors() void
+        +get(url, params) Promise
+        +post(url, data) Promise
+    }
+
+    class LoginPage {
+        -username: string
+        -password: string
+        -loading: boolean
+        +handleSubmit() void
+    }
+
+    class VocabLearningPage {
+        -words: Word[]
+        -currentIndex: number
+        -isFlipped: boolean
+        +loadWords() void
+        +submitWordEvent(wordId, event) void
+    }
+
+    class QuestionPracticePage {
+        -questions: Question[]
+        -currentQuestion: Question
+        -userAnswer: string
+        +loadQuestions(subject, type) void
+        +submitAnswer(questionId, answer) void
+    }
+
+    class AITutorPage {
+        -messages: ChatMessage[]
+        -input: string
+        +sendMessage() void
+        +loadHistory() void
+    }
+
+    AuthContext --> ApiClient: 拦截器注入 token
+    LoginPage --> AuthContext: 调用 login
+    VocabLearningPage --> ApiClient: GET /vocab/words
+    QuestionPracticePage --> ApiClient: GET /questions
+    AITutorPage --> ApiClient: POST /chat
+
+    %% ─── mobile 修复 ───
+    class MobileAuthStore {
+        +user: User | null
+        +token: string | null
+        +isAuthenticated: boolean
+        +isLoading: boolean
+        +checkAuth() Promise~void~
+        +login(email, password) Promise~void~
+        +logout() Promise~void~
+    }
+
+    class MobileApiClient {
+        -client: AxiosInstance
+        -BASE_URL: string (可配置)
+        +setupInterceptors() void
+    }
+
+    class LearnScreen {
+        -questionType: string
+        -startTime: number
+        +loadQuestions(params) void
+        +handleAnswer(answer) void
+    }
+
+    class CalculateQuestion {
+        -userInput: string
+        +handleAnswer(answer) void
+    }
+
+    MobileAuthStore --> MobileApiClient: 恢复 token
+    LearnScreen --> MobileApiClient: 传 type 参数
+    CalculateQuestion --> LearnScreen: 提交实际答案
+
+    %% ─── ai-engine 游戏引擎 + 异步 ───
+    class WordGamesService {
+        -db: AsyncpgPool
+        +async start_game(request) WordGameResponse
+        +async submit_answer(request) SubmitAnswerResponse
+        +async get_game_summary(session_id) GameSummary
+        +async get_leaderboard(request) LeaderboardResponse
+        -async _select_words(count, difficulty) List~Word~
+        -async _load_word_bank() Dict
+        -async _persist_session(session) void
+        -async _restore_session(session_id) WordGameSession
+    }
+
+    class AIRouter {
+        +async chat_completion(messages, subject) str
+        +async generate_embedding(text) List~float~
+        +async text_to_speech(text) bytes
+        +async moderate(text) dict
+        -_record_request(provider, success, latency) void
+    }
+
+    class LLMService {
+        -_router: AIRouter
+        -_rag: RagService
+        +async chat(messages, context) str
+        +async generate_explanation(question, answer) str
+        +async generate_study_plan(subject, weak_points) str
+    }
+
+    class ConversationService {
+        -db: AsyncpgPool
+        +async save(user_id, messages, reply, provider, model) int
+        +async get_history(user_id, limit) List~AIConversation~
+    }
+
+    class OpenAICompatProvider {
+        -_client: AsyncOpenAI
+        +async chat_completion(messages) str
+        +async generate_embedding(text) List~float~
+        +async chat_completion_stream(messages) AsyncGenerator
+        -async _get_client() AsyncOpenAI
+    }
+
+    AIRouter --> OpenAICompatProvider: await 调用
+    LLMService --> AIRouter: await 调用
+    WordGamesService --> AsyncpgPool: 读写 DB
+    ConversationService --> AsyncpgPool: 读写 DB
+
+    %% ─── api 后端 ORM ───
+    class VocabularyWord {
+        +word_id: str (PK)
+        +headword: str
+        +meaning: str
+        +phonetic: str
+        +tags: JSONB
+        +frequency: int
+        +synonyms: JSONB
+        +antonyms: JSONB
+        +examples: JSONB
+    }
+
+    class Question {
+        +id: int (PK)
+        +subject: str
+        +knowledge_points: JSONB
+        +type: str
+        +difficulty: int
+        +content: str
+        +options: JSONB
+        +answer: str
+        +solution: str
+    }
+
+    class GameSession {
+        +id: int (PK)
+        +user_id: int (FK)
+        +game_id: str
+        +score: int
+        +xp_gained: int
+        +coins_gained: int
+        +accuracy: float
+        +duration: int
+        +started_at: datetime
+        +finished_at: datetime
+    }
+
+    class WordGameSession {
+        +session_id: str (PK)
+        +user_id: str
+        +game_type: str
+        +difficulty: str
+        +words: JSONB
+        +current_index: int
+        +score: int
+        +correct_count: int
+        +wrong_count: int
+        +time_limit_seconds: int
+        +started_at: datetime
+        +is_active: bool
+    }
+
+    class AIConversation {
+        +id: int (PK)
+        +user_id: int (FK)
+        +messages: JSONB
+        +cited_kp: JSONB
+        +token_cost: int
+        +provider: str
+        +model: str
+        +created_at: datetime
+    }
+
+    class UserGameProfile {
+        +user_id: int (PK, FK)
+        +level: int
+        +total_xp: int
+        +coins: int
+        +streak_days: int
+        +badges: JSONB
+        +rank: int
+    }
+
+    WordGameSession --> GameSession: 游戏结束后写入
+    GameSession --> UserGameProfile: 更新 XP/金币
+    WordGamesService --> WordGameSession: 读写活跃会话
+    WordGamesService --> VocabularyWord: 动态取词
+    ConversationService --> AIConversation: 持久化对话

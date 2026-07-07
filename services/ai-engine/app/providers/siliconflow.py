@@ -3,6 +3,7 @@ SiliconFlow 供应商
 
 硅基流动 SiliconFlow，提供嵌入向量、TTS、STT 服务。
 所有嵌入向量统一使用 BAAI/bge-m3 模型。
+使用 async httpx 和 AsyncOpenAI，不阻塞事件循环。
 """
 
 import logging
@@ -72,8 +73,8 @@ class SiliconFlowProvider(OpenAICompatProvider, BaseTTSProvider, BaseSTTProvider
 
     # ── 嵌入向量（覆盖父类以使用专门的 embedding model） ─────
 
-    def generate_embedding(self, text: str) -> list[float]:
-        """使用 BAAI/bge-m3 生成嵌入向量"""
+    async def generate_embedding(self, text: str) -> list[float]:
+        """使用 BAAI/bge-m3 异步生成嵌入向量"""
         if self._offline_mode:
             return self._mock_embedding(text)
 
@@ -83,7 +84,7 @@ class SiliconFlowProvider(OpenAICompatProvider, BaseTTSProvider, BaseSTTProvider
             if client is None:
                 return self._mock_embedding(text)
 
-            response = client.embeddings.create(
+            response = await client.embeddings.create(
                 model=self._embedding_model,
                 input=[text],
             )
@@ -110,8 +111,8 @@ class SiliconFlowProvider(OpenAICompatProvider, BaseTTSProvider, BaseSTTProvider
             )
             raise
 
-    def generate_embeddings(self, texts: list[str]) -> list[list[float]]:
-        """批量生成嵌入向量"""
+    async def generate_embeddings(self, texts: list[str]) -> list[list[float]]:
+        """异步批量生成嵌入向量"""
         if self._offline_mode:
             return [self._mock_embedding(t) for t in texts]
 
@@ -121,7 +122,7 @@ class SiliconFlowProvider(OpenAICompatProvider, BaseTTSProvider, BaseSTTProvider
             if client is None:
                 return [self._mock_embedding(t) for t in texts]
 
-            response = client.embeddings.create(
+            response = await client.embeddings.create(
                 model=self._embedding_model,
                 input=texts,
             )
@@ -150,14 +151,14 @@ class SiliconFlowProvider(OpenAICompatProvider, BaseTTSProvider, BaseSTTProvider
 
     # ── BaseTTSProvider 实现 ─────────────────────────────────
 
-    def text_to_speech(
+    async def text_to_speech(
         self,
         text: str,
         voice: str = "default",
         speed: float = 1.0,
         **kwargs: Any,
     ) -> bytes:
-        """文本转语音 (CosyVoice)"""
+        """异步文本转语音 (CosyVoice)"""
         if self._offline_mode:
             return self._mock_tts(text)
 
@@ -176,13 +177,13 @@ class SiliconFlowProvider(OpenAICompatProvider, BaseTTSProvider, BaseSTTProvider
                 "response_format": "mp3",
                 "speed": speed,
             }
-            resp = httpx.post(
-                f"{self._base_url}/audio/speech",
-                json=payload,
-                headers=headers,
-                timeout=60.0,
-            )
-            resp.raise_for_status()
+            async with httpx.AsyncClient(timeout=60.0) as client:
+                resp = await client.post(
+                    f"{self._base_url}/audio/speech",
+                    json=payload,
+                    headers=headers,
+                )
+                resp.raise_for_status()
             elapsed = time.time() - start_time
             self._log_cost(
                 operation="tts",
@@ -208,13 +209,13 @@ class SiliconFlowProvider(OpenAICompatProvider, BaseTTSProvider, BaseSTTProvider
 
     # ── BaseSTTProvider 实现 ─────────────────────────────────
 
-    def speech_to_text(
+    async def speech_to_text(
         self,
         audio_data: bytes,
         language: str = "zh",
         **kwargs: Any,
     ) -> str:
-        """语音转文本 (SenseVoice)"""
+        """异步语音转文本 (SenseVoice)"""
         if self._offline_mode:
             return self._mock_stt()
 
@@ -232,14 +233,14 @@ class SiliconFlowProvider(OpenAICompatProvider, BaseTTSProvider, BaseSTTProvider
                 "model": self._stt_model,
                 "language": language,
             }
-            resp = httpx.post(
-                f"{self._base_url}/audio/transcriptions",
-                headers=headers,
-                files=files,
-                data=data,
-                timeout=60.0,
-            )
-            resp.raise_for_status()
+            async with httpx.AsyncClient(timeout=60.0) as client:
+                resp = await client.post(
+                    f"{self._base_url}/audio/transcriptions",
+                    headers=headers,
+                    files=files,
+                    data=data,
+                )
+                resp.raise_for_status()
             elapsed = time.time() - start_time
             result = resp.json().get("text", "")
             self._log_cost(
