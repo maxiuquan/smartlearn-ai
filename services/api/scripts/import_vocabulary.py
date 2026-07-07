@@ -10,7 +10,11 @@
 - 字段严格对齐 ORM 列定义：word_id/headword/meaning/phonetic/tags/frequency/
   synonyms/antonyms/examples（examples 为 JSONB，原 example_sentence 文本并入 examples 列表）
 - word_id 为主键，使用 ON CONFLICT DO UPDATE 实现幂等 upsert（可安全刷新）
-- synonyms.json / word-frequency.json 按 headword 更新同反义词与词频
+- 加载 3 个词汇源：cet4-core.json(顶层数组) / kaoyan-high-freq.json(顶层数组) /
+  kaoyan-words.json({"words":[...]} 包裹)。三源 word_id 前缀不同(cet4-/ky-/w)，不冲突，
+  重复 headword 作为独立行保留。
+- synonyms.json / word-frequency.json 按 headword 更新同反义词与词频；
+  因 headword 可能重复，按 headword 匹配时更新全部命中行。
 - 依赖 `alembic upgrade head` 保证表存在
 """
 import json
@@ -45,6 +49,21 @@ def load_json(filename: str):
         return json.load(f)
 
 
+def _extract_words(data) -> list:
+    """从解析后的 JSON 中提取单词列表，兼容两种结构。
+
+    - 顶层数组：cet4-core.json / kaoyan-high-freq.json → [{...}, ...]
+    - 包裹对象：kaoyan-words.json → {"words": [{...}, ...]}
+    """
+    if data is None:
+        return []
+    if isinstance(data, list):
+        return data
+    if isinstance(data, dict):
+        return data.get("words", [])
+    return []
+
+
 def _to_orm_word(w: dict) -> dict:
     """将单词 JSON 映射为 ORM VocabularyWord 字段。"""
     word_id = w.get("id", w.get("word_id"))
@@ -72,11 +91,10 @@ def _to_orm_word(w: dict) -> dict:
     }
 
 
-def import_words(db, kaoyan) -> int:
-    """upsert kaoyan-words 中的单词（按 word_id 幂等）。返回写入条数。"""
-    if not kaoyan:
+def import_words(db, words: list, source: str = "") -> int:
+    """upsert 单词列表（按 word_id 幂等）。返回写入条数。"""
+    if not words:
         return 0
-    words = kaoyan.get("words", [])
     rows = []
     for w in words:
         if not isinstance(w, dict):
@@ -104,12 +122,12 @@ def import_words(db, kaoyan) -> int:
     )
     db.execute(stmt)
     db.commit()
-    logger.info("[OK] kaoyan-words.json: upsert %d 个单词", len(rows))
+    logger.info("[OK] %s: upsert %d 个单词", source or "vocabulary", len(rows))
     return len(rows)
 
 
 def update_synonyms(db, synonyms) -> None:
-    """按 headword 更新同反义词。"""
+    """按 headword 更新同反义词；重复 headword 更新全部命中行。"""
     if not synonyms:
         return
     syn_list = synonyms.get("words", synonyms.get("synonyms", []))
@@ -120,20 +138,21 @@ def update_synonyms(db, synonyms) -> None:
         word = s.get("word", "")
         if not word:
             continue
-        obj = db.execute(
+        objs = db.execute(
             select(VocabularyWord).where(VocabularyWord.headword == word)
-        ).scalar_one_or_none()
-        if obj is None:
+        ).scalars().all()
+        if not objs:
             continue
-        obj.synonyms = s.get("synonyms") or []
-        obj.antonyms = s.get("antonyms") or []
-        updated += 1
+        for obj in objs:
+            obj.synonyms = s.get("synonyms") or []
+            obj.antonyms = s.get("antonyms") or []
+        updated += len(objs)
     db.commit()
     logger.info("[OK] synonyms.json: 更新 %d 个单词的同反义词", updated)
 
 
 def update_frequency(db, frequency) -> None:
-    """按 headword 更新词频。"""
+    """按 headword 更新词频；重复 headword 更新全部命中行。"""
     if not frequency:
         return
     freq_words = frequency.get("words", [])
@@ -144,13 +163,15 @@ def update_frequency(db, frequency) -> None:
         word = fw.get("word", "")
         if not word:
             continue
-        obj = db.execute(
+        objs = db.execute(
             select(VocabularyWord).where(VocabularyWord.headword == word)
-        ).scalar_one_or_none()
-        if obj is None:
+        ).scalars().all()
+        if not objs:
             continue
-        obj.frequency = int(fw.get("frequency", obj.frequency) or 0)
-        updated += 1
+        new_freq = int(fw.get("frequency", 0) or 0)
+        for obj in objs:
+            obj.frequency = new_freq
+        updated += len(objs)
     db.commit()
     logger.info("[OK] word-frequency.json: 更新 %d 个单词词频", updated)
 
@@ -158,7 +179,10 @@ def update_frequency(db, frequency) -> None:
 def main() -> None:
     total = 0
     with SessionLocal() as db:
-        total += import_words(db, load_json("kaoyan-words.json"))
+        # 三个词汇源均按 word_id 幂等 upsert；word_id 前缀不同(cet4-/ky-/w)，不冲突
+        for filename in ("cet4-core.json", "kaoyan-high-freq.json", "kaoyan-words.json"):
+            words = _extract_words(load_json(filename))
+            total += import_words(db, words, filename)
         update_synonyms(db, load_json("synonyms.json"))
         update_frequency(db, load_json("word-frequency.json"))
         # 说明: word-books.json 无对应 ORM 模型 / 迁移表，本轮不导入
