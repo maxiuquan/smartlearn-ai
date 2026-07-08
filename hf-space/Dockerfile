@@ -5,6 +5,9 @@
 # HF Space Settings → SDK=Docker, Dockerfile path=hf-space/Dockerfile
 # ──────────────────────────────────────────────────────────────
 
+# 强制打破 Docker 缓存(每次构建都重新执行所有层)
+ARG CACHE_BUSTER=v2026-07-08-v3
+
 # ========== Stage 1: 构建前端 (student-web + admin) ==========
 FROM node:20-alpine AS frontend
 
