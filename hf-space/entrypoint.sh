@@ -60,11 +60,13 @@ echo "[2/5] 后台执行 alembic 迁移 + 初始化管理员..."
 
 # ── 4. 注入 AI_ENGINE_API_KEY 到 nginx 配置 ──
 echo "[4/5] 注入 AI_ENGINE_API_KEY..."
+# /app/nginx.conf 是 user 可写的,sed 修改后复制到 /etc/nginx/
 if [ -n "$AI_ENGINE_API_KEY" ]; then
-    # API Key 由 openssl rand -hex 32 生成,仅含十六进制字符,sed 替换安全
-    sed -i "s/__AI_ENGINE_API_KEY__/${AI_ENGINE_API_KEY}/g" /etc/nginx/nginx.conf
+    sed "s/__AI_ENGINE_API_KEY__/${AI_ENGINE_API_KEY}/g" /app/nginx.conf > /tmp/nginx.conf
+    cat /tmp/nginx.conf > /etc/nginx/nginx.conf 2>/dev/null || cp /tmp/nginx.conf /etc/nginx/nginx.conf
     echo "  API Key 已注入"
 else
+    cp /app/nginx.conf /etc/nginx/nginx.conf 2>/dev/null || true
     echo "  ⚠️  AI_ENGINE_API_KEY 未设置,/word-games 反代鉴权将失败"
 fi
 

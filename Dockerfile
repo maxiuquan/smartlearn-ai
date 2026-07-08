@@ -75,6 +75,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     nginx supervisor curl libpq5 postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
+# HF Spaces 强制以 UID 1000 运行容器,创建非 root 用户适配
+RUN useradd -m -u 1000 user
+
 # 从 deps 阶段复制已安装的 Python 包
 COPY --from=deps /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
 COPY --from=deps /usr/local/bin /usr/local/bin
@@ -83,31 +86,43 @@ WORKDIR /app
 
 # ── 前端构建产物合并到 /app/web ──
 # student-web 在根路径 /,admin 在子路径 /admin/
-COPY --from=frontend /build/student-web/dist /app/web/
-COPY --from=frontend /build/admin/dist /app/web/admin/
+COPY --from=frontend --chown=user /build/student-web/dist /app/web/
+COPY --from=frontend --chown=user /build/admin/dist /app/web/admin/
 
 # ── api 后端代码 ──
-COPY services/api/app ./app
-COPY services/api/startup_check.py ./startup_check.py
-COPY services/api/alembic ./alembic
-COPY services/api/alembic.ini ./alembic.ini
-COPY services/api/scripts ./scripts
+COPY --chown=user services/api/app ./app
+COPY --chown=user services/api/startup_check.py ./startup_check.py
+COPY --chown=user services/api/alembic ./alembic
+COPY --chown=user services/api/alembic.ini ./alembic.ini
+COPY --chown=user services/api/scripts ./scripts
 
 # ── ai-engine 代码（保持目录结构,main.py 的 sys.path 依赖此布局）──
-COPY services/ai-engine/app ./ai-engine/app
-COPY services/ai-engine/config.py ./ai-engine/config.py
+COPY --chown=user services/ai-engine/app ./ai-engine/app
+COPY --chown=user services/ai-engine/config.py ./ai-engine/config.py
 
 # ── 数据文件（题库/词汇/知识点,供 ai-engine 离线加载）──
-COPY data ./data
+COPY --chown=user data ./data
 
 # ── 部署配置 ──
-COPY hf-space/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-COPY hf-space/nginx.conf /etc/nginx/nginx.conf
-COPY hf-space/entrypoint.sh /app/entrypoint.sh
+COPY --chown=user hf-space/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+# nginx.conf 复制到 /app/ (user 可写),entrypoint.sh sed 注入 API Key 后再复制到 /etc/nginx/
+COPY --chown=user hf-space/nginx.conf /app/nginx.conf
+COPY --chown=user hf-space/entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 
-# 创建日志/备份目录
-RUN mkdir -p /app/logs /app/backups
+# 创建日志/备份目录,确保 user 可写
+RUN mkdir -p /app/logs /app/backups /var/log/supervisor /var/run/supervisor \
+    && chown -R user:user /app /var/log/supervisor /var/run/supervisor /var/lib/nginx /var/log/nginx /etc/nginx
+
+# nginx 以非 root 运行:pid 和 temp 文件需放在 user 可写目录
+# nginx.conf 已配置 pid /tmp/nginx.pid 和 temp 路径在 /tmp/
+# 但 /var/lib/nginx/body 等 defaults 需可写
+RUN chmod -R 777 /var/lib/nginx /var/log/nginx 2>/dev/null || true
+
+USER user
+
+ENV HOME=/home/user \
+    PATH=/home/user/.local/bin:$PATH
 
 EXPOSE 7860
 
