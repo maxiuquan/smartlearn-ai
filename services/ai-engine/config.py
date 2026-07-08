@@ -1,6 +1,7 @@
 """
 AI Engine Service Configuration
 """
+from pydantic import field_validator
 from pydantic_settings import BaseSettings
 from typing import List
 from functools import lru_cache
@@ -62,6 +63,22 @@ class Settings(BaseSettings):
     # ============================================================
     # 全局鉴权开关（默认开启；生产环境必须开启）
     AI_ENGINE_AUTH_ENABLED: bool = True
+
+    @field_validator("AI_ENGINE_AUTH_ENABLED", mode="before")
+    @classmethod
+    def parse_auth_enabled(cls, v):
+        """容错解析布尔值: 非标准值（如误填的 HS256）默认为 True（开启鉴权）"""
+        if isinstance(v, bool):
+            return v
+        if isinstance(v, str):
+            low = v.strip().lower()
+            if low in ("true", "1", "yes", "on"):
+                return True
+            if low in ("false", "0", "no", "off"):
+                return False
+            # 非标准值（如误填的 HS256）-> 默认开启鉴权（安全优先）
+            return True
+        return bool(v)
     # 服务间 / 网关凭证：请求头 X-Api-Key 等于此值即通过鉴权
     AI_ENGINE_API_KEY: str = ""
     # 复用 api 服务的 JWT 签名密钥（同一密钥，由 compose 注入相同值）
