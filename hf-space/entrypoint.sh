@@ -15,10 +15,10 @@ echo "================================================"
 echo "  SmartLearn AI - HF Spaces 启动中..."
 echo "================================================"
 
-# ── 1. 等待外部 PostgreSQL 可连接 ──
+# ── 1. 等待外部 PostgreSQL 可连接（最多 30 秒，不阻塞容器启动）──
 # Aiven 免费档可能从睡眠中唤醒,首次连接需几秒
 echo "[1/5] 等待 PostgreSQL 可连接..."
-MAX_RETRIES=30
+MAX_RETRIES=15
 RETRY=0
 while [ $RETRY -lt $MAX_RETRIES ]; do
     if python -c "
@@ -26,7 +26,7 @@ import os, sys
 try:
     import psycopg2
     url = os.environ.get('DATABASE_URL', '').replace('postgresql+asyncpg://', 'postgresql://').replace('postgresql+psycopg://', 'postgresql://')
-    conn = psycopg2.connect(url, connect_timeout=5)
+    conn = psycopg2.connect(url, connect_timeout=3)
     conn.close()
     sys.exit(0)
 except Exception as e:
@@ -42,21 +42,21 @@ except Exception as e:
 done
 
 if [ $RETRY -ge $MAX_RETRIES ]; then
-    echo "  ⚠️  PostgreSQL 连接超时,继续启动（迁移可能失败）"
+    echo "  ⚠️  PostgreSQL 连接超时,继续启动（迁移在后台重试）"
 fi
 
-# ── 2. 执行数据库迁移 ──
-echo "[2/5] 执行 alembic 迁移..."
-cd /app
-if PYTHONPATH=/app timeout 120 alembic upgrade head; then
+# ── 2. 执行数据库迁移（后台异步，不阻塞容器启动）──
+# HF Spaces 期待容器尽快监听 7860 端口，迁移和种子在后台执行
+echo "[2/5] 后台执行 alembic 迁移 + 初始化管理员..."
+(
+  cd /app
+  if PYTHONPATH=/app timeout 120 alembic upgrade head; then
     echo "  迁移完成"
-else
-    echo "  ⚠️  迁移失败或超时,继续启动（表可能已存在）"
-fi
-
-# ── 3. 初始化管理员账号（幂等） ──
-echo "[3/5] 初始化管理员账号..."
-PYTHONPATH=/app timeout 30 python scripts/seed.py || echo "  ⚠️  管理员初始化失败（可能已存在）"
+  else
+    echo "  ⚠️  迁移失败或超时,表可能已存在"
+  fi
+  PYTHONPATH=/app timeout 30 python scripts/seed.py || echo "  ⚠️  管理员初始化失败（可能已存在）"
+) >> /app/logs/init.log 2>&1 &
 
 # ── 4. 注入 AI_ENGINE_API_KEY 到 nginx 配置 ──
 echo "[4/5] 注入 AI_ENGINE_API_KEY..."
