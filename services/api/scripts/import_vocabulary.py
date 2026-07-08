@@ -10,9 +10,9 @@
 - 字段严格对齐 ORM 列定义：word_id/headword/meaning/phonetic/tags/frequency/
   synonyms/antonyms/examples（examples 为 JSONB，原 example_sentence 文本并入 examples 列表）
 - word_id 为主键，使用 ON CONFLICT DO UPDATE 实现幂等 upsert（可安全刷新）
-- 加载 3 个词汇源：cet4-core.json(顶层数组) / kaoyan-high-freq.json(顶层数组) /
-  kaoyan-words.json({"words":[...]} 包裹)。三源 word_id 前缀不同(cet4-/ky-/w)，不冲突，
-  重复 headword 作为独立行保留。
+- 加载 4 个词汇源：cet4-core.json(顶层数组) / cet6-core.json(顶层数组) /
+  kaoyan-high-freq.json(顶层数组) / kaoyan-words.json({"words":[...]} 包裹)。
+  四源 word_id 前缀不同(cet4-/cet6-/ky-/w)，不冲突，重复 headword 作为独立行保留。
 - synonyms.json / word-frequency.json 按 headword 更新同反义词与词频；
   因 headword 可能重复，按 headword 匹配时更新全部命中行。
 - 依赖 `alembic upgrade head` 保证表存在
@@ -52,7 +52,7 @@ def load_json(filename: str):
 def _extract_words(data) -> list:
     """从解析后的 JSON 中提取单词列表，兼容两种结构。
 
-    - 顶层数组：cet4-core.json / kaoyan-high-freq.json → [{...}, ...]
+    - 顶层数组：cet4-core.json / cet6-core.json / kaoyan-high-freq.json → [{...}, ...]
     - 包裹对象：kaoyan-words.json → {"words": [{...}, ...]}
     """
     if data is None:
@@ -179,8 +179,8 @@ def update_frequency(db, frequency) -> None:
 def main() -> None:
     total = 0
     with SessionLocal() as db:
-        # 三个词汇源均按 word_id 幂等 upsert；word_id 前缀不同(cet4-/ky-/w)，不冲突
-        for filename in ("cet4-core.json", "kaoyan-high-freq.json", "kaoyan-words.json"):
+        # 四个词汇源均按 word_id 幂等 upsert；word_id 前缀不同(cet4-/cet6-/ky-/w)，不冲突
+        for filename in ("cet4-core.json", "cet6-core.json", "kaoyan-high-freq.json", "kaoyan-words.json"):
             words = _extract_words(load_json(filename))
             total += import_words(db, words, filename)
         update_synonyms(db, load_json("synonyms.json"))

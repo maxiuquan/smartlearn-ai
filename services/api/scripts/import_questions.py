@@ -77,15 +77,28 @@ def main() -> None:
             if not data:
                 continue
 
-            subject = data.get("subject_code", data.get("subject", "math"))
+            # 兼容两种 JSON 结构：
+            # - 对象：{"subject_code": "math", "questions": [...]}（math-examples / english-full）
+            # - 顶层数组：[{...}, ...]（math-full，无元数据包裹）
+            if isinstance(data, list):
+                questions = data
+                # 顶层数组无 subject_code，从文件名推断
+                subject = "math" if "math" in filename else "english"
+            elif isinstance(data, dict):
+                subject = data.get("subject_code", data.get("subject", "math"))
+                questions = data.get("questions")
+                if not questions:
+                    questions = [data] if data.get("content") else []
+            else:
+                logger.warning("[SKIP] %s: 无法识别的 JSON 结构", filename)
+                continue
+
+            if not isinstance(questions, list) or not questions:
+                logger.warning("[SKIP] %s: 未解析到题目", filename)
+                continue
+
             if isinstance(subject, str):
                 subject = subject.strip().lower()
-
-            questions = data.get("questions")
-            if not questions:
-                questions = [data] if isinstance(data, dict) else data
-            if not isinstance(questions, list):
-                continue
 
             orm_rows = []
             for q in questions:
