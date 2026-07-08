@@ -48,6 +48,8 @@ class Word(BaseModel):
     part_of_speech: Optional[str] = Field(None, description="词性")
     difficulty: float = Field(..., ge=0, le=1, description="难度")
     category: Optional[str] = Field(None, description="分类")
+    # P1-2：数学题正确答案随 session 持久化，避免 submit_answer 线性遍历题库反查
+    correct_answer: Optional[str] = Field(None, description="正确答案（数学题用，避免反查题库）")
 
 
 class AnswerRecord(BaseModel):

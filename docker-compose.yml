@@ -252,6 +252,11 @@ services:
         condition: service_healthy
       db:
         condition: service_healthy
+      # P2-5：ai-engine 依赖 api 服务 healthy，确保 api 启动时执行的
+      # alembic upgrade head（迁移 004 加 game_id/subject/answered 列）已完成，
+      # 避免 ai-engine 读/写尚未加列的 word_game_sessions 表。
+      api:
+        condition: service_healthy
     networks:
       - smartlearn-network
     healthcheck:

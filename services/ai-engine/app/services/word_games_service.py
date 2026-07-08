@@ -12,6 +12,13 @@ G03: session/leaderboard 持久化到 DB（asyncpg）
 - 6.2⑤ 25 款游戏差异化：按 game_id 差异化出题（数学/英语/跨科分流）
 - 6.2⑥ 排行榜串榜：持久化真实 game_id，按 game_id 分榜
 - 6.3 重复出词：采样去重，避免 fallback 重复
+
+第七轮后待修复项（P0/P1/P2）：
+- P0-1：JWT sub 已确认为 str(users.id) 数字，_finalize_session 加防御性日志
+- P1-2：数学题正确答案持久化到 Word.correct_answer，submit_answer 直接读取，
+        不再线性遍历 _all_math 反查；数学题优先 MULTIPLE_CHOICE 提升判分可靠性
+- P1-3：跨科游戏（CROSS_SUBJECT）混合词汇+数学题，不再全出数学题
+- P1-4：按 game_id 差异化出题机制（题型分流 + 主题文案）
 """
 import json
 import os
@@ -403,31 +410,54 @@ class WordGamesService:
             jwt_sub = auth.get("sub")
             if jwt_sub:
                 user_id = str(jwt_sub)
+                # P0-1 防御性日志：JWT sub 应为数字 users.id，非数字时成绩会静默不入库
+                if not str(jwt_sub).lstrip("-").isdigit():
+                    logger.warning(
+                        "JWT sub=%r 非数字，game progress will not persist (foreign key constraint). "
+                        "Ensure api signs JWT sub=str(users.id).",
+                        jwt_sub,
+                    )
 
-        # 6.1① 按 subject 分流取题
-        is_math = request.subject in (SubjectType.MATH, SubjectType.CROSS_SUBJECT)
+        # 6.1①/P1-3 按 subject 分流取题
+        # - MATH：纯数学题
+        # - CROSS_SUBJECT：词汇 + 数学混合（P1-3 修复：不再全出数学题）
+        # - VOCABULARY：纯词汇
         math_questions: List[Dict] = []
         words: List[Word] = []
 
-        if is_math:
-            # 数学题：从 questions/math-*.json 取
+        if request.subject == SubjectType.MATH:
+            # 纯数学题
             math_questions = await self._select_math_questions(
                 count=request.word_count,
                 difficulty=request.difficulty,
             )
-            # 占位 Word 列表（数学题无单词，用题目 id 作占位以兼容 session 结构）
-            words = [
-                Word(
-                    word_id=q.get("id", f"mq_{i}"),
-                    word=q.get("title", "数学题")[:50],
-                    meaning=q.get("content", "")[:200],
-                    pronunciation=None,
-                    example_sentence=q.get("solution"),
-                    part_of_speech=None,
-                    difficulty=min(max(int(q.get("difficulty", 2)) / 5.0, 0.1), 1.0),
-                    category=q.get("chapter"),
-                )
-                for i, q in enumerate(math_questions)
+            words = self._math_questions_to_words(math_questions)
+        elif request.subject == SubjectType.CROSS_SUBJECT:
+            # P1-3 跨科混合：一半词汇 + 一半数学
+            half = max(1, request.word_count // 2)
+            math_count = request.word_count - half
+            math_questions = await self._select_math_questions(
+                count=math_count,
+                difficulty=request.difficulty,
+            )
+            await self._load_word_bank()
+            vocab_words = await self._select_words(
+                count=half,
+                difficulty=request.difficulty,
+                categories=request.categories,
+                exclude_words=request.exclude_words or []
+            )
+            words = self._math_questions_to_words(math_questions) + vocab_words
+            # 打乱顺序，避免前半数学后半词汇
+            combined = list(zip(words, [True] * len(math_questions) + [False] * len(vocab_words)))
+            random.shuffle(combined)
+            words = [w for w, _ in combined]
+            # 重新整理 math_questions 顺序以匹配 words
+            math_q_by_id = {q.get("id"): q for q in math_questions}
+            math_questions = [
+                math_q_by_id[w.word_id]
+                for w in words
+                if w.word_id in math_q_by_id
             ]
         else:
             # 词汇题：从 vocabulary/*.json 取
@@ -516,23 +546,20 @@ class WordGamesService:
         current_word = session.words[session.current_index]
         is_math = session.subject in (SubjectType.MATH, SubjectType.CROSS_SUBJECT)
 
-        # 6.1① 答案判定：数学题用 meaning 字段存的原始 answer，词汇题用 word
+        # P1-2 答案判定：优先从 Word.correct_answer 读取（已随 session 持久化），
+        #         避免线性遍历 _all_math（5026 题）反查；回退才用 _get_math_correct_answer
         if is_math:
-            # 数学题：current_word.meaning 存的是题目 content，
-            # 正确答案在 current_word.example_sentence（solution）里，
-            # 但更可靠的是从 math_questions 重新取——这里用 word_id 反查
-            # 为简化：数学题的 correct_answer 通过 word.word 存的是 title，
-            # 真正答案需要从题库取。改为：session 持久化时存了原始 question 数据，
-            # 这里从 current_word 的字段组合判定
-            # 实际：start_game 时 meaning 存了 content[:200]，answer 没存
-            # 改用：数学题判定用归一化字符串比较（answer 字段在 math-full.json 里）
-            # 由于 Word 模型没字段存 answer，我们用 word_id 反查题库
-            correct_answer = await self._get_math_correct_answer(current_word.word_id)
+            # 主路径：直接从 session 的 Word 读取
+            correct_answer = current_word.correct_answer or ""
             if not correct_answer:
-                # 回退：用 example_sentence（solution）的第一行作答案
+                # 回退：从题库反查（兼容旧 session，未存 correct_answer 字段）
+                correct_answer = await self._get_math_correct_answer(current_word.word_id)
+            if not correct_answer:
+                # 最终回退：用 solution 第一行
                 correct_answer = (current_word.example_sentence or "").split("\n")[0]
         else:
-            correct_answer = current_word.word
+            # 词汇题：正确答案就是单词本身
+            correct_answer = current_word.correct_answer or current_word.word
 
         # 判断答案是否正确
         is_correct = self._check_answer(
@@ -601,13 +628,16 @@ class WordGamesService:
         # 获取下一题
         next_question = None
         if not is_game_over:
-            # 6.1① 数学题：从题库按 word_id 反查完整题目数据
+            # P1-2/P1-3 判断下一题是否为数学题：
+            # 跨科游戏的混合题库里，只有 word_id 在数学题库里的才是数学题
+            next_word = session.words[session.current_index]
             math_next: List[Dict] = []
             if is_math:
-                next_word = session.words[session.current_index]
+                # MATH 或 CROSS_SUBJECT：尝试反查数学题库
                 math_q = await self._get_math_question_by_id(next_word.word_id)
                 if math_q:
                     math_next = [math_q]
+            # 若 math_next 为空（词汇题或跨科中的词汇题），_generate_question 自动走词汇分支
             next_question = await self._generate_question(
                 session=session,
                 index=session.current_index,
@@ -1142,21 +1172,130 @@ class WordGamesService:
         """生成问题
 
         6.1①：数学/跨科游戏用 math_questions 出题，词汇游戏用 word 出题。
-        6.2⑤：按 session.game_id 差异化（数学/英语分流已由 subject 决定）。
+        P1-3：跨科游戏的词汇题（不在 math_questions 里的）自动走词汇分支。
+        6.2⑤/P1-4：按 session.game_id 差异化出题文案。
         """
         word = session.words[index]
-        is_math = session.subject in (SubjectType.MATH, SubjectType.CROSS_SUBJECT)
 
-        # 6.1① 数学题分支
-        if is_math and math_questions and index < len(math_questions):
-            return self._generate_math_question(
-                session=session, math_q=math_questions[index], index=index, word=word
+        # P1-3 数学题分支：仅当传入了 math_questions 且当前题在题库里时走数学分支
+        # 跨科游戏的词汇题 math_questions 为空，自动走词汇分支
+        if math_questions:
+            # 找到当前 word 对应的数学题（按 word_id 匹配，跨科混合时 index 可能不对应）
+            for mq in math_questions:
+                if mq.get("id") == word.word_id:
+                    return self._generate_math_question(
+                        session=session, math_q=mq, index=index, word=word
+                    )
+
+        # 词汇题分支（P1-4：按 game_id 差异化文案，题型仍基于 game_type）
+        return self._generate_vocab_question(session, word, index)
+
+    def _generate_vocab_question(
+        self,
+        session: WordGameSession,
+        word: Word,
+        index: int,
+    ) -> WordGameQuestion:
+        """生成词汇题（P1-4：按 game_id 差异化文案）
+
+        25 款词汇游戏虽共用 3 种核心题型，但根据 game_id 调整问法文案，
+        让"单词接龙/听写/填字"等游戏体验有差异，而非完全换皮。
+        """
+        game_id = session.game_id
+        # P1-4 按 game_id 定制文案
+        # 选择题类游戏：词义消消乐/词汇PK/听音辨词/图词配对/记忆翻牌/高频词挑战
+        if game_id in (
+            "word-match-blast", "vocabulary-duel", "listening-dash",
+            "picture-word-match", "memory-flip-match", "high-frequency-challenge",
+            "wrong-question-boss", "daily-quiz-arena", "knowledge-combo-streak",
+            "memory-maze", "study-team-raid",
+        ):
+            options = self._generate_options_sync(word, session.words)
+            # 按 game_id 微调问法
+            if game_id == "listening-dash":
+                question_text = f"听音辨词：请选出正确的单词释义"
+            elif game_id == "picture-word-match":
+                question_text = f"看图选词：哪个单词匹配该图片？"
+            elif game_id == "memory-flip-match":
+                question_text = f"记忆翻牌：请匹配 '{word.word}' 的释义"
+            elif game_id == "word-match-blast":
+                question_text = f"词义消消乐：'{word.word}' 的含义是？"
+            else:
+                question_text = f"'{word.word}' 的正确释义是？"
+            return WordGameQuestion(
+                question_id=f"q_{index}",
+                word=word,
+                question_type=GameType.MULTIPLE_CHOICE,
+                question_text=question_text,
+                options=options,
+                correct_answer=word.meaning,
+                hint=f"首字母是 {word.word[0] if word.word else '?'}",
+                points=10
             )
 
-        # 词汇题分支（原逻辑）
+        # 拼写类游戏：拼写蜂/字母泡泡/单词接龙
+        if game_id in ("spelling-bee", "word-bubble-pop", "word-chain"):
+            if game_id == "word-chain":
+                question_text = f"单词接龙：请用 '{word.word[-1] if word.word else '?'}' 开头拼写一个新单词，或拼写当前词"
+            elif game_id == "word-bubble-pop":
+                question_text = f"字母泡泡拼词：请拼出含义为 '{word.meaning}' 的单词"
+            else:
+                question_text = f"听音拼写：请拼写含义为 '{word.meaning}' 的单词"
+            return WordGameQuestion(
+                question_id=f"q_{index}",
+                word=word,
+                question_type=GameType.SPELLING,
+                question_text=question_text,
+                options=None,
+                correct_answer=word.word,
+                hint=f"有 {len(word.word)} 个字母",
+                points=10
+            )
+
+        # 填空类游戏：语境速填/词形变形/纵横填字/词根词缀树/长难句拆解/同反义连线
+        if game_id in (
+            "cloze-sprint", "word-form-master", "crossword-quest",
+            "root-affix-tree", "sentence-untangle", "synonym-antonym-match",
+        ):
+            if game_id == "cloze-sprint":
+                sentence = f"语境填空：The ___ means '{word.meaning}'."
+            elif game_id == "word-form-master":
+                sentence = f"词形变形：请填写 '{word.word}' 的正确词形（释义：{word.meaning}）"
+            elif game_id == "crossword-quest":
+                sentence = f"纵横填字线索：{word.meaning}"
+            elif game_id == "root-affix-tree":
+                sentence = f"词根推导：请填写以该词根衍生的单词（{word.meaning}）"
+            elif game_id == "synonym-antonym-match":
+                sentence = f"同反义连线：请填写 '{word.word}' 的同义词或反义词"
+            else:
+                sentence = f"长难句填空：{word.meaning}"
+            return WordGameQuestion(
+                question_id=f"q_{index}",
+                word=word,
+                question_type=GameType.FILL_BLANK,
+                question_text=sentence,
+                options=None,
+                correct_answer=word.word,
+                hint=f"首字母是 {word.word[0] if word.word else '?'}",
+                points=10
+            )
+
+        # 闪卡速记：简单展示
+        if game_id == "flashcard-rush":
+            return WordGameQuestion(
+                question_id=f"q_{index}",
+                word=word,
+                question_type=GameType.FILL_BLANK,
+                question_text=f"闪卡速记：你认识 '{word.word}' 吗？请输入其释义",
+                options=None,
+                correct_answer=word.meaning,
+                hint=f"首字母是 {word.word[0] if word.word else '?'}",
+                points=10
+            )
+
+        # 兜底：默认按 game_type 出题
         if session.game_type == GameType.MULTIPLE_CHOICE:
-            # 选择题：生成选项
-            options = await self._generate_options(word, session.words)
+            options = self._generate_options_sync(word, session.words)
             return WordGameQuestion(
                 question_id=f"q_{index}",
                 word=word,
@@ -1164,12 +1303,10 @@ class WordGamesService:
                 question_text=f"'{word.meaning}' 的英文是？",
                 options=options,
                 correct_answer=word.word,
-                hint=f"首字母是 {word.word[0]}",
+                hint=f"首字母是 {word.word[0] if word.word else '?'}",
                 points=10
             )
-
         elif session.game_type == GameType.SPELLING:
-            # 拼写题
             return WordGameQuestion(
                 question_id=f"q_{index}",
                 word=word,
@@ -1180,23 +1317,7 @@ class WordGamesService:
                 hint=f"有 {len(word.word)} 个字母",
                 points=10
             )
-
-        elif session.game_type == GameType.FILL_BLANK:
-            # 填空题
-            sentence = f"The ___ is {word.meaning}."
-            return WordGameQuestion(
-                question_id=f"q_{index}",
-                word=word,
-                question_type=session.game_type,
-                question_text=sentence,
-                options=None,
-                correct_answer=word.word,
-                hint=f"首字母是 {word.word[0]}",
-                points=10
-            )
-
         else:
-            # 默认问题格式
             return WordGameQuestion(
                 question_id=f"q_{index}",
                 word=word,
@@ -1204,9 +1325,31 @@ class WordGamesService:
                 question_text=f"请输入 '{word.meaning}' 的英文",
                 options=None,
                 correct_answer=word.word,
-                hint=f"首字母是 {word.word[0]}",
+                hint=f"首字母是 {word.word[0] if word.word else '?'}",
                 points=10
             )
+
+    def _generate_options_sync(
+        self,
+        correct_word: Word,
+        all_words: List[Word],
+    ) -> List[str]:
+        """同步生成选择题选项（P1-4：词汇题选项用释义而非单词，匹配问法）。"""
+        options = [correct_word.meaning]
+        other_meanings = [w.meaning for w in all_words if w.word_id != correct_word.word_id]
+        if len(other_meanings) < 3:
+            pool = [w.meaning for w in self._all_words
+                    if w.word != correct_word.word
+                    and w.meaning not in other_meanings
+                    and w.meaning != correct_word.meaning]
+            random.shuffle(pool)
+            other_meanings.extend(pool[:3 - len(other_meanings)])
+        if len(other_meanings) >= 3:
+            options.extend(random.sample(other_meanings, 3))
+        else:
+            options.extend(other_meanings)
+        random.shuffle(options)
+        return options[:4]
 
     def _generate_math_question(
         self,
@@ -1215,11 +1358,13 @@ class WordGamesService:
         index: int,
         word: Word,
     ) -> WordGameQuestion:
-        """生成数学题（6.1①）
+        """生成数学题（6.1① / P1-2）
 
         math-full.json 的字段：id/type/difficulty/chapter/content/answer/solution/hints/tags
+        P1-2：优先用选择题（MULTIPLE_CHOICE）出题，因为数学填空题的字符串归一化比较
+              极易误判（分数/根号/LaTeX 等格式差异）；选择题用选项匹配更可靠。
         - 选择题：用 answer 作正确选项，从同 chapter 题目取干扰项
-        - 填空题：用 answer 作正确答案
+        - 填空题：仅在显式要求非选择题时使用
         """
         q_id = math_q.get("id", f"q_{index}")
         content = math_q.get("content", "")
@@ -1227,9 +1372,13 @@ class WordGamesService:
         hints = math_q.get("hints", [])
         hint = hints[0] if hints else "请仔细审题"
 
-        # 数学题统一用 FILL_BLANK 题型（前端 MathQuestionCard 支持 LaTeX 渲染）
-        # 除非 session.game_type 是 MULTIPLE_CHOICE，则生成选项
-        if session.game_type == GameType.MULTIPLE_CHOICE:
+        # P1-2 数学题优先选择题（判分可靠）
+        # 若 session.game_type 是 MULTIPLE_CHOICE 或未指定（默认），都用选择题
+        use_choice = session.game_type in (
+            GameType.MULTIPLE_CHOICE, GameType.WORD_MATCH, GameType.WORD_CHAIN,
+            GameType.LISTEN_WRITE, GameType.WORD_SEARCH, GameType.CROSSWORD,
+        )
+        if use_choice:
             # 选择题：从同 chapter 题目取 3 个干扰答案
             options = [answer]
             same_chapter = [
@@ -1237,16 +1386,20 @@ class WordGamesService:
                 if q.get("chapter") == math_q.get("chapter")
                 and q.get("id") != q_id
                 and q.get("answer", "") not in options
+                and q.get("answer", "")  # 排除空答案
             ]
             random.shuffle(same_chapter)
             for q in same_chapter[:3]:
                 options.append(q.get("answer", ""))
+            # 若干扰项不足 3 个，用占位（避免选项数量异常）
+            while len(options) < 4:
+                options.append(f"选项{len(options)+1}")
             random.shuffle(options)
 
             return WordGameQuestion(
                 question_id=q_id,
                 word=word,
-                question_type=session.game_type,
+                question_type=GameType.MULTIPLE_CHOICE,
                 question_text=content,
                 options=options[:4],
                 correct_answer=answer,
@@ -1254,7 +1407,7 @@ class WordGamesService:
                 points=10
             )
         else:
-            # 填空题
+            # 填空题（仅 FILL_BLANK / SPELLING 时使用）
             return WordGameQuestion(
                 question_id=q_id,
                 word=word,
@@ -1267,12 +1420,41 @@ class WordGamesService:
             )
 
     async def _get_math_correct_answer(self, question_id: str) -> str:
-        """从数学题库按 word_id 反查正确答案（6.1①）。"""
+        """从数学题库按 word_id 反查正确答案（6.1①）。
+
+        P1-2 备注：此方法仅作回退用——主路径已把 answer 存到 Word.correct_answer，
+        submit_answer 优先从 session 读取，避免 O(n) 线性扫描 5026 题。
+        """
         await self._load_math_bank()
         for q in self._all_math:
             if q.get("id") == question_id:
                 return q.get("answer", "")
         return ""
+
+    def _math_questions_to_words(self, math_questions: List[Dict]) -> List[Word]:
+        """把数学题转成 Word 占位列表（P1-2：answer 持久化到 Word.correct_answer）。
+
+        math-full.json 的字段：id/type/difficulty/chapter/content/answer/solution/hints/tags
+        - word_id ← id
+        - word ← title（用于显示和 answered 记录）
+        - meaning ← content（题目正文）
+        - example_sentence ← solution（解题步骤，summary 时可展示）
+        - correct_answer ← answer（P1-2：避免 submit_answer 线性反查题库）
+        """
+        return [
+            Word(
+                word_id=q.get("id", f"mq_{i}"),
+                word=q.get("title", "数学题")[:50],
+                meaning=q.get("content", "")[:200],
+                pronunciation=None,
+                example_sentence=q.get("solution"),
+                part_of_speech=None,
+                difficulty=min(max(int(q.get("difficulty", 2)) / 5.0, 0.1), 1.0),
+                category=q.get("chapter"),
+                correct_answer=q.get("answer", ""),
+            )
+            for i, q in enumerate(math_questions)
+        ]
 
     async def _get_math_question_by_id(self, question_id: str) -> Optional[Dict]:
         """从数学题库按 id 反查完整题目数据（6.1①，submit_answer 生成下一题用）。"""
