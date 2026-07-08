@@ -31,7 +31,8 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 logger = logging.getLogger(__name__)
 
 # 初始管理员账号（密码可通过环境变量覆盖；默认仅用于本地/演示初始化）
-ADMIN_EMAIL = os.environ.get("SEED_ADMIN_EMAIL", "admin@smartlearn.local")
+# 注意: 默认邮箱使用 .io TLD（避免 Pydantic EmailStr 拒绝 .local 等保留 TLD）
+ADMIN_EMAIL = os.environ.get("SEED_ADMIN_EMAIL", "admin@smartlearn.io")
 ADMIN_PASSWORD = os.environ.get("SEED_ADMIN_PASSWORD", "Admin@12345678")
 ADMIN_NICKNAME = os.environ.get("SEED_ADMIN_NICKNAME", "系统管理员")
 

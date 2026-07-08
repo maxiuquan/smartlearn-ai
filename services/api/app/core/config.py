@@ -145,22 +145,50 @@ class Settings(BaseSettings):
     SMTP_FROM: Optional[str] = None  # 发件人地址，默认取 SMTP_USER
 
     # ---------- 便捷属性 ----------
+    @staticmethod
+    def _strip_sslmode(url: str) -> tuple[str, bool]:
+        """从 PG 连接串剥离 sslmode 参数(异步 asyncpg 不支持).
+
+        返回 (剥离后的 url, 是否需要 ssl).
+        sslmode 取值 require/prefer/verify-ca/verify-full 视为需要 ssl;
+        disable 或缺省视为不需要.
+        """
+        if "?" not in url:
+            return url, False
+        base, query = url.split("?", 1)
+        keep: list[str] = []
+        requires_ssl = False
+        for kv in query.split("&"):
+            if "=" not in kv:
+                keep.append(kv)
+                continue
+            k, v = kv.split("=", 1)
+            if k.lower() == "sslmode":
+                if v.lower() in ("require", "prefer", "verify-ca", "verify-full"):
+                    requires_ssl = True
+                # 丢弃 sslmode 参数
+            else:
+                keep.append(kv)
+        new_query = "&".join(keep)
+        return f"{base}?{new_query}" if new_query else base, requires_ssl
+
     @property
     def database_url(self) -> str:
         """异步数据库 URL（asyncpg 驱动）.
 
         优先使用 DATABASE_URL 单一连接串；未配置则回退到分散字段拼接。
+        注意: asyncpg 不支持 sslmode 参数,这里会剥离并通过 database_requires_ssl 暴露。
         """
         if self.DATABASE_URL:
             url = self.DATABASE_URL.strip()
             # 用户可能填的是 postgresql:// 或 postgres://
             if url.startswith("postgresql://"):
-                return url.replace("postgresql://", "postgresql+asyncpg://", 1)
-            if url.startswith("postgres://"):
-                return url.replace("postgres://", "postgresql+asyncpg://", 1)
-            if url.startswith("postgresql+asyncpg://"):
-                return url
-            return url  # 兜底直接返回
+                url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
+            elif url.startswith("postgres://"):
+                url = url.replace("postgres://", "postgresql+asyncpg://", 1)
+            # 剥离 sslmode(asyncpg 不支持)
+            url, _ = self._strip_sslmode(url)
+            return url
         # 回退：分散字段
         host = self.POSTGRES_SERVER or self.DB_HOST
         port = self.POSTGRES_PORT or self.DB_PORT
@@ -168,6 +196,14 @@ class Settings(BaseSettings):
         pwd = self.POSTGRES_PASSWORD or self.DB_PASSWORD
         name = self.POSTGRES_DB or self.DB_NAME
         return f"postgresql+asyncpg://{user}:{pwd}@{host}:{port}/{name}"
+
+    @property
+    def database_requires_ssl(self) -> bool:
+        """异步引擎是否需要 SSL(asyncpg 通过 connect_args={'ssl': True} 传)."""
+        if not self.DATABASE_URL:
+            return False
+        _, requires_ssl = self._strip_sslmode(self.DATABASE_URL.strip())
+        return requires_ssl
 
     @property
     def database_url_sync(self) -> str:
@@ -193,9 +229,15 @@ class Settings(BaseSettings):
         """Redis 连接 URL.
 
         优先使用 REDIS_URL 单一连接串；未配置则回退到分散字段拼接。
+        自动兼容: Upstash Redis 免费档强制 TLS, 若用户填了 redis://...upstash.io
+        会自动转换为 rediss://(双 s 表示 TLS)。
         """
         if self.REDIS_URL:
-            return self.REDIS_URL.strip()
+            url = self.REDIS_URL.strip()
+            # Upstash 强制 TLS,把 redis:// 自动改成 rediss://
+            if url.startswith("redis://") and ".upstash.io" in url:
+                url = "rediss://" + url[len("redis://"):]
+            return url
         return f"redis://:{self.REDIS_PASSWORD}@{self.REDIS_HOST}:{self.REDIS_PORT}/0"
 
     @property
