@@ -22,7 +22,7 @@ import {
 import {
   ArrowLeftOutlined,
   EditOutlined,
-  BanOutlined,
+  StopOutlined,
   CheckCircleOutlined,
   CrownOutlined,
   KeyOutlined,
@@ -235,7 +235,7 @@ const UserDetail: React.FC = () => {
                 启用用户
               </Button>
             ) : (
-              <Button danger icon={<BanOutlined />} onClick={handleBan}>
+              <Button danger icon={<StopOutlined />} onClick={handleBan}>
                 禁用用户
               </Button>
             )}

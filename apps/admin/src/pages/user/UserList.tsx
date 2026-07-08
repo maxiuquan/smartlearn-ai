@@ -19,7 +19,7 @@ import {
   PlusOutlined,
   EditOutlined,
   DeleteOutlined,
-  BanOutlined,
+  StopOutlined,
   CheckCircleOutlined,
   ExportOutlined,
   ImportOutlined,
@@ -178,7 +178,7 @@ const UserList: React.FC = () => {
               type="link"
               size="small"
               danger
-              icon={<BanOutlined />}
+              icon={<StopOutlined />}
               onClick={() => {
                 setCurrentUser(record);
                 setBanModalVisible(true);
@@ -382,7 +382,7 @@ const UserList: React.FC = () => {
           <Button
             key="batchBan"
             danger
-            icon={<BanOutlined />}
+            icon={<StopOutlined />}
             onClick={handleBatchBan}
             disabled={selectedRowKeys.length === 0}
           >
