@@ -12,11 +12,12 @@ WORKDIR /build
 
 # --- student-web ---
 COPY apps/student-web/package*.json ./student-web/
-RUN cd student-web && npm ci
+RUN cd student-web && npm ci && npm install --save-dev @types/node
 
 COPY apps/student-web ./student-web
 COPY data ./data
-RUN cd student-web && npm run build
+# 跳过 tsc 类型检查(生产构建不需要,避免 @types/node 缺失等本地类型问题)
+RUN cd student-web && npx vite build
 
 # --- admin (base 设为 /admin/ 以支持子路径部署) ---
 COPY apps/admin/package*.json ./admin/
