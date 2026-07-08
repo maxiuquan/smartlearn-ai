@@ -22,7 +22,7 @@ word_games_service = WordGamesService()
 
 
 @router.post("/start", response_model=WordGameResponse)
-async def start_game(request: WordGameRequest, _auth: dict = Depends(require_auth)):
+async def start_game(request: WordGameRequest, auth: dict = Depends(require_auth)):
     """
     开始单词游戏
 
@@ -30,12 +30,14 @@ async def start_game(request: WordGameRequest, _auth: dict = Depends(require_aut
     - 选择游戏类型
     - 选择单词
     - 设置时间限制
+
+    6.1②：透传 auth 到 service，JWT sub 优先作 user_id。
     """
-    return await word_games_service.start_game(request)
+    return await word_games_service.start_game(request, auth=auth)
 
 
 @router.post("/submit", response_model=SubmitAnswerResponse)
-async def submit_answer(request: SubmitAnswerRequest, _auth: dict = Depends(require_auth)):
+async def submit_answer(request: SubmitAnswerRequest, auth: dict = Depends(require_auth)):
     """
     提交答案
 
@@ -43,12 +45,14 @@ async def submit_answer(request: SubmitAnswerRequest, _auth: dict = Depends(requ
     - 判断正误
     - 计算得分
     - 获取下一题
+
+    6.1②：透传 auth，校验 session 归属。
     """
-    return await word_games_service.submit_answer(request)
+    return await word_games_service.submit_answer(request, auth=auth)
 
 
 @router.get("/summary/{session_id}", response_model=GameSummary)
-async def get_game_summary(session_id: str):
+async def get_game_summary(session_id: str, auth: dict = Depends(require_auth)):
     """
     获取游戏总结
 
@@ -57,18 +61,23 @@ async def get_game_summary(session_id: str):
     - 正确率
     - 需要加强的单词
     - 排名和徽章
+
+    6.3：加 require_auth 防 IDOR（只能查自己的 session）。
+    6.1②：透传 auth，service 层校验 session 归属。
     """
-    return await word_games_service.get_game_summary(session_id)
+    return await word_games_service.get_game_summary(session_id, auth=auth)
 
 
 @router.post("/leaderboard", response_model=LeaderboardResponse)
-async def get_leaderboard(request: LeaderboardRequest, _auth: dict = Depends(require_auth)):
+async def get_leaderboard(request: LeaderboardRequest, auth: dict = Depends(require_auth)):
     """
     获取排行榜
 
     查看游戏排行榜
+
+    6.2⑥：支持按 game_id 分榜。
     """
-    return await word_games_service.get_leaderboard(request)
+    return await word_games_service.get_leaderboard(request, auth=auth)
 
 
 @router.get("/game-types")

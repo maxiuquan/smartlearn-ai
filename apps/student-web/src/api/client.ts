@@ -66,8 +66,45 @@ const GAME_TYPE_MAP: Record<string, string> = {
   'study-team-raid': 'multiple_choice',
 };
 
+// 6.1① 学科映射：gameId → subject（vocabulary/math/cross_subject）
+// 与 data/games/games-config.json 的 category 字段保持一致。
+const GAME_SUBJECT_MAP: Record<string, string> = {
+  // 词汇类（16 款）
+  'word-match-blast': 'vocabulary',
+  'spelling-bee': 'vocabulary',
+  'root-affix-tree': 'vocabulary',
+  'cloze-sprint': 'vocabulary',
+  'sentence-untangle': 'vocabulary',
+  'vocabulary-duel': 'vocabulary',
+  'flashcard-rush': 'vocabulary',
+  'listening-dash': 'vocabulary',
+  'word-chain': 'vocabulary',
+  'word-bubble-pop': 'vocabulary',
+  'synonym-antonym-match': 'vocabulary',
+  'picture-word-match': 'vocabulary',
+  'crossword-quest': 'vocabulary',
+  'word-form-master': 'vocabulary',
+  'high-frequency-challenge': 'vocabulary',
+  'memory-flip-match': 'vocabulary',
+  // 数学类（4 款）
+  'limit-blitz': 'math',
+  'formula-link': 'math',
+  'proof-step-sort': 'math',
+  'problem-quest-map': 'math',
+  // 跨科目类（5 款）
+  'wrong-question-boss': 'cross_subject',
+  'daily-quiz-arena': 'cross_subject',
+  'knowledge-combo-streak': 'cross_subject',
+  'memory-maze': 'cross_subject',
+  'study-team-raid': 'cross_subject',
+};
+
 export function getGameType(gameId: string): string {
   return GAME_TYPE_MAP[gameId] || 'multiple_choice';
+}
+
+export function getGameSubject(gameId: string): string {
+  return GAME_SUBJECT_MAP[gameId] || 'vocabulary';
 }
 
 // 游戏名称映射
@@ -90,10 +127,14 @@ export interface StartGameParams {
 
 export async function startGame(params: StartGameParams) {
   const gameType = getGameType(params.gameId);
+  const subject = getGameSubject(params.gameId);
+  // 6.1② 不再硬编码 student_001——后端用 JWT sub 优先作 user_id，
+  //     此处 user_id 留空，由 Authorization 头透传 JWT。
   const res = await client.post('/word-games/start', {
-    user_id: params.userId || 'student_001',
+    user_id: params.userId || '',
     game_type: gameType,
-    game_id: params.gameId,  // E04: 增加 game_id 参数，后端可按 game_id 差异化配置
+    game_id: params.gameId,    // 6.2⑤ 真实游戏标识
+    subject,                    // 6.1① 学科分流
     difficulty: params.difficulty || 'medium',
     word_count: params.wordCount || 10,
   });
@@ -129,8 +170,14 @@ export async function getGameSummary(sessionId: string) {
 }
 
 // 获取排行榜
-export async function getLeaderboard(gameType?: string, limit = 10) {
+// 6.2⑥ 优先按 game_id 分榜（25 款游戏独立榜），无 game_id 时回退到 game_type。
+export async function getLeaderboard(
+  gameId?: string,
+  gameType?: string,
+  limit = 10,
+) {
   const res = await client.post('/word-games/leaderboard', {
+    game_id: gameId || null,
     game_type: gameType || null,
     limit,
   });

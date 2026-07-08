@@ -1,14 +1,19 @@
 """
 单词游戏数据模型
+
+设计依据：第五轮复审 6.1/6.2/6.3 修复
+- 增加 SubjectType 区分学科（vocabulary/math/cross_subject）
+- WordGameRequest 增加 game_id 字段（6.2⑤：25 款游戏差异化）
+- WordGameSession 增加 game_id/subject/answered 记录（6.2④：错词本真实数据）
 """
 from pydantic import BaseModel, Field
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Any
 from datetime import datetime
 from enum import Enum
 
 
 class GameType(str, Enum):
-    """游戏类型"""
+    """游戏类型（题型）"""
     WORD_MATCH = "word_match"  # 单词配对
     SPELLING = "spelling"  # 拼写练习
     WORD_CHAIN = "word_chain"  # 单词接龙
@@ -17,6 +22,13 @@ class GameType(str, Enum):
     LISTEN_WRITE = "listen_write"  # 听写
     WORD_SEARCH = "word_search"  # 单词搜索
     CROSSWORD = "crossword"  # 填字游戏
+
+
+class SubjectType(str, Enum):
+    """游戏学科分类（与 games-config.json 的 category 对齐）"""
+    VOCABULARY = "vocabulary"
+    MATH = "math"
+    CROSS_SUBJECT = "cross_subject"
 
 
 class GameDifficulty(str, Enum):
@@ -38,13 +50,25 @@ class Word(BaseModel):
     category: Optional[str] = Field(None, description="分类")
 
 
+class AnswerRecord(BaseModel):
+    """单题作答记录（6.2④：错词本真实数据来源）"""
+    question_id: str = Field(..., description="问题ID")
+    word_id: str = Field("", description="单词ID（数学题为空）")
+    word: str = Field("", description="题目内容/单词")
+    is_correct: bool = Field(..., description="是否正确")
+    user_answer: str = Field(..., description="用户答案")
+    correct_answer: str = Field(..., description="正确答案")
+
+
 class WordGameSession(BaseModel):
     """游戏会话"""
     session_id: str = Field(..., description="会话ID")
     user_id: str = Field(..., description="用户ID")
-    game_type: GameType = Field(..., description="游戏类型")
+    game_type: GameType = Field(..., description="游戏类型（题型）")
+    game_id: str = Field(default="", description="游戏ID（25款游戏的真实标识，6.2⑤/⑥）")
+    subject: SubjectType = Field(default=SubjectType.VOCABULARY, description="学科分类")
     difficulty: GameDifficulty = Field(..., description="难度")
-    words: List[Word] = Field(..., description="单词列表")
+    words: List[Word] = Field(..., description="单词列表（数学题为占位）")
     current_index: int = Field(default=0, ge=0, description="当前索引")
     score: int = Field(default=0, ge=0, description="得分")
     correct_count: int = Field(default=0, ge=0, description="正确数")
@@ -52,6 +76,7 @@ class WordGameSession(BaseModel):
     time_limit_seconds: int = Field(..., ge=0, description="时间限制(秒)")
     started_at: datetime = Field(default_factory=datetime.now, description="开始时间")
     is_active: bool = Field(default=True, description="是否活跃")
+    answered: List[AnswerRecord] = Field(default_factory=list, description="逐题作答记录（6.2④）")
 
 
 class WordGameQuestion(BaseModel):
@@ -87,8 +112,10 @@ class WordGameResult(BaseModel):
 
 class WordGameRequest(BaseModel):
     """单词游戏请求"""
-    user_id: str = Field(..., description="用户ID")
-    game_type: GameType = Field(..., description="游戏类型")
+    user_id: str = Field(..., description="用户ID（兼容前端传值，真实身份以 JWT 为准）")
+    game_type: GameType = Field(..., description="游戏类型（题型）")
+    game_id: str = Field(default="", description="游戏ID（25款游戏差异化，6.2⑤）")
+    subject: SubjectType = Field(default=SubjectType.VOCABULARY, description="学科分类")
     difficulty: GameDifficulty = Field(default=GameDifficulty.MEDIUM, description="难度")
     word_count: int = Field(default=10, ge=5, le=30, description="单词数量")
     time_limit_seconds: Optional[int] = Field(None, description="时间限制(秒)")
@@ -125,7 +152,9 @@ class GameSummary(BaseModel):
     """游戏总结"""
     session_id: str = Field(..., description="会话ID")
     user_id: str = Field(..., description="用户ID")
-    game_type: GameType = Field(..., description="游戏类型")
+    game_type: GameType = Field(..., description="游戏类型（题型）")
+    game_id: str = Field(default="", description="游戏ID")
+    subject: SubjectType = Field(default=SubjectType.VOCABULARY, description="学科分类")
     total_score: int = Field(..., description="总得分")
     max_score: int = Field(..., description="满分")
     accuracy: float = Field(..., ge=0, le=1, description="正确率")
@@ -145,13 +174,15 @@ class LeaderboardEntry(BaseModel):
     user_id: str = Field(..., description="用户ID")
     username: str = Field(..., description="用户名")
     score: int = Field(..., description="得分")
-    game_type: GameType = Field(..., description="游戏类型")
+    game_type: Optional[GameType] = Field(None, description="游戏类型（题型）")
+    game_id: str = Field(default="", description="游戏ID（6.2⑥：按真实 game_id 分榜）")
     achieved_at: datetime = Field(..., description="达成时间")
 
 
 class LeaderboardRequest(BaseModel):
     """排行榜请求"""
-    game_type: Optional[GameType] = Field(None, description="游戏类型")
+    game_type: Optional[GameType] = Field(None, description="游戏类型（题型）")
+    game_id: Optional[str] = Field(None, description="游戏ID（6.2⑥：按真实 game_id 分榜）")
     difficulty: Optional[GameDifficulty] = Field(None, description="难度")
     limit: int = Field(default=10, ge=1, le=100, description="数量限制")
 

@@ -69,7 +69,7 @@ export default function MathGame() {
     })();
   }, [gameId]);
 
-  // 倒计时
+  // 倒计时（6.3：从依赖移除 timeLeft，避免每秒重建 interval）
   useEffect(() => {
     if (timeLeft <= 0 || loading) return;
 
@@ -85,7 +85,8 @@ export default function MathGame() {
     }, 1000);
 
     return () => clearInterval(timerRef.current);
-  }, [timeLeft, loading, sessionId, navigate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, sessionId, navigate]);
 
   // 提交答案
   const handleAnswer = useCallback(
