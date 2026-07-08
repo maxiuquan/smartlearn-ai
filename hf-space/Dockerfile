@@ -17,10 +17,11 @@ RUN cd student-web && npm ci && npm install --save-dev @types/node
 
 # 复制源代码和数据(修改此处会打破 Docker 缓存,强制重新构建)
 COPY apps/student-web ./student-web
-COPY data ./data
+# data 复制到 student-web/data,适配 vite.config.ts 的 fallback 路径 ./data
+COPY data ./student-web/data
 # 直接用 vite build 跳过 tsc 类型检查(生产构建不需要类型检查)
 # 原因:本地缺失 @types/node 会导致 tsc 报错,但 vite 用 esbuild 不做类型检查
-RUN cd student-web && npx vite build --debug
+RUN cd student-web && npx vite build
 
 # --- admin (base 设为 /admin/ 以支持子路径部署) ---
 COPY apps/admin/package*.json ./admin/
