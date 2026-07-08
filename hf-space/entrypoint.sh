@@ -41,16 +41,27 @@ AI_PID=$!
 echo "  ai-engine 已启动 (PID $AI_PID)"
 
 # ── 3. 后台异步执行 alembic 迁移 + 初始化管理员 ──
+# 注意: 输出直接到 stdout/stderr(不重定向到 init.log),便于 HF logs 诊断
 echo "[3/4] 后台执行 alembic 迁移 + 初始化管理员..."
 (
   cd /app
-  if PYTHONPATH=/app timeout 120 alembic upgrade head; then
-    echo "  迁移完成"
+  echo "--- alembic upgrade head ---"
+  PYTHONPATH=/app timeout 120 alembic upgrade head 2>&1
+  alembic_rc=$?
+  if [ $alembic_rc -eq 0 ]; then
+    echo "  ✅ alembic 迁移完成"
   else
-    echo "  ⚠️  迁移失败或超时,表可能已存在"
+    echo "  ⚠️  alembic 迁移失败(退出码 $alembic_rc)"
   fi
-  PYTHONPATH=/app timeout 30 python scripts/seed.py || echo "  ⚠️  管理员初始化失败（可能已存在）"
-) >> /app/logs/init.log 2>&1 &
+  echo "--- seed.py ---"
+  PYTHONPATH=/app timeout 30 python scripts/seed.py 2>&1
+  seed_rc=$?
+  if [ $seed_rc -eq 0 ]; then
+    echo "  ✅ seed.py 完成"
+  else
+    echo "  ⚠️  seed.py 失败(退出码 $seed_rc)"
+  fi
+) &
 
 # ── 4. 等待任一进程退出则停止全部 ──
 echo "[4/4] 服务运行中"
