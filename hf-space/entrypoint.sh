@@ -48,15 +48,15 @@ fi
 # ── 2. 执行数据库迁移 ──
 echo "[2/5] 执行 alembic 迁移..."
 cd /app
-if PYTHONPATH=/app alembic upgrade head; then
+if PYTHONPATH=/app timeout 120 alembic upgrade head; then
     echo "  迁移完成"
 else
-    echo "  ⚠️  迁移失败,继续启动（表可能已存在）"
+    echo "  ⚠️  迁移失败或超时,继续启动（表可能已存在）"
 fi
 
 # ── 3. 初始化管理员账号（幂等） ──
 echo "[3/5] 初始化管理员账号..."
-python scripts/seed.py || echo "  ⚠️  管理员初始化失败（可能已存在）"
+PYTHONPATH=/app timeout 30 python scripts/seed.py || echo "  ⚠️  管理员初始化失败（可能已存在）"
 
 # ── 4. 注入 AI_ENGINE_API_KEY 到 nginx 配置 ──
 echo "[4/5] 注入 AI_ENGINE_API_KEY..."
