@@ -53,7 +53,8 @@ COPY services/api/requirements.txt ./api-requirements.txt
 COPY services/ai-engine/requirements.txt ./ai-requirements.txt
 
 # 合并安装（pip 自动去重）;跳过 pymilvus（HF 部署用 inmemory 向量存储，省 ~200MB）
-RUN cat api-requirements.txt ai-requirements.txt | grep -v '^pymilvus' > merged.txt \
+# 先 cat 第一个文件,echo 加换行,再 cat 第二个文件,避免包名粘连
+RUN (cat api-requirements.txt; echo; cat ai-requirements.txt) | grep -v '^pymilvus' > merged.txt \
     && pip install --no-cache-dir -r merged.txt
 
 # ========== Stage 3: 最终镜像 ==========
