@@ -15,12 +15,13 @@ COPY apps/student-web/package*.json ./student-web/
 # 安装 @types/node 解决 vite.config.ts 中 path/fs/__dirname 类型缺失
 RUN cd student-web && npm ci && npm install --save-dev @types/node
 
-# 复制源代码和数据(修改此处会打破 Docker 缓存,强制重新构建)
+# 复制源代码
 COPY apps/student-web ./student-web
-# data 复制到 student-web/data,适配 vite.config.ts 的 fallback 路径 ./data
+# 复制 data 到 student-web/data(适配 vite.config.ts 的 fallback 路径 ./data)
 COPY data ./student-web/data
+# 调试:确认 data 文件存在
+RUN ls -la /build/student-web/data/games/ && cat /build/student-web/data/games/games-config.json | head -5
 # 直接用 vite build 跳过 tsc 类型检查(生产构建不需要类型检查)
-# 原因:本地缺失 @types/node 会导致 tsc 报错,但 vite 用 esbuild 不做类型检查
 RUN cd student-web && npx vite build
 
 # --- admin (base 设为 /admin/ 以支持子路径部署) ---
