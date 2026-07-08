@@ -7,6 +7,7 @@ AI Engine — asyncpg 数据库连接池模块
 设计依据：优化设计-2026-07-08 组G（G02/G03）
 """
 import logging
+import ssl
 from typing import Optional
 from urllib.parse import urlparse, parse_qs, urlunparse
 
@@ -23,7 +24,7 @@ def _sanitize_dsn(dsn: str) -> tuple[str, bool]:
     """剥离 asyncpg 不支持的 sslmode 参数,返回 (清理后 dsn, 是否需要 ssl).
 
     Aiven 等云 PG 给的连接串通常带 ?sslmode=require,
-    而 asyncpg 不识别 sslmode 参数,需要在 create_pool(dsn=..., ssl=True) 显式传。
+    而 asyncpg 不识别 sslmode 参数,需要在 create_pool(dsn=..., ssl=...) 显式传。
     """
     if "?" not in dsn:
         return dsn, False
@@ -39,6 +40,18 @@ def _sanitize_dsn(dsn: str) -> tuple[str, bool]:
     new_qs = "&".join(f"{k}={v[0]}" for k, v in qs.items())
     new_parsed = parsed._replace(query=new_qs)
     return urlunparse(new_parsed), requires_ssl
+
+
+def _build_ssl_context() -> ssl.SSLContext:
+    """构建 SSL 上下文: 加密但不验证证书.
+
+    Aiven/Supabase 等云 PG 用自签名 CA 证书,asyncpg 默认严格验证会失败。
+    禁用证书验证后仍能加密传输,只是不验证服务端身份。
+    """
+    ctx = ssl.create_default_context()
+    ctx.check_hostname = False
+    ctx.verify_mode = ssl.CERT_NONE
+    return ctx
 
 
 async def get_pool() -> asyncpg.Pool:
@@ -72,7 +85,7 @@ async def get_pool() -> asyncpg.Pool:
         "command_timeout": 30,
     }
     if requires_ssl:
-        pool_kwargs["ssl"] = True
+        pool_kwargs["ssl"] = _build_ssl_context()
     _pool = await asyncpg.create_pool(dsn=dsn, **pool_kwargs)
     logger.info("asyncpg pool created successfully.")
     return _pool

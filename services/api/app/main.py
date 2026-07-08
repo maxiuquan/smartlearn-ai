@@ -171,7 +171,11 @@ async def keepalive():
 
         redis_client = aioredis.from_url(settings.redis_url, decode_responses=True)
         await redis_client.ping()
-        await redis_client.aclose()
+        # 兼容 redis-py 不同版本: 新版 aclose(),旧版 close()
+        if hasattr(redis_client, "aclose"):
+            await redis_client.aclose()
+        else:
+            await redis_client.close()
         result["checks"]["redis"] = "ok"
     except Exception as e:
         result["checks"]["redis"] = f"error: {e}"
