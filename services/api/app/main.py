@@ -22,16 +22,30 @@ async def lifespan(app: FastAPI):
     # 启动时安全校验
     _startup_security_check()
 
-    # 初始化 Celery（确保任务模块已加载）
+    # 初始化 Celery（确保任务模块已加载；HF 单容器部署时无 Celery Worker/Beat，
+    # 此处仅加载模块定义，不实际消费任务）
     try:
         from app.celery_app import celery_app
-        logger.info("Celery 应用已初始化")
+        logger.info("Celery 应用已初始化（定义加载，未启动 worker）")
     except Exception as e:
         logger.warning(f"Celery 初始化失败（非关键）: {e}")
+
+    # 初始化 APScheduler（HF 部署用 APScheduler 替代 Celery Beat 跑定时任务）
+    try:
+        from app.tasks.apscheduler_setup import start_scheduler, shutdown_scheduler
+        start_scheduler()
+        logger.info("APScheduler 已启动（定时任务运行中）")
+    except Exception as e:
+        logger.warning(f"APScheduler 启动失败（非关键，定时任务不可用）: {e}")
 
     yield
 
     # 关闭时清理
+    try:
+        from app.tasks.apscheduler_setup import shutdown_scheduler
+        shutdown_scheduler()
+    except Exception:
+        pass
     logger.info("应用正在关闭...")
 
 
@@ -120,6 +134,50 @@ async def health():
         "service": "smartlearn-api",
         "version": settings.APP_VERSION,
     }
+
+
+@app.get("/keepalive")
+async def keepalive():
+    """保活端点 - Upstash Cron 定期 ping,同时保活 HF Space + Aiven PG + Upstash Redis。
+
+    - 不需要鉴权（Upstash Cron 不带 JWT）
+    - 查询 PG 确保连接活跃（Aiven 免费档可能因闲置断开）
+    - 查询 Redis 确保连接活跃（Upstash 免费档同样有闲置限制）
+    - 响应快（<1s），不影响正常请求
+    """
+    import time
+
+    result = {
+        "status": "ok",
+        "timestamp": int(time.time()),
+        "checks": {},
+    }
+
+    # ── 检查 PostgreSQL ──
+    try:
+        from sqlalchemy import text
+        from app.db.session import async_session_factory
+
+        async with async_session_factory() as session:
+            await session.execute(text("SELECT 1"))
+        result["checks"]["postgres"] = "ok"
+    except Exception as e:
+        result["checks"]["postgres"] = f"error: {e}"
+        result["status"] = "degraded"
+
+    # ── 检查 Redis（可选,不可用不影响保活）──
+    try:
+        import redis.asyncio as aioredis
+
+        redis_client = aioredis.from_url(settings.redis_url, decode_responses=True)
+        await redis_client.ping()
+        await redis_client.aclose()
+        result["checks"]["redis"] = "ok"
+    except Exception as e:
+        result["checks"]["redis"] = f"error: {e}"
+        # Redis 不可用不改变 status,因为有内存降级
+
+    return result
 
 
 @app.get("/")
