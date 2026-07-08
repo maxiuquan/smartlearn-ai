@@ -48,7 +48,7 @@ fi
 # ── 2. 执行数据库迁移 ──
 echo "[2/5] 执行 alembic 迁移..."
 cd /app
-if alembic upgrade head; then
+if PYTHONPATH=/app alembic upgrade head; then
     echo "  迁移完成"
 else
     echo "  ⚠️  迁移失败,继续启动（表可能已存在）"

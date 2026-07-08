@@ -26,7 +26,12 @@ from app.schemas.games import (
 router = APIRouter()
 
 # JSON 配置文件路径：项目根目录 / data / games / games-config.json
-_GAMES_CONFIG_PATH = Path(__file__).resolve().parents[5] / "data" / "games" / "games-config.json"
+# 开发环境 parents[5]=项目根; Docker 环境 parents[3]=/app
+_parents = Path(__file__).resolve().parents
+_GAMES_CONFIG_PATH = (
+    (_parents[5] if len(_parents) > 5 else _parents[3])
+    / "data" / "games" / "games-config.json"
+)
 
 
 def _load_games_config() -> list[dict]:

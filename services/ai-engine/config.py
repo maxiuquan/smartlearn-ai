@@ -42,8 +42,13 @@ class Settings(BaseSettings):
     WORD_GAME_TIME_LIMIT: int = 60  # 单词游戏时间限制(秒)
     WORD_GAME_BATCH_SIZE: int = 10  # 单词游戏批次大小
     
-    # CORS
-    CORS_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:3001", "http://localhost:5173"]
+    # CORS (逗号分隔的字符串,兼容环境变量直接设置)
+    CORS_ORIGINS: str = "http://localhost:3000,http://localhost:3001,http://localhost:5173"
+
+    @property
+    def cors_origins_list(self) -> List[str]:
+        """将逗号分隔的 CORS_ORIGINS 解析为列表。"""
+        return [origin.strip() for origin in self.CORS_ORIGINS.split(",") if origin.strip()]
 
     # ============================================================
     # 数据库（共享 PostgreSQL，与 api 服务同一实例）
