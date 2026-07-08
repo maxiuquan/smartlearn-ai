@@ -3,51 +3,51 @@
 # SmartLearn AI - HF Spaces 容器启动脚本
 # ──────────────────────────────────────────────────────────────
 # 执行顺序:
-#   1. 等待外部 PG 可连接（Aiven 冷启动可能需要几秒）
-#   2. alembic upgrade head（数据库迁移）
-#   3. 初始化管理员账号（幂等）
-#   4. 注入 AI_ENGINE_API_KEY 到 nginx 配置
-#   5. 启动 supervisord（管理 nginx + api + ai-engine）
+#   1. 注入 AI_ENGINE_API_KEY 到 nginx 配置
+#   2. 后台启动 nginx + api + ai-engine
+#   3. 后台异步执行 alembic 迁移 + 初始化管理员
+#   4. 前台 wait,保持容器运行
 # ──────────────────────────────────────────────────────────────
-set -e
+# 注意: HF Spaces 以 UID 1000 非 root 运行,不使用 supervisord
+# (非 root 的 supervisord 无法正确管理进程优先级)
 
 echo "================================================"
 echo "  SmartLearn AI - HF Spaces 启动中..."
 echo "================================================"
 
-# ── 1. 等待外部 PostgreSQL 可连接（最多 30 秒，不阻塞容器启动）──
-# Aiven 免费档可能从睡眠中唤醒,首次连接需几秒
-echo "[1/5] 等待 PostgreSQL 可连接..."
-MAX_RETRIES=15
-RETRY=0
-while [ $RETRY -lt $MAX_RETRIES ]; do
-    if python -c "
-import os, sys
-try:
-    import psycopg2
-    url = os.environ.get('DATABASE_URL', '').replace('postgresql+asyncpg://', 'postgresql://').replace('postgresql+psycopg://', 'postgresql://')
-    conn = psycopg2.connect(url, connect_timeout=3)
-    conn.close()
-    sys.exit(0)
-except Exception as e:
-    print(f'  等待中... ({e})', file=sys.stderr)
-    sys.exit(1)
-" 2>/dev/null; then
-        echo "  PostgreSQL 已连接"
-        break
-    fi
-    RETRY=$((RETRY + 1))
-    echo "  重试 $RETRY/$MAX_RETRIES..."
-    sleep 2
-done
+cd /app
 
-if [ $RETRY -ge $MAX_RETRIES ]; then
-    echo "  ⚠️  PostgreSQL 连接超时,继续启动（迁移在后台重试）"
+# ── 1. 注入 AI_ENGINE_API_KEY 到 nginx 配置 ──
+echo "[1/4] 注入 AI_ENGINE_API_KEY..."
+if [ -n "$AI_ENGINE_API_KEY" ]; then
+    sed "s/__AI_ENGINE_API_KEY__/${AI_ENGINE_API_KEY}/g" /app/nginx.conf > /etc/nginx/nginx.conf
+    echo "  API Key 已注入"
+else
+    cp /app/nginx.conf /etc/nginx/nginx.conf
+    echo "  ⚠️  AI_ENGINE_API_KEY 未设置,/word-games 反代鉴权将失败"
 fi
 
-# ── 2. 执行数据库迁移（后台异步，不阻塞容器启动）──
-# HF Spaces 期待容器尽快监听 7860 端口，迁移和种子在后台执行
-echo "[2/5] 后台执行 alembic 迁移 + 初始化管理员..."
+# ── 2. 启动三个进程（后台）──
+echo "[2/4] 启动 nginx + api + ai-engine..."
+
+# nginx: 前台模式
+nginx -g "daemon off;" &
+NGINX_PID=$!
+echo "  nginx 已启动 (PID $NGINX_PID)"
+
+# api: uvicorn (1 worker 节省内存)
+cd /app
+PYTHONPATH=/app uvicorn app.main:app --host 127.0.0.1 --port 8000 --workers 1 --proxy-headers &
+API_PID=$!
+echo "  api 已启动 (PID $API_PID)"
+
+# ai-engine: uvicorn (1 worker)
+PYTHONPATH=/app/ai-engine uvicorn app.main:app --app-dir /app/ai-engine --host 127.0.0.1 --port 8001 --workers 1 --proxy-headers &
+AI_PID=$!
+echo "  ai-engine 已启动 (PID $AI_PID)"
+
+# ── 3. 后台异步执行 alembic 迁移 + 初始化管理员 ──
+echo "[3/4] 后台执行 alembic 迁移 + 初始化管理员..."
 (
   cd /app
   if PYTHONPATH=/app timeout 120 alembic upgrade head; then
@@ -58,22 +58,18 @@ echo "[2/5] 后台执行 alembic 迁移 + 初始化管理员..."
   PYTHONPATH=/app timeout 30 python scripts/seed.py || echo "  ⚠️  管理员初始化失败（可能已存在）"
 ) >> /app/logs/init.log 2>&1 &
 
-# ── 4. 注入 AI_ENGINE_API_KEY 到 nginx 配置 ──
-echo "[4/5] 注入 AI_ENGINE_API_KEY..."
-# /app/nginx.conf 是 user 可写的,sed 修改后复制到 /etc/nginx/
-if [ -n "$AI_ENGINE_API_KEY" ]; then
-    sed "s/__AI_ENGINE_API_KEY__/${AI_ENGINE_API_KEY}/g" /app/nginx.conf > /tmp/nginx.conf
-    cat /tmp/nginx.conf > /etc/nginx/nginx.conf 2>/dev/null || cp /tmp/nginx.conf /etc/nginx/nginx.conf
-    echo "  API Key 已注入"
-else
-    cp /app/nginx.conf /etc/nginx/nginx.conf 2>/dev/null || true
-    echo "  ⚠️  AI_ENGINE_API_KEY 未设置,/word-games 反代鉴权将失败"
-fi
-
-# ── 5. 启动 supervisord ──
-echo "[5/5] 启动 supervisord..."
+# ── 4. 等待任一进程退出则停止全部 ──
+echo "[4/4] 服务运行中"
 echo "================================================"
 echo "  服务启动: nginx:7860 + api:8000 + ai-engine:8001"
 echo "  保活端点: /keepalive"
 echo "================================================"
-exec supervisord -c /etc/supervisor/conf.d/supervisord.conf
+
+# 捕获信号,优雅退出
+trap "kill $NGINX_PID $API_PID $AI_PID 2>/dev/null; exit 0" SIGTERM SIGINT
+
+# 等待任一进程退出
+wait -n $NGINX_PID $API_PID $AI_PID
+echo "⚠️  某个进程已退出,停止全部服务..."
+kill $NGINX_PID $API_PID $AI_PID 2>/dev/null
+exit 1
