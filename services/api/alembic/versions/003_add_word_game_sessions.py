@@ -25,7 +25,8 @@ def upgrade() -> None:
     op.create_table(
         "word_game_sessions",
         sa.Column("session_id", sa.String(length=64), primary_key=True),
-        sa.Column("user_id", sa.String(length=100), nullable=False, index=True),
+        # 不用 index=True: 会与下方 op.create_index 同名冲突导致 DuplicateTable
+        sa.Column("user_id", sa.String(length=100), nullable=False),
         sa.Column("game_type", sa.String(length=50), nullable=False),
         sa.Column("difficulty", sa.String(length=20), nullable=False),
         sa.Column("words", postgresql.JSONB(astext_type=sa.Text()), nullable=False),
