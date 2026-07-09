@@ -6,7 +6,7 @@
 from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends
-from sqlalchemy import func, select
+from sqlalchemy import Date, cast, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.deps import get_current_admin_user, get_current_user, get_db
@@ -112,18 +112,20 @@ async def get_user_analysis(
     # last_login_at / created_at 列是 TIMESTAMP WITHOUT TIME ZONE, 需剥离 tzinfo
     thirty_days_ago = (now - timedelta(days=30)).replace(tzinfo=None)
 
-    # 每日新增用户数（PostgreSQL 用 func.date_trunc）
-    # 注意: SELECT/GROUP BY/ORDER BY 必须用完全相同的表达式, 否则 PostgreSQL 报
-    # GroupingError "column must appear in the GROUP BY clause".
-    # 这里 SELECT 用 date_trunc(day, col), 在 Python 中格式化为 "YYYY-MM-DD".
+    # 每日新增用户数
+    # 注意: 不能用 func.date_trunc('day', col), 因为 asyncpg prepared statement 会把
+    # 字符串参数化为 $1, SELECT/GROUP BY/ORDER BY 用不同占位符 ($1/$3/$4),
+    # PostgreSQL planner 无法证明表达式相同 → GroupingError.
+    # 改用 CAST(col AS DATE), 不带参数, SELECT/GROUP BY 生成完全相同的 SQL 字符串.
+    new_date_expr = cast(User.created_at, Date)
     new_users_stmt = (
         select(
-            func.date_trunc("day", User.created_at).label("date"),
+            new_date_expr.label("date"),
             func.count().label("count"),
         )
         .where(User.created_at >= thirty_days_ago)
-        .group_by(func.date_trunc("day", User.created_at))
-        .order_by(func.date_trunc("day", User.created_at))
+        .group_by(new_date_expr)
+        .order_by(new_date_expr)
     )
     new_users_rows = (await db.execute(new_users_stmt)).all()
     new_users_daily = [
@@ -132,15 +134,16 @@ async def get_user_analysis(
     ]
 
     # 每日活跃用户数（按 last_login_at 日期分组）
+    active_date_expr = cast(User.last_login_at, Date)
     active_users_stmt = (
         select(
-            func.date_trunc("day", User.last_login_at).label("date"),
+            active_date_expr.label("date"),
             func.count().label("count"),
         )
         .where(User.last_login_at.is_not(None))
         .where(User.last_login_at >= thirty_days_ago)
-        .group_by(func.date_trunc("day", User.last_login_at))
-        .order_by(func.date_trunc("day", User.last_login_at))
+        .group_by(active_date_expr)
+        .order_by(active_date_expr)
     )
     active_users_rows = (await db.execute(active_users_stmt)).all()
     active_users_daily = [
