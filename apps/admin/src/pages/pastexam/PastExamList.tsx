@@ -169,10 +169,14 @@ const PastExamList: React.FC = () => {
     };
   };
 
-  // 编辑真题
+  // 编辑真题（API 返回 snake_case，表单字段为 camelCase，需做映射）
   const handleEdit = (exam: PastExam) => {
     setCurrentExam(exam);
-    form.setFieldsValue(exam);
+    form.setFieldsValue({
+      ...exam,
+      examType: (exam as any).examType ?? (exam as any).exam_type,
+      totalScore: (exam as any).totalScore ?? (exam as any).total_score,
+    });
     setEditModalVisible(true);
   };
 

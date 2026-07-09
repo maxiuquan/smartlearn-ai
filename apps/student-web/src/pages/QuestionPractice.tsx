@@ -139,11 +139,17 @@ export default function QuestionPractice() {
   if (selectedQuestion) {
     const isChoice = selectedQuestion.type === 'choice';
     const options = selectedQuestion.options;
+    // 解析选项：支持数组 ["A. xxx"] 和对象 {"A": "xxx"} 两种格式
+    // 当为数组且值含 "X. " 前缀时，提取字母作为 key，去掉前缀避免重复显示
     const optionEntries: [string, string][] =
       options && !Array.isArray(options)
         ? Object.entries(options)
         : Array.isArray(options)
-        ? options.map((o, i) => [String.fromCharCode(65 + i), o])
+        ? options.map((o, i) => {
+            const match = String(o).match(/^([A-Z])[.、)]\s*(.*)/);
+            if (match) return [match[1], match[2]];
+            return [String.fromCharCode(65 + i), String(o)];
+          })
         : [];
 
     return (

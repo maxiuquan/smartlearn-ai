@@ -63,7 +63,8 @@ const QuestionEdit: React.FC = () => {
     try {
       const question = await getQuestion(id!);
       form.setFieldsValue(question);
-      setSelectedKnowledge(question.knowledgePoints);
+      // 后端返回 knowledge_points（snake_case），前端用 knowledgePoints
+      setSelectedKnowledge(question.knowledgePoints ?? question.knowledge_points ?? []);
     } catch (error) {
       message.error('获取题目信息失败');
     } finally {
