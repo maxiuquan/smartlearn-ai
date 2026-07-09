@@ -53,7 +53,8 @@ async def get_overview(
     - vip_users: VIP 等级 > 0 的用户数
     """
     now = datetime.now(timezone.utc)
-    seven_days_ago = now - timedelta(days=7)
+    # last_login_at / created_at 列是 TIMESTAMP WITHOUT TIME ZONE, 需剥离 tzinfo
+    seven_days_ago = (now - timedelta(days=7)).replace(tzinfo=None)
 
     total_users = await _count(db, select(func.count()).select_from(User))
     active_users_7d = await _count(
@@ -108,7 +109,8 @@ async def get_user_analysis(
     - vip_distribution: 按 VIP 等级分布
     """
     now = datetime.now(timezone.utc)
-    thirty_days_ago = now - timedelta(days=30)
+    # last_login_at / created_at 列是 TIMESTAMP WITHOUT TIME ZONE, 需剥离 tzinfo
+    thirty_days_ago = (now - timedelta(days=30)).replace(tzinfo=None)
 
     # 每日新增用户数（PostgreSQL 用 func.date_trunc）
     new_users_stmt = (
@@ -180,7 +182,9 @@ async def get_my_overview(
     - today_active: 今日活跃用户数（last_login_at 在今天）
     """
     now = datetime.now(timezone.utc)
-    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    # last_login_at 列是 TIMESTAMP WITHOUT TIME ZONE, 传 aware datetime 会触发
+    # asyncpg "can't subtract offset-naive and offset-aware datetimes" 错误, 故剥离 tzinfo
+    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0, tzinfo=None)
 
     total_questions = await _count(db, select(func.count()).select_from(Question))
     total_vocab = await _count(db, select(func.count()).select_from(VocabularyWord))
