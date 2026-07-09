@@ -6,7 +6,7 @@
 # ──────────────────────────────────────────────────────────────
 
 # 强制打破 Docker 缓存(每次构建都重新执行所有层)
-ARG CACHE_BUSTER=v2026-07-10-v6
+ARG CACHE_BUSTER=v2026-07-10-v7
 
 # ========== Stage 1: 构建前端 (student-web + admin) ==========
 FROM node:20-alpine AS frontend
@@ -79,6 +79,10 @@ COPY --from=deps /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.
 COPY --from=deps /usr/local/bin /usr/local/bin
 
 WORKDIR /app
+
+# 使用 CACHE_BUSTER 强制打破后续 COPY 层的缓存
+ARG CACHE_BUSTER
+RUN echo "Cache bust: $CACHE_BUSTER"
 
 # ── 前端构建产物合并到 /app/web ──
 # student-web 在根路径 /,admin 在子路径 /admin/
