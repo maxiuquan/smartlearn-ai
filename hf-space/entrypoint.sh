@@ -40,9 +40,9 @@ PYTHONPATH=/app/ai-engine uvicorn app.main:app --app-dir /app/ai-engine --host 1
 AI_PID=$!
 echo "  ai-engine 已启动 (PID $AI_PID)"
 
-# ── 3. 后台异步执行 alembic 迁移 + 初始化管理员 ──
+# ── 3. 后台异步执行 alembic 迁移 + 初始化数据 ──
 # 注意: 输出直接到 stdout/stderr(不重定向到 init.log),便于 HF logs 诊断
-echo "[3/4] 后台执行 alembic 迁移 + 初始化管理员..."
+echo "[3/4] 后台执行 alembic 迁移 + 数据导入..."
 (
   cd /app
   echo "--- alembic upgrade head ---"
@@ -53,13 +53,16 @@ echo "[3/4] 后台执行 alembic 迁移 + 初始化管理员..."
   else
     echo "  ⚠️  alembic 迁移失败(退出码 $alembic_rc)"
   fi
-  echo "--- seed.py ---"
-  PYTHONPATH=/app timeout 30 python scripts/seed.py 2>&1
-  seed_rc=$?
-  if [ $seed_rc -eq 0 ]; then
-    echo "  ✅ seed.py 完成"
+
+  echo "--- 导入知识点/题目/词汇 + 初始化管理员 ---"
+  # import_all.py 依次执行 import_knowledge/import_questions/import_vocabulary/seed
+  # 各脚本均幂等(可安全重跑), 词汇用 ON CONFLICT DO UPDATE, 其他用 SELECT 检查存在性
+  PYTHONPATH=/app timeout 300 python scripts/import_all.py 2>&1
+  import_rc=$?
+  if [ $import_rc -eq 0 ]; then
+    echo "  ✅ 数据导入完成"
   else
-    echo "  ⚠️  seed.py 失败(退出码 $seed_rc)"
+    echo "  ⚠️  数据导入失败(退出码 $import_rc), 部分数据可能缺失"
   fi
 ) &
 

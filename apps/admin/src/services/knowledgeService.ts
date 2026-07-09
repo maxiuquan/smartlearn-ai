@@ -8,10 +8,9 @@ import { KnowledgePoint, PaginatedResponse } from '@/types';
 // 后端知识点为只读接口，下列写操作（创建/更新/删除/移动/依赖/导入）后端尚未实现。
 
 // 获取知识点列表
-// TODO: 后端无 /knowledge 列表接口，仅有 /knowledge/search（需 q 参数，响应结构为 {results,total,query}）。
-//       前端 PageParams 与后端入参/出参结构不一致，调用会 422 或拿不到分页数据，需后续适配。
+// 后端为 GET /knowledge（admin_data 路由提供的分页列表，支持 subject/q 可选筛选）
 export async function getKnowledgeList(params: PageParams): Promise<PaginatedResponse<KnowledgePoint>> {
-  return pageApi.get<KnowledgePoint>('/knowledge/search', params);
+  return pageApi.get<KnowledgePoint>('/knowledge', params);
 }
 
 // 获取知识点树

@@ -1,6 +1,7 @@
 """API v1 路由聚合"""
 from fastapi import APIRouter
 
+from app.api.v1.admin_data import router as admin_data_router
 from app.api.v1.audit import router as audit_router
 from app.api.v1.auth import router as auth_router
 from app.api.v1.games import router as games_router
@@ -27,3 +28,6 @@ api_router.include_router(users_router, prefix="/users", tags=["用户管理"])
 api_router.include_router(system_router, prefix="/system", tags=["系统管理"])
 api_router.include_router(statistics_router, prefix="/statistics", tags=["统计"])
 api_router.include_router(audit_router, prefix="/audit-logs", tags=["审计日志"])
+# admin 数据管理路由（学科/词书/真题/习题册/知识点列表）
+# 注意: 此路由不设 prefix,内部已带 /subjects /vocab/word-books /past-exams /workbooks /knowledge 完整路径
+api_router.include_router(admin_data_router, tags=["数据管理"])
