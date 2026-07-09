@@ -141,10 +141,19 @@ app.include_router(api_router)
 @app.get("/health")
 async def health():
     """健康检查端点 - docker-compose healthcheck 依赖"""
+    # 诊断: 检查 sympy 是否可用
+    try:
+        import sympy
+        sympy_ok = True
+        sympy_ver = sympy.__version__
+    except Exception as e:
+        sympy_ok = False
+        sympy_ver = str(e)
     return {
         "status": "ok",
         "service": "smartlearn-api",
         "version": settings.APP_VERSION,
+        "sympy": {"available": sympy_ok, "version": sympy_ver},
     }
 
 
