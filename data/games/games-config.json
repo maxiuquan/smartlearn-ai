@@ -350,7 +350,7 @@
       "data_sources": ["vocabulary/kaoyan-words.json"],
       "difficulty_levels": ["easy", "medium"],
       "session": {
-        "time_limit_sec": 45,
+        "time_limit_sec": 90,
         "lives": 0,
         "combo_enabled": true
       },
