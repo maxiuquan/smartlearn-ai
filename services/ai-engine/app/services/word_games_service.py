@@ -1363,22 +1363,17 @@ class WordGamesService:
         for w in others:
             pairs.append({"left": w.word, "right": w.meaning})
 
-        # 打乱左右列顺序，保证位置随机
-        left_items = [p["left"] for p in pairs]
-        right_items = [p["right"] for p in pairs]
-        random.shuffle(left_items)
-        random.shuffle(right_items)
-        # 重新组装成 pairs，左列与右列独立打乱（位置不一一对应，需用户点击匹配）
-        shuffled_pairs = [
-            {"left": l, "right": r} for l, r in zip(left_items, right_items)
-        ]
+        # 返回正确配对的 pairs（left↔right 对应关系正确）
+        # 前端 QuestionCard 的 TapMatchGame 会独立 shuffle 左右两列的显示顺序，
+        # 用 pairId（pairs 数组索引）判断配对是否正确。
+        # 注意：后端不能独立打乱 left/right 再 zip，那样会破坏正确配对关系。
 
         return WordGameQuestion(
             question_id=f"q_{index}",
             word=word,
             question_type=GameType.TAP_MATCH,
             question_text="点击配对：将单词与正确的释义配对",
-            pairs=shuffled_pairs,
+            pairs=pairs,
             correct_answer=word.meaning,  # 当前题的正确配对（释义）
             hint=f"当前目标：{word.word}",
             points=10
@@ -1430,8 +1425,8 @@ class WordGamesService:
             # 词根衍生顺序：前缀 + 词根 + 后缀
             sentence = f"re {word.word} tion"
         else:
-            # sentence-untangle：默认造句
-            sentence = f"I need to {word.word} today"
+            # sentence-untangle：用语法通顺的通用造句（适配任意词性）
+            sentence = f"I think the word is {word.word} here"
 
         words = sentence.split()
         correct_order = words.copy()
@@ -1658,12 +1653,21 @@ class WordGamesService:
         """根据 game_id 推导词汇题的正确答案
 
         与 _generate_vocab_question 的题型路由保持一致：
-        - TAP_MATCH / LISTEN_SELECT：正确答案是 word.meaning（用户配对/选择释义）
+        - MULTIPLE_CHOICE / TAP_MATCH / LISTEN_SELECT：正确答案是 word.meaning
+          （用户选择/配对的都是释义）
         - DRAG_SORT：正确答案是原句（用户把打乱的单词排成正确顺序）
-        - 其他（MULTIPLE_CHOICE/SPELLING/FILL_BLANK/WORD_BANK）：回退到 word.word
-          保持向后兼容，不影响现有 3 种题型的判分逻辑
+        - SPELLING / FILL_BLANK / WORD_BANK：正确答案是 word.word
+          （用户拼写/填入的是英文单词）
         """
         game_id = session.game_id
+
+        # MULTIPLE_CHOICE 选择题：用户选释义，答案是 meaning
+        if game_id in (
+            "vocabulary-duel", "high-frequency-challenge", "wrong-question-boss",
+            "daily-quiz-arena", "knowledge-combo-streak", "memory-maze",
+            "study-team-raid", "problem-quest-map", "formula-link",
+        ):
+            return word.meaning
 
         # TAP_MATCH 点击配对消除：用户配对 word↔meaning，答案是 meaning
         if game_id in (
@@ -1685,10 +1689,9 @@ class WordGamesService:
             elif game_id == "root-affix-tree":
                 return f"re {word.word} tion"
             else:
-                return f"I need to {word.word} today"
+                return f"I think the word is {word.word} here"
 
-        # 其他题型（MULTIPLE_CHOICE/SPELLING/FILL_BLANK/WORD_BANK）：回退到 word.word
-        # 保持向后兼容：现有 3 种题型的判分逻辑不受影响
+        # SPELLING / FILL_BLANK / WORD_BANK：用户拼写/填入英文单词，答案是 word.word
         return word.correct_answer or word.word
 
     def _check_answer(
