@@ -36,7 +36,13 @@ from app.models import VocabularyWord
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
 
-DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "..", "data", "vocabulary")
+# data 目录: 兼容本地(services/api/scripts -> ../../../data)与容器(/app/scripts -> /app/data)
+_DATA_CANDIDATES = [
+    os.path.join(os.path.dirname(__file__), "..", "..", "..", "data", "vocabulary"),  # 本地开发
+    os.path.join(os.path.dirname(__file__), "..", "data", "vocabulary"),  # 容器内 /app/scripts -> /app/data
+    "/app/data/vocabulary",  # 容器内绝对路径兜底
+]
+DATA_DIR = next((os.path.abspath(p) for p in _DATA_CANDIDATES if os.path.isdir(p)), _DATA_CANDIDATES[0])
 
 
 def load_json(filename: str):

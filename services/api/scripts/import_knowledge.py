@@ -29,7 +29,13 @@ from app.models import KnowledgePoint
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
 
-DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "..", "data", "knowledge-points")
+# data 目录: 兼容本地(services/api/scripts -> ../../../data)与容器(/app/scripts -> /app/data)
+_DATA_CANDIDATES = [
+    os.path.join(os.path.dirname(__file__), "..", "..", "..", "data", "knowledge-points"),  # 本地开发
+    os.path.join(os.path.dirname(__file__), "..", "data", "knowledge-points"),  # 容器内 /app/scripts -> /app/data
+    "/app/data/knowledge-points",  # 容器内绝对路径兜底
+]
+DATA_DIR = next((os.path.abspath(p) for p in _DATA_CANDIDATES if os.path.isdir(p)), _DATA_CANDIDATES[0])
 
 # 文件名 -> 学科代码（覆盖 data/knowledge-points 下全部知识点文件）
 SUBJECT_FILE_MAP = {

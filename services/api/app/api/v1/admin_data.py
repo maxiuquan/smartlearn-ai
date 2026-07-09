@@ -308,6 +308,24 @@ async def list_past_exams(
     return {"items": items, "total": total, "page": page, "page_size": page_size}
 
 
+@router.get("/past-exams/stats", summary="获取真题统计")
+async def get_past_exam_stats(current: User = Depends(get_current_admin_user)) -> dict:
+    papers = _load_exam_papers()
+    by_year: dict[int, int] = {}
+    by_subject: dict[str, int] = {}
+    by_province: dict[str, int] = {}
+    for p in papers:
+        y = p["year"]
+        by_year[y] = by_year.get(y, 0) + 1
+        s = p["subject"]
+        if s:
+            by_subject[s] = by_subject.get(s, 0) + 1
+        prov = p.get("province")
+        if prov:
+            by_province[prov] = by_province.get(prov, 0) + 1
+    return {"total": len(papers), "byYear": by_year, "bySubject": by_subject, "byProvince": by_province}
+
+
 @router.get("/past-exams/{exam_id}", summary="获取真题详情")
 async def get_past_exam(
     exam_id: str,
@@ -338,24 +356,6 @@ async def delete_past_exam(exam_id: str, current: User = Depends(get_current_adm
 @router.post("/past-exams/{exam_id}/publish", summary="发布真题")
 async def publish_past_exam(exam_id: str, current: User = Depends(get_current_admin_user)) -> None:
     _not_implemented("真题管理")
-
-
-@router.get("/past-exams/stats", summary="获取真题统计")
-async def get_past_exam_stats(current: User = Depends(get_current_admin_user)) -> dict:
-    papers = _load_exam_papers()
-    by_year: dict[int, int] = {}
-    by_subject: dict[str, int] = {}
-    by_province: dict[str, int] = {}
-    for p in papers:
-        y = p["year"]
-        by_year[y] = by_year.get(y, 0) + 1
-        s = p["subject"]
-        if s:
-            by_subject[s] = by_subject.get(s, 0) + 1
-        prov = p.get("province")
-        if prov:
-            by_province[prov] = by_province.get(prov, 0) + 1
-    return {"total": len(papers), "byYear": by_year, "bySubject": by_subject, "byProvince": by_province}
 
 
 # ── 习题册管理 ──
