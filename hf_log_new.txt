@@ -1,428 +1,404 @@
-data: {"data":"===== Application Startup at 2026-07-09 00:06:11 =====\n","timestamp":"2026-07-09T00:06:11Z"}
+data: {"data":"===== Application Startup at 2026-07-09 00:53:13 =====\n","timestamp":"2026-07-09T00:53:13Z"}
 
-data: {"data":"================================================","timestamp":"2026-07-09T00:06:25.257Z"}
+data: {"data":"================================================","timestamp":"2026-07-09T00:53:24.867Z"}
 
-data: {"data":"  SmartLearn AI - HF Spaces 启动中...","timestamp":"2026-07-09T00:06:25.257Z"}
+data: {"data":"  SmartLearn AI - HF Spaces 启动中...","timestamp":"2026-07-09T00:53:24.867Z"}
 
-data: {"data":"================================================","timestamp":"2026-07-09T00:06:25.257Z"}
+data: {"data":"================================================","timestamp":"2026-07-09T00:53:24.867Z"}
 
-data: {"data":"[1/4] 注入 AI_ENGINE_API_KEY...","timestamp":"2026-07-09T00:06:25.257Z"}
+data: {"data":"[1/4] 注入 AI_ENGINE_API_KEY...","timestamp":"2026-07-09T00:53:24.867Z"}
 
-data: {"data":"  API Key 已注入","timestamp":"2026-07-09T00:06:25.263Z"}
+data: {"data":"  API Key 已注入","timestamp":"2026-07-09T00:53:24.877Z"}
 
-data: {"data":"[2/4] 启动 nginx + api + ai-engine...","timestamp":"2026-07-09T00:06:25.263Z"}
+data: {"data":"[2/4] 启动 nginx + api + ai-engine...","timestamp":"2026-07-09T00:53:24.877Z"}
 
-data: {"data":"  nginx 已启动 (PID 8)","timestamp":"2026-07-09T00:06:25.263Z"}
+data: {"data":"  nginx 已启动 (PID 8)","timestamp":"2026-07-09T00:53:24.877Z"}
 
-data: {"data":"  api 已启动 (PID 9)","timestamp":"2026-07-09T00:06:25.263Z"}
+data: {"data":"  api 已启动 (PID 9)","timestamp":"2026-07-09T00:53:24.877Z"}
 
-data: {"data":"  ai-engine 已启动 (PID 10)","timestamp":"2026-07-09T00:06:25.264Z"}
+data: {"data":"  ai-engine 已启动 (PID 10)","timestamp":"2026-07-09T00:53:24.877Z"}
 
-data: {"data":"[3/4] 后台执行 alembic 迁移 + 初始化管理员...","timestamp":"2026-07-09T00:06:25.264Z"}
+data: {"data":"[3/4] 后台执行 alembic 迁移 + 初始化管理员...","timestamp":"2026-07-09T00:53:24.877Z"}
 
-data: {"data":"[4/4] 服务运行中","timestamp":"2026-07-09T00:06:25.264Z"}
+data: {"data":"[4/4] 服务运行中","timestamp":"2026-07-09T00:53:24.878Z"}
 
-data: {"data":"================================================","timestamp":"2026-07-09T00:06:25.264Z"}
+data: {"data":"================================================","timestamp":"2026-07-09T00:53:24.878Z"}
 
-data: {"data":"  服务: nginx:7860 + api:8000 + ai-engine:8001","timestamp":"2026-07-09T00:06:25.264Z"}
+data: {"data":"  服务: nginx:7860 + api:8000 + ai-engine:8001","timestamp":"2026-07-09T00:53:24.878Z"}
 
-data: {"data":"  保活: /keepalive","timestamp":"2026-07-09T00:06:25.264Z"}
+data: {"data":"  保活: /keepalive","timestamp":"2026-07-09T00:53:24.878Z"}
 
-data: {"data":"================================================","timestamp":"2026-07-09T00:06:25.264Z"}
+data: {"data":"================================================","timestamp":"2026-07-09T00:53:24.878Z"}
 
-data: {"data":"--- alembic upgrade head ---","timestamp":"2026-07-09T00:06:25.264Z"}
+data: {"data":"--- alembic upgrade head ---","timestamp":"2026-07-09T00:53:24.878Z"}
 
-data: {"data":"2026/07/09 00:06:25 [warn] 8#8: the \"user\" directive makes sense only if the master process runs with super-user privileges, ignored in /etc/nginx/nginx.conf:13","timestamp":"2026-07-09T00:06:25.270Z"}
+data: {"data":"2026/07/09 00:53:24 [warn] 8#8: the \"user\" directive makes sense only if the master process runs with super-user privileges, ignored in /etc/nginx/nginx.conf:13","timestamp":"2026-07-09T00:53:24.882Z"}
 
-data: {"data":"INFO:     Started server process [10]","timestamp":"2026-07-09T00:06:27.130Z"}
+data: {"data":"INFO:     Started server process [10]","timestamp":"2026-07-09T00:53:26.538Z"}
 
-data: {"data":"INFO:     Waiting for application startup.","timestamp":"2026-07-09T00:06:27.130Z"}
+data: {"data":"INFO:     Waiting for application startup.","timestamp":"2026-07-09T00:53:26.538Z"}
 
-data: {"data":"   SmartLearn AI Engine v1.0.0 启动中...","timestamp":"2026-07-09T00:06:27.131Z"}
+data: {"data":"   SmartLearn AI Engine v1.0.0 启动中...","timestamp":"2026-07-09T00:53:26.538Z"}
 
-data: {"data":"   LLM 模型: gpt-4o-mini","timestamp":"2026-07-09T00:06:27.131Z"}
+data: {"data":"   LLM 模型: gpt-4o-mini","timestamp":"2026-07-09T00:53:26.538Z"}
 
-data: {"data":"   嵌入模型: text-embedding-3-small","timestamp":"2026-07-09T00:06:27.131Z"}
+data: {"data":"   嵌入模型: text-embedding-3-small","timestamp":"2026-07-09T00:53:26.538Z"}
 
-data: {"data":"   运行模式: 在线模式","timestamp":"2026-07-09T00:06:27.131Z"}
+data: {"data":"   运行模式: 在线模式","timestamp":"2026-07-09T00:53:26.538Z"}
 
-data: {"data":"   向量存储: inmemory","timestamp":"2026-07-09T00:06:27.131Z"}
+data: {"data":"   向量存储: inmemory","timestamp":"2026-07-09T00:53:26.538Z"}
 
-data: {"data":"警告: 知识点目录不存在: /data/knowledge-points","timestamp":"2026-07-09T00:06:27.158Z"}
+data: {"data":"警告: 知识点目录不存在: /data/knowledge-points","timestamp":"2026-07-09T00:53:26.569Z"}
 
-data: {"data":"警告: 题目目录不存在: /data/questions","timestamp":"2026-07-09T00:06:27.183Z"}
+data: {"data":"警告: 题目目录不存在: /data/questions","timestamp":"2026-07-09T00:53:26.596Z"}
 
-data: {"data":"RAG 服务已初始化: 0 个知识点, 0 道题目","timestamp":"2026-07-09T00:06:27.183Z"}
+data: {"data":"RAG 服务已初始化: 0 个知识点, 0 道题目","timestamp":"2026-07-09T00:53:26.596Z"}
 
-data: {"data":"   知识库加载完成: 0 知识点, 0 题目","timestamp":"2026-07-09T00:06:27.183Z"}
+data: {"data":"   知识库加载完成: 0 知识点, 0 题目","timestamp":"2026-07-09T00:53:26.596Z"}
 
-data: {"data":"INFO:     Application startup complete.","timestamp":"2026-07-09T00:06:27.183Z"}
+data: {"data":"INFO:     Application startup complete.","timestamp":"2026-07-09T00:53:26.597Z"}
 
-data: {"data":"INFO:     Uvicorn running on http://127.0.0.1:8001 (Press CTRL+C to quit)","timestamp":"2026-07-09T00:06:27.193Z"}
+data: {"data":"INFO:     Uvicorn running on http://127.0.0.1:8001 (Press CTRL+C to quit)","timestamp":"2026-07-09T00:53:26.602Z"}
 
-data: {"data":"INFO:     Started server process [9]","timestamp":"2026-07-09T00:06:27.656Z"}
+data: {"data":"INFO:     Started server process [9]","timestamp":"2026-07-09T00:53:26.824Z"}
 
-data: {"data":"INFO:     Waiting for application startup.","timestamp":"2026-07-09T00:06:27.656Z"}
+data: {"data":"INFO:     Waiting for application startup.","timestamp":"2026-07-09T00:53:26.824Z"}
 
-data: {"data":"INFO:     Application startup complete.","timestamp":"2026-07-09T00:06:27.798Z"}
+data: {"data":"INFO:     Application startup complete.","timestamp":"2026-07-09T00:53:26.912Z"}
 
-data: {"data":"INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)","timestamp":"2026-07-09T00:06:27.801Z"}
+data: {"data":"INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)","timestamp":"2026-07-09T00:53:26.914Z"}
 
-data: {"data":"INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.","timestamp":"2026-07-09T00:06:27.811Z"}
+data: {"data":"INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.","timestamp":"2026-07-09T00:53:27.295Z"}
 
-data: {"data":"INFO  [alembic.runtime.migration] Will assume transactional DDL.","timestamp":"2026-07-09T00:06:27.811Z"}
+data: {"data":"INFO  [alembic.runtime.migration] Will assume transactional DDL.","timestamp":"2026-07-09T00:53:27.295Z"}
 
-data: {"data":"  ✅ alembic 迁移完成","timestamp":"2026-07-09T00:06:28.200Z"}
+data: {"data":"  ✅ alembic 迁移完成","timestamp":"2026-07-09T00:53:27.658Z"}
 
-data: {"data":"--- seed.py ---","timestamp":"2026-07-09T00:06:28.200Z"}
+data: {"data":"--- seed.py ---","timestamp":"2026-07-09T00:53:27.658Z"}
 
-data: {"data":"2026-07-09 00:06:30,693 [INFO] [UPDATE] 管理员账号 maxiuquan@163.com 密码已同步","timestamp":"2026-07-09T00:06:30.694Z"}
+data: {"data":"2026-07-09 00:53:30,031 [INFO] [UPDATE] 管理员账号 maxiuquan@163.com 密码已同步","timestamp":"2026-07-09T00:53:30.031Z"}
 
-data: {"data":"  ✅ seed.py 完成","timestamp":"2026-07-09T00:06:30.830Z"}
+data: {"data":"  ✅ seed.py 完成","timestamp":"2026-07-09T00:53:30.132Z"}
 
-data: {"data":"INFO:     10.16.15.181:0 - \"POST /api/v1/auth/login HTTP/1.1\" 500 Internal Server Error","timestamp":"2026-07-09T00:08:00.391Z"}
+data: {"data":"INFO:     10.16.43.124:0 - \"POST /api/v1/auth/login HTTP/1.1\" 200 OK","timestamp":"2026-07-09T00:54:11.817Z"}
 
-data: {"data":"ERROR:    Exception in ASGI application","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"INFO:     10.16.15.181:0 - \"GET /api/v1/statistics/my-overview HTTP/1.1\" 500 Internal Server Error","timestamp":"2026-07-09T00:54:14.200Z"}
 
-data: {"data":"Traceback (most recent call last):","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"ERROR:    Exception in ASGI application","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"asyncpg/protocol/prepared_stmt.pyx\", line 175, in asyncpg.protocol.protocol.PreparedStatementState._encode_bind_msg","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"Traceback (most recent call last):","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"asyncpg/protocol/codecs/base.pyx\", line 227, in asyncpg.protocol.protocol.Codec.encode","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"asyncpg/protocol/prepared_stmt.pyx\", line 175, in asyncpg.protocol.protocol.PreparedStatementState._encode_bind_msg","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"asyncpg/protocol/codecs/base.pyx\", line 129, in asyncpg.protocol.protocol.Codec.encode_scalar","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"asyncpg/protocol/codecs/base.pyx\", line 227, in asyncpg.protocol.protocol.Codec.encode","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"asyncpg/pgproto/./codecs/datetime.pyx\", line 152, in asyncpg.pgproto.pgproto.timestamp_encode","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"asyncpg/protocol/codecs/base.pyx\", line 129, in asyncpg.protocol.protocol.Codec.encode_scalar","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"TypeError: can't subtract offset-naive and offset-aware datetimes","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"asyncpg/pgproto/./codecs/datetime.pyx\", line 152, in asyncpg.pgproto.pgproto.timestamp_encode","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"TypeError: can't subtract offset-naive and offset-aware datetimes","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"The above exception was the direct cause of the following exception:","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"The above exception was the direct cause of the following exception:","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"Traceback (most recent call last):","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py\", line 538, in _prepare_and_execute","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"Traceback (most recent call last):","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    self._rows = deque(await prepared_stmt.fetch(*parameters))","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py\", line 538, in _prepare_and_execute","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"    self._rows = deque(await prepared_stmt.fetch(*parameters))","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/asyncpg/prepared_stmt.py\", line 176, in fetch","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    data = await self.__bind_execute(args, 0, timeout)","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/asyncpg/prepared_stmt.py\", line 176, in fetch","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"    data = await self.__bind_execute(args, 0, timeout)","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/asyncpg/prepared_stmt.py\", line 241, in __bind_execute","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    data, status, _ = await self.__do_execute(","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/asyncpg/prepared_stmt.py\", line 241, in __bind_execute","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"                      ^^^^^^^^^^^^^^^^^^^^^^^^","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"    data, status, _ = await self.__do_execute(","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/asyncpg/prepared_stmt.py\", line 230, in __do_execute","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"                      ^^^^^^^^^^^^^^^^^^^^^^^^","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    return await executor(protocol)","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/asyncpg/prepared_stmt.py\", line 230, in __do_execute","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"           ^^^^^^^^^^^^^^^^^^^^^^^^","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"    return await executor(protocol)","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"asyncpg/protocol/protocol.pyx\", line 186, in bind_execute","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"           ^^^^^^^^^^^^^^^^^^^^^^^^","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"asyncpg/protocol/prepared_stmt.pyx\", line 204, in asyncpg.protocol.protocol.PreparedStatementState._encode_bind_msg","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"asyncpg/protocol/protocol.pyx\", line 186, in bind_execute","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"asyncpg.exceptions.DataError: invalid input for query argument $1: datetime.datetime(2026, 7, 9, 0, 8, 0, 2... (can't subtract offset-naive and offset-aware datetimes)","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"asyncpg/protocol/prepared_stmt.pyx\", line 204, in asyncpg.protocol.protocol.PreparedStatementState._encode_bind_msg","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"asyncpg.exceptions.DataError: invalid input for query argument $1: datetime.datetime(2026, 7, 9, 0, 0, tzin... (can't subtract offset-naive and offset-aware datetimes)","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"The above exception was the direct cause of the following exception:","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"The above exception was the direct cause of the following exception:","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"Traceback (most recent call last):","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py\", line 1967, in _exec_single_context","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"Traceback (most recent call last):","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    self.dialect.do_execute(","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py\", line 1967, in _exec_single_context","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/default.py\", line 941, in do_execute","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"    self.dialect.do_execute(","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    cursor.execute(statement, parameters)","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/default.py\", line 941, in do_execute","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py\", line 572, in execute","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"    cursor.execute(statement, parameters)","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    self._adapt_connection.await_(","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py\", line 572, in execute","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/util/_concurrency_py3k.py\", line 132, in await_only","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"    self._adapt_connection.await_(","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/util/_concurrency_py3k.py\", line 132, in await_only","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/util/_concurrency_py3k.py\", line 196, in greenlet_spawn","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    value = await result","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/util/_concurrency_py3k.py\", line 196, in greenlet_spawn","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"            ^^^^^^^^^^^^","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"    value = await result","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py\", line 550, in _prepare_and_execute","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"            ^^^^^^^^^^^^","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    self._handle_exception(error)","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py\", line 550, in _prepare_and_execute","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py\", line 501, in _handle_exception","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"    self._handle_exception(error)","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    self._adapt_connection._handle_exception(error)","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py\", line 501, in _handle_exception","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py\", line 784, in _handle_exception","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"    self._adapt_connection._handle_exception(error)","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    raise translated_error from error","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py\", line 784, in _handle_exception","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"sqlalchemy.dialects.postgresql.asyncpg.AsyncAdapt_asyncpg_dbapi.Error: <class 'asyncpg.exceptions.DataError'>: invalid input for query argument $1: datetime.datetime(2026, 7, 9, 0, 8, 0, 2... (can't subtract offset-naive and offset-aware datetimes)","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"    raise translated_error from error","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"sqlalchemy.dialects.postgresql.asyncpg.AsyncAdapt_asyncpg_dbapi.Error: <class 'asyncpg.exceptions.DataError'>: invalid input for query argument $1: datetime.datetime(2026, 7, 9, 0, 0, tzin... (can't subtract offset-naive and offset-aware datetimes)","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"The above exception was the direct cause of the following exception:","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"The above exception was the direct cause of the following exception:","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"Traceback (most recent call last):","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/uvicorn/protocols/http/httptools_impl.py\", line 399, in run_asgi","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"Traceback (most recent call last):","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    result = await app(  # type: ignore[func-returns-value]","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/uvicorn/protocols/http/httptools_impl.py\", line 399, in run_asgi","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"    result = await app(  # type: ignore[func-returns-value]","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/uvicorn/middleware/proxy_headers.py\", line 70, in __call__","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    return await self.app(scope, receive, send)","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/uvicorn/middleware/proxy_headers.py\", line 70, in __call__","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"    return await self.app(scope, receive, send)","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/fastapi/applications.py\", line 1054, in __call__","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    await super().__call__(scope, receive, send)","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/fastapi/applications.py\", line 1054, in __call__","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/starlette/applications.py\", line 113, in __call__","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"    await super().__call__(scope, receive, send)","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    await self.middleware_stack(scope, receive, send)","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/starlette/applications.py\", line 113, in __call__","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/starlette/middleware/errors.py\", line 187, in __call__","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"    await self.middleware_stack(scope, receive, send)","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    raise exc","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/starlette/middleware/errors.py\", line 187, in __call__","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/starlette/middleware/errors.py\", line 165, in __call__","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"    raise exc","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    await self.app(scope, receive, _send)","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/starlette/middleware/errors.py\", line 165, in __call__","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/starlette/middleware/cors.py\", line 85, in __call__","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"    await self.app(scope, receive, _send)","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    await self.app(scope, receive, send)","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/starlette/middleware/cors.py\", line 85, in __call__","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/starlette/middleware/exceptions.py\", line 62, in __call__","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"    await self.app(scope, receive, send)","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/starlette/middleware/exceptions.py\", line 62, in __call__","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py\", line 62, in wrapped_app","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    raise exc","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py\", line 62, in wrapped_app","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py\", line 51, in wrapped_app","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"    raise exc","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    await app(scope, receive, sender)","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py\", line 51, in wrapped_app","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 715, in __call__","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"    await app(scope, receive, sender)","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    await self.middleware_stack(scope, receive, send)","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 715, in __call__","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 735, in app","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"    await self.middleware_stack(scope, receive, send)","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    await route.handle(scope, receive, send)","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 735, in app","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 288, in handle","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"    await route.handle(scope, receive, send)","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    await self.app(scope, receive, send)","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 288, in handle","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 76, in app","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"    await self.app(scope, receive, send)","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    await wrap_app_handling_exceptions(app, request)(scope, receive, send)","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 76, in app","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py\", line 62, in wrapped_app","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"    await wrap_app_handling_exceptions(app, request)(scope, receive, send)","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    raise exc","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py\", line 62, in wrapped_app","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py\", line 51, in wrapped_app","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"    raise exc","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    await app(scope, receive, sender)","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py\", line 51, in wrapped_app","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 73, in app","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"    await app(scope, receive, sender)","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    response = await f(request)","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 73, in app","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"               ^^^^^^^^^^^^^^^^","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"    response = await f(request)","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/fastapi/routing.py\", line 301, in app","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"               ^^^^^^^^^^^^^^^^","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    raw_response = await run_endpoint_function(","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/fastapi/routing.py\", line 301, in app","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"    raw_response = await run_endpoint_function(","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/fastapi/routing.py\", line 212, in run_endpoint_function","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    return await dependant.call(**values)","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/fastapi/routing.py\", line 212, in run_endpoint_function","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"    return await dependant.call(**values)","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/app/app/api/v1/auth.py\", line 159, in login","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    await db.commit()","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"/app/app/api/v1/statistics.py\", line 188, in get_my_overview","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/ext/asyncio/session.py\", line 1009, in commit","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"    today_active = await _count(","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    await greenlet_spawn(self.sync_session.commit)","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"                   ^^^^^^^^^^^^^","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/util/_concurrency_py3k.py\", line 203, in greenlet_spawn","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"/app/app/api/v1/statistics.py\", line 35, in _count","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    result = context.switch(value)","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"    return (await db.execute(stmt)).scalar() or 0","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"             ^^^^^^^^^^^^^^^^^^^^^","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"            ^^^^^^^^^^^^^^^^^^^^^^","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py\", line 2028, in commit","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/ext/asyncio/session.py\", line 461, in execute","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    trans.commit(_to_root=True)","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"    result = await greenlet_spawn(","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"<string>\", line 2, in commit","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"             ^^^^^^^^^^^^^^^^^^^^^","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/state_changes.py\", line 139, in _go","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/util/_concurrency_py3k.py\", line 201, in greenlet_spawn","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    ret_value = fn(self, *arg, **kw)","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"    result = context.throw(*sys.exc_info())","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"                ^^^^^^^^^^^^^^^^^^^^","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py\", line 1313, in commit","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py\", line 2362, in execute","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    self._prepare_impl()","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"    return self._execute_internal(","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"<string>\", line 2, in _prepare_impl","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"           ^^^^^^^^^^^^^^^^^^^^^^^","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/state_changes.py\", line 139, in _go","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py\", line 2247, in _execute_internal","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    ret_value = fn(self, *arg, **kw)","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"    result: Result[Any] = compile_state_cls.orm_execute_statement(","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"                ^^^^^^^^^^^^^^^^^^^^","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py\", line 1288, in _prepare_impl","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/context.py\", line 305, in orm_execute_statement","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    self.session.flush()","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"    result = conn.execute(","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py\", line 4352, in flush","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"             ^^^^^^^^^^^^^","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    self._flush(objects)","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py\", line 1418, in execute","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py\", line 4487, in _flush","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"    return meth(","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    with util.safe_reraise():","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"           ^^^^^","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/util/langhelpers.py\", line 146, in __exit__","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/sql/elements.py\", line 515, in _execute_on_connection","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    raise exc_value.with_traceback(exc_tb)","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"    return connection._execute_clauseelement(","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py\", line 4448, in _flush","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    flush_context.execute()","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py\", line 1640, in _execute_clauseelement","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/unitofwork.py\", line 466, in execute","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"    ret = self._execute_context(","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    rec.execute(self)","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"          ^^^^^^^^^^^^^^^^^^^^^^","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/unitofwork.py\", line 642, in execute","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py\", line 1846, in _execute_context","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    util.preloaded.orm_persistence.save_obj(","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"    return self._exec_single_context(","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/persistence.py\", line 85, in save_obj","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"           ^^^^^^^^^^^^^^^^^^^^^^^^^^","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    _emit_update_statements(","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py\", line 1986, in _exec_single_context","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/persistence.py\", line 912, in _emit_update_statements","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"    self._handle_dbapi_exception(","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    c = connection.execute(","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py\", line 2355, in _handle_dbapi_exception","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"        ^^^^^^^^^^^^^^^^^^^","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py\", line 1418, in execute","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py\", line 1967, in _exec_single_context","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    return meth(","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"    self.dialect.do_execute(","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"           ^^^^^","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/default.py\", line 941, in do_execute","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/sql/elements.py\", line 515, in _execute_on_connection","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"    cursor.execute(statement, parameters)","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    return connection._execute_clauseelement(","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py\", line 572, in execute","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"    self._adapt_connection.await_(","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py\", line 1640, in _execute_clauseelement","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/util/_concurrency_py3k.py\", line 132, in await_only","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    ret = self._execute_context(","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"          ^^^^^^^^^^^^^^^^^^^^^^","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py\", line 1846, in _execute_context","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/util/_concurrency_py3k.py\", line 196, in greenlet_spawn","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    return self._exec_single_context(","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"    value = await result","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"           ^^^^^^^^^^^^^^^^^^^^^^^^^^","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"            ^^^^^^^^^^^^","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py\", line 1986, in _exec_single_context","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py\", line 550, in _prepare_and_execute","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    self._handle_dbapi_exception(","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"    self._handle_exception(error)","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py\", line 2355, in _handle_dbapi_exception","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py\", line 501, in _handle_exception","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"    self._adapt_connection._handle_exception(error)","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py\", line 1967, in _exec_single_context","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py\", line 784, in _handle_exception","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    self.dialect.do_execute(","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"    raise translated_error from error","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/default.py\", line 941, in do_execute","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"sqlalchemy.exc.DBAPIError: (sqlalchemy.dialects.postgresql.asyncpg.Error) <class 'asyncpg.exceptions.DataError'>: invalid input for query argument $1: datetime.datetime(2026, 7, 9, 0, 0, tzin... (can't subtract offset-naive and offset-aware datetimes)","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    cursor.execute(statement, parameters)","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"[SQL: SELECT count(*) AS count_1 ","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py\", line 572, in execute","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"FROM users ","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    self._adapt_connection.await_(","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"WHERE users.last_login_at IS NOT NULL AND users.last_login_at >= $1::TIMESTAMP WITHOUT TIME ZONE]","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/util/_concurrency_py3k.py\", line 132, in await_only","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"[parameters: (datetime.datetime(2026, 7, 9, 0, 0, tzinfo=datetime.timezone.utc),)]","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"(Background on this error at: https://sqlalche.me/e/20/dbapi)","timestamp":"2026-07-09T00:54:14.207Z"}
 
-data: {"data":"           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"INFO:     10.16.28.127:0 - \"GET /api/v1/statistics/my-profile HTTP/1.1\" 200 OK","timestamp":"2026-07-09T00:54:16.360Z"}
 
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/util/_concurrency_py3k.py\", line 196, in greenlet_spawn","timestamp":"2026-07-09T00:08:00.399Z"}
-
-data: {"data":"    value = await result","timestamp":"2026-07-09T00:08:00.399Z"}
-
-data: {"data":"            ^^^^^^^^^^^^","timestamp":"2026-07-09T00:08:00.399Z"}
-
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py\", line 550, in _prepare_and_execute","timestamp":"2026-07-09T00:08:00.399Z"}
-
-data: {"data":"    self._handle_exception(error)","timestamp":"2026-07-09T00:08:00.399Z"}
-
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py\", line 501, in _handle_exception","timestamp":"2026-07-09T00:08:00.399Z"}
-
-data: {"data":"    self._adapt_connection._handle_exception(error)","timestamp":"2026-07-09T00:08:00.399Z"}
-
-data: {"data":"  File \"/usr/local/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py\", line 784, in _handle_exception","timestamp":"2026-07-09T00:08:00.399Z"}
-
-data: {"data":"    raise translated_error from error","timestamp":"2026-07-09T00:08:00.399Z"}
-
-data: {"data":"sqlalchemy.exc.DBAPIError: (sqlalchemy.dialects.postgresql.asyncpg.Error) <class 'asyncpg.exceptions.DataError'>: invalid input for query argument $1: datetime.datetime(2026, 7, 9, 0, 8, 0, 2... (can't subtract offset-naive and offset-aware datetimes)","timestamp":"2026-07-09T00:08:00.399Z"}
-
-data: {"data":"[SQL: UPDATE users SET last_login_at=$1::TIMESTAMP WITHOUT TIME ZONE, updated_at=now() WHERE users.id = $2::INTEGER]","timestamp":"2026-07-09T00:08:00.399Z"}
-
-data: {"data":"[parameters: (datetime.datetime(2026, 7, 9, 0, 8, 0, 254918, tzinfo=datetime.timezone.utc), 1)]","timestamp":"2026-07-09T00:08:00.399Z"}
-
-data: {"data":"(Background on this error at: https://sqlalche.me/e/20/dbapi)","timestamp":"2026-07-09T00:08:00.399Z"}
+data: {"data":"INFO:     10.16.42.105:0 - \"GET /api/v1/auth/me HTTP/1.1\" 200 OK","timestamp":"2026-07-09T00:54:18.009Z"}
 

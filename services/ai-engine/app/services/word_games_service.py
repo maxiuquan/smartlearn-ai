@@ -558,8 +558,8 @@ class WordGamesService:
                 # 最终回退：用 solution 第一行
                 correct_answer = (current_word.example_sentence or "").split("\n")[0]
         else:
-            # 词汇题：正确答案就是单词本身
-            correct_answer = current_word.correct_answer or current_word.word
+            # 词汇题：按 game_id 推导正确答案（与 _generate_vocab_question 题型路由一致）
+            correct_answer = self._get_vocab_correct_answer(session, current_word)
 
         # 判断答案是否正确
         is_correct = self._check_answer(
@@ -1158,6 +1158,11 @@ class WordGamesService:
             GameType.LISTEN_WRITE: 60,
             GameType.WORD_SEARCH: 120,
             GameType.CROSSWORD: 180,
+            # 扩展题型时间限制
+            GameType.TAP_MATCH: 45,        # 点击配对消除
+            GameType.LISTEN_SELECT: 30,    # 听音选词
+            GameType.DRAG_SORT: 60,        # 拖拽排序
+            GameType.WORD_BANK: 40,        # 词库填空
         }
 
         base = base_time.get(game_type, 30)
@@ -1196,138 +1201,292 @@ class WordGamesService:
         word: Word,
         index: int,
     ) -> WordGameQuestion:
-        """生成词汇题（P1-4：按 game_id 差异化文案）
+        """生成词汇题（P1-4 + 7 题型扩展）
 
-        25 款词汇游戏虽共用 3 种核心题型，但根据 game_id 调整问法文案，
-        让"单词接龙/听写/填字"等游戏体验有差异，而非完全换皮。
+        按 session.game_id 路由到 7 种题型生成方法：
+        1. MULTIPLE_CHOICE 选择题（9 款）
+        2. TAP_MATCH 点击配对消除（4 款）
+        3. LISTEN_SELECT 听音选词（1 款）
+        4. SPELLING 拼写输入（3 款）
+        5. DRAG_SORT 拖拽排序（2 款）
+        6. WORD_BANK 词库填空（4 款）
+        7. FILL_BLANK 填空输入（2 款）
+        未匹配的 game_id 回退到原有 3 种题型兜底逻辑。
         """
         game_id = session.game_id
-        # P1-4 按 game_id 定制文案
-        # 选择题类游戏：词义消消乐/词汇PK/听音辨词/图词配对/记忆翻牌/高频词挑战
-        if game_id in (
-            "word-match-blast", "vocabulary-duel", "listening-dash",
-            "picture-word-match", "memory-flip-match", "high-frequency-challenge",
-            "wrong-question-boss", "daily-quiz-arena", "knowledge-combo-streak",
-            "memory-maze", "study-team-raid",
-        ):
-            options = self._generate_options_sync(word, session.words)
-            # 按 game_id 微调问法
-            if game_id == "listening-dash":
-                question_text = f"听音辨词：请选出正确的单词释义"
-            elif game_id == "picture-word-match":
-                question_text = f"看图选词：哪个单词匹配该图片？"
-            elif game_id == "memory-flip-match":
-                question_text = f"记忆翻牌：请匹配 '{word.word}' 的释义"
-            elif game_id == "word-match-blast":
-                question_text = f"词义消消乐：'{word.word}' 的含义是？"
-            else:
-                question_text = f"'{word.word}' 的正确释义是？"
-            return WordGameQuestion(
-                question_id=f"q_{index}",
-                word=word,
-                question_type=GameType.MULTIPLE_CHOICE,
-                question_text=question_text,
-                options=options,
-                correct_answer=word.meaning,
-                hint=f"首字母是 {word.word[0] if word.word else '?'}",
-                points=10
-            )
 
-        # 拼写类游戏：拼写蜂/字母泡泡/单词接龙
+        # 1. MULTIPLE_CHOICE 选择题
+        if game_id in (
+            "vocabulary-duel", "high-frequency-challenge", "wrong-question-boss",
+            "daily-quiz-arena", "knowledge-combo-streak", "memory-maze",
+            "study-team-raid", "problem-quest-map", "formula-link",
+        ):
+            return self._generate_multiple_choice_question(session, word, index)
+
+        # 2. TAP_MATCH 点击配对消除
+        if game_id in (
+            "word-match-blast", "synonym-antonym-match",
+            "picture-word-match", "memory-flip-match",
+        ):
+            return self._generate_tap_match_question(session, word, index)
+
+        # 3. LISTEN_SELECT 听音选词
+        if game_id == "listening-dash":
+            return self._generate_listen_select_question(session, word, index)
+
+        # 4. SPELLING 拼写输入
         if game_id in ("spelling-bee", "word-bubble-pop", "word-chain"):
-            if game_id == "word-chain":
-                question_text = f"单词接龙：请用 '{word.word[-1] if word.word else '?'}' 开头拼写一个新单词，或拼写当前词"
-            elif game_id == "word-bubble-pop":
-                question_text = f"字母泡泡拼词：请拼出含义为 '{word.meaning}' 的单词"
-            else:
-                question_text = f"听音拼写：请拼写含义为 '{word.meaning}' 的单词"
-            return WordGameQuestion(
-                question_id=f"q_{index}",
-                word=word,
-                question_type=GameType.SPELLING,
-                question_text=question_text,
-                options=None,
-                correct_answer=word.word,
-                hint=f"有 {len(word.word)} 个字母",
-                points=10
-            )
+            return self._generate_spelling_question(session, word, index)
 
-        # 填空类游戏：语境速填/词形变形/纵横填字/词根词缀树/长难句拆解/同反义连线
+        # 5. DRAG_SORT 拖拽排序
+        if game_id in ("sentence-untangle", "root-affix-tree"):
+            return self._generate_drag_sort_question(session, word, index)
+
+        # 6. WORD_BANK 词库填空
         if game_id in (
-            "cloze-sprint", "word-form-master", "crossword-quest",
-            "root-affix-tree", "sentence-untangle", "synonym-antonym-match",
+            "cloze-sprint", "word-form-master",
+            "crossword-quest", "flashcard-rush",
         ):
-            if game_id == "cloze-sprint":
-                sentence = f"语境填空：The ___ means '{word.meaning}'."
-            elif game_id == "word-form-master":
-                sentence = f"词形变形：请填写 '{word.word}' 的正确词形（释义：{word.meaning}）"
-            elif game_id == "crossword-quest":
-                sentence = f"纵横填字线索：{word.meaning}"
-            elif game_id == "root-affix-tree":
-                sentence = f"词根推导：请填写以该词根衍生的单词（{word.meaning}）"
-            elif game_id == "synonym-antonym-match":
-                sentence = f"同反义连线：请填写 '{word.word}' 的同义词或反义词"
-            else:
-                sentence = f"长难句填空：{word.meaning}"
-            return WordGameQuestion(
-                question_id=f"q_{index}",
-                word=word,
-                question_type=GameType.FILL_BLANK,
-                question_text=sentence,
-                options=None,
-                correct_answer=word.word,
-                hint=f"首字母是 {word.word[0] if word.word else '?'}",
-                points=10
-            )
+            return self._generate_word_bank_question(session, word, index)
 
-        # 闪卡速记：简单展示
-        if game_id == "flashcard-rush":
-            return WordGameQuestion(
-                question_id=f"q_{index}",
-                word=word,
-                question_type=GameType.FILL_BLANK,
-                question_text=f"闪卡速记：你认识 '{word.word}' 吗？请输入其释义",
-                options=None,
-                correct_answer=word.meaning,
-                hint=f"首字母是 {word.word[0] if word.word else '?'}",
-                points=10
-            )
+        # 7. FILL_BLANK 填空输入
+        if game_id in ("limit-blitz", "proof-step-sort"):
+            return self._generate_fill_blank_question(session, word, index)
 
-        # 兜底：默认按 game_type 出题
+        # 兜底：默认按 game_type 出题（保持向后兼容）
         if session.game_type == GameType.MULTIPLE_CHOICE:
-            options = self._generate_options_sync(word, session.words)
-            return WordGameQuestion(
-                question_id=f"q_{index}",
-                word=word,
-                question_type=session.game_type,
-                question_text=f"'{word.meaning}' 的英文是？",
-                options=options,
-                correct_answer=word.word,
-                hint=f"首字母是 {word.word[0] if word.word else '?'}",
-                points=10
-            )
+            return self._generate_multiple_choice_question(session, word, index)
         elif session.game_type == GameType.SPELLING:
-            return WordGameQuestion(
-                question_id=f"q_{index}",
-                word=word,
-                question_type=session.game_type,
-                question_text=f"请拼写: {word.meaning}",
-                options=None,
-                correct_answer=word.word,
-                hint=f"有 {len(word.word)} 个字母",
-                points=10
-            )
+            return self._generate_spelling_question(session, word, index)
         else:
-            return WordGameQuestion(
-                question_id=f"q_{index}",
-                word=word,
-                question_type=session.game_type,
-                question_text=f"请输入 '{word.meaning}' 的英文",
-                options=None,
-                correct_answer=word.word,
-                hint=f"首字母是 {word.word[0] if word.word else '?'}",
-                points=10
-            )
+            return self._generate_fill_blank_question(session, word, index)
+
+    def _generate_multiple_choice_question(
+        self,
+        session: WordGameSession,
+        word: Word,
+        index: int,
+    ) -> WordGameQuestion:
+        """生成选择题（MULTIPLE_CHOICE）：词义消消乐/词汇PK/记忆翻牌等"""
+        options = self._generate_options_sync(word, session.words)
+        game_id = session.game_id
+        # 按 game_id 微调问法
+        if game_id == "picture-word-match":
+            question_text = f"看图选词：哪个单词匹配该图片？"
+        elif game_id == "memory-flip-match":
+            question_text = f"记忆翻牌：请匹配 '{word.word}' 的释义"
+        elif game_id == "word-match-blast":
+            question_text = f"词义消消乐：'{word.word}' 的含义是？"
+        else:
+            question_text = f"'{word.word}' 的正确释义是？"
+        return WordGameQuestion(
+            question_id=f"q_{index}",
+            word=word,
+            question_type=GameType.MULTIPLE_CHOICE,
+            question_text=question_text,
+            options=options,
+            correct_answer=word.meaning,
+            hint=f"首字母是 {word.word[0] if word.word else '?'}",
+            points=10
+        )
+
+    def _generate_spelling_question(
+        self,
+        session: WordGameSession,
+        word: Word,
+        index: int,
+    ) -> WordGameQuestion:
+        """生成拼写题（SPELLING）：拼写蜂/字母泡泡/单词接龙"""
+        game_id = session.game_id
+        if game_id == "word-chain":
+            question_text = f"单词接龙：请用 '{word.word[-1] if word.word else '?'}' 开头拼写一个新单词，或拼写当前词"
+        elif game_id == "word-bubble-pop":
+            question_text = f"字母泡泡拼词：请拼出含义为 '{word.meaning}' 的单词"
+        else:
+            question_text = f"听音拼写：请拼写含义为 '{word.meaning}' 的单词"
+        return WordGameQuestion(
+            question_id=f"q_{index}",
+            word=word,
+            question_type=GameType.SPELLING,
+            question_text=question_text,
+            options=None,
+            correct_answer=word.word,
+            hint=f"有 {len(word.word)} 个字母",
+            points=10
+        )
+
+    def _generate_fill_blank_question(
+        self,
+        session: WordGameSession,
+        word: Word,
+        index: int,
+    ) -> WordGameQuestion:
+        """生成填空题（FILL_BLANK）：极限冲刺/证明步骤排序"""
+        game_id = session.game_id
+        if game_id == "limit-blitz":
+            sentence = f"极限冲刺：请在句中填入正确单词（释义：{word.meaning}）"
+        elif game_id == "proof-step-sort":
+            sentence = f"证明填空：请填写关键步骤（释义：{word.meaning}）"
+        else:
+            sentence = f"请输入 '{word.meaning}' 的英文"
+        return WordGameQuestion(
+            question_id=f"q_{index}",
+            word=word,
+            question_type=GameType.FILL_BLANK,
+            question_text=sentence,
+            options=None,
+            correct_answer=word.word,
+            hint=f"首字母是 {word.word[0] if word.word else '?'}",
+            points=10
+        )
+
+    def _generate_tap_match_question(
+        self,
+        session: WordGameSession,
+        word: Word,
+        index: int,
+    ) -> WordGameQuestion:
+        """生成点击配对消除题（TAP_MATCH）：4 对 (word, meaning) 卡片
+
+        - pairs 字段填充 4 对左右列卡片，打乱顺序
+        - correct_answer 是当前目标单词的释义（用于判分）
+        - 前端点击两张卡片完成配对消除
+        """
+        all_words = session.words if session.words else self._all_words
+        # 当前目标词 + 3 个干扰词
+        pairs = [{"left": word.word, "right": word.meaning}]
+        others = [
+            w for w in all_words
+            if w.word_id != word.word_id and w.word and w.meaning
+        ]
+        others = random.sample(others, min(3, len(others)))
+        for w in others:
+            pairs.append({"left": w.word, "right": w.meaning})
+
+        # 打乱左右列顺序，保证位置随机
+        left_items = [p["left"] for p in pairs]
+        right_items = [p["right"] for p in pairs]
+        random.shuffle(left_items)
+        random.shuffle(right_items)
+        # 重新组装成 pairs，左列与右列独立打乱（位置不一一对应，需用户点击匹配）
+        shuffled_pairs = [
+            {"left": l, "right": r} for l, r in zip(left_items, right_items)
+        ]
+
+        return WordGameQuestion(
+            question_id=f"q_{index}",
+            word=word,
+            question_type=GameType.TAP_MATCH,
+            question_text="点击配对：将单词与正确的释义配对",
+            pairs=shuffled_pairs,
+            correct_answer=word.meaning,  # 当前题的正确配对（释义）
+            hint=f"当前目标：{word.word}",
+            points=10
+        )
+
+    def _generate_listen_select_question(
+        self,
+        session: WordGameSession,
+        word: Word,
+        index: int,
+    ) -> WordGameQuestion:
+        """生成听音选词题（LISTEN_SELECT）：TTS 播放发音 + 4 选项选释义
+
+        - 复用 MULTIPLE_CHOICE 的选项生成逻辑
+        - question_text 提示用户点击播放按钮听发音
+        - question_type 设为 LISTEN_SELECT，前端用 Web Speech API 播放 word
+        """
+        options = self._generate_options_sync(word, session.words)
+        return WordGameQuestion(
+            question_id=f"q_{index}",
+            word=word,
+            question_type=GameType.LISTEN_SELECT,
+            question_text="点击播放按钮听发音，然后选择正确的释义",
+            options=options,
+            correct_answer=word.meaning,
+            hint=f"首字母是 {word.word[0] if word.word else '?'}",
+            points=10
+        )
+
+    def _generate_drag_sort_question(
+        self,
+        session: WordGameSession,
+        word: Word,
+        index: int,
+    ) -> WordGameQuestion:
+        """生成拖拽排序题（DRAG_SORT）：把打乱的单词排成正确顺序
+
+        - sort_items 字段填充打乱的单词列表
+        - correct_answer 是正确顺序的句子（空格连接）
+        - 前端把 sort_items 渲染为可拖拽卡片
+        """
+        game_id = session.game_id
+        # 用 word 造一个简单句子（简化示例，优先用例句）
+        example = (word.example_sentence or "").strip()
+        if example:
+            # 用真实例句，去除多余标点便于排序
+            sentence = example.rstrip(".!?。！？")
+        elif game_id == "root-affix-tree":
+            # 词根衍生顺序：前缀 + 词根 + 后缀
+            sentence = f"re {word.word} tion"
+        else:
+            # sentence-untangle：默认造句
+            sentence = f"I need to {word.word} today"
+
+        words = sentence.split()
+        correct_order = words.copy()
+        # 打乱顺序（保证至少有一处位置变化）
+        if len(words) > 1:
+            random.shuffle(words)
+            # 若打乱后仍与原序相同，交换前两项
+            if words == correct_order:
+                words[0], words[1] = words[1], words[0]
+
+        return WordGameQuestion(
+            question_id=f"q_{index}",
+            word=word,
+            question_type=GameType.DRAG_SORT,
+            question_text=f"拖拽排序：把单词排成正确的句子顺序（释义：{word.meaning}）",
+            sort_items=words,
+            correct_answer=" ".join(correct_order),
+            hint=f"首词是 {correct_order[0]}",
+            points=10
+        )
+
+    def _generate_word_bank_question(
+        self,
+        session: WordGameSession,
+        word: Word,
+        index: int,
+    ) -> WordGameQuestion:
+        """生成词库填空题（WORD_BANK）：从词库点选词填入空格
+
+        - word_bank 字段填充候选词列表（正确答案 + 3 个干扰词）
+        - correct_answer 是正确答案（单词本身）
+        - 前端把 word_bank 渲染为可点击的词库按钮
+        """
+        all_words = session.words if session.words else self._all_words
+        # 填空句子（简化示例）
+        sentence = f"The ______ means '{word.meaning}'."
+        # 词库：正确答案 + 3 个干扰词
+        others = [
+            w.word for w in all_words
+            if w.word_id != word.word_id and w.word
+        ]
+        others = random.sample(others, min(3, len(others)))
+        bank = [word.word] + others
+        random.shuffle(bank)
+
+        return WordGameQuestion(
+            question_id=f"q_{index}",
+            word=word,
+            question_type=GameType.WORD_BANK,
+            question_text=sentence,
+            word_bank=bank,
+            correct_answer=word.word,
+            hint=f"首字母是 {word.word[0] if word.word else '?'}",
+            points=10
+        )
 
     def _generate_options_sync(
         self,
@@ -1491,6 +1650,47 @@ class WordGamesService:
         random.shuffle(options)
         return options[:4]  # 确保最多 4 个选项
 
+    def _get_vocab_correct_answer(
+        self,
+        session: WordGameSession,
+        word: Word,
+    ) -> str:
+        """根据 game_id 推导词汇题的正确答案
+
+        与 _generate_vocab_question 的题型路由保持一致：
+        - TAP_MATCH / LISTEN_SELECT：正确答案是 word.meaning（用户配对/选择释义）
+        - DRAG_SORT：正确答案是原句（用户把打乱的单词排成正确顺序）
+        - 其他（MULTIPLE_CHOICE/SPELLING/FILL_BLANK/WORD_BANK）：回退到 word.word
+          保持向后兼容，不影响现有 3 种题型的判分逻辑
+        """
+        game_id = session.game_id
+
+        # TAP_MATCH 点击配对消除：用户配对 word↔meaning，答案是 meaning
+        if game_id in (
+            "word-match-blast", "synonym-antonym-match",
+            "picture-word-match", "memory-flip-match",
+        ):
+            return word.meaning
+
+        # LISTEN_SELECT 听音选词：用户从选项中选释义，答案是 meaning
+        if game_id == "listening-dash":
+            return word.meaning
+
+        # DRAG_SORT 拖拽排序：用户排成正确句子，答案是原句（空格连接）
+        # 注意：与 _generate_drag_sort_question 的句子构造逻辑保持一致
+        if game_id in ("sentence-untangle", "root-affix-tree"):
+            example = (word.example_sentence or "").strip()
+            if example:
+                return example.rstrip(".!?。！？")
+            elif game_id == "root-affix-tree":
+                return f"re {word.word} tion"
+            else:
+                return f"I need to {word.word} today"
+
+        # 其他题型（MULTIPLE_CHOICE/SPELLING/FILL_BLANK/WORD_BANK）：回退到 word.word
+        # 保持向后兼容：现有 3 种题型的判分逻辑不受影响
+        return word.correct_answer or word.word
+
     def _check_answer(
         self,
         user_answer: str,
@@ -1530,6 +1730,11 @@ class WordGamesService:
             GameType.LISTEN_WRITE: "听发音写出单词",
             GameType.WORD_SEARCH: "在字母网格中找出隐藏的单词",
             GameType.CROSSWORD: "完成填字游戏",
+            # 扩展题型说明
+            GameType.TAP_MATCH: "点击左右两列卡片完成单词-释义配对消除",
+            GameType.LISTEN_SELECT: "点击播放按钮听发音，然后选择正确的释义",
+            GameType.DRAG_SORT: "拖拽打乱的单词，排成正确的句子顺序",
+            GameType.WORD_BANK: "从词库中点选正确的单词填入句子空格",
         }
         return instructions.get(game_type, "完成单词游戏")
 

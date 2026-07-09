@@ -38,32 +38,41 @@ client.interceptors.response.use(
 );
 
 // 游戏类型映射：gameId → API 支持的 game_type
+// 与后端 _generate_vocab_question 的 game_id 路由保持一致
+// 7 种真实交互题型：multiple_choice / tap_match / listen_select / spelling / drag_sort / word_bank / fill_blank
 const GAME_TYPE_MAP: Record<string, string> = {
-  'word-match-blast': 'multiple_choice',
-  'spelling-bee': 'spelling',
-  'root-affix-tree': 'fill_blank',
-  'cloze-sprint': 'fill_blank',
-  'sentence-untangle': 'fill_blank',
+  // MULTIPLE_CHOICE 选择题（9 款）
   'vocabulary-duel': 'multiple_choice',
-  'flashcard-rush': 'multiple_choice',
-  'listening-dash': 'multiple_choice',
-  'word-chain': 'spelling',
-  'word-bubble-pop': 'spelling',
-  'synonym-antonym-match': 'multiple_choice',
-  'picture-word-match': 'multiple_choice',
-  'crossword-quest': 'fill_blank',
-  'word-form-master': 'fill_blank',
   'high-frequency-challenge': 'multiple_choice',
-  'memory-flip-match': 'multiple_choice',
-  'limit-blitz': 'fill_blank',
-  'formula-link': 'multiple_choice',
-  'proof-step-sort': 'fill_blank',
-  'problem-quest-map': 'multiple_choice',
   'wrong-question-boss': 'multiple_choice',
   'daily-quiz-arena': 'multiple_choice',
   'knowledge-combo-streak': 'multiple_choice',
   'memory-maze': 'multiple_choice',
   'study-team-raid': 'multiple_choice',
+  'problem-quest-map': 'multiple_choice',
+  'formula-link': 'multiple_choice',
+  // TAP_MATCH 点击配对消除（4 款）
+  'word-match-blast': 'tap_match',
+  'synonym-antonym-match': 'tap_match',
+  'picture-word-match': 'tap_match',
+  'memory-flip-match': 'tap_match',
+  // LISTEN_SELECT 听音选词（1 款）
+  'listening-dash': 'listen_select',
+  // SPELLING 拼写输入（3 款）
+  'spelling-bee': 'spelling',
+  'word-bubble-pop': 'spelling',
+  'word-chain': 'spelling',
+  // DRAG_SORT 拖拽排序（2 款）
+  'sentence-untangle': 'drag_sort',
+  'root-affix-tree': 'drag_sort',
+  // WORD_BANK 词库填空（4 款）
+  'cloze-sprint': 'word_bank',
+  'word-form-master': 'word_bank',
+  'crossword-quest': 'word_bank',
+  'flashcard-rush': 'word_bank',
+  // FILL_BLANK 填空输入（2 款）
+  'limit-blitz': 'fill_blank',
+  'proof-step-sort': 'fill_blank',
 };
 
 // 6.1① 学科映射：gameId → subject（vocabulary/math/cross_subject）
@@ -113,6 +122,10 @@ export function getGameDisplayName(gameId: string): string {
     'multiple_choice': '选择题',
     'spelling': '拼写题',
     'fill_blank': '填空题',
+    'tap_match': '配对消除',
+    'listen_select': '听音选词',
+    'drag_sort': '拖拽排序',
+    'word_bank': '词库填空',
   };
   return names[getGameType(gameId)] || '选择题';
 }

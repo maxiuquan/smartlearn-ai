@@ -22,6 +22,11 @@ class GameType(str, Enum):
     LISTEN_WRITE = "listen_write"  # 听写
     WORD_SEARCH = "word_search"  # 单词搜索
     CROSSWORD = "crossword"  # 填字游戏
+    # 扩展题型（保留现有 8 种，不删除）
+    TAP_MATCH = "tap_match"  # 点击配对消除（两列卡片点击匹配）
+    LISTEN_SELECT = "listen_select"  # 听音选词（TTS 播放发音 + 选择题）
+    DRAG_SORT = "drag_sort"  # 拖拽排序（单词排序成正确顺序）
+    WORD_BANK = "word_bank"  # 词库填空（点选词库填入空格）
 
 
 class SubjectType(str, Enum):
@@ -91,6 +96,13 @@ class WordGameQuestion(BaseModel):
     correct_answer: str = Field(..., description="正确答案")
     hint: Optional[str] = Field(None, description="提示")
     points: int = Field(default=10, ge=1, description="分值")
+    # 扩展字段（新题型专用，可选）
+    # 点击配对消除题用：左列和右列的卡片
+    pairs: Optional[List[Dict[str, str]]] = Field(None, description="配对题的左右列卡片")
+    # 拖拽排序题用：打乱顺序的单词列表
+    sort_items: Optional[List[str]] = Field(None, description="排序题的待排序项")
+    # 词库填空题用：词库选项
+    word_bank: Optional[List[str]] = Field(None, description="词库填空的候选词")
 
 
 class WordGameAnswer(BaseModel):
