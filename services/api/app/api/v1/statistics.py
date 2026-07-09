@@ -113,11 +113,12 @@ async def get_user_analysis(
     thirty_days_ago = (now - timedelta(days=30)).replace(tzinfo=None)
 
     # 每日新增用户数（PostgreSQL 用 func.date_trunc）
+    # 注意: SELECT/GROUP BY/ORDER BY 必须用完全相同的表达式, 否则 PostgreSQL 报
+    # GroupingError "column must appear in the GROUP BY clause".
+    # 这里 SELECT 用 date_trunc(day, col), 在 Python 中格式化为 "YYYY-MM-DD".
     new_users_stmt = (
         select(
-            func.to_char(func.date_trunc("day", User.created_at), "YYYY-MM-DD").label(
-                "date"
-            ),
+            func.date_trunc("day", User.created_at).label("date"),
             func.count().label("count"),
         )
         .where(User.created_at >= thirty_days_ago)
@@ -126,15 +127,14 @@ async def get_user_analysis(
     )
     new_users_rows = (await db.execute(new_users_stmt)).all()
     new_users_daily = [
-        {"date": row.date, "count": int(row.count)} for row in new_users_rows
+        {"date": row.date.strftime("%Y-%m-%d") if row.date else "", "count": int(row.count)}
+        for row in new_users_rows
     ]
 
     # 每日活跃用户数（按 last_login_at 日期分组）
     active_users_stmt = (
         select(
-            func.to_char(func.date_trunc("day", User.last_login_at), "YYYY-MM-DD").label(
-                "date"
-            ),
+            func.date_trunc("day", User.last_login_at).label("date"),
             func.count().label("count"),
         )
         .where(User.last_login_at.is_not(None))
@@ -144,7 +144,8 @@ async def get_user_analysis(
     )
     active_users_rows = (await db.execute(active_users_stmt)).all()
     active_users_daily = [
-        {"date": row.date, "count": int(row.count)} for row in active_users_rows
+        {"date": row.date.strftime("%Y-%m-%d") if row.date else "", "count": int(row.count)}
+        for row in active_users_rows
     ]
 
     # 角色分布
