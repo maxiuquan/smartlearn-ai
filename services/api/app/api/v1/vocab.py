@@ -141,6 +141,7 @@ async def get_due_words(
     """获取当前用户今日需要复习的词汇列表。"""
     # next_review_at 列是 TIMESTAMP WITHOUT TIME ZONE, 需剥离 tzinfo
     now = datetime.now(timezone.utc).replace(tzinfo=None)
+    # 注意: ORM 模型类没有 .join() 方法, 必须用 select(...).join() 链式调用
     result = await db.execute(
         select(
             UserWordProgress.word_id,
@@ -153,11 +154,10 @@ async def get_due_words(
             VocabularyWord.headword,
             VocabularyWord.meaning,
         )
-        .select_from(
-            UserWordProgress.join(
-                VocabularyWord,
-                UserWordProgress.word_id == VocabularyWord.word_id,
-            )
+        .select_from(UserWordProgress)
+        .join(
+            VocabularyWord,
+            UserWordProgress.word_id == VocabularyWord.word_id,
         )
         .where(
             UserWordProgress.user_id == user_id,
