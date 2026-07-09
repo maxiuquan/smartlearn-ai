@@ -100,11 +100,11 @@ const UserList: React.FC = () => {
     },
     {
       title: '用户',
-      dataIndex: 'username',
+      dataIndex: 'email',
       render: (_: any, record: User) => (
         <Space>
           <Avatar src={record.avatar} icon={<UserOutlined />} size="small" />
-          <span>{record.nickname || record.username}</span>
+          <span>{record.nickname || record.email}</span>
         </Space>
       ),
     },
@@ -142,13 +142,13 @@ const UserList: React.FC = () => {
     },
     {
       title: '注册时间',
-      dataIndex: 'createdAt',
+      dataIndex: 'created_at',
       render: (date: string) => dayjs(date).format('YYYY-MM-DD HH:mm'),
       sorter: true,
     },
     {
       title: '最后登录',
-      dataIndex: 'lastLoginAt',
+      dataIndex: 'last_login_at',
       render: (date: string) =>
         date ? dayjs(date).format('YYYY-MM-DD HH:mm') : '-',
     },

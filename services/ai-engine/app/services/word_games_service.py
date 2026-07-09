@@ -1109,8 +1109,12 @@ class WordGamesService:
         # 获取对应难度的单词
         word_pool = list(bank.get(difficulty, bank[GameDifficulty.MEDIUM]))
 
-        # 过滤排除的单词
-        word_pool = [w for w in word_pool if w.word not in exclude_words]
+        # 过滤排除的单词 + 过滤 word/meaning 为空的无效词条
+        # （避免 tap_match 等题型出现空白选项）
+        word_pool = [
+            w for w in word_pool
+            if w.word not in exclude_words and w.word and w.meaning
+        ]
 
         # 按类别过滤
         if categories:
@@ -1123,13 +1127,17 @@ class WordGamesService:
                     additional = [
                         w for w in bank.get(diff, [])
                         if w.word not in exclude_words and w not in word_pool
+                        and w.word and w.meaning
                     ]
                     word_pool.extend(additional)
 
         # 随机选择
         if not word_pool:
-            # 最终回退
-            word_pool = self._all_words[:count] if self._all_words else []
+            # 最终回退（同样过滤无效词条）
+            word_pool = [
+                w for w in self._all_words[:count]
+                if w.word and w.meaning
+            ] if self._all_words else []
 
         selected = random.sample(
             word_pool, min(count, len(word_pool))

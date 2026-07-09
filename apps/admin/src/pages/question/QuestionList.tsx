@@ -109,7 +109,7 @@ const QuestionList: React.FC = () => {
     },
     {
       title: '知识点',
-      dataIndex: 'knowledgePoints',
+      dataIndex: 'knowledge_points',
       width: 200,
       render: (points: string[]) => <TagList tags={points} max={2} />,
     },
@@ -129,7 +129,7 @@ const QuestionList: React.FC = () => {
     },
     {
       title: '创建时间',
-      dataIndex: 'createdAt',
+      dataIndex: 'created_at',
       width: 150,
       render: (date: string) => dayjs(date).format('YYYY-MM-DD HH:mm'),
       sorter: true,

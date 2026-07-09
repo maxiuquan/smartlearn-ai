@@ -53,13 +53,13 @@ const WordList: React.FC = () => {
   const columns: ColumnsType<Word> = [
     {
       title: 'ID',
-      dataIndex: 'id',
-      width: 80,
+      dataIndex: 'word_id',
+      width: 100,
       ellipsis: true,
     },
     {
       title: '单词',
-      dataIndex: 'word',
+      dataIndex: 'headword',
       width: 150,
     },
     {
@@ -74,16 +74,22 @@ const WordList: React.FC = () => {
     },
     {
       title: '词书',
-      dataIndex: 'bookId',
+      dataIndex: 'tags',
       width: 120,
+      render: (tags: string[] | null) =>
+        tags && tags.length > 0 ? (
+          <Tag color="blue">{tags.join(', ')}</Tag>
+        ) : (
+          '-'
+        ),
     },
     {
       title: '难度',
-      dataIndex: 'difficulty',
+      dataIndex: 'frequency',
       width: 80,
-      render: (difficulty: number) => (
-        <Tag color={difficulty <= 2 ? 'green' : difficulty <= 4 ? 'orange' : 'red'}>
-          {difficulty}级
+      render: (freq: number) => (
+        <Tag color={freq >= 80 ? 'red' : freq >= 40 ? 'orange' : 'green'}>
+          {freq || 0}
         </Tag>
       ),
     },
@@ -91,12 +97,6 @@ const WordList: React.FC = () => {
       title: '频率',
       dataIndex: 'frequency',
       width: 80,
-    },
-    {
-      title: '创建时间',
-      dataIndex: 'createdAt',
-      width: 150,
-      render: (date: string) => dayjs(date).format('YYYY-MM-DD HH:mm'),
     },
     {
       title: '操作',
@@ -153,7 +153,7 @@ const WordList: React.FC = () => {
   // 删除单词
   const handleDelete = async (word: Word) => {
     try {
-      await deleteWord(word.id);
+      await deleteWord(word.word_id);
       message.success('单词已删除');
       actionRef.current?.reload();
     } catch (error) {
@@ -185,7 +185,7 @@ const WordList: React.FC = () => {
         columns={columns}
         actionRef={actionRef}
         request={fetchData}
-        rowKey="id"
+        rowKey="word_id"
         pagination={{
           pageSize: 20,
         }}
