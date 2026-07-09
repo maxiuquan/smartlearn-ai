@@ -6,7 +6,7 @@
 # ──────────────────────────────────────────────────────────────
 
 # 强制打破 Docker 缓存(每次构建都重新执行所有层)
-ARG CACHE_BUSTER=v2026-07-09-v2
+ARG CACHE_BUSTER=v2026-07-09-v3
 
 # ========== Stage 1: 构建前端 (student-web + admin) ==========
 FROM node:20-alpine AS frontend

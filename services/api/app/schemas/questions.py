@@ -10,12 +10,14 @@ class QuestionResponse(BaseModel):
 
     id: int
     subject: str
-    knowledge_points: Optional[list[dict[str, Any]]] = None
+    # 数据源 JSON 中 knowledge_points/options 可能是 list[str] 或 list[dict]
+    # 用 list[Any] 兼容两种结构, 避免数据导入后 schema 校验失败
+    knowledge_points: Optional[list[Any]] = None
     type: str
     difficulty: int
     title: Optional[str] = None
     content: str
-    options: Optional[list[dict[str, Any]]] = None
+    options: Optional[list[Any]] = None
     answer: Optional[str] = None  # 列表或详情页隐藏，练习页不返回
     solution: Optional[str] = None
     created_at: datetime
