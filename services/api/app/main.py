@@ -117,9 +117,21 @@ app = FastAPI(
 try:
     from slowapi import Limiter, _rate_limit_exceeded_handler
     from slowapi.errors import RateLimitExceeded
-    from slowapi.util import get_remote_address
+    from fastapi import Request
 
-    limiter = Limiter(key_func=get_remote_address)
+
+    def _get_forwarded_ip(request: Request) -> str:
+        """从 X-Forwarded-For 或 X-Real-IP 获取真实客户端 IP."""
+        forwarded = request.headers.get("X-Forwarded-For")
+        if forwarded:
+            return forwarded.split(",")[0].strip()
+        real_ip = request.headers.get("X-Real-IP")
+        if real_ip:
+            return real_ip.strip()
+        return request.client.host if request.client else "unknown"
+
+
+    limiter = Limiter(key_func=_get_forwarded_ip, enabled=True)
     app.state.limiter = limiter
     app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 except ImportError:

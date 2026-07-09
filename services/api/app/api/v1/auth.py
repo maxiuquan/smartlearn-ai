@@ -53,11 +53,24 @@ def _issue_tokens(user: User) -> TokenResponse:
 # 限流装饰器（slowapi 不可用时退化为无操作）
 # 注意: slowapi 装饰器在请求时从 request.app.state.limiter 获取限流器实例,
 # 因此这里只需创建一个用于生成装饰器的 Limiter, 实际限流状态存储在 app.state.limiter
+# key_func 使用 X-Forwarded-For 头获取真实客户端 IP（经过 nginx 反代）
 try:
     from slowapi import Limiter
-    from slowapi.util import get_remote_address
+    from fastapi import Request
 
-    _limiter = Limiter(key_func=get_remote_address, enabled=True)
+
+    def _get_forwarded_ip(request: Request) -> str:
+        """从 X-Forwarded-For 或 X-Real-IP 获取真实客户端 IP."""
+        forwarded = request.headers.get("X-Forwarded-For")
+        if forwarded:
+            return forwarded.split(",")[0].strip()
+        real_ip = request.headers.get("X-Real-IP")
+        if real_ip:
+            return real_ip.strip()
+        return request.client.host if request.client else "unknown"
+
+
+    _limiter = Limiter(key_func=_get_forwarded_ip, enabled=True)
     limit_login = _limiter.limit("10/minute")
     limit_register = _limiter.limit("5/minute")
 except ImportError:
