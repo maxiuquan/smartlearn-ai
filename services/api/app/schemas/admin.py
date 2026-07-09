@@ -244,3 +244,34 @@ class UserAnalysisResponse(BaseModel):
     active_users_daily: list[dict[str, Any]] = Field(default_factory=list)
     role_distribution: dict[str, int] = Field(default_factory=dict)
     vip_distribution: dict[str, int] = Field(default_factory=dict)
+
+
+# ── 学生端统计（无需 admin 权限） ──
+
+
+class StudentOverviewResponse(BaseModel):
+    """学生端平台概览响应。
+
+    字段对齐学生端 Dashboard 期望：题目总数 / 词汇总数 / 注册用户 / 今日活跃。
+    """
+
+    total_questions: int = 0
+    total_vocab: int = 0
+    total_users: int = 0
+    today_active: int = 0
+
+
+class StudentProfileResponse(BaseModel):
+    """学生端个人资料统计响应。
+
+    字段对齐学生端 Profile 期望：答题数 / 正确率 / 学习天数 / 连续打卡 / 掌握词汇 / 学习时长。
+    """
+
+    total_study_days: int = 0
+    total_questions_answered: int = 0
+    total_correct: int = 0
+    accuracy: float = 0.0
+    total_study_minutes: int = 0
+    current_streak: int = 0
+    vocab_mastered: int = 0
+    last_login_at: Optional[datetime] = None

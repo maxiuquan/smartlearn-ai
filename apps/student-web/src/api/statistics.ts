@@ -26,20 +26,20 @@ export interface UserStats {
  */
 export const statisticsApi = {
   /**
-   * 获取平台概览统计
-   * GET /api/v1/statistics/overview
+   * 获取学生端平台概览统计
+   * GET /api/v1/statistics/my-overview
    */
   async getOverview(): Promise<OverviewStats> {
-    const res = await client.get('/api/v1/statistics/overview');
+    const res = await client.get('/api/v1/statistics/my-overview');
     return res.data;
   },
 
   /**
    * 获取当前用户学习统计
-   * GET /api/v1/statistics/user
+   * GET /api/v1/statistics/my-profile
    */
   async getUserStats(): Promise<UserStats> {
-    const res = await client.get('/api/v1/statistics/user');
+    const res = await client.get('/api/v1/statistics/my-profile');
     return res.data;
   },
 };

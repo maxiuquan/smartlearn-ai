@@ -55,7 +55,7 @@ export async function importUsers(file: File): Promise<{ success: number; failed
 
 // 导出用户
 export async function exportUsers(params?: PageParams): Promise<Blob> {
-  const response = await request.get('/v1/users/export', {
+  const response = await request.get('/users/export', {
     params,
     responseType: 'blob',
   });

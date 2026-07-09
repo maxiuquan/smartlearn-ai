@@ -88,7 +88,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 
 const App: React.FC = () => {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/admin/">
       <React.Suspense fallback={<Loading />}>
         <Routes>
           {/* 登录路由 */}

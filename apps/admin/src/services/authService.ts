@@ -1,9 +1,17 @@
-import { api, pageApi } from './request';
-import { User, LoginParams, LoginResult, PaginatedResponse } from '@/types';
+import { api } from './request';
+import { User, LoginParams, PaginatedResponse } from '@/types';
 
-// 登录
-export async function login(params: LoginParams): Promise<LoginResult> {
-  return api.post<LoginResult>('/auth/login', params);
+// 后端 TokenResponse 结构（FastAPI 直接返回，无 user 字段）
+export interface TokenResponse {
+  access_token: string;
+  refresh_token: string;
+  token_type: string;
+  expires_in: number;
+}
+
+// 登录：返回 token，user 需另外调用 getCurrentUser 获取
+export async function login(params: LoginParams): Promise<TokenResponse> {
+  return api.post<TokenResponse>('/auth/login', params);
 }
 
 // 获取当前用户信息
@@ -25,7 +33,7 @@ export async function changePassword(params: { old_password: string; new_passwor
   return api.post<void>('/auth/change-password', params);
 }
 
-// 刷新Token
-export async function refreshToken(): Promise<{ token: string }> {
-  return api.post<{ token: string }>('/auth/refresh');
+// 刷新 Token
+export async function refreshToken(): Promise<TokenResponse> {
+  return api.post<TokenResponse>('/auth/refresh');
 }

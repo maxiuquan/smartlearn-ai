@@ -247,16 +247,16 @@ export default function QuestionPractice() {
                 </p>
                 {!attemptResult.correct && (
                   <p className="text-sm text-gray-600 mt-1">
-                    正确答案：<FormulaText text={attemptResult.correct_answer} />
+                    正确答案：<FormulaText text={attemptResult.correct_answer ?? ''} />
                   </p>
                 )}
               </div>
 
-              {attemptResult.analysis && (
+              {attemptResult.solution && (
                 <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
                   <p className="font-medium text-gray-700 mb-2">📝 解析</p>
                   <p className="text-sm text-gray-600 leading-relaxed">
-                    <FormulaText text={attemptResult.analysis} />
+                    <FormulaText text={attemptResult.solution} />
                   </p>
                 </div>
               )}
