@@ -51,11 +51,13 @@ def _issue_tokens(user: User) -> TokenResponse:
 
 
 # 限流装饰器（slowapi 不可用时退化为无操作）
+# 注意: slowapi 装饰器在请求时从 request.app.state.limiter 获取限流器实例,
+# 因此这里只需创建一个用于生成装饰器的 Limiter, 实际限流状态存储在 app.state.limiter
 try:
     from slowapi import Limiter
     from slowapi.util import get_remote_address
 
-    _limiter = Limiter(key_func=get_remote_address)
+    _limiter = Limiter(key_func=get_remote_address, enabled=True)
     limit_login = _limiter.limit("10/minute")
     limit_register = _limiter.limit("5/minute")
 except ImportError:
