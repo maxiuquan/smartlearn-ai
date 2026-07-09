@@ -6,7 +6,7 @@
 # ──────────────────────────────────────────────────────────────
 
 # 强制打破 Docker 缓存(每次构建都重新执行所有层)
-ARG CACHE_BUSTER=v2026-07-10-v7
+ARG CACHE_BUSTER=v2026-07-10-v8
 
 # ========== Stage 1: 构建前端 (student-web + admin) ==========
 FROM node:20-alpine AS frontend
@@ -52,8 +52,9 @@ WORKDIR /build
 COPY services/api/requirements.txt ./api-requirements.txt
 COPY services/ai-engine/requirements.txt ./ai-requirements.txt
 
-# 合并安装（pip 自动去重）;跳过 pymilvus（HF 部署用 inmemory 向量存储，省 ~200MB）
-RUN cat api-requirements.txt ai-requirements.txt | grep -v '^pymilvus' > merged.txt \
+# 使用 CACHE_BUSTER 强制打破 deps 阶段缓存（确保 sympy 等新依赖被安装）
+ARG CACHE_BUSTER
+RUN echo "Cache bust (deps): $CACHE_BUSTER" && cat api-requirements.txt ai-requirements.txt | grep -v '^pymilvus' > merged.txt \
     && pip install --no-cache-dir -r merged.txt
 
 # ========== Stage 3: 最终镜像 ==========
