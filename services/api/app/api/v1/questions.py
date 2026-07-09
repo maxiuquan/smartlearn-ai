@@ -31,7 +31,7 @@ router = APIRouter()
 )
 async def list_questions(
     subject: Optional[str] = Query(None, description="学科筛选"),
-    kp_id: Optional[int] = Query(None, description="知识点 ID 筛选"),
+    kp_id: Optional[str] = Query(None, description="知识点 slug 筛选"),
     difficulty: Optional[str] = Query(None, description="难度筛选（1-5）"),
     type: Optional[str] = Query(None, description="题型筛选"),
     page: int = Query(1, ge=1),

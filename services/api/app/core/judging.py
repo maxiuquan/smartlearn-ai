@@ -22,7 +22,11 @@ logger = logging.getLogger(__name__)
 TYPE_CHOICE = "choice"
 TYPE_MULTIPLE_CHOICE = "multiple_choice"
 TYPE_MATH = "math"
+TYPE_CALCULATION = "calculation"
 TYPE_FILL_BLANK = "fill_blank"
+TYPE_FILL_IN = "fill_in"
+# 所有需要 SymPy 等价判定的题型
+_MATH_TYPES = (TYPE_MATH, TYPE_CALCULATION)
 
 _NUM_OK_TYPES = (int, float, complex)
 
@@ -112,7 +116,7 @@ def judge_answer(user_answer: str, correct_answer: str, question_type: str = "ch
         u = user_answer.strip().lower()
         return any(u == c.strip().lower() for c in candidates)
 
-    if qtype == TYPE_MATH:
+    if qtype in _MATH_TYPES:
         # 数学题：SymPy 等价判定
         u = _strip_outer(user_answer)
         for c in candidates:
@@ -130,7 +134,7 @@ def judge_answer(user_answer: str, correct_answer: str, question_type: str = "ch
                     return True
         return False
 
-    if qtype == TYPE_FILL_BLANK:
+    if qtype in (TYPE_FILL_BLANK, TYPE_FILL_IN):
         # 填空题：规范化后匹配
         u = _normalize_fill(user_answer)
         return any(u == _normalize_fill(c) for c in candidates)
