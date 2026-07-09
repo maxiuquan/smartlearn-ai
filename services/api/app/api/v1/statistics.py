@@ -5,8 +5,8 @@
 """
 from datetime import datetime, timedelta, timezone
 
-from fastapi import APIRouter, Depends
-from sqlalchemy import Date, cast, func, select
+from fastapi import APIRouter, Depends, Query
+from sqlalchemy import Date, Integer, cast, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.deps import get_current_admin_user, get_current_user, get_db
@@ -303,3 +303,260 @@ async def get_my_profile(
         vocab_mastered=vocab_mastered,
         last_login_at=current.last_login_at,
     )
+
+
+# ─── 管理后台统计图表端点 ────────────────────────────────────
+
+
+@router.get("/user-activity", summary="用户活跃趋势（管理端）")
+async def get_user_activity_trend(
+    days: int = Query(30, ge=1, le=365),
+    db: AsyncSession = Depends(get_db),
+    current: User = Depends(get_current_admin_user),
+) -> dict:
+    """返回近 N 天每日活跃/新增用户数。
+
+    - dates: 日期字符串列表 (YYYY-MM-DD)
+    - activeUsers: 每日活跃用户数（按 last_login_at 日期分组）
+    - newUsers: 每日新增用户数
+    - logins: 登录次数（此处用活跃用户数近似）
+    """
+    now = datetime.now(timezone.utc)
+    cutoff = (now - timedelta(days=days)).replace(tzinfo=None)
+
+    date_expr = cast(User.created_at, Date)
+    new_stmt = (
+        select(date_expr.label("date"), func.count().label("count"))
+        .where(User.created_at >= cutoff)
+        .group_by(date_expr)
+        .order_by(date_expr)
+    )
+    new_rows = (await db.execute(new_stmt)).all()
+    new_map = {row.date: int(row.count) for row in new_rows if row.date}
+
+    active_date_expr = cast(User.last_login_at, Date)
+    active_stmt = (
+        select(active_date_expr.label("date"), func.count().label("count"))
+        .where(User.last_login_at.is_not(None))
+        .where(User.last_login_at >= cutoff)
+        .group_by(active_date_expr)
+        .order_by(active_date_expr)
+    )
+    active_rows = (await db.execute(active_stmt)).all()
+    active_map = {row.date: int(row.count) for row in active_rows if row.date}
+
+    dates: list[str] = []
+    active_users: list[int] = []
+    new_users: list[int] = []
+    logins: list[int] = []
+    for i in range(days):
+        d = (now - timedelta(days=days - 1 - i)).date()
+        ds = d.strftime("%Y-%m-%d")
+        dates.append(ds)
+        au = active_map.get(d, 0)
+        nu = new_map.get(d, 0)
+        active_users.append(au)
+        new_users.append(nu)
+        logins.append(au)
+
+    return {
+        "dates": dates,
+        "activeUsers": active_users,
+        "newUsers": new_users,
+        "logins": logins,
+    }
+
+
+@router.get("/question-completion", summary="题目完成趋势（管理端）")
+async def get_question_completion_trend(
+    days: int = Query(30, ge=1, le=365),
+    db: AsyncSession = Depends(get_db),
+    current: User = Depends(get_current_admin_user),
+) -> dict:
+    """返回近 N 天每日答题数与正确数。
+
+    - dates: 日期列表
+    - completed: 每日完成题目数
+    - correct: 每日答对题目数
+    """
+    now = datetime.now(timezone.utc)
+    cutoff = (now - timedelta(days=days)).replace(tzinfo=None)
+
+    date_expr = cast(UserQuestionAttempt.created_at, Date)
+    total_stmt = (
+        select(date_expr.label("date"), func.count().label("count"))
+        .where(UserQuestionAttempt.created_at >= cutoff)
+        .group_by(date_expr)
+        .order_by(date_expr)
+    )
+    total_rows = (await db.execute(total_stmt)).all()
+    total_map = {row.date: int(row.count) for row in total_rows if row.date}
+
+    correct_stmt = (
+        select(date_expr.label("date"), func.count().label("count"))
+        .where(UserQuestionAttempt.created_at >= cutoff)
+        .where(UserQuestionAttempt.correct == True)  # noqa: E712
+        .group_by(date_expr)
+        .order_by(date_expr)
+    )
+    correct_rows = (await db.execute(correct_stmt)).all()
+    correct_map = {row.date: int(row.count) for row in correct_rows if row.date}
+
+    dates: list[str] = []
+    completed: list[int] = []
+    correct: list[int] = []
+    for i in range(days):
+        d = (now - timedelta(days=days - 1 - i)).date()
+        dates.append(d.strftime("%Y-%m-%d"))
+        completed.append(total_map.get(d, 0))
+        correct.append(correct_map.get(d, 0))
+
+    return {"dates": dates, "completed": completed, "correct": correct}
+
+
+@router.get("/subject-distribution", summary="学科分布（管理端）")
+async def get_subject_distribution(
+    db: AsyncSession = Depends(get_db),
+    current: User = Depends(get_current_admin_user),
+) -> list:
+    """返回题目按学科分布统计。"""
+    stmt = (
+        select(Question.subject, func.count().label("count"))
+        .group_by(Question.subject)
+        .order_by(func.count().desc())
+    )
+    rows = (await db.execute(stmt)).all()
+    total = sum(int(r[1]) for r in rows) or 1
+    return [
+        {
+            "subject": str(row[0]),
+            "count": int(row[1]),
+            "percentage": round(int(row[1]) / total * 100, 2),
+        }
+        for row in rows
+    ]
+
+
+@router.get("/knowledge-mastery", summary="知识点掌握分布（管理端）")
+async def get_knowledge_mastery(
+    db: AsyncSession = Depends(get_db),
+    current: User = Depends(get_current_admin_user),
+) -> list:
+    """返回用户词汇掌握分布（按 mastery_level 分桶）。
+
+    桶定义：未学习(new)、入门(0<mastery<=0.3)、进阶(0.3-0.6)、掌握(0.6-0.9)、精通(>=0.9)
+    """
+    # 统计各掌握等级的词汇数
+    beginner = await _count(
+        db,
+        select(func.count())
+        .select_from(UserWordProgress)
+        .where(UserWordProgress.mastery_level > 0)
+        .where(UserWordProgress.mastery_level <= 0.3),
+    )
+    intermediate = await _count(
+        db,
+        select(func.count())
+        .select_from(UserWordProgress)
+        .where(UserWordProgress.mastery_level > 0.3)
+        .where(UserWordProgress.mastery_level <= 0.6),
+    )
+    mastered = await _count(
+        db,
+        select(func.count())
+        .select_from(UserWordProgress)
+        .where(UserWordProgress.mastery_level > 0.6)
+        .where(UserWordProgress.mastery_level <= 0.9),
+    )
+    expert = await _count(
+        db,
+        select(func.count())
+        .select_from(UserWordProgress)
+        .where(UserWordProgress.mastery_level > 0.9),
+    )
+    total_vocab_progress = await _count(
+        db, select(func.count()).select_from(UserWordProgress)
+    )
+    new_count = total_vocab_progress - (beginner + intermediate + mastered + expert)
+    new_count = max(0, new_count)
+
+    return [
+        {"level": "未学习", "count": new_count},
+        {"level": "入门", "count": beginner},
+        {"level": "进阶", "count": intermediate},
+        {"level": "掌握", "count": mastered},
+        {"level": "精通", "count": expert},
+    ]
+
+
+@router.get("/user-ranking", summary="用户学习排行（管理端）")
+async def get_user_ranking(
+    type: str = Query("study_time", description="排行类型: study_time | questions | accuracy"),
+    limit: int = Query(10, ge=1, le=100),
+    db: AsyncSession = Depends(get_db),
+    current: User = Depends(get_current_admin_user),
+) -> list:
+    """返回用户学习排行。
+
+    - study_time: 按游戏会话累计时长排序（秒）
+    - questions: 按答题总数排序
+    - accuracy: 按正确率排序
+    """
+    if type == "study_time":
+        stmt = (
+            select(
+                GameSession.user_id,
+                func.sum(GameSession.duration).label("value"),
+            )
+            .group_by(GameSession.user_id)
+            .order_by(func.sum(GameSession.duration).desc())
+            .limit(limit)
+        )
+        rows = (await db.execute(stmt)).all()
+    elif type == "questions":
+        stmt = (
+            select(
+                UserQuestionAttempt.user_id,
+                func.count().label("value"),
+            )
+            .group_by(UserQuestionAttempt.user_id)
+            .order_by(func.count().desc())
+            .limit(limit)
+        )
+        rows = (await db.execute(stmt)).all()
+    elif type == "accuracy":
+        stmt = (
+            select(
+                UserQuestionAttempt.user_id,
+                func.avg(UserQuestionAttempt.correct.cast(Integer)).label("value"),
+            )
+            .group_by(UserQuestionAttempt.user_id)
+            .order_by(func.avg(UserQuestionAttempt.correct.cast(Integer)).desc())
+            .limit(limit)
+        )
+        rows = (await db.execute(stmt)).all()
+    else:
+        return []
+
+    if not rows:
+        return []
+
+    user_ids = [int(r[0]) for r in rows]
+    user_stmt = select(User.id, User.nickname).where(User.id.in_(user_ids))
+    user_rows = (await db.execute(user_stmt)).all()
+    user_map = {row[0]: row[1] or f"用户{row[0]}" for row in user_rows}
+
+    result = []
+    for r in rows:
+        uid = int(r[0])
+        result.append(
+            {
+                "user": {
+                    "id": str(uid),
+                    "nickname": user_map.get(uid, f"用户{uid}"),
+                    "avatar": "",
+                },
+                "value": float(r[1] or 0),
+            }
+        )
+    return result

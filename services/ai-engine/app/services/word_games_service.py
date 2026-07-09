@@ -1359,6 +1359,15 @@ class WordGamesService:
             w for w in all_words
             if w.word_id != word.word_id and w.word and w.meaning
         ]
+        # 从全量词库补充干扰词（session.words 可能不足或部分 word/meaning 为空）
+        if len(others) < 3 and self._all_words:
+            existing_ids = {o.word_id for o in others}
+            existing_ids.add(word.word_id)
+            fallback = [
+                w for w in self._all_words
+                if w.word_id not in existing_ids and w.word and w.meaning
+            ]
+            others.extend(fallback)
         others = random.sample(others, min(3, len(others)))
         for w in others:
             pairs.append({"left": w.word, "right": w.meaning})

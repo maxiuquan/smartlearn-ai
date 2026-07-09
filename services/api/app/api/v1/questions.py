@@ -31,7 +31,7 @@ router = APIRouter()
 async def list_questions(
     subject: Optional[str] = Query(None, description="学科筛选"),
     kp_id: Optional[int] = Query(None, description="知识点 ID 筛选"),
-    difficulty: Optional[int] = Query(None, ge=1, le=5, description="难度筛选"),
+    difficulty: Optional[str] = Query(None, description="难度筛选（1-5）"),
     type: Optional[str] = Query(None, description="题型筛选"),
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
@@ -40,14 +40,24 @@ async def list_questions(
     """分页获取题目列表，支持多条件筛选。
 
     - 列表不返回答案和解析
+    - 空字符串参数视为 None（前端未选筛选器时传空串）
     """
     conditions = []
     if subject:
         conditions.append(Question.subject == subject)
-    if difficulty:
-        conditions.append(Question.difficulty == difficulty)
     if type:
         conditions.append(Question.type == type)
+    # difficulty 是 str 类型以兼容空串，此处转为 int
+    difficulty_int: Optional[int] = None
+    if difficulty:
+        try:
+            difficulty_int = int(difficulty)
+            if not (1 <= difficulty_int <= 5):
+                difficulty_int = None
+        except (ValueError, TypeError):
+            difficulty_int = None
+    if difficulty_int:
+        conditions.append(Question.difficulty == difficulty_int)
 
     # 计数
     count_result = await db.execute(

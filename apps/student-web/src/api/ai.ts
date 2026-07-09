@@ -27,9 +27,8 @@ export const aiApi = {
    * @param context 可选上下文信息
    */
   async chat(messages: ChatMessage[], context?: string): Promise<ChatResponse> {
-    const lastMessage = messages[messages.length - 1];
     const res = await client.post('/chat', {
-      message: lastMessage?.content || '',
+      messages: messages.map((m) => ({ role: m.role, content: m.content })),
       context: context || undefined,
     });
     return res.data;
