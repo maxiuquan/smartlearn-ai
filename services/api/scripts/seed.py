@@ -43,7 +43,18 @@ def main() -> None:
             select(User).where(User.email == ADMIN_EMAIL)
         ).scalar_one_or_none()
         if existing is not None:
-            logger.info("[SKIP] 管理员账号 %s 已存在，跳过", ADMIN_EMAIL)
+            # 账号已存在: 同步密码(支持通过 SEED_ADMIN_PASSWORD 环境变量重置密码)
+            new_hash = hash_password(ADMIN_PASSWORD)
+            if existing.password_hash != new_hash:
+                existing.password_hash = new_hash
+                existing.role = "super_admin"
+                existing.status = "active"
+                if ADMIN_NICKNAME:
+                    existing.nickname = ADMIN_NICKNAME
+                db.commit()
+                logger.info("[UPDATE] 管理员账号 %s 密码已同步", ADMIN_EMAIL)
+            else:
+                logger.info("[SKIP] 管理员账号 %s 已存在，密码未变", ADMIN_EMAIL)
             return
 
         admin = User(
