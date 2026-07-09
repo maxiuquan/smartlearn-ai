@@ -106,7 +106,8 @@ async def get_progress(
     stats = result.first()
 
     # 今日待复习
-    now = datetime.now(timezone.utc)
+    # next_review_at 列是 TIMESTAMP WITHOUT TIME ZONE, 需剥离 tzinfo
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
     due_result = await db.execute(
         select(func.count())
         .select_from(UserWordProgress)
@@ -138,7 +139,8 @@ async def get_due_words(
     db: AsyncSession = Depends(get_db),
 ) -> list[WordProgressResponse]:
     """获取当前用户今日需要复习的词汇列表。"""
-    now = datetime.now(timezone.utc)
+    # next_review_at 列是 TIMESTAMP WITHOUT TIME ZONE, 需剥离 tzinfo
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
     result = await db.execute(
         select(
             UserWordProgress.word_id,
@@ -198,7 +200,8 @@ async def submit_word_event(
     - 所有单词游戏通过此接口提交学习结果
     """
     event_type = body.event_type
-    now = datetime.now(timezone.utc)
+    # next_review_at 列是 TIMESTAMP WITHOUT TIME ZONE, 需剥离 tzinfo
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
 
     # 查询当前进度
     result = await db.execute(
