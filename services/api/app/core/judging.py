@@ -53,11 +53,35 @@ def _strip_outer(s: str) -> str:
     return s.strip()
 
 
+def _parse_equation(expr: str):
+    """将等式（含 =）转为左-右的表达式；无 = 则原样返回."""
+    if "=" not in expr:
+        return None
+    parts = expr.split("=", 1)
+    if len(parts) != 2:
+        return None
+    try:
+        left = sympify(parts[0], evaluate=True)
+        right = sympify(parts[1], evaluate=True)
+        return left - right
+    except Exception:
+        return None
+
+
 def _try_sympy_eq(user: str, answer: str) -> Optional[bool]:
     """尝试用 SymPy 判定等价，失败返回 None."""
     if not _SYMPY_OK:
         return None
     try:
+        # 处理等式：2x+y-z=1  vs  2x+y-z-1=0
+        u_eq = _parse_equation(user)
+        a_eq = _parse_equation(answer)
+        if u_eq is not None and a_eq is not None:
+            return simplify(u_eq - a_eq) == 0
+        # 一方是等式、另一方是表达式：不匹配
+        if u_eq is not None or a_eq is not None:
+            return False
+
         a = sympify(user, evaluate=True)
         b = sympify(answer, evaluate=True)
         if simplify(a - b) == 0:
