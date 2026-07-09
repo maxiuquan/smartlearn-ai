@@ -198,6 +198,11 @@ async def submit_game_session(
     xp_gained = max(1, body.score // 10)
     coins_gained = max(1, body.score // 20)
 
+    # DB 列为 TIMESTAMP WITHOUT TIME ZONE, 必须剥离 tzinfo 避免 asyncpg DataError
+    started = body.started_at.replace(tzinfo=None) if body.started_at else datetime.utcnow()
+    finished = body.finished_at or datetime.now(timezone.utc)
+    finished = finished.replace(tzinfo=None) if finished.tzinfo else finished
+
     # 记录游戏会话
     new_session = GameSession(
         user_id=user_id,
@@ -207,8 +212,8 @@ async def submit_game_session(
         coins_gained=coins_gained,
         accuracy=body.accuracy,
         duration=body.duration,
-        started_at=body.started_at,
-        finished_at=body.finished_at or datetime.now(timezone.utc),
+        started_at=started,
+        finished_at=finished,
     )
     db.add(new_session)
     await db.flush()  # 获取自增 ID

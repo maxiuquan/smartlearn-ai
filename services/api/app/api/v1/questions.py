@@ -110,7 +110,8 @@ async def get_recommend_questions(
     3. 排除最近 N 天内已答对的题目
     4. 若无足够个性化数据，回退到按难度匹配 + 随机
     """
-    now = datetime.now(timezone.utc)
+    # DB 列为 TIMESTAMP WITHOUT TIME ZONE, 必须用 naive datetime 避免 asyncpg DataError
+    now = datetime.utcnow()
     recent_cutoff = now - timedelta(days=7)  # 排除最近 7 天答对的题目
 
     recommendation_reason = "基于你的学习进度，为你推荐以下题目"
