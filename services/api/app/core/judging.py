@@ -2,12 +2,14 @@
 
 判题策略：
 - 选择题（choice/multiple_choice）：精确匹配选项字母或内容
-- 数学题（math/fill_blank）：用 SymPy 做数值/符号等价判定
+- 数学题（math/calculation）：用 SymPy 做数值/符号等价判定
   - 归一化：去空格、统一大小写、剥离 LaTeX 包裹、去 x= 前缀
+  - 隐式乘法：2x → 2*x, 3(x+1) → 3*(x+1), ^ → **
   - 符号等价：simplify(a - b) == 0
   - 数值等价：float(a) == float(b)（容差 1e-9）
+  - 等式判定：2x+y-z=1 等价于 2x+y-z-1=0
   - 多答案：answer 支持 `|` 分隔的多解集合
-- 填空题（fill_blank）：规范化后精确匹配，支持多答案
+- 填空题（fill_blank/fill_in）：规范化后精确匹配，支持多答案
 - 其他：回退到规范化字符串比较
 """
 from __future__ import annotations
@@ -31,14 +33,35 @@ _MATH_TYPES = (TYPE_MATH, TYPE_CALCULATION)
 _NUM_OK_TYPES = (int, float, complex)
 
 try:
-    from sympy import Rational, simplify, sympify
+    from sympy import simplify
+    from sympy.parsing.sympy_parser import (
+        implicit_multiplication_application,
+        parse_expr,
+        standard_transformations,
+    )
     from sympy.parsing.latex import parse_latex  # 可选，缺失时降级
 
     _SYMPY_OK = True
+    # 变换序列：标准变换 + 隐式乘法 + 函数应用
+    _TRANSFORMS = standard_transformations + (implicit_multiplication_application,)
 except Exception:  # sympy 初始化失败时降级
     _SYMPY_OK = False
     parse_latex = None  # type: ignore[assignment]
+    _TRANSFORMS = ()
     logger.warning("sympy 不可用，数学判题将降级为字符串比较")
+
+
+def _preprocess_math(s: str) -> str:
+    """预处理数学表达式：^ → **, 去多余空格."""
+    # ^ → ** (指数运算)
+    s = s.replace("^", "**")
+    return s
+
+
+def _smart_parse(expr: str):
+    """用 parse_expr 解析表达式，支持隐式乘法（2x → 2*x）."""
+    expr = _preprocess_math(expr)
+    return parse_expr(expr, transformations=_TRANSFORMS, evaluate=True)
 
 
 def _strip_outer(s: str) -> str:
@@ -48,21 +71,21 @@ def _strip_outer(s: str) -> str:
     s = re.sub(r"^\$+|\$+$", "", s)
     s = re.sub(r"^\\\(|\\\)$", "", s)
     s = re.sub(r"^\\\[|\\\]$", "", s)
-    # 去 x=、y= 等变量前缀
+    # 去 x=、y= 等变量前缀（仅当行首是 单字母= 时）
     s = re.sub(r"^[a-z]\s*=\s*", "", s)
     return s.strip()
 
 
 def _parse_equation(expr: str):
-    """将等式（含 =）转为左-右的表达式；无 = 则原样返回."""
+    """将等式（含 =）转为左-右的表达式；无 = 则返回 None."""
     if "=" not in expr:
         return None
     parts = expr.split("=", 1)
     if len(parts) != 2:
         return None
     try:
-        left = sympify(parts[0], evaluate=True)
-        right = sympify(parts[1], evaluate=True)
+        left = _smart_parse(parts[0])
+        right = _smart_parse(parts[1])
         return left - right
     except Exception:
         return None
@@ -82,8 +105,8 @@ def _try_sympy_eq(user: str, answer: str) -> Optional[bool]:
         if u_eq is not None or a_eq is not None:
             return False
 
-        a = sympify(user, evaluate=True)
-        b = sympify(answer, evaluate=True)
+        a = _smart_parse(user)
+        b = _smart_parse(answer)
         if simplify(a - b) == 0:
             return True
         # 数值近似相等（容差）
