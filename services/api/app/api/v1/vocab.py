@@ -228,6 +228,7 @@ async def submit_word_event(
         if event_type == "correct":
             correct_inc = 1
             new_mastery = min(1.0, new_mastery + 0.1)
+            # P1-5 修复：先用更新前的 ease 计算间隔，再更新 ease（符合 SM-2 规范）
             new_interval = max(1, int(new_interval * new_ease))
             new_ease = min(3.0, new_ease + 0.1)
             if new_mastery >= 0.9:
@@ -249,8 +250,10 @@ async def submit_word_event(
             new_interval = 1
             new_ease = max(1.3, new_ease - 0.3)
         elif event_type == "learned":
+            # P1-5 修复：learned 事件也推进间隔，与 correct 一致
             new_status = "learning"
             new_mastery = max(new_mastery, 0.3)
+            new_interval = max(1, int(new_interval * new_ease)) if new_interval > 0 else 1
 
         next_review = now + timedelta(days=max(1, new_interval))
 
@@ -288,6 +291,10 @@ async def submit_word_event(
         initial_mastery = 0.3 if event_type in ("learned", "correct") else 0.0
         initial_interval = 1
         next_review = now + timedelta(days=1)
+        # P1-5 修复：review_count 按事件类型设置，不写死 1
+        initial_review_count = 1 if event_type in ("learned", "correct", "wrong") else 0
+        initial_correct = 1 if event_type == "correct" else 0
+        initial_wrong = 1 if event_type == "wrong" else 0
 
         db.add(
             UserWordProgress(
@@ -298,9 +305,9 @@ async def submit_word_event(
                 ease_factor=2.5,
                 interval_days=initial_interval,
                 next_review_at=next_review,
-                review_count=1,
-                correct_count=1 if event_type == "correct" else 0,
-                wrong_count=1 if event_type == "wrong" else 0,
+                review_count=initial_review_count,
+                correct_count=initial_correct,
+                wrong_count=initial_wrong,
             )
         )
 

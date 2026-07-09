@@ -118,21 +118,41 @@ async def mark_wrong_question_reviewed(
             detail=f"错题记录不存在: question_id={question_id}",
         )
 
-    # 更新下次复习时间（间隔递增）
-    # 第1次复习: 3天后, 第2次: 7天后, 第3次: 14天后, 以此类推
+    # 更新复习状态（独立 review_count，修复原用 wrong_count 做索引的缺陷）
+    # 间隔序列：第1次复习3天, 第2次7天, 第3次14天, 第4次30天, 第5次60天
+    # 连续到第5阶段后毕业（从错题本移除）
     intervals = [3, 7, 14, 30, 60]
-    review_count = existing.wrong_count
-    interval_days = intervals[min(review_count - 1, len(intervals) - 1)]
+    max_stage = len(intervals)  # 5
+    new_stage = existing.review_stage + 1
+
+    if new_stage > max_stage:
+        # 已达最高阶段，标记毕业并从错题本移除
+        await db.execute(
+            text(
+                """
+                DELETE FROM wrong_questions
+                WHERE user_id = :user_id AND question_id = :question_id
+                """
+            ),
+            {"user_id": user_id, "question_id": question_id},
+        )
+        await db.commit()
+        return
+
+    interval_days = intervals[min(new_stage - 1, max_stage - 1)]
 
     await db.execute(
         text(
             """
             UPDATE wrong_questions SET
+                review_count = review_count + 1,
+                review_stage = :stage,
                 next_review_at = NOW() + (:interval || ' days')::INTERVAL
             WHERE user_id = :user_id AND question_id = :question_id
             """
         ),
         {
+            "stage": new_stage,
             "interval": str(interval_days),
             "user_id": user_id,
             "question_id": question_id,

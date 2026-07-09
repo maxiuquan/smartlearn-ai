@@ -25,7 +25,10 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
 async def get_current_user_id(
     credentials: HTTPAuthorizationCredentials = Depends(security_scheme),
 ) -> int:
-    """Extract user ID from JWT token (lightweight, no DB lookup)."""
+    """Extract user ID from JWT token (lightweight, no DB lookup).
+
+    额外校验 JWT claims 中的 status，拒绝被封禁用户的令牌（即使签名有效）。
+    """
     token = credentials.credentials
     payload = decode_token(token)
     if not payload or payload.get("type") != "access":
@@ -38,6 +41,13 @@ async def get_current_user_id(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token 缺少用户标识",
+        )
+    # 校验 status claim：banned 用户的令牌即使未过期也拒绝
+    token_status = payload.get("status")
+    if token_status == "banned":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="账号已被禁用，请联系管理员",
         )
     return int(sub)
 

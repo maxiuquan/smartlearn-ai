@@ -193,7 +193,44 @@ async def submit_game_session(
     - 记录分数、经验值、金币
     - 更新用户等级
     - 检查成就解锁
+    - 服务端校验：分数合理性、时长合理性、防止刷分
     """
+    # 服务端校验：加载游戏配置，验证分数合理性
+    games_raw = _load_games_config()
+    game_cfg = next((g for g in games_raw if g["game_id"] == body.game_id), None)
+    if not game_cfg:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"游戏 '{body.game_id}' 不存在",
+        )
+
+    # 校验时长合理性（不超过配置时长的 2 倍，防止超时作弊）
+    session_cfg = game_cfg.get("session") or {}
+    configured_time = session_cfg.get("time_limit_sec", 0)
+    if configured_time > 0 and body.duration is not None:
+        if body.duration > configured_time * 2:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="游戏时长异常，疑似作弊",
+            )
+
+    # 校验分数上限：基于奖励配置估算合理上限（base_xp * 100 作为软上限）
+    rewards_cfg = game_cfg.get("rewards") or {}
+    base_xp = rewards_cfg.get("base_xp", 10)
+    score_cap = max(base_xp * 100, 10000)  # 至少 10000，最高 base_xp*100
+    if body.score > score_cap:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"分数 {body.score} 超过合理上限 {score_cap}，疑似作弊",
+        )
+
+    # 校验 accuracy 与 score 一致性
+    if body.accuracy is not None and body.score > 0 and body.accuracy == 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="准确率为 0 但分数大于 0，数据不一致",
+        )
+
     # 计算经验值和金币
     xp_gained = max(1, body.score // 10)
     coins_gained = max(1, body.score // 20)

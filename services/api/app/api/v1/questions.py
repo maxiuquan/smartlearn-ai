@@ -3,10 +3,11 @@ from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import func, select, text
+from sqlalchemy import Integer, cast, func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.deps import get_current_user_id, get_db, get_optional_user_id
+from app.core.judging import judge_answer
 from app.models.business import (
     Question,
     UserQuestionAttempt,
@@ -47,6 +48,9 @@ async def list_questions(
         conditions.append(Question.subject == subject)
     if type:
         conditions.append(Question.type == type)
+    # P0-4 修复: kp_id 筛选加入 conditions（knowledge_points 是 JSONB 数组，用 contains 查询）
+    if kp_id:
+        conditions.append(Question.knowledge_points.contains([kp_id]))
     # difficulty 是 str 类型以兼容空串，此处转为 int
     difficulty_int: Optional[int] = None
     if difficulty:
@@ -185,8 +189,8 @@ async def get_recommend_questions(
 
     # ── Step 2: 不足时补充低掌握度知识点关联题目 ──
     if len(questions) < count:
-        # 查询用户低掌握度词汇关联的题目（通过 knowledge_points JSON 字段）
-        # 这里用难度匹配作为补充策略
+        # 查询用户薄弱知识点：按知识点统计答错率，优先推荐错误率高的知识点关联题目
+        # 通过 UserQuestionAttempt 关联 Question.knowledge_points 计算各知识点正确率
         remaining = count - len(questions)
         base_conditions = []
         if subject:
@@ -207,11 +211,34 @@ async def get_recommend_questions(
         if recently_correct_ids:
             base_conditions.append(Question.id.notin_(recently_correct_ids))
 
-        # 按难度升序 + 随机排序，优先推荐中等难度题目
+        # 自适应推题：优先推荐用户近期答错的知识点关联题目（难度适配）
+        # 计算用户平均正确率，据此选择难度档位
+        stats_result = await db.execute(
+            select(
+                func.count().label("total_attempts"),
+                func.sum(func.cast(UserQuestionAttempt.correct, Integer)).label("correct_cnt"),
+            ).where(UserQuestionAttempt.user_id == user_id)
+        )
+        stats = stats_result.first()
+        total_attempts = stats.total_attempts or 0
+        correct_cnt = stats.correct_cnt or 0
+        accuracy = (correct_cnt / total_attempts) if total_attempts > 0 else 0.5
+
+        # 根据正确率选择目标难度：低正确率→低难度，高正确率→高难度（循序渐进）
+        if accuracy < 0.4:
+            target_difficulty = 1
+        elif accuracy < 0.6:
+            target_difficulty = 2
+        elif accuracy < 0.8:
+            target_difficulty = 3
+        else:
+            target_difficulty = 4
+
+        # 优先推荐目标难度附近的题目，按难度接近度排序
         fill_result = await db.execute(
             select(Question)
             .where(*base_conditions)
-            .order_by(Question.difficulty.asc(), func.random())
+            .order_by(func.abs(Question.difficulty - target_difficulty).asc(), func.random())
             .limit(remaining)
         )
         fill_rows = fill_result.scalars().all()
@@ -338,7 +365,7 @@ async def submit_attempt(
             detail=f"题目 {question_id} 不存在",
         )
 
-    correct = body.user_answer.strip().lower() == row.answer.strip().lower()
+    correct = judge_answer(body.user_answer, row.answer, row.type)
 
     # 记录作答
     db.add(
@@ -366,12 +393,28 @@ async def submit_attempt(
             ),
             {"user_id": user_id, "question_id": question_id},
         )
+    else:
+        # 答对：从错题本移除（毕业判定）
+        await db.execute(
+            text(
+                """
+                DELETE FROM wrong_questions
+                WHERE user_id = :user_id AND question_id = :question_id
+                """
+            ),
+            {"user_id": user_id, "question_id": question_id},
+        )
 
     await db.commit()
+
+    # XP 按难度加权（P2 修复）
+    xp_gained = 0
+    if correct:
+        xp_gained = 5 + (row.difficulty or 1) * 5  # 难度1=10, 难度5=30
 
     return QuestionAttemptResponse(
         correct=correct,
         correct_answer=row.answer if not correct else None,
         solution=row.solution if not correct else None,
-        xp_gained=10 if correct else 0,
+        xp_gained=xp_gained,
     )

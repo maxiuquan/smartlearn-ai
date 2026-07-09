@@ -50,12 +50,29 @@ def _issue_tokens(user: User) -> TokenResponse:
     )
 
 
+# 限流装饰器（slowapi 不可用时退化为无操作）
+try:
+    from slowapi import Limiter
+    from slowapi.util import get_remote_address
+
+    _limiter = Limiter(key_func=get_remote_address)
+    limit_login = _limiter.limit("10/minute")
+    limit_register = _limiter.limit("5/minute")
+except ImportError:
+    def limit_login(func):
+        return func
+
+    def limit_register(func):
+        return func
+
+
 @router.post(
     "/register",
     response_model=TokenResponse,
     status_code=status.HTTP_201_CREATED,
     summary="用户注册",
 )
+@limit_register
 async def register(
     body: RegisterRequest,
     db: AsyncSession = Depends(get_db),
@@ -107,6 +124,7 @@ async def register(
     response_model=TokenResponse,
     summary="用户登录",
 )
+@limit_login
 async def login(
     body: LoginRequest,
     db: AsyncSession = Depends(get_db),

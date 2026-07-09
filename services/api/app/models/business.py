@@ -124,6 +124,10 @@ class WrongQuestion(Base):
         DateTime, server_default=func.now(), nullable=False
     )
     next_review_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    # SRS 闭环字段（迁移 005）
+    review_count: Mapped[int] = mapped_column(Integer, server_default="0", nullable=False)
+    review_stage: Mapped[int] = mapped_column(Integer, server_default="0", nullable=False)
+    graduated_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
 
 
 class AIConversation(Base):
