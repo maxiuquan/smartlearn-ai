@@ -232,6 +232,7 @@ class StatisticsOverviewResponse(BaseModel):
     new_users_7d: int = 0
     total_questions: int = 0
     total_vocab: int = 0
+    total_knowledge_points: int = 0
     total_ai_calls: int = 0
     total_game_sessions: int = 0
     vip_users: int = 0

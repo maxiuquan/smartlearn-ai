@@ -31,17 +31,18 @@ const Dashboard: React.FC = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [statsRes, activityRes, subjectRes, rankingRes] = await Promise.all([
+      // 使用 allSettled: 单个 API 失败不影响其他请求
+      const results = await Promise.allSettled([
         getDashboardStats(),
         getUserActivityTrend(30),
         getSubjectDistribution(),
         getUserRanking('study_time', 10),
       ]);
 
-      setStats(statsRes);
-      setActivityData(activityRes);
-      setSubjectData(subjectRes);
-      setRankingData(rankingRes);
+      if (results[0].status === 'fulfilled') setStats(results[0].value);
+      if (results[1].status === 'fulfilled') setActivityData(results[1].value);
+      if (results[2].status === 'fulfilled') setSubjectData(results[2].value);
+      if (results[3].status === 'fulfilled') setRankingData(results[3].value);
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error);
     } finally {

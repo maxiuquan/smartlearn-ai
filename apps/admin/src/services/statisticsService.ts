@@ -7,8 +7,19 @@ import { DashboardStats, UserStats, PaginatedResponse } from '@/types';
 //   其余统计子接口（活跃趋势/完成趋势/学科分布/掌握分布/排行/单用户明细/导出）后端尚未实现。
 
 // 获取仪表盘统计数据
+// 后端返回 snake_case 字段, 此处映射为前端 camelCase
 export async function getDashboardStats(): Promise<DashboardStats> {
-  return api.get<DashboardStats>('/statistics/overview');
+  const raw = await api.get<any>('/statistics/overview');
+  return {
+    totalUsers: raw.total_users ?? 0,
+    activeUsers: raw.active_users_7d ?? 0,
+    totalQuestions: raw.total_questions ?? 0,
+    totalKnowledgePoints: raw.total_knowledge_points ?? 0,
+    totalWords: raw.total_vocab ?? 0,
+    todayLogins: raw.today_logins ?? 0,
+    weeklyActiveUsers: raw.active_users_7d ?? 0,
+    monthlyActiveUsers: raw.active_users_30d ?? 0,
+  };
 }
 
 // 获取用户活跃趋势

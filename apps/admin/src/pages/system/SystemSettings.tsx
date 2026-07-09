@@ -233,10 +233,10 @@ const SystemSettings: React.FC = () => {
                     />
                     <Table
                       dataSource={[
-                        { key: '运行时间', value: `${Math.round(systemInfo.uptime / 3600)}小时` },
-                        { key: '内存使用', value: `${Math.round(systemInfo.memory.used / 1024 / 1024)}MB / ${Math.round(systemInfo.memory.total / 1024 / 1024)}MB` },
-                        { key: 'CPU使用率', value: `${systemInfo.cpu}%` },
-                        { key: '数据库', value: `${systemInfo.database.type} ${systemInfo.database.version}` },
+                        { key: '运行时间', value: `${Math.round((systemInfo.uptime_seconds || 0) / 3600)}小时` },
+                        { key: '内存使用率', value: `${systemInfo.memory_usage || 0}%` },
+                        { key: 'CPU使用率', value: `${systemInfo.cpu_usage || 0}%` },
+                        { key: '数据库记录数', value: `${systemInfo.db_size || 0} 条` },
                       ]}
                       columns={[
                         { title: '项目', dataIndex: 'key' },

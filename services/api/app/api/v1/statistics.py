@@ -13,6 +13,7 @@ from app.core.deps import get_current_admin_user, get_current_user, get_db
 from app.models.business import (
     AIConversation,
     GameSession,
+    KnowledgePoint,
     Question,
     UserGameProfile,
     UserQuestionAttempt,
@@ -71,6 +72,9 @@ async def get_overview(
     )
     total_questions = await _count(db, select(func.count()).select_from(Question))
     total_vocab = await _count(db, select(func.count()).select_from(VocabularyWord))
+    total_knowledge_points = await _count(
+        db, select(func.count()).select_from(KnowledgePoint)
+    )
     total_ai_calls = await _count(db, select(func.count()).select_from(AIConversation))
     total_game_sessions = await _count(
         db, select(func.count()).select_from(GameSession)
@@ -86,6 +90,7 @@ async def get_overview(
         new_users_7d=new_users_7d,
         total_questions=total_questions,
         total_vocab=total_vocab,
+        total_knowledge_points=total_knowledge_points,
         total_ai_calls=total_ai_calls,
         total_game_sessions=total_game_sessions,
         vip_users=vip_users,

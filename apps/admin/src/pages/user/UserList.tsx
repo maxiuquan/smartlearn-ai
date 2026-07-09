@@ -26,6 +26,7 @@ import {
   SearchOutlined,
   ExclamationCircleOutlined,
   InboxOutlined,
+  UserOutlined,
 } from '@ant-design/icons';
 import type { ColumnsType, ActionType } from '@ant-design/pro-table';
 import ProTable from '@ant-design/pro-table';
@@ -102,7 +103,7 @@ const UserList: React.FC = () => {
       dataIndex: 'username',
       render: (_: any, record: User) => (
         <Space>
-          <Avatar src={record.avatar} icon={<Avatar.Icon />} size="small" />
+          <Avatar src={record.avatar} icon={<UserOutlined />} size="small" />
           <span>{record.nickname || record.username}</span>
         </Space>
       ),
