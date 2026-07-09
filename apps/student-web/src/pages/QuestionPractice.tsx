@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import FormulaText from '../components/FormulaText';
+import AIAssistant from '../components/AIAssistant';
 import {
   questionsApi,
   type QuestionItem,
@@ -171,8 +172,18 @@ export default function QuestionPractice() {
             )}
           </div>
 
+          {/* 题目标签（title 作为分类标签） */}
+          {selectedQuestion.title && (
+            <div className="mb-3">
+              <span className="text-xs bg-gray-50 text-gray-500 px-2 py-1 rounded">
+                {selectedQuestion.title}
+              </span>
+            </div>
+          )}
+
+          {/* 题目正文（content 为真正题干，回退到 title） */}
           <p className="text-lg text-gray-800 mb-4">
-            <FormulaText text={selectedQuestion.title} />
+            <FormulaText text={selectedQuestion.content || selectedQuestion.title} />
           </p>
 
           {/* 选择题选项 */}
@@ -270,6 +281,12 @@ export default function QuestionPractice() {
             </div>
           )}
         </div>
+
+        {/* AI 助手 — 答题时提供题目相关辅导 */}
+        <AIAssistant
+          context={selectedQuestion ? `当前题目：${selectedQuestion.content || selectedQuestion.title}（${selectedQuestion.subject}学科，${selectedQuestion.type}题型）` : '题库练习'}
+          buttonTitle="AI 题目辅导"
+        />
       </div>
     );
   }
@@ -383,7 +400,7 @@ export default function QuestionPractice() {
                       )}
                     </div>
                     <p className="text-sm text-gray-700 line-clamp-2">
-                      <FormulaText text={q.title} />
+                      <FormulaText text={q.content || q.title} />
                     </p>
                   </div>
                   <span className="text-gray-300 text-sm flex-shrink-0">→</span>

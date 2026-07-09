@@ -1,5 +1,16 @@
 import { useState, useEffect, useCallback } from 'react';
 import { vocabApi, type VocabWord, type VocabProgress, type WordEvent } from '../api/vocab';
+import AIAssistant from '../components/AIAssistant';
+
+/** 词书/分类选项（与后端 tags 数据对齐） */
+const CATEGORY_OPTIONS = [
+  { value: '', label: '全部', emoji: '📚' },
+  { value: 'CET4', label: '英语四级', emoji: '📘' },
+  { value: 'CET6', label: '英语六级', emoji: '📗' },
+  { value: '考研', label: '考研英语', emoji: '📕' },
+  { value: '学术词汇', label: '学术词汇', emoji: '📙' },
+  { value: '高频', label: '高频词汇', emoji: '🔥' },
+];
 
 /**
  * 词汇学习页面。
@@ -23,14 +34,17 @@ export default function VocabLearning() {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
 
+  // 当前选中的词书分类（tag）
+  const [category, setCategory] = useState('');
+
   const currentWord = words[currentIndex] || null;
 
   /** 加载词汇列表 */
-  const loadWords = useCallback(async (pageNum: number) => {
+  const loadWords = useCallback(async (pageNum: number, tag?: string) => {
     try {
       setLoading(true);
       setError('');
-      const data = await vocabApi.getWords({ page: pageNum, page_size: 20 });
+      const data = await vocabApi.getWords({ page: pageNum, page_size: 20, tag: tag || undefined });
       if (pageNum === 1) {
         setWords(data.items);
       } else {
@@ -59,9 +73,18 @@ export default function VocabLearning() {
   }, []);
 
   useEffect(() => {
-    loadWords(1);
+    loadWords(1, category);
     loadProgressAndDue();
-  }, [loadWords, loadProgressAndDue]);
+  }, [loadWords, loadProgressAndDue, category]);
+
+  /** 切换词书分类 */
+  function handleCategoryChange(tag: string) {
+    setCategory(tag);
+    setCurrentIndex(0);
+    setFlipped(false);
+    setPage(1);
+    loadWords(1, tag);
+  }
 
   /** 处理认识/不认识 */
   const handleWordEvent = useCallback(
@@ -87,7 +110,7 @@ export default function VocabLearning() {
           // 加载更多
           const nextPage = page + 1;
           setPage(nextPage);
-          loadWords(nextPage);
+          loadWords(nextPage, category);
           setCurrentIndex(words.length);
         } else {
           // 已到末尾
@@ -95,7 +118,7 @@ export default function VocabLearning() {
         }
       }, 300);
     },
-    [currentWord, submitting, currentIndex, words.length, hasMore, page, loadWords, loadProgressAndDue]
+    [currentWord, submitting, currentIndex, words.length, hasMore, page, loadWords, loadProgressAndDue, category]
   );
 
   // ─── 加载态 ───
@@ -115,7 +138,7 @@ export default function VocabLearning() {
         <p className="text-5xl mb-4">😵</p>
         <p className="text-red-500 text-lg mb-4">{error}</p>
         <button
-          onClick={() => loadWords(1)}
+          onClick={() => loadWords(1, category)}
           className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
         >
           重新加载
@@ -138,7 +161,24 @@ export default function VocabLearning() {
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       {/* 主区域 — 翻卡 */}
       <div className="lg:col-span-2">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6">📖 词汇学习</h1>
+        <h1 className="text-2xl font-bold text-gray-800 mb-4">📖 词汇学习</h1>
+
+        {/* 词书分类选择器 */}
+        <div className="flex flex-wrap gap-2 mb-6">
+          {CATEGORY_OPTIONS.map((opt) => (
+            <button
+              key={opt.value}
+              onClick={() => handleCategoryChange(opt.value)}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all
+                ${category === opt.value
+                  ? 'bg-blue-500 text-white shadow-md shadow-blue-200'
+                  : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+                }`}
+            >
+              {opt.emoji} {opt.label}
+            </button>
+          ))}
+        </div>
 
         {/* 翻卡容器 */}
         <div
@@ -264,7 +304,7 @@ export default function VocabLearning() {
               onClick={() => {
                 const next = page + 1;
                 setPage(next);
-                loadWords(next);
+                loadWords(next, category);
               }}
               className="text-blue-500 hover:underline"
             >
@@ -356,6 +396,12 @@ export default function VocabLearning() {
           )}
         </div>
       </div>
+
+      {/* AI 助手浮动面板 — 上下文为当前单词 */}
+      <AIAssistant
+        context={currentWord ? `当前学习单词：${currentWord.headword}（${currentWord.meaning}）` : '词汇学习'}
+        buttonTitle="AI 词汇助手"
+      />
     </div>
   );
 }

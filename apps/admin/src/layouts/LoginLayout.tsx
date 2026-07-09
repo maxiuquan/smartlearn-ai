@@ -22,10 +22,10 @@ const LoginLayout: React.FC = () => {
     try {
       // 后端 /auth/login 返回 {access_token, refresh_token}（无 user 字段）
       // 登录后需再调 /auth/me 获取用户信息
+      // remember 字段仅用于前端记住用户名，不发给后端（后端 extra: forbid）
       const tokenRes = await login({
         username: values.username,
         password: values.password,
-        remember: values.remember,
       });
 
       // 先把 token 存入 store，以便后续请求带上 Authorization 头

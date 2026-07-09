@@ -33,6 +33,10 @@ async def list_words(
 ) -> WordListResponse:
     """分页获取词汇列表，支持按标签和词频筛选。"""
     conditions = []
+    if tag:
+        # tags 是 JSONB 数组（如 ["CET4", "高频"]），用 contains 做包含查询
+        # 兼容大小写不同的标签写法（CET4 / cet4 / CET-4）
+        conditions.append(VocabularyWord.tags.contains([tag]))
     if frequency is not None:
         conditions.append(VocabularyWord.frequency >= frequency)
 

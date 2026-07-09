@@ -10,8 +10,13 @@ export interface TokenResponse {
 }
 
 // 登录：返回 token，user 需另外调用 getCurrentUser 获取
+// 注意：后端 LoginRequest 配置了 extra: forbid，只允许 username/phone/email/password，
+// 因此只提取 username 和 password 发送，过滤掉 remember 等前端专用字段。
 export async function login(params: LoginParams): Promise<TokenResponse> {
-  return api.post<TokenResponse>('/auth/login', params);
+  return api.post<TokenResponse>('/auth/login', {
+    username: params.username,
+    password: params.password,
+  });
 }
 
 // 获取当前用户信息

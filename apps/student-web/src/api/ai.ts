@@ -27,10 +27,12 @@ export const aiApi = {
    * @param context 可选上下文信息
    */
   async chat(messages: ChatMessage[], context?: string): Promise<ChatResponse> {
+    // AI 对话生成可能需要较长时间，单独设置 120 秒超时
+    // （全局 client timeout 为 15 秒，不足以等待 AI 回复）
     const res = await client.post('/chat', {
       messages: messages.map((m) => ({ role: m.role, content: m.content })),
       context: context || undefined,
-    });
+    }, { timeout: 120000 });
     return res.data;
   },
 };

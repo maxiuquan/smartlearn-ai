@@ -7,6 +7,8 @@ export interface QuestionItem {
   type: string;
   difficulty: string;
   title: string;
+  /** 真正的题目正文/题干（后端 content 字段） */
+  content?: string;
   options?: string[] | Record<string, string>;
   answer?: string;
   /** 后端字段为 solution，前端兼容用 analysis */
@@ -30,6 +32,8 @@ export interface QuestionDetail {
   type: string;
   difficulty: string;
   title: string;
+  /** 真正的题目正文/题干（后端 content 字段） */
+  content?: string;
   options: string[] | Record<string, string>;
   answer: string;
   /** 后端字段为 solution，前端兼容用 analysis */
