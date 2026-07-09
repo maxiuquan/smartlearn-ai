@@ -35,6 +35,7 @@ async def list_wrong_questions(
         conditions.append(Question.subject == subject)
 
     offset = (page - 1) * page_size
+    # 注意: ORM 模型类没有 .join() 方法, 必须用 select(...).join() 链式调用
     result = await db.execute(
         select(
             WrongQuestion.question_id,
@@ -52,11 +53,10 @@ async def list_wrong_questions(
             Question.solution,
             Question.created_at,
         )
-        .select_from(
-            WrongQuestion.join(
-                Question,
-                WrongQuestion.question_id == Question.id,
-            )
+        .select_from(WrongQuestion)
+        .join(
+            Question,
+            WrongQuestion.question_id == Question.id,
         )
         .where(*conditions)
         .order_by(WrongQuestion.last_wrong_at.desc())
