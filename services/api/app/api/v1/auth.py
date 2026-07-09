@@ -155,7 +155,9 @@ async def login(
         )
 
     # 更新最后登录时间
-    user.last_login_at = datetime.now(timezone.utc)
+    # 注意: last_login_at 列是 TIMESTAMP WITHOUT TIME ZONE, 传 aware datetime 会触发
+    # asyncpg "can't subtract offset-naive and offset-aware datetimes" 错误, 故剥离 tzinfo
+    user.last_login_at = datetime.now(timezone.utc).replace(tzinfo=None)
     await db.commit()
 
     return _issue_tokens(user)
