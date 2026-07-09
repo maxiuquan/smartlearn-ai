@@ -18,6 +18,37 @@ router = APIRouter()
 
 
 @router.get(
+    "/tree",
+    response_model=list[KnowledgePointResponse],
+    summary="获取全部知识点（扁平列表）",
+)
+async def get_all_knowledge_tree(
+    db: AsyncSession = Depends(get_db),
+) -> list[KnowledgePointResponse]:
+    """返回全部知识点的扁平列表，供前端知识点选择器使用。"""
+    result = await db.execute(
+        select(KnowledgePoint).order_by(KnowledgePoint.subject, KnowledgePoint.id)
+    )
+    rows = result.scalars().all()
+    return [
+        KnowledgePointResponse(
+            id=row.id,
+            subject=row.subject,
+            chapter=row.chapter,
+            section=row.section,
+            name=row.name,
+            description=row.description,
+            difficulty=row.difficulty,
+            importance=row.importance,
+            prerequisites=row.prerequisites,
+            keywords=row.keywords,
+            created_at=row.created_at,
+        )
+        for row in rows
+    ]
+
+
+@router.get(
     "/search",
     response_model=KnowledgeSearchResponse,
     summary="搜索知识点",

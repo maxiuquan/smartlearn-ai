@@ -15,12 +15,12 @@ export async function getKnowledgeList(params: PageParams): Promise<PaginatedRes
 
 // 获取知识点树
 // 后端为 GET /knowledge/{subject}（subject 为路径参数）
+// 无 subject 时调用 GET /knowledge/tree 返回全部知识点的扁平列表
 export async function getKnowledgeTree(subject?: string): Promise<KnowledgePoint[]> {
-  // subject 缺省时回退到查询参数形式（后端无对应路由，会 404）
   if (subject) {
     return api.get<KnowledgePoint[]>(`/knowledge/${subject}`);
   }
-  return api.get<KnowledgePoint[]>('/knowledge/tree', { params: { subject } });
+  return api.get<KnowledgePoint[]>('/knowledge/tree');
 }
 
 // 获取知识点详情
