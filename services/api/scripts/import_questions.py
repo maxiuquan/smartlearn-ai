@@ -119,6 +119,9 @@ def main() -> None:
             # 幂等：该学科已存在则跳过。
             # 注意：questions 被 user_question_attempts / wrong_questions 外键引用，
             # 不宜清空，故采用"跳过已存在学科"策略以避免重复与误删用户数据。
+            # 例外：FORCE_REFRESH_SUBJECTS 中的学科会先删除旧题再重新导入
+            # （FK 为 ondelete=CASCADE，引用行自动清理）。
+            FORCE_REFRESH_SUBJECTS = {"english"}
             existing = (
                 db.execute(
                     select(func.count())
@@ -127,7 +130,7 @@ def main() -> None:
                 ).scalar()
                 or 0
             )
-            if existing > 0:
+            if existing > 0 and subject not in FORCE_REFRESH_SUBJECTS:
                 logger.info(
                     "[SKIP] %s: 学科 %s 已存在 %d 题，跳过（刷新请先清空 questions）",
                     filename,
@@ -135,6 +138,17 @@ def main() -> None:
                     existing,
                 )
                 continue
+
+            if existing > 0 and subject in FORCE_REFRESH_SUBJECTS:
+                logger.info(
+                    "[REFRESH] %s: 学科 %s 已存在 %d 题，强制刷新（CASCADE 删除引用行）",
+                    filename,
+                    subject,
+                    existing,
+                )
+                from sqlalchemy import delete
+                db.execute(delete(Question).where(Question.subject == subject))
+                db.commit()
 
             db.bulk_insert_mappings(Question, orm_rows)
             db.commit()
