@@ -85,7 +85,7 @@ async def _build_user_detail(db: AsyncSession, user: User) -> UserDetailResponse
         logger.warning("Failed to load subscription for user %s: %s", user.id, e)
 
     # 统计（每个独立 try/except，失败默认 0）
-    def _safe_count(model, label):
+    async def _safe_count(model, label):
         try:
             return (
                 await db.execute(
@@ -98,10 +98,10 @@ async def _build_user_detail(db: AsyncSession, user: User) -> UserDetailResponse
             logger.warning("Failed to count %s for user %s: %s", label, user.id, e)
             return 0
 
-    question_count = _safe_count(UserQuestionAttempt, "attempts")
-    word_count = _safe_count(UserWordProgress, "word_progress")
-    game_count = _safe_count(GameSession, "game_sessions")
-    ai_conversation_count = _safe_count(AIConversation, "ai_conversations")
+    question_count = await _safe_count(UserQuestionAttempt, "attempts")
+    word_count = await _safe_count(UserWordProgress, "word_progress")
+    game_count = await _safe_count(GameSession, "game_sessions")
+    ai_conversation_count = await _safe_count(AIConversation, "ai_conversations")
 
     # 学习天数
     study_days = 0
