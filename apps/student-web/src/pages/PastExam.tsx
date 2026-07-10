@@ -44,6 +44,9 @@ interface PaperOption {
 const PAPER_OPTIONS: PaperOption[] = [
   { file: '/exam-papers/math-sample.json', title: '考研数学真题', emoji: '🔢' },
   { file: '/exam-papers/english-sample.json', title: '考研英语真题', emoji: '📖' },
+  { file: '/exam-papers/english1-exams.json', title: '考研英语一历年真题', emoji: '📚' },
+  { file: '/exam-papers/cet4-exams.json', title: '英语四级真题', emoji: '🎓' },
+  { file: '/exam-papers/cet6-exams.json', title: '英语六级真题', emoji: '🏆' },
 ];
 
 const QUESTION_TYPE_LABELS: Record<string, string> = {

@@ -1,7 +1,8 @@
 """
 单词游戏路由
 """
-from fastapi import APIRouter, Depends
+from typing import Optional
+from fastapi import APIRouter, Depends, Header
 
 from app.models.word_games import (
     WordGameRequest,
@@ -22,7 +23,11 @@ word_games_service = WordGamesService()
 
 
 @router.post("/start", response_model=WordGameResponse)
-async def start_game(request: WordGameRequest, auth: dict = Depends(require_auth)):
+async def start_game(
+    request: WordGameRequest,
+    auth: dict = Depends(require_auth),
+    authorization: Optional[str] = Header(default=None),
+):
     """
     开始单词游戏
 
@@ -32,12 +37,17 @@ async def start_game(request: WordGameRequest, auth: dict = Depends(require_auth
     - 设置时间限制
 
     6.1②：透传 auth 到 service，JWT sub 优先作 user_id。
+    词汇联动：透传 authorization token，service 用它调 api 获取今日学过的词汇。
     """
-    return await word_games_service.start_game(request, auth=auth)
+    return await word_games_service.start_game(request, auth=auth, auth_token=authorization)
 
 
 @router.post("/submit", response_model=SubmitAnswerResponse)
-async def submit_answer(request: SubmitAnswerRequest, auth: dict = Depends(require_auth)):
+async def submit_answer(
+    request: SubmitAnswerRequest,
+    auth: dict = Depends(require_auth),
+    authorization: Optional[str] = Header(default=None),
+):
     """
     提交答案
 
@@ -47,8 +57,9 @@ async def submit_answer(request: SubmitAnswerRequest, auth: dict = Depends(requi
     - 获取下一题
 
     6.1②：透传 auth，校验 session 归属。
+    词汇联动：透传 authorization token，service 用它向 api 提交 word event。
     """
-    return await word_games_service.submit_answer(request, auth=auth)
+    return await word_games_service.submit_answer(request, auth=auth, auth_token=authorization)
 
 
 @router.get("/summary/{session_id}", response_model=GameSummary)

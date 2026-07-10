@@ -42,6 +42,9 @@ class Settings(BaseSettings):
     # Word Games
     WORD_GAME_TIME_LIMIT: int = 60  # 单词游戏时间限制(秒)
     WORD_GAME_BATCH_SIZE: int = 10  # 单词游戏批次大小
+
+    # API 服务地址（用于词汇进度联动：获取今日学过词汇、提交答题事件）
+    API_BASE_URL: str = "http://127.0.0.1:8000"
     
     # CORS (逗号分隔的字符串,兼容环境变量直接设置)
     CORS_ORIGINS: str = "http://localhost:3000,http://localhost:3001,http://localhost:5173"

@@ -58,30 +58,68 @@ export default function AIAssistant({
     setInput('');
     setLoading(true);
 
+    // 创建一个空的 AI 气泡，流式追加内容
+    const aiBubbleId = `a-${Date.now()}`;
+    setMessages((prev) => [...prev, {
+      id: aiBubbleId,
+      role: 'assistant',
+      content: '',
+      timestamp: Date.now(),
+    }]);
+
+    const history: ChatMessage[] = messages.slice(-5).map((b) => ({
+      role: b.role,
+      content: b.content,
+    }));
+    history.push({ role: 'user', content: text });
+
     try {
-      const history: ChatMessage[] = messages.slice(-5).map((b) => ({
-        role: b.role,
-        content: b.content,
-      }));
-      history.push({ role: 'user', content: text });
-
-      const res = await aiApi.chat(history, context);
-
-      const aiBubble: ChatBubble = {
-        id: `a-${Date.now()}`,
-        role: 'assistant',
-        content: res.reply || '抱歉，我暂时无法回答。',
-        timestamp: Date.now(),
-      };
-      setMessages((prev) => [...prev, aiBubble]);
+      await aiApi.chatStream(
+        history,
+        {
+          onChunk: (chunk) => {
+            setMessages((prev) =>
+              prev.map((m) =>
+                m.id === aiBubbleId
+                  ? { ...m, content: m.content + chunk }
+                  : m
+              )
+            );
+          },
+          onDone: () => {
+            // 流结束，检查是否为空回复
+            setMessages((prev) => {
+              const aiMsg = prev.find((m) => m.id === aiBubbleId);
+              if (aiMsg && !aiMsg.content) {
+                return prev.map((m) =>
+                  m.id === aiBubbleId
+                    ? { ...m, content: '抱歉，我暂时无法回答。' }
+                    : m
+                );
+              }
+              return prev;
+            });
+          },
+          onError: (msg) => {
+            setMessages((prev) =>
+              prev.map((m) =>
+                m.id === aiBubbleId
+                  ? { ...m, content: prev.find((x) => x.id === aiBubbleId)?.content || `抱歉，连接 AI 服务时出错：${msg}` }
+                  : m
+              )
+            );
+          },
+        },
+        context,
+      );
     } catch (err: any) {
-      const errorBubble: ChatBubble = {
-        id: `e-${Date.now()}`,
-        role: 'assistant',
-        content: `抱歉，连接 AI 服务时出错：${err?.message || '未知错误'}。请稍后重试。`,
-        timestamp: Date.now(),
-      };
-      setMessages((prev) => [...prev, errorBubble]);
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === aiBubbleId
+            ? { ...m, content: m.content || `抱歉，连接 AI 服务时出错：${err?.message || '未知错误'}。请稍后重试。` }
+            : m
+        )
+      );
     } finally {
       setLoading(false);
       inputRef.current?.focus();
@@ -175,18 +213,23 @@ export default function AIAssistant({
               ))
             )}
 
-            {/* 加载态 */}
-            {loading && (
-              <div className="flex justify-start">
-                <div className="bg-white rounded-2xl rounded-bl-md px-4 py-3 border border-gray-100">
-                  <div className="flex items-center gap-1">
-                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+            {/* 加载态 — 仅在 AI 气泡内容仍为空时显示（流式开始后隐藏） */}
+            {loading && (() => {
+              const lastMsg = messages[messages.length - 1];
+              const isEmpty = !lastMsg || lastMsg.role !== 'assistant' || !lastMsg.content;
+              if (!isEmpty) return null;
+              return (
+                <div className="flex justify-start">
+                  <div className="bg-white rounded-2xl rounded-bl-md px-4 py-3 border border-gray-100">
+                    <div className="flex items-center gap-1">
+                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              );
+            })()}
             <div ref={messagesEndRef} />
           </div>
 

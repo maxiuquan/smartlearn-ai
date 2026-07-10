@@ -396,6 +396,7 @@ class WordGamesService:
         self,
         request: WordGameRequest,
         auth: Optional[dict] = None,
+        auth_token: Optional[str] = None,
     ) -> WordGameResponse:
         """开始游戏
 
@@ -403,6 +404,7 @@ class WordGamesService:
               词汇从 vocabulary/*.json 取词。
         6.1②：auth 透传——JWT 优先用 sub 作为 user_id，避免 student_001 → 0 外键违约。
         6.2⑤：记录 game_id，按 game_id 差异化出题。
+        词汇联动：优先使用今日学过的词汇，不足时从词库扩展。
         """
         # 6.1② user_id 解析：JWT sub 优先，request.user_id 兜底
         user_id = request.user_id
@@ -417,6 +419,9 @@ class WordGamesService:
                         "Ensure api signs JWT sub=str(users.id).",
                         jwt_sub,
                     )
+
+        # 词汇联动：尝试获取今日学过的词汇（优先使用）
+        today_words = await self._fetch_today_vocab_words(auth_token)
 
         # 6.1①/P1-3 按 subject 分流取题
         # - MATH：纯数学题
@@ -441,11 +446,12 @@ class WordGamesService:
                 difficulty=request.difficulty,
             )
             await self._load_word_bank()
-            vocab_words = await self._select_words(
+            vocab_words = await self._select_words_with_today(
                 count=half,
                 difficulty=request.difficulty,
                 categories=request.categories,
-                exclude_words=request.exclude_words or []
+                exclude_words=request.exclude_words or [],
+                today_words=today_words,
             )
             words = self._math_questions_to_words(math_questions) + vocab_words
             # 打乱顺序，避免前半数学后半词汇
@@ -460,13 +466,14 @@ class WordGamesService:
                 if w.word_id in math_q_by_id
             ]
         else:
-            # 词汇题：从 vocabulary/*.json 取
+            # 词汇题：优先今日学过的，不足时从词库扩展
             await self._load_word_bank()
-            words = await self._select_words(
+            words = await self._select_words_with_today(
                 count=request.word_count,
                 difficulty=request.difficulty,
                 categories=request.categories,
-                exclude_words=request.exclude_words or []
+                exclude_words=request.exclude_words or [],
+                today_words=today_words,
             )
 
         # 确定时间限制
@@ -520,12 +527,15 @@ class WordGamesService:
         self,
         request: SubmitAnswerRequest,
         auth: Optional[dict] = None,
+        auth_token: Optional[str] = None,
     ) -> SubmitAnswerResponse:
         """提交答案
 
         6.1②：auth 透传校验 session 归属。
         6.2④：每题作答记录到 session.answered，summary 按真实记录分类。
         6.1①：数学题用题目 answer 字段校验，词汇题用 word 校验。
+        词汇联动：答完每题后向 api 提交 word event（correct/wrong），
+                  扩展词会自动进入下次词汇学习。
         """
         # 从 DB 恢复会话（跨 worker 可恢复）
         session = await self._restore_session(request.session_id)
@@ -590,6 +600,20 @@ class WordGamesService:
             user_answer=answer.user_answer,
             correct_answer=correct_answer,
         ))
+
+        # 词汇联动：向 api 提交 word event，同步词汇进度
+        # correct → SRS 推进，wrong → SRS 重置，扩展词自动进入下次词汇学习
+        if not is_math and current_word.word_id:
+            try:
+                await self._submit_word_event(
+                    auth_token=auth_token,
+                    word_id=current_word.word_id,
+                    event_type="correct" if is_correct else "wrong",
+                    game_id=session.game_id,
+                    duration_ms=answer.time_spent_seconds * 1000,
+                )
+            except Exception as e:
+                logger.debug("Vocab event submission failed (non-critical): %s", e)
 
         # 生成反馈
         feedback = self._generate_feedback(
@@ -1090,6 +1114,135 @@ class WordGamesService:
         except Exception as e:
             logger.warning("Failed to get user rank: %s", e)
             return None
+
+    # ──────────────────────────────────────────────
+    #  词汇联动（与 api 服务的 /vocab 接口对接）
+    # ──────────────────────────────────────────────
+
+    async def _fetch_today_vocab_words(self, auth_token: Optional[str]) -> List[Dict]:
+        """从 api 服务获取今日学过/复习过的词汇列表。
+
+        返回原始 dict 列表（含 word_id/headword/meaning/phonetic/tags 等），
+        供 _select_words_with_today 转换为 Word 对象并优先使用。
+        失败时返回空列表（非关键路径，游戏继续从词库取词）。
+        """
+        if not auth_token:
+            return []
+        try:
+            import httpx
+            api_url = settings.API_BASE_URL.rstrip("/")
+            async with httpx.AsyncClient(timeout=3.0) as client:
+                resp = await client.get(
+                    f"{api_url}/api/v1/vocab/learned-today",
+                    params={"limit": 50},
+                    headers={"Authorization": auth_token},
+                )
+                if resp.status_code == 200:
+                    data = resp.json()
+                    words = data.get("words", [])
+                    logger.info("Fetched %d today-learned words from api", len(words))
+                    return words
+        except Exception as e:
+            logger.debug("Failed to fetch today vocab words: %s", e)
+        return []
+
+    async def _submit_word_event(
+        self,
+        auth_token: Optional[str],
+        word_id: str,
+        event_type: str,
+        game_id: str = "",
+        duration_ms: int = 0,
+    ) -> None:
+        """向 api 服务提交单词学习事件，同步词汇进度。
+
+        - correct/wrong 事件推进 SRS 算法
+        - 扩展词（不在用户进度中的词）会自动创建新记录，进入下次词汇学习
+        """
+        if not auth_token or not word_id:
+            return
+        import httpx
+        api_url = settings.API_BASE_URL.rstrip("/")
+        async with httpx.AsyncClient(timeout=3.0) as client:
+            await client.post(
+                f"{api_url}/api/v1/vocab/events",
+                json={
+                    "word_id": word_id,
+                    "event_type": event_type,
+                    "game_id": game_id or None,
+                    "duration_ms": duration_ms or None,
+                },
+                headers={"Authorization": auth_token},
+            )
+
+    async def _select_words_with_today(
+        self,
+        count: int,
+        difficulty: GameDifficulty,
+        categories: Optional[List[str]],
+        exclude_words: List[str],
+        today_words: List[Dict],
+    ) -> List[Word]:
+        """选词：优先使用今日学过的词汇，不足时从词库扩展。
+
+        - today_words: 从 api /vocab/learned-today 获取的今日词汇 dict 列表
+        - 扩展词（来自词库但不在今日学习列表中的）会自动通过 submit_answer 的
+          _submit_word_event 提交 "correct"/"wrong" 事件，进入下次词汇学习
+        """
+        selected: List[Word] = []
+        used_words: set = set()
+
+        # 1. 优先从今日学过的词汇中选
+        for w in today_words:
+            if len(selected) >= count:
+                break
+            headword = w.get("headword", "")
+            meaning = w.get("meaning", "")
+            if not headword or not meaning or headword in exclude_words:
+                continue
+            if headword in used_words:
+                continue
+            freq = int(w.get("frequency", 3) or 3)
+            examples = w.get("examples", [])
+            example_en = ""
+            if examples and isinstance(examples, list):
+                first = examples[0]
+                if isinstance(first, dict):
+                    example_en = first.get("en", "")
+                elif isinstance(first, str):
+                    example_en = first
+            word_obj = Word(
+                word_id=w.get("word_id", ""),
+                word=headword,
+                meaning=meaning,
+                pronunciation=w.get("phonetic", ""),
+                example_sentence=example_en,
+                part_of_speech=None,
+                difficulty=min(max(freq / 5.0, 0.1), 1.0),
+                category=(w.get("tags", [None])[0] if w.get("tags") else None),
+            )
+            selected.append(word_obj)
+            used_words.add(headword)
+
+        logger.info(
+            "Word selection: %d from today's learned, %d needed from bank",
+            len(selected), max(0, count - len(selected)),
+        )
+
+        # 2. 不足部分从词库扩展
+        if len(selected) < count:
+            remaining = count - len(selected)
+            # 排除已选的词
+            bank_exclude = list(exclude_words) + list(used_words)
+            bank_words = await self._select_words(
+                count=remaining,
+                difficulty=difficulty,
+                categories=categories,
+                exclude_words=bank_exclude,
+            )
+            selected.extend(bank_words)
+
+        return selected[:count]
 
     # ──────────────────────────────────────────────
     #  选题与题目生成

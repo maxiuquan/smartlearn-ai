@@ -188,6 +188,74 @@ async def get_due_words(
     ]
 
 
+@router.get(
+    "/learned-today",
+    summary="获取今日学习/复习的词汇（供游戏联动使用）",
+)
+async def get_learned_today(
+    limit: int = Query(50, ge=1, le=200),
+    user_id: int = Depends(get_current_user_id),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """获取当前用户今日学习或复习过的词汇列表（含 headword/meaning，供单词游戏优先使用）。
+
+    返回今日 updated_at 在当天的 user_word_progress 记录，关联 vocabulary_words 取词表信息。
+    单词游戏应优先使用这些词，使游戏与词汇学习进度联动。
+    """
+    # 今日 UTC 0 点（列是 TIMESTAMP WITHOUT TIME ZONE, 需剥离 tzinfo）
+    today_start = datetime.now(timezone.utc).replace(
+        tzinfo=None, hour=0, minute=0, second=0, microsecond=0
+    )
+
+    result = await db.execute(
+        select(
+            UserWordProgress.word_id,
+            UserWordProgress.status,
+            UserWordProgress.mastery_level,
+            VocabularyWord.headword,
+            VocabularyWord.meaning,
+            VocabularyWord.phonetic,
+            VocabularyWord.tags,
+            VocabularyWord.frequency,
+            VocabularyWord.synonyms,
+            VocabularyWord.antonyms,
+            VocabularyWord.examples,
+        )
+        .select_from(UserWordProgress)
+        .join(
+            VocabularyWord,
+            UserWordProgress.word_id == VocabularyWord.word_id,
+        )
+        .where(
+            UserWordProgress.user_id == user_id,
+            UserWordProgress.updated_at >= today_start,
+        )
+        .order_by(UserWordProgress.updated_at.desc())
+        .limit(limit)
+    )
+    rows = result.fetchall()
+
+    return {
+        "count": len(rows),
+        "words": [
+            {
+                "word_id": row.word_id,
+                "headword": row.headword,
+                "meaning": row.meaning,
+                "phonetic": row.phonetic,
+                "tags": row.tags,
+                "frequency": row.frequency,
+                "synonyms": row.synonyms,
+                "antonyms": row.antonyms,
+                "examples": row.examples,
+                "status": row.status,
+                "mastery_level": row.mastery_level,
+            }
+            for row in rows
+        ],
+    }
+
+
 @router.post(
     "/events",
     status_code=status.HTTP_204_NO_CONTENT,

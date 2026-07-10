@@ -1,10 +1,11 @@
 """
 AI 导师对话路由
 """
+import json
 import logging
 import uuid
 from fastapi import APIRouter, Depends
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
 
 from app.services.llm_service import get_llm_service
@@ -99,3 +100,47 @@ async def health_check():
         "model": settings.LLM_MODEL_NAME,
         "offline": settings.offline_mode,
     }
+
+
+@router.post("/stream")
+async def chat_stream(request: ChatRequest, auth: dict = Depends(require_auth)):
+    """AI 导师对话（流式 SSE）
+
+    通过 Server-Sent Events 逐 token 返回 AI 回复，大幅降低首字延迟。
+    前端使用 EventSource 或 fetch ReadableStream 消费。
+
+    SSE 事件格式:
+      data: {"type":"chunk","content":"你好"}\\n\\n
+      data: {"type":"done","model":"glm-4-flash"}\\n\\n
+      data: {"type":"error","message":"..."}\\n\\n
+    """
+    from config import settings
+
+    llm = get_llm_service()
+    messages = [{"role": m.role, "content": m.content} for m in request.messages]
+
+    async def event_generator():
+        try:
+            async for chunk in llm.chat_stream(messages, context=request.context):
+                yield f"data: {json.dumps({'type': 'chunk', 'content': chunk}, ensure_ascii=False)}\n\n"
+            yield f"data: {json.dumps({'type': 'done', 'model': settings.LLM_MODEL_NAME, 'offline': settings.offline_mode}, ensure_ascii=False)}\n\n"
+        except ProviderUnavailableError as e:
+            trace_id = e.trace_id or uuid.uuid4().hex
+            logger.error(
+                "Chat stream 供应商不可用: provider=%s error_type=%s trace_id=%s",
+                e.provider, e.error_type, trace_id,
+            )
+            yield f"data: {json.dumps({'type': 'error', 'message': 'AI 供应商当前不可用，请稍后重试', 'trace_id': trace_id}, ensure_ascii=False)}\n\n"
+        except Exception as e:
+            logger.error("Chat stream 异常: %s", e, exc_info=True)
+            yield f"data: {json.dumps({'type': 'error', 'message': str(e)}, ensure_ascii=False)}\n\n"
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
