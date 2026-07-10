@@ -53,9 +53,15 @@ async def list_questions(
     # P0-4 修复: kp_id 筛选加入 conditions（knowledge_points 是 JSONB 数组，用 contains 查询）
     if kp_id:
         conditions.append(Question.knowledge_points.contains([kp_id]))
-    # category 按 tags 数组包含匹配
+    # category 按 knowledge_points 包含匹配（CET4→vocab-cet4, CET6→vocab-cet6, 考研→vocab-kaoyan）
     if category:
-        conditions.append(Question.tags.contains([category]))
+        _category_kp_map = {
+            "CET4": "vocab-cet4",
+            "CET6": "vocab-cet6",
+            "考研": "vocab-kaoyan",
+        }
+        kp_value = _category_kp_map.get(category, category)
+        conditions.append(Question.knowledge_points.contains([kp_value]))
     # difficulty 是 str 类型以兼容空串，此处转为 int
     difficulty_int: Optional[int] = None
     if difficulty:
