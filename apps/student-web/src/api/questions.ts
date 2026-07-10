@@ -124,4 +124,12 @@ export const questionsApi = {
     });
     return res.data;
   },
+
+  /**
+   * alias: attempt — MathLearning.tsx 调用此名称
+   * 与 submitAttempt 功能完全一致
+   */
+  async attempt(id: string, userAnswer: string, timeSpent: number = 5000): Promise<AttemptResult> {
+    return this.submitAttempt(id, userAnswer, timeSpent);
+  },
 };

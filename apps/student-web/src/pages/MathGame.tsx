@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { startGame, submitAnswer, type SubmitAnswerParams } from '../api/client';
-import MathQuestionCard from '../components/MathQuestionCard';
+import QuestionCard from '../components/QuestionCard';
 import ScoreBoard from '../components/ScoreBoard';
 import ProgressBar from '../components/ProgressBar';
 
@@ -18,6 +18,9 @@ interface Question {
     meaning: string;
     pronunciation?: string;
   };
+  pairs?: Array<{ left: string; right: string }>;
+  sort_items?: string[];
+  word_bank?: string[];
 }
 
 interface Feedback {
@@ -197,8 +200,8 @@ export default function MathGame() {
         />
       </div>
 
-      {/* 数学题目卡片 - 支持公式渲染 */}
-      <MathQuestionCard
+      {/* 题目卡片 - 使用 QuestionCard 支持全部 7 种题型（含 tap_match/drag_sort）*/}
+      <QuestionCard
         question={question}
         questionIndex={questionIndex}
         totalQuestions={totalQuestions}

@@ -588,11 +588,18 @@ class WordGamesService:
             correct_answer = self._get_vocab_correct_answer(session, current_word)
 
         # 判断答案是否正确
-        is_correct = self._check_answer(
-            user_answer=answer.user_answer,
-            correct_answer=correct_answer,
-            game_type=session.game_type
-        )
+        # word-chain 特殊判分：用户输入的单词必须以正确首字母开头，且是有效英文单词
+        if session.game_id == "word-chain":
+            is_correct = self._check_word_chain_answer(
+                user_answer=answer.user_answer,
+                expected_letter=correct_answer,
+            )
+        else:
+            is_correct = self._check_answer(
+                user_answer=answer.user_answer,
+                correct_answer=correct_answer,
+                game_type=session.game_type
+            )
 
         # 计算得分
         points_earned = 0
@@ -635,7 +642,8 @@ class WordGamesService:
         feedback = self._generate_feedback(
             is_correct=is_correct,
             word=current_word,
-            user_answer=answer.user_answer
+            user_answer=answer.user_answer,
+            game_id=session.game_id or "",
         )
 
         # 创建结果
@@ -1473,10 +1481,28 @@ class WordGamesService:
         word: Word,
         index: int,
     ) -> WordGameQuestion:
-        """生成拼写题（SPELLING）：拼写蜂/字母泡泡/单词接龙"""
+        """生成拼写题（SPELLING）：拼写蜂/字母泡泡/单词接龙
+
+        word-chain 规则：系统给出一个单词，用户需要输入以该单词最后一个字母开头的新单词。
+        例如系统给出 "inquire"（结尾 e），用户输入 "eagle"（e 开头）即为正确。
+        """
         game_id = session.game_id
         if game_id == "word-chain":
-            question_text = f"单词接龙：请用 '{word.word[-1] if word.word else '?'}' 开头拼写一个新单词，或拼写当前词"
+            last_char = word.word[-1].lower() if word.word else "?"
+            question_text = (
+                f"单词接龙：当前单词是 '{word.word}'，"
+                f"请输入一个以字母 '{last_char}' 开头的英文单词"
+            )
+            return WordGameQuestion(
+                question_id=f"q_{index}",
+                word=word,
+                question_type=GameType.SPELLING,
+                question_text=question_text,
+                options=None,
+                correct_answer=last_char,  # 正确答案的首字母
+                hint=f"以 '{last_char}' 开头的单词",
+                points=10
+            )
         elif game_id == "word-bubble-pop":
             question_text = f"字母泡泡拼词：请拼出含义为 '{word.meaning}' 的单词"
         else:
@@ -1944,6 +1970,9 @@ class WordGamesService:
                 return f"I think the word is {word.word} here"
 
         # SPELLING / FILL_BLANK / WORD_BANK：用户拼写/填入英文单词，答案是 word.word
+        # word-chain 例外：正确答案是首字母（用户输入以该字母开头的任意单词）
+        if game_id == "word-chain":
+            return (word.correct_answer or word.word[-1] or "a").lower()[:1]
         return word.correct_answer or word.word
 
     def _check_answer(
@@ -1957,14 +1986,51 @@ class WordGamesService:
         correct_normalized = correct_answer.strip().lower()
         return user_normalized == correct_normalized
 
+    def _check_word_chain_answer(
+        self,
+        user_answer: str,
+        expected_letter: str,
+    ) -> bool:
+        """单词接龙判分：用户输入的单词必须以指定字母开头，且是有效英文单词。
+
+        判定规则：
+        1. 用户答案必须以 expected_letter 开头（不区分大小写）
+        2. 用户答案必须是有效英文单词（在词库中存在）
+        3. 用户答案长度必须 >= 2（不能只输入单字母）
+        """
+        user_word = user_answer.strip().lower()
+        letter = expected_letter.strip().lower()[:1] if expected_letter else ""
+
+        # 长度检查
+        if len(user_word) < 2:
+            return False
+
+        # 首字母检查
+        if not letter or not user_word.startswith(letter):
+            return False
+
+        # 有效单词检查：在词库中查找
+        for w in self._all_words:
+            if w.word and w.word.lower() == user_word:
+                return True
+
+        # 如果词库为空（极端情况），放宽为仅首字母检查
+        if not self._all_words:
+            return True
+
+        return False
+
     def _generate_feedback(
         self,
         is_correct: bool,
         word: Word,
-        user_answer: str
+        user_answer: str,
+        game_id: str = "",
     ) -> str:
         """生成反馈"""
         if is_correct:
+            if game_id == "word-chain":
+                return f"正确！'{user_answer}' 是有效的单词接龙！"
             feedbacks = [
                 f"正确！{word.word} = {word.meaning}",
                 f"太棒了！{word.word} 记得很牢！",
@@ -1972,6 +2038,9 @@ class WordGamesService:
             ]
             return random.choice(feedbacks)
         else:
+            if game_id == "word-chain":
+                last_char = word.word[-1] if word.word else "?"
+                return f"需要一个以 '{last_char}' 开头的有效英文单词（至少2个字母）"
             return f"正确答案是 {word.word}，意思是 {word.meaning}"
 
     def _get_game_instructions(self, game_type: GameType) -> str:
