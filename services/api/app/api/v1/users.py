@@ -27,6 +27,7 @@ from app.models.subscription import Subscription
 from app.models.user import User
 from app.schemas.admin import (
     ResetPasswordRequest,
+    SubscriptionInfo,
     UserBanRequest,
     UserCreateRequest,
     UserDetailResponse,
