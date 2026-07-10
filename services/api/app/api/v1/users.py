@@ -57,56 +57,65 @@ async def _get_user_or_404(db: AsyncSession, user_id: int) -> User:
 
 
 async def _build_user_detail(db: AsyncSession, user: User) -> UserDetailResponse:
-    """构造用户详情响应（含订阅与统计）。"""
-    # 订阅信息
-    sub_result = await db.execute(
-        select(Subscription)
-        .where(Subscription.user_id == user.id)
-        .order_by(Subscription.created_at.desc())
-        .limit(1)
-    )
-    sub = sub_result.scalar_one_or_none()
+    """构造用户详情响应（含订阅与统计）。
 
-    # 统计
-    question_count = (
-        await db.execute(
-            select(func.count()).select_from(UserQuestionAttempt).where(
+    每个子查询独立 try/except，避免单点失败导致整个接口 500。
+    """
+    import logging
+    logger = logging.getLogger("api.users")
+
+    def _strip_tz(dt):
+        """安全地剥离 datetime 的 tzinfo。"""
+        if dt and hasattr(dt, 'tzinfo') and dt.tzinfo:
+            return dt.replace(tzinfo=None)
+        return dt
+
+    # 订阅信息（失败不阻塞）
+    sub = None
+    try:
+        sub_result = await db.execute(
+            select(Subscription)
+            .where(Subscription.user_id == user.id)
+            .order_by(Subscription.created_at.desc())
+            .limit(1)
+        )
+        sub = sub_result.scalar_one_or_none()
+    except Exception as e:
+        logger.warning("Failed to load subscription for user %s: %s", user.id, e)
+
+    # 统计（每个独立 try/except，失败默认 0）
+    def _safe_count(model, label):
+        try:
+            return (
+                await db.execute(
+                    select(func.count()).select_from(model).where(
+                        model.user_id == user.id
+                    )
+                )
+            ).scalar() or 0
+        except Exception as e:
+            logger.warning("Failed to count %s for user %s: %s", label, user.id, e)
+            return 0
+
+    question_count = _safe_count(UserQuestionAttempt, "attempts")
+    word_count = _safe_count(UserWordProgress, "word_progress")
+    game_count = _safe_count(GameSession, "game_sessions")
+    ai_conversation_count = _safe_count(AIConversation, "ai_conversations")
+
+    # 学习天数
+    study_days = 0
+    try:
+        study_days_result = await db.execute(
+            select(func.count(func.distinct(func.date(UserQuestionAttempt.created_at)))).where(
                 UserQuestionAttempt.user_id == user.id
             )
         )
-    ).scalar() or 0
+        study_days = study_days_result.scalar() or 0
+    except Exception as e:
+        logger.warning("Failed to count study_days for user %s: %s", user.id, e)
 
-    word_count = (
-        await db.execute(
-            select(func.count()).select_from(UserWordProgress).where(
-                UserWordProgress.user_id == user.id
-            )
-        )
-    ).scalar() or 0
-
-    game_count = (
-        await db.execute(
-            select(func.count()).select_from(GameSession).where(
-                GameSession.user_id == user.id
-            )
-        )
-    ).scalar() or 0
-
-    ai_conversation_count = (
-        await db.execute(
-            select(func.count()).select_from(AIConversation).where(
-                AIConversation.user_id == user.id
-            )
-        )
-    ).scalar() or 0
-
-    # 学习天数（答题记录的不同日期数）
-    study_days_result = await db.execute(
-        select(func.count(func.distinct(func.date(UserQuestionAttempt.created_at)))).where(
-            UserQuestionAttempt.user_id == user.id
-        )
-    )
-    study_days = study_days_result.scalar() or 0
+    # updated_at 可能不存在（旧迁移），安全获取
+    updated_at = _strip_tz(getattr(user, 'updated_at', None) or user.created_at)
 
     return UserDetailResponse(
         id=user.id,
@@ -116,20 +125,20 @@ async def _build_user_detail(db: AsyncSession, user: User) -> UserDetailResponse
         status=user.status,
         nickname=user.nickname,
         avatar=user.avatar,
-        wechat_openid=user.wechat_openid,
+        wechat_openid=getattr(user, 'wechat_openid', None),
         vip_level=user.vip_level,
-        vip_expire_at=user.vip_expire_at.replace(tzinfo=None) if user.vip_expire_at and user.vip_expire_at.tzinfo else user.vip_expire_at,
+        vip_expire_at=_strip_tz(user.vip_expire_at),
         ai_quota_daily_override=user.ai_quota_daily_override,
-        last_login_at=user.last_login_at.replace(tzinfo=None) if user.last_login_at and user.last_login_at.tzinfo else user.last_login_at,
-        created_at=user.created_at.replace(tzinfo=None) if user.created_at and user.created_at.tzinfo else user.created_at,
-        updated_at=user.updated_at.replace(tzinfo=None) if user.updated_at and user.updated_at.tzinfo else user.updated_at,
+        last_login_at=_strip_tz(user.last_login_at),
+        created_at=_strip_tz(user.created_at),
+        updated_at=updated_at,
         subscription=(
-            {
-                "plan": sub.plan,
-                "status": sub.status,
-                "end_at": sub.end_at.replace(tzinfo=None) if sub.end_at and sub.end_at.tzinfo else sub.end_at,
-                "ai_quota_daily": sub.ai_quota_daily,
-            }
+            SubscriptionInfo(
+                plan=sub.plan,
+                status=sub.status,
+                end_at=_strip_tz(sub.end_at),
+                ai_quota_daily=sub.ai_quota_daily,
+            )
             if sub
             else None
         ),
