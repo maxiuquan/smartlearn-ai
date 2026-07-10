@@ -559,14 +559,30 @@ class WordGamesService:
         # P1-2 答案判定：优先从 Word.correct_answer 读取（已随 session 持久化），
         #         避免线性遍历 _all_math（5026 题）反查；回退才用 _get_math_correct_answer
         if is_math:
-            # 主路径：直接从 session 的 Word 读取
-            correct_answer = current_word.correct_answer or ""
-            if not correct_answer:
-                # 回退：从题库反查（兼容旧 session，未存 correct_answer 字段）
-                correct_answer = await self._get_math_correct_answer(current_word.word_id)
-            if not correct_answer:
-                # 最终回退：用 solution 第一行
-                correct_answer = (current_word.example_sentence or "").split("\n")[0]
+            # DRAG_SORT 数学题（proof-step-sort）：正确答案是排序后的步骤序列，需从 solution 重新生成
+            if session.game_type == GameType.DRAG_SORT:
+                math_q = await self._get_math_question_by_id(current_word.word_id)
+                if math_q:
+                    solution = math_q.get("solution", "")
+                    content = math_q.get("content", "")
+                    if solution:
+                        steps = [s.strip() for s in solution.replace('。', '\n').replace('.', '\n').split('\n') if s.strip()]
+                    else:
+                        steps = content.split() if content else [current_word.correct_answer or "无步骤"]
+                    if len(steps) < 2:
+                        steps = [f"步骤1: {content[:30]}", f"步骤2: 求解得 {current_word.correct_answer}"]
+                    correct_answer = " | ".join(steps)
+                else:
+                    correct_answer = current_word.correct_answer or ""
+            # TAP_MATCH 数学题（formula-link）：正确答案是数学题答案，与 word.correct_answer 一致
+            else:
+                correct_answer = current_word.correct_answer or ""
+                if not correct_answer:
+                    # 回退：从题库反查（兼容旧 session，未存 correct_answer 字段）
+                    correct_answer = await self._get_math_correct_answer(current_word.word_id)
+                if not correct_answer:
+                    # 最终回退：用 solution 第一行
+                    correct_answer = (current_word.example_sentence or "").split("\n")[0]
         else:
             # 词汇题：按 game_id 推导正确答案（与 _generate_vocab_question 题型路由一致）
             correct_answer = self._get_vocab_correct_answer(session, current_word)
@@ -1380,14 +1396,14 @@ class WordGamesService:
         if game_id in (
             "vocabulary-duel", "high-frequency-challenge", "wrong-question-boss",
             "daily-quiz-arena", "knowledge-combo-streak", "memory-maze",
-            "study-team-raid", "problem-quest-map", "formula-link",
+            "study-team-raid", "problem-quest-map",
         ):
             return self._generate_multiple_choice_question(session, word, index)
 
         # 2. TAP_MATCH 点击配对消除
         if game_id in (
             "word-match-blast", "synonym-antonym-match",
-            "picture-word-match", "memory-flip-match",
+            "picture-word-match", "memory-flip-match", "formula-link",
         ):
             return self._generate_tap_match_question(session, word, index)
 
@@ -1400,7 +1416,7 @@ class WordGamesService:
             return self._generate_spelling_question(session, word, index)
 
         # 5. DRAG_SORT 拖拽排序
-        if game_id in ("sentence-untangle", "root-affix-tree"):
+        if game_id in ("sentence-untangle", "root-affix-tree", "proof-step-sort"):
             return self._generate_drag_sort_question(session, word, index)
 
         # 6. WORD_BANK 词库填空
@@ -1411,7 +1427,7 @@ class WordGamesService:
             return self._generate_word_bank_question(session, word, index)
 
         # 7. FILL_BLANK 填空输入
-        if game_id in ("limit-blitz", "proof-step-sort"):
+        if game_id in ("limit-blitz",):
             return self._generate_fill_blank_question(session, word, index)
 
         # 兜底：默认按 game_type 出题（保持向后兼容）
@@ -1689,12 +1705,78 @@ class WordGamesService:
               极易误判（分数/根号/LaTeX 等格式差异）；选择题用选项匹配更可靠。
         - 选择题：用 answer 作正确选项，从同 chapter 题目取干扰项
         - 填空题：仅在显式要求非选择题时使用
+        - 配对消除（TAP_MATCH）：formula-link 公式连连看，题目内容↔答案配对
+        - 拖拽排序（DRAG_SORT）：proof-step-sort 证明步骤排序，solution 按行分割打乱
         """
         q_id = math_q.get("id", f"q_{index}")
         content = math_q.get("content", "")
         answer = math_q.get("answer", "")
         hints = math_q.get("hints", [])
         hint = hints[0] if hints else "请仔细审题"
+        solution = math_q.get("solution", "")
+
+        # formula-link: TAP_MATCH 公式连连看 — 题目内容↔答案配对
+        if session.game_type == GameType.TAP_MATCH:
+            # 当前题的正确配对：content 摘要 ↔ answer
+            content_short = content[:60] if content else answer
+            pairs = [{"left": content_short, "right": answer}]
+            # 从同 chapter 取 3 个干扰配对
+            same_chapter = [
+                q for q in self._all_math
+                if q.get("chapter") == math_q.get("chapter")
+                and q.get("id") != q_id
+                and q.get("answer", "") and q.get("content", "")
+            ]
+            random.shuffle(same_chapter)
+            for q in same_chapter[:3]:
+                pairs.append({
+                    "left": q.get("content", "")[:60],
+                    "right": q.get("answer", ""),
+                })
+            # 干扰项不足时用占位
+            while len(pairs) < 4:
+                pairs.append({"left": f"题目{len(pairs)+1}", "right": f"答案{len(pairs)+1}"})
+
+            return WordGameQuestion(
+                question_id=q_id,
+                word=word,
+                question_type=GameType.TAP_MATCH,
+                question_text="点击配对：将题目与正确答案配对",
+                pairs=pairs,
+                correct_answer=answer,
+                hint=hint,
+                points=10
+            )
+
+        # proof-step-sort: DRAG_SORT 证明步骤排序 — solution 按行分割打乱
+        if session.game_type == GameType.DRAG_SORT:
+            # 把 solution 按行/句号分割成步骤
+            if solution:
+                # 按换行或句号分割
+                steps = [s.strip() for s in solution.replace('。', '\n').replace('.', '\n').split('\n') if s.strip()]
+            else:
+                # 无 solution 时用 content 按词分割
+                steps = content.split() if content else [answer, "无步骤"]
+            # 至少 2 步才能排序
+            if len(steps) < 2:
+                steps = [f"步骤1: {content[:30]}", f"步骤2: 求解得 {answer}"]
+
+            correct_order = steps.copy()
+            shuffled = steps.copy()
+            random.shuffle(shuffled)
+            if shuffled == correct_order and len(shuffled) > 1:
+                shuffled[0], shuffled[1] = shuffled[1], shuffled[0]
+
+            return WordGameQuestion(
+                question_id=q_id,
+                word=word,
+                question_type=GameType.DRAG_SORT,
+                question_text=f"拖拽排序：把证明步骤排成正确顺序（题目：{content[:50]}）",
+                sort_items=shuffled,
+                correct_answer=" | ".join(correct_order),
+                hint=f"首步是 {correct_order[0][:30]}",
+                points=10
+            )
 
         # P1-2 数学题优先选择题（判分可靠）
         # 若 session.game_type 是 MULTIPLE_CHOICE 或未指定（默认），都用选择题
@@ -1835,14 +1917,14 @@ class WordGamesService:
         if game_id in (
             "vocabulary-duel", "high-frequency-challenge", "wrong-question-boss",
             "daily-quiz-arena", "knowledge-combo-streak", "memory-maze",
-            "study-team-raid", "problem-quest-map", "formula-link",
+            "study-team-raid", "problem-quest-map",
         ):
             return word.meaning
 
         # TAP_MATCH 点击配对消除：用户配对 word↔meaning，答案是 meaning
         if game_id in (
             "word-match-blast", "synonym-antonym-match",
-            "picture-word-match", "memory-flip-match",
+            "picture-word-match", "memory-flip-match", "formula-link",
         ):
             return word.meaning
 
@@ -1852,7 +1934,7 @@ class WordGamesService:
 
         # DRAG_SORT 拖拽排序：用户排成正确句子，答案是原句（空格连接）
         # 注意：与 _generate_drag_sort_question 的句子构造逻辑保持一致
-        if game_id in ("sentence-untangle", "root-affix-tree"):
+        if game_id in ("sentence-untangle", "root-affix-tree", "proof-step-sort"):
             example = (word.example_sentence or "").strip()
             if example:
                 return example.rstrip(".!?。！？")

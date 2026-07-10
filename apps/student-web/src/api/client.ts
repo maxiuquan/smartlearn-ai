@@ -41,7 +41,7 @@ client.interceptors.response.use(
 // 与后端 _generate_vocab_question 的 game_id 路由保持一致
 // 7 种真实交互题型：multiple_choice / tap_match / listen_select / spelling / drag_sort / word_bank / fill_blank
 const GAME_TYPE_MAP: Record<string, string> = {
-  // MULTIPLE_CHOICE 选择题（9 款）
+  // MULTIPLE_CHOICE 选择题（7 款）
   'vocabulary-duel': 'multiple_choice',
   'high-frequency-challenge': 'multiple_choice',
   'wrong-question-boss': 'multiple_choice',
@@ -49,30 +49,31 @@ const GAME_TYPE_MAP: Record<string, string> = {
   'knowledge-combo-streak': 'multiple_choice',
   'memory-maze': 'multiple_choice',
   'study-team-raid': 'multiple_choice',
-  'problem-quest-map': 'multiple_choice',
-  'formula-link': 'multiple_choice',
-  // TAP_MATCH 点击配对消除（4 款）
+  // TAP_MATCH 点击配对消除（5 款）
   'word-match-blast': 'tap_match',
   'synonym-antonym-match': 'tap_match',
   'picture-word-match': 'tap_match',
   'memory-flip-match': 'tap_match',
+  'formula-link': 'tap_match',
   // LISTEN_SELECT 听音选词（1 款）
   'listening-dash': 'listen_select',
   // SPELLING 拼写输入（3 款）
   'spelling-bee': 'spelling',
   'word-bubble-pop': 'spelling',
   'word-chain': 'spelling',
-  // DRAG_SORT 拖拽排序（2 款）
+  // DRAG_SORT 拖拽排序（3 款）
   'sentence-untangle': 'drag_sort',
   'root-affix-tree': 'drag_sort',
+  'proof-step-sort': 'drag_sort',
   // WORD_BANK 词库填空（4 款）
   'cloze-sprint': 'word_bank',
   'word-form-master': 'word_bank',
   'crossword-quest': 'word_bank',
   'flashcard-rush': 'word_bank',
-  // FILL_BLANK 填空输入（2 款）
+  // FILL_BLANK 填空输入（1 款）
   'limit-blitz': 'fill_blank',
-  'proof-step-sort': 'fill_blank',
+  // MULTIPLE_CHOICE 数学选择题（1 款）
+  'problem-quest-map': 'multiple_choice',
 };
 
 // 6.1① 学科映射：gameId → subject（vocabulary/math/cross_subject）
