@@ -476,6 +476,10 @@ class WordGamesService:
                 today_words=today_words,
             )
 
+        # word-chain 特殊处理：交替制需要较大 word_count 防止提前结束
+        if request.game_id == "word-chain" and request.word_count < 20:
+            words = words * 3  # 复制词库扩展，实际使用时动态替换
+
         # 确定时间限制
         time_limit = request.time_limit_seconds or self._calculate_time_limit(
             request.game_type,
@@ -590,9 +594,11 @@ class WordGamesService:
         # 判断答案是否正确
         # word-chain 特殊判分：用户输入的单词必须以正确首字母开头，且是有效英文单词
         if session.game_id == "word-chain":
+            # 使用 chain_used_words 防重复
             is_correct = self._check_word_chain_answer(
                 user_answer=answer.user_answer,
                 expected_letter=correct_answer,
+                used_words=session.chain_used_words,
             )
         else:
             is_correct = self._check_answer(
@@ -658,7 +664,43 @@ class WordGamesService:
         )
 
         # 移动到下一个
-        session.current_index += 1
+        # word-chain 交替回合制：用户答错时不推进，让用户重试同一个词
+        if session.game_id == "word-chain" and not is_correct:
+            pass  # 不推进 current_index，用户重试
+        else:
+            session.current_index += 1
+
+        # word-chain 交替回合制：用户答对后，系统接用户的词
+        # 系统接词逻辑在 _system_pick_chain_word 中实现
+        system_chain_word = None
+        if session.game_id == "word-chain" and is_correct:
+            user_word = answer.user_answer.strip()
+            # 把用户词加入已用列表
+            if user_word and user_word.lower() not in [w.lower() for w in session.chain_used_words]:
+                session.chain_used_words.append(user_word)
+            # 系统接用户词的尾字母
+            system_chain_word = self._system_pick_chain_word(
+                last_letter=user_word[-1].lower() if user_word else "a",
+                used_words=session.chain_used_words,
+            )
+            if system_chain_word:
+                # 系统接上词，更新链状态，下一题显示系统接的词
+                session.chain_current_word = system_chain_word
+                session.chain_turn = "system"
+                if system_chain_word.lower() not in [w.lower() for w in session.chain_used_words]:
+                    session.chain_used_words.append(system_chain_word)
+                # 附加系统接词信息到反馈
+                feedback += f"\n🤖 系统接词：'{system_chain_word}'（尾字母 '{system_chain_word[-1].lower()}'）"
+            else:
+                # 系统接不上 → 用户胜利，游戏结束
+                feedback += "\n🎉 系统接不上！你赢了本回合！"
+                # 仍继续游戏，但下一题从新词重新开始
+                session.chain_current_word = ""
+                session.chain_turn = "user"
+        elif session.game_id == "word-chain" and not is_correct:
+            # 用户接错：保留当前链状态，下题重试同一词
+            # 不清空 chain_current_word，让用户继续接同一个词
+            pass
 
         # 检查游戏是否结束
         is_game_over = session.current_index >= len(session.words)
@@ -676,21 +718,33 @@ class WordGamesService:
         # 获取下一题
         next_question = None
         if not is_game_over:
-            # P1-2/P1-3 判断下一题是否为数学题：
-            # 跨科游戏的混合题库里，只有 word_id 在数学题库里的才是数学题
-            next_word = session.words[session.current_index]
-            math_next: List[Dict] = []
-            if is_math:
-                # MATH 或 CROSS_SUBJECT：尝试反查数学题库
-                math_q = await self._get_math_question_by_id(next_word.word_id)
-                if math_q:
-                    math_next = [math_q]
-            # 若 math_next 为空（词汇题或跨科中的词汇题），_generate_question 自动走词汇分支
-            next_question = await self._generate_question(
-                session=session,
-                index=session.current_index,
-                math_questions=math_next,
-            )
+            if session.game_id == "word-chain":
+                # word-chain 交替回合制下一题生成
+                # session.chain_current_word 已在上方更新为系统接的词
+                # session.chain_turn 已设为 "system"
+                next_word = session.words[session.current_index] if session.current_index < len(session.words) else session.words[-1]
+                next_question = self._generate_spelling_question(
+                    session=session,
+                    word=next_word,
+                    index=session.current_index,
+                )
+            else:
+                # 其他游戏：原有逻辑
+                # P1-2/P1-3 判断下一题是否为数学题：
+                # 跨科游戏的混合题库里，只有 word_id 在数学题库里的才是数学题
+                next_word = session.words[session.current_index]
+                math_next: List[Dict] = []
+                if is_math:
+                    # MATH 或 CROSS_SUBJECT：尝试反查数学题库
+                    math_q = await self._get_math_question_by_id(next_word.word_id)
+                    if math_q:
+                        math_next = [math_q]
+                # 若 math_next 为空（词汇题或跨科中的词汇题），_generate_question 自动走词汇分支
+                next_question = await self._generate_question(
+                    session=session,
+                    index=session.current_index,
+                    math_questions=math_next,
+                )
 
         # 计算进度
         progress = session.current_index / len(session.words)
@@ -1483,24 +1537,50 @@ class WordGamesService:
     ) -> WordGameQuestion:
         """生成拼写题（SPELLING）：拼写蜂/字母泡泡/单词接龙
 
-        word-chain 规则：系统给出一个单词，用户需要输入以该单词最后一个字母开头的新单词。
-        例如系统给出 "inquire"（结尾 e），用户输入 "eagle"（e 开头）即为正确。
+        word-chain 交替回合制：
+        - 系统先出题（session.chain_current_word 为空时用预设词首发）
+        - 用户接词后，系统接用户的词（在 submit_answer 中生成）
+        - 系统接完再让用户接，循环交替
         """
         game_id = session.game_id
         if game_id == "word-chain":
-            last_char = word.word[-1].lower() if word.word else "?"
-            question_text = (
-                f"单词接龙：当前单词是 '{word.word}'，"
-                f"请输入一个以字母 '{last_char}' 开头的英文单词"
-            )
+            # 交替回合制：使用 session.chain_current_word 作为当前链尾词
+            if session.chain_current_word:
+                current_word = session.chain_current_word
+            else:
+                # 首次：系统用预设词首发
+                current_word = word.word
+                session.chain_current_word = current_word
+                if current_word and current_word.lower() not in [w.lower() for w in session.chain_used_words]:
+                    session.chain_used_words.append(current_word)
+
+            last_char = current_word[-1].lower() if current_word else "a"
+            turn = session.chain_turn
+            if turn == "system":
+                # 系统刚接完词（在 submit_answer 中生成），现在轮到用户
+                sys_word = session.chain_current_word
+                sys_last = sys_word[-1].lower() if sys_word else "a"
+                question_text = (
+                    f"✅ 系统接词：'{sys_word}'\n"
+                    f"👉 请输入以 '{sys_last}' 开头的英文单词继续接龙"
+                )
+                expected = sys_last
+            else:
+                # 系统首发或用户刚接完词后系统未动（正常应已在 submit_answer 处理）
+                question_text = (
+                    f"🔢 系统出词：'{current_word}'\n"
+                    f"👉 请输入以 '{last_char}' 开头的英文单词接龙"
+                )
+                expected = last_char
+
             return WordGameQuestion(
                 question_id=f"q_{index}",
                 word=word,
                 question_type=GameType.SPELLING,
                 question_text=question_text,
                 options=None,
-                correct_answer=last_char,  # 正确答案的首字母
-                hint=f"以 '{last_char}' 开头的单词",
+                correct_answer=expected,
+                hint=f"以 '{expected}' 开头的单词（已用 {len(session.chain_used_words)} 词）",
                 points=10
             )
         elif game_id == "word-bubble-pop":
@@ -1990,13 +2070,15 @@ class WordGamesService:
         self,
         user_answer: str,
         expected_letter: str,
+        used_words: List[str] = None,
     ) -> bool:
-        """单词接龙判分：用户输入的单词必须以指定字母开头，且是有效英文单词。
+        """单词接龙判分：用户输入的单词必须以指定字母开头，是有效英文单词，且未在本局使用过。
 
         判定规则：
         1. 用户答案必须以 expected_letter 开头（不区分大小写）
         2. 用户答案必须是有效英文单词（在词库中存在）
         3. 用户答案长度必须 >= 2（不能只输入单字母）
+        4. 用户答案未在本局已使用过（避免重复）
         """
         user_word = user_answer.strip().lower()
         letter = expected_letter.strip().lower()[:1] if expected_letter else ""
@@ -2007,6 +2089,11 @@ class WordGamesService:
 
         # 首字母检查
         if not letter or not user_word.startswith(letter):
+            return False
+
+        # 重复词检查
+        used_words = used_words or []
+        if user_word in [w.lower() for w in used_words]:
             return False
 
         # 有效单词检查：在词库中查找
@@ -2020,6 +2107,40 @@ class WordGamesService:
 
         return False
 
+    def _find_chain_word(
+        self,
+        start_letter: str,
+        used_words: List[str],
+    ) -> Optional[Word]:
+        """从词库中找一个以指定字母开头且未使用过的单词（用于系统接龙）。"""
+        used_lower = {w.lower() for w in used_words if w}
+        candidates = [
+            w for w in self._all_words
+            if w.word
+            and w.word[0].lower() == start_letter.lower()
+            and w.word.lower() not in used_lower
+        ]
+        if not candidates:
+            return None
+        return random.choice(candidates)
+
+    def _system_pick_chain_word(
+        self,
+        last_letter: str,
+        used_words: List[str],
+    ) -> str:
+        """系统接龙：根据用户词尾字母，从词库挑一个有效词作为系统回应。
+
+        返回空字符串表示系统接不上（用户胜本回合）。
+        优先选择长度 ≥3 的常见词，避免太难。
+        """
+        if not last_letter:
+            return ""
+        word_obj = self._find_chain_word(last_letter, used_words)
+        if word_obj and word_obj.word:
+            return word_obj.word
+        return ""
+
     def _generate_feedback(
         self,
         is_correct: bool,
@@ -2030,7 +2151,8 @@ class WordGamesService:
         """生成反馈"""
         if is_correct:
             if game_id == "word-chain":
-                return f"正确！'{user_answer}' 是有效的单词接龙！"
+                user_last = user_answer[-1] if user_answer else "?"
+                return f"✅ 正确！'{user_answer}' 是有效的单词接龙（尾字母 '{user_last}'），系统正在接龙..."
             feedbacks = [
                 f"正确！{word.word} = {word.meaning}",
                 f"太棒了！{word.word} 记得很牢！",
@@ -2039,8 +2161,8 @@ class WordGamesService:
             return random.choice(feedbacks)
         else:
             if game_id == "word-chain":
-                last_char = word.word[-1] if word.word else "?"
-                return f"需要一个以 '{last_char}' 开头的有效英文单词（至少2个字母）"
+                # 反馈中提示期望的首字母
+                return f"❌ 需要一个以期望字母开头的有效英文单词（至少2个字母，不能重复使用已用过的词）"
             return f"正确答案是 {word.word}，意思是 {word.meaning}"
 
     def _get_game_instructions(self, game_type: GameType) -> str:

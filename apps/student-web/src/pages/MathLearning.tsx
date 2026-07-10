@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import FormulaText from '../components/FormulaText';
 import AIAssistant from '../components/AIAssistant';
+import HandwritingPad from '../components/HandwritingPad';
+import ScratchPad from '../components/ScratchPad';
 import {
   questionsApi,
   type QuestionItem,
@@ -51,6 +53,8 @@ export default function MathLearning() {
   const [attemptResult, setAttemptResult] = useState<AttemptResult | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [answerError, setAnswerError] = useState('');
+  // 辅助工具面板：none/handwriting/scratch
+  const [toolPanel, setToolPanel] = useState<'none' | 'handwriting' | 'scratch'>('none');
 
   const pageSize = 10;
 
@@ -337,6 +341,49 @@ export default function MathLearning() {
                 </button>
               )}
             </div>
+
+            {/* 辅助工具切换 */}
+            <div className="flex gap-2 mt-4">
+              <button
+                type="button"
+                onClick={() => setToolPanel(toolPanel === 'handwriting' ? 'none' : 'handwriting')}
+                className={`px-3 py-1.5 text-xs rounded-lg border transition-all ${
+                  toolPanel === 'handwriting'
+                    ? 'border-purple-400 bg-purple-50 text-purple-700'
+                    : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                ✍️ 手写板
+              </button>
+              <button
+                type="button"
+                onClick={() => setToolPanel(toolPanel === 'scratch' ? 'none' : 'scratch')}
+                className={`px-3 py-1.5 text-xs rounded-lg border transition-all ${
+                  toolPanel === 'scratch'
+                    ? 'border-yellow-400 bg-yellow-50 text-yellow-700'
+                    : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                📝 草稿纸
+              </button>
+            </div>
+
+            {/* 手写板面板 */}
+            {toolPanel === 'handwriting' && (
+              <div className="mt-3">
+                <HandwritingPad height={260} />
+                <p className="text-xs text-gray-400 mt-1">
+                  支持鼠标/触摸手写，可撤销、清空、保存图片。用于书写推导步骤或绘制图形。
+                </p>
+              </div>
+            )}
+
+            {/* 草稿纸面板 */}
+            {toolPanel === 'scratch' && (
+              <div className="mt-3">
+                <ScratchPad height={260} />
+              </div>
+            )}
           </div>
 
           {/* AI 辅导 */}

@@ -4,6 +4,8 @@ import { startGame, submitAnswer, type SubmitAnswerParams } from '../api/client'
 import QuestionCard from '../components/QuestionCard';
 import ScoreBoard from '../components/ScoreBoard';
 import ProgressBar from '../components/ProgressBar';
+import HandwritingPad from '../components/HandwritingPad';
+import ScratchPad from '../components/ScratchPad';
 
 interface Question {
   question_id: string;
@@ -45,6 +47,7 @@ export default function MathGame() {
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [toolPanel, setToolPanel] = useState<'none' | 'handwriting' | 'scratch'>('none');
 
   const questionStartTime = useRef(Date.now());
   const timerRef = useRef<ReturnType<typeof setInterval>>();
@@ -209,6 +212,49 @@ export default function MathGame() {
         feedback={feedback}
         submitting={submitting}
       />
+
+      {/* 辅助工具切换 */}
+      <div className="flex gap-2 mt-4">
+        <button
+          type="button"
+          onClick={() => setToolPanel(toolPanel === 'handwriting' ? 'none' : 'handwriting')}
+          className={`px-3 py-1.5 text-xs rounded-lg border transition-all ${
+            toolPanel === 'handwriting'
+              ? 'border-purple-400 bg-purple-50 text-purple-700'
+              : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+          }`}
+        >
+          ✍️ 手写板
+        </button>
+        <button
+          type="button"
+          onClick={() => setToolPanel(toolPanel === 'scratch' ? 'none' : 'scratch')}
+          className={`px-3 py-1.5 text-xs rounded-lg border transition-all ${
+            toolPanel === 'scratch'
+              ? 'border-yellow-400 bg-yellow-50 text-yellow-700'
+              : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+          }`}
+        >
+          📝 草稿纸
+        </button>
+      </div>
+
+      {/* 手写板面板 */}
+      {toolPanel === 'handwriting' && (
+        <div className="mt-3">
+          <HandwritingPad height={260} />
+          <p className="text-xs text-gray-400 mt-1">
+            支持鼠标/触摸手写，可撤销、清空、保存图片。用于书写推导步骤或绘制图形。
+          </p>
+        </div>
+      )}
+
+      {/* 草稿纸面板 */}
+      {toolPanel === 'scratch' && (
+        <div className="mt-3">
+          <ScratchPad height={260} />
+        </div>
+      )}
     </div>
   );
 }

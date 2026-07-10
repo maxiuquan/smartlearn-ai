@@ -84,6 +84,10 @@ class WordGameSession(BaseModel):
     started_at: datetime = Field(default_factory=datetime.now, description="开始时间")
     is_active: bool = Field(default=True, description="是否活跃")
     answered: List[AnswerRecord] = Field(default_factory=list, description="逐题作答记录（6.2④）")
+    # 单词接龙交替回合制：记录当前链尾字母、已用单词、系统出过的词、当前回合
+    chain_current_word: str = Field(default="", description="单词接龙当前链尾单词（系统或用户最后输入的词）")
+    chain_used_words: List[str] = Field(default_factory=list, description="单词接龙已用单词列表（防重复）")
+    chain_turn: str = Field(default="user", description="当前回合：user=等待用户接词，system=系统刚接完词")
 
 
 class WordGameQuestion(BaseModel):
