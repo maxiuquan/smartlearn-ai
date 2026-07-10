@@ -138,6 +138,12 @@ class Settings(BaseSettings):
     COGVIEW_API_KEY: str = ""
     COGVIEW_BASE_URL: str = "https://open.bigmodel.cn/api/paas/v4/"
     COGVIEW_MODEL: str = "cogview-3-flash"
+
+    # --- 兜底 OpenAI 兼容供应商 - 当 GLM/DeepSeek 都不可用时启用 ---
+    # 可填任意 OpenAI 兼容服务（如 OpenAI、SiliconFlow 聊天模型、Kimi、通义等）
+    FALLBACK_OPENAI_API_KEY: str = ""
+    FALLBACK_OPENAI_BASE_URL: str = "https://api.openai.com/v1"
+    FALLBACK_OPENAI_MODEL: str = "gpt-4o-mini"
     
     # ============================================================
     # 向量存储配置
@@ -171,8 +177,9 @@ class Settings(BaseSettings):
             or self.DEEPSEEK_API_KEY
             or self.SILICONFLOW_API_KEY
             or self.COGVIEW_API_KEY
+            or self.FALLBACK_OPENAI_API_KEY
         )
-    
+
     @property
     def active_providers(self) -> list[str]:
         """列出当前已配置的活跃供应商"""
@@ -187,6 +194,8 @@ class Settings(BaseSettings):
             providers.append("siliconflow")
         if self.COGVIEW_API_KEY:
             providers.append("cogview")
+        if self.FALLBACK_OPENAI_API_KEY:
+            providers.append("fallback_openai")
         return providers
     
     class Config:

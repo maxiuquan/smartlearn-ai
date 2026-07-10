@@ -228,6 +228,10 @@ services:
       - COGVIEW_API_KEY=${COGVIEW_API_KEY:-}
       - COGVIEW_BASE_URL=${COGVIEW_BASE_URL:-https://open.bigmodel.cn/api/paas/v4/}
       - COGVIEW_MODEL=${COGVIEW_MODEL:-cogview-3-flash}
+      # 兜底 OpenAI 兼容供应商（当 GLM/DeepSeek 都不可用时启用）
+      - FALLBACK_OPENAI_API_KEY=${FALLBACK_OPENAI_API_KEY:-}
+      - FALLBACK_OPENAI_BASE_URL=${FALLBACK_OPENAI_BASE_URL:-https://api.openai.com/v1}
+      - FALLBACK_OPENAI_MODEL=${FALLBACK_OPENAI_MODEL:-gpt-4o-mini}
       # 向量存储
       - VECTOR_STORE_TYPE=${VECTOR_STORE_TYPE:-inmemory}
       - MILVUS_HOST=milvus

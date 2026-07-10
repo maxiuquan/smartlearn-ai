@@ -55,6 +55,10 @@ class ProviderUnavailableError(Exception):
 
 # ─── 路由配置 ────────────────────────────────────────────────
 
+# 兜底供应商：当主/备供应商均不可用时（限流/超时/宕机）的最后保障。
+# 通过环境变量 FALLBACK_OPENAI_API_KEY 等配置，可填任意 OpenAI 兼容服务。
+LAST_RESORT_PROVIDER = "fallback_openai"
+
 # 路由策略: (capability, subject) -> {"primary": provider_name, "fallback": provider_name}
 # capability: chat, embedding, tts, stt, image, moderation
 # subject: math, english, politics, professional, default, * (通配)
@@ -127,9 +131,16 @@ class AIRouter:
         return self._registry.get_provider(name)
 
     def _any_online_provider(self, capability: str, subject: str = "default") -> bool:
-        """判断该能力路由是否存在任一在线（已配置、非离线）供应商。"""
+        """判断该能力路由是否存在任一在线（已配置、非离线）供应商。
+
+        对 chat 能力，额外检查兜底供应商 fallback_openai。
+        """
         primary_name, fallback_name = self._resolve_route(capability, subject)
-        for name in (primary_name, fallback_name):
+        candidates = [primary_name, fallback_name]
+        # chat 能力额外纳入兜底供应商
+        if capability == "chat":
+            candidates.append(LAST_RESORT_PROVIDER)
+        for name in candidates:
             if not name:
                 continue
             provider = self._get_provider(name)
@@ -235,6 +246,30 @@ class AIRouter:
                     )
                     errors.append((fallback_name, e))
 
+        # 尝试兜底供应商（OpenAI 兼容，最后保障）
+        provider = self._get_provider(LAST_RESORT_PROVIDER)
+        if provider is not None and not provider.is_offline:
+            start = time.time()
+            try:
+                result = await provider.chat_completion(
+                    messages, max_tokens, temperature, **kwargs
+                )
+                self._record_request(LAST_RESORT_PROVIDER, True, time.time() - start)
+                logger.warning(
+                    "[AIRouter] chat 主/备供应商均不可用，已使用兜底供应商 %s 应答",
+                    LAST_RESORT_PROVIDER,
+                )
+                return result
+            except Exception as e:
+                self._record_request(LAST_RESORT_PROVIDER, False, time.time() - start)
+                logger.error(
+                    "[AIRouter] chat 兜底供应商 %s 运行时故障: error_type=%s msg=%s",
+                    LAST_RESORT_PROVIDER,
+                    type(e).__name__,
+                    e,
+                )
+                errors.append((LAST_RESORT_PROVIDER, e))
+
         # 判断是否离线模式：没有任何在线供应商
         if not self._any_online_provider("chat", subject):
             # 离线模式：返回模拟响应（调用方需显式标注 simulated=true）
@@ -314,6 +349,31 @@ class AIRouter:
                         e,
                     )
                     errors.append((fallback_name, e))
+
+        # 尝试兜底供应商（OpenAI 兼容，最后保障）
+        provider = self._get_provider(LAST_RESORT_PROVIDER)
+        if provider is not None and not provider.is_offline:
+            start = time.time()
+            try:
+                logger.warning(
+                    "[AIRouter] 流式 chat 主/备供应商均不可用，尝试兜底供应商 %s",
+                    LAST_RESORT_PROVIDER,
+                )
+                async for chunk in provider.chat_completion_stream(
+                    messages, max_tokens, temperature, **kwargs
+                ):
+                    yield chunk
+                self._record_request(LAST_RESORT_PROVIDER, True, time.time() - start)
+                return
+            except Exception as e:
+                self._record_request(LAST_RESORT_PROVIDER, False, time.time() - start)
+                logger.error(
+                    "[AIRouter] 流式 chat 兜底供应商 %s 运行时故障: error_type=%s msg=%s",
+                    LAST_RESORT_PROVIDER,
+                    type(e).__name__,
+                    e,
+                )
+                errors.append((LAST_RESORT_PROVIDER, e))
 
         # 运行时故障：向上抛出
         if errors:
