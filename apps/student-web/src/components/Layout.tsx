@@ -6,6 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 const NAV_ITEMS = [
   { path: '/dashboard', label: '仪表盘', emoji: '📊' },
   { path: '/vocab', label: '词汇学习', emoji: '📖' },
+  { path: '/math', label: '数学学习', emoji: '📐' },
   { path: '/practice', label: '题库练习', emoji: '✏️' },
   { path: '/exam', label: '真题模拟', emoji: '📝' },
   { path: '/ai-tutor', label: 'AI 辅导', emoji: '🤖' },

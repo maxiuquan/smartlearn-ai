@@ -45,10 +45,10 @@ export async function getUserStats(id: string): Promise<UserStats> {
 }
 
 // 批量导入用户
-export async function importUsers(file: File): Promise<{ success: number; failed: number }> {
+export async function importUsers(file: File): Promise<{ success_count: number; error_count: number }> {
   const formData = new FormData();
   formData.append('file', file);
-  return api.post<{ success: number; failed: number }>('/users/import', formData, {
+  return api.post<{ success_count: number; error_count: number }>('/users/import', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
 }

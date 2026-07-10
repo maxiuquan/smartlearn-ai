@@ -64,12 +64,19 @@ const UserDetail: React.FC = () => {
   const fetchUser = async () => {
     setLoading(true);
     try {
-      const [userRes, statsRes] = await Promise.all([
-        getUser(id!),
-        getUserStats(id!),
-      ]);
+      const userRes = await getUser(id!);
       setUser(userRes);
-      setStats(statsRes);
+      // stats 已嵌入在 user 响应中，也可从单独端点获取
+      if (userRes.stats) {
+        setStats(userRes.stats);
+      } else {
+        try {
+          const statsRes = await getUserStats(id!);
+          setStats(statsRes);
+        } catch {
+          // 统计获取失败不阻塞
+        }
+      }
     } catch (error) {
       message.error('获取用户信息失败');
     } finally {
@@ -220,7 +227,7 @@ const UserDetail: React.FC = () => {
           <Avatar src={user.avatar} size={80} />
           <div style={{ flex: 1 }}>
             <h2 style={{ margin: 0, marginBottom: 8 }}>
-              {user.nickname || user.username}
+              {user.nickname || user.email || user.phone || `用户${user.id}`}
             </h2>
             <Space>
               <Tag color={roleColorMap[user.role]}>{roleTextMap[user.role]}</Tag>
@@ -255,11 +262,11 @@ const UserDetail: React.FC = () => {
       {/* 统计数据 */}
       <div style={{ marginTop: 16 }}>
         <Space size="large" wrap>
-          <StatCard title="学习天数" value={stats?.studyDays || 0} />
-          <StatCard title="学习时长" value={stats?.totalStudyTime || 0} suffix="分钟" />
-          <StatCard title="完成题目" value={stats?.questionsCompleted || 0} />
-          <StatCard title="正确率" value={(stats?.accuracy || 0) * 100} precision={1} suffix="%" />
-          <StatCard title="学习单词" value={stats?.wordsLearned || 0} />
+          <StatCard title="学习天数" value={stats?.study_days || 0} />
+          <StatCard title="完成题目" value={stats?.question_count || 0} />
+          <StatCard title="学习单词" value={stats?.word_count || 0} />
+          <StatCard title="游戏场次" value={stats?.game_count || 0} />
+          <StatCard title="AI对话数" value={stats?.ai_conversation_count || 0} />
         </Space>
       </div>
 
@@ -273,8 +280,7 @@ const UserDetail: React.FC = () => {
               children: (
                 <Descriptions bordered column={2}>
                   <Descriptions.Item label="用户ID">{user.id}</Descriptions.Item>
-                  <Descriptions.Item label="用户名">{user.username}</Descriptions.Item>
-                  <Descriptions.Item label="邮箱">{user.email}</Descriptions.Item>
+                  <Descriptions.Item label="邮箱">{user.email || '-'}</Descriptions.Item>
                   <Descriptions.Item label="手机">{user.phone || '-'}</Descriptions.Item>
                   <Descriptions.Item label="昵称">{user.nickname || '-'}</Descriptions.Item>
                   <Descriptions.Item label="角色">
@@ -286,18 +292,18 @@ const UserDetail: React.FC = () => {
                     </Tag>
                   </Descriptions.Item>
                   <Descriptions.Item label="注册时间">
-                    {dayjs(user.createdAt).format('YYYY-MM-DD HH:mm:ss')}
+                    {dayjs(user.created_at).format('YYYY-MM-DD HH:mm:ss')}
                   </Descriptions.Item>
                   <Descriptions.Item label="最后登录">
-                    {user.lastLoginAt
-                      ? dayjs(user.lastLoginAt).format('YYYY-MM-DD HH:mm:ss')
+                    {user.last_login_at
+                      ? dayjs(user.last_login_at).format('YYYY-MM-DD HH:mm:ss')
                       : '-'}
                   </Descriptions.Item>
-                  <Descriptions.Item label="年级">
-                    {user.profile?.grade || '-'}
+                  <Descriptions.Item label="微信OpenID">
+                    {user.wechat_openid || '-'}
                   </Descriptions.Item>
-                  <Descriptions.Item label="学校">
-                    {user.profile?.school || '-'}
+                  <Descriptions.Item label="订阅计划">
+                    {user.subscription?.plan || 'free'}
                   </Descriptions.Item>
                   <Descriptions.Item label="VIP 等级">
                     {user.vip_level ?? 0}
@@ -310,6 +316,9 @@ const UserDetail: React.FC = () => {
                   <Descriptions.Item label="AI 配额覆盖">
                     {user.ai_quota_daily_override ?? '-'}
                   </Descriptions.Item>
+                  <Descriptions.Item label="每日AI配额">
+                    {user.subscription?.ai_quota_daily ?? 10}
+                  </Descriptions.Item>
                 </Descriptions>
               ),
             },
@@ -317,36 +326,15 @@ const UserDetail: React.FC = () => {
               key: 'knowledge',
               label: '知识点掌握',
               children: (
-                <Table
-                  dataSource={stats?.knowledgePoints || []}
-                  rowKey="id"
-                  pagination={false}
-                  columns={[
-                    { title: '知识点', dataIndex: 'name' },
-                    {
-                      title: '进度',
-                      dataIndex: 'progress',
-                      render: (v: number) => (
-                        <Progress percent={Math.round(v * 100)} size="small" />
-                      ),
-                    },
-                    {
-                      title: '掌握度',
-                      dataIndex: 'mastery',
-                      render: (v: number) => (
-                        <Progress
-                          percent={Math.round(v * 100)}
-                          size="small"
-                          strokeColor={{
-                            '0%': '#ff4d4f',
-                            '50%': '#faad14',
-                            '100%': '#52c41a',
-                          }}
-                        />
-                      ),
-                    },
-                  ]}
-                />
+                <div style={{ textAlign: 'center', padding: '40px 0', color: '#999' }}>
+                  <p>知识点掌握详情功能开发中</p>
+                  <p style={{ fontSize: 13 }}>
+                    完成题目：{stats?.question_count || 0} ·
+                    学习单词：{stats?.word_count || 0} ·
+                    游戏场次：{stats?.game_count || 0} ·
+                    AI对话：{stats?.ai_conversation_count || 0}
+                  </p>
+                </div>
               ),
             },
           ]}

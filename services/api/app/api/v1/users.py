@@ -118,16 +118,16 @@ async def _build_user_detail(db: AsyncSession, user: User) -> UserDetailResponse
         avatar=user.avatar,
         wechat_openid=user.wechat_openid,
         vip_level=user.vip_level,
-        vip_expire_at=user.vip_expire_at,
+        vip_expire_at=user.vip_expire_at.replace(tzinfo=None) if user.vip_expire_at and user.vip_expire_at.tzinfo else user.vip_expire_at,
         ai_quota_daily_override=user.ai_quota_daily_override,
-        last_login_at=user.last_login_at,
-        created_at=user.created_at,
-        updated_at=user.updated_at,
+        last_login_at=user.last_login_at.replace(tzinfo=None) if user.last_login_at and user.last_login_at.tzinfo else user.last_login_at,
+        created_at=user.created_at.replace(tzinfo=None) if user.created_at and user.created_at.tzinfo else user.created_at,
+        updated_at=user.updated_at.replace(tzinfo=None) if user.updated_at and user.updated_at.tzinfo else user.updated_at,
         subscription=(
             {
                 "plan": sub.plan,
                 "status": sub.status,
-                "end_at": sub.end_at,
+                "end_at": sub.end_at.replace(tzinfo=None) if sub.end_at and sub.end_at.tzinfo else sub.end_at,
                 "ai_quota_daily": sub.ai_quota_daily,
             }
             if sub

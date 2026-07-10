@@ -56,6 +56,7 @@ export interface GetQuestionsParams {
   subject?: string;
   type?: string;
   difficulty?: string;
+  category?: string;
   kp_id?: string;
   page?: number;
 }
@@ -75,6 +76,7 @@ export const questionsApi = {
         subject: params.subject,
         type: params.type,
         difficulty: params.difficulty,
+        category: params.category,
         kp_id: params.kp_id,
         page: params.page || 1,
       },

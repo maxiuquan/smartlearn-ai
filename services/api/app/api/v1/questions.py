@@ -34,6 +34,7 @@ async def list_questions(
     kp_id: Optional[str] = Query(None, description="知识点 slug 筛选"),
     difficulty: Optional[str] = Query(None, description="难度筛选（1-5）"),
     type: Optional[str] = Query(None, description="题型筛选"),
+    category: Optional[str] = Query(None, description="分类筛选（CET4/CET6/考研等，按 tags 包含匹配）"),
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
@@ -42,6 +43,7 @@ async def list_questions(
 
     - 列表不返回答案和解析
     - 空字符串参数视为 None（前端未选筛选器时传空串）
+    - category 按 tags 数组包含匹配（如 category=CET4 匹配 tags 含 "CET4" 的题）
     """
     conditions = []
     if subject:
@@ -51,6 +53,9 @@ async def list_questions(
     # P0-4 修复: kp_id 筛选加入 conditions（knowledge_points 是 JSONB 数组，用 contains 查询）
     if kp_id:
         conditions.append(Question.knowledge_points.contains([kp_id]))
+    # category 按 tags 数组包含匹配
+    if category:
+        conditions.append(Question.tags.contains([category]))
     # difficulty 是 str 类型以兼容空串，此处转为 int
     difficulty_int: Optional[int] = None
     if difficulty:

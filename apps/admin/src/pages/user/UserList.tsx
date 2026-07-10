@@ -331,7 +331,7 @@ const UserList: React.FC = () => {
     setImporting(true);
     try {
       const result = await importUsers(importFile);
-      message.success(`导入成功 ${result.success} 个，失败 ${result.failed} 个`);
+      message.success(`导入成功 ${result.success_count} 个，失败 ${result.error_count} 个`);
       setImportModalVisible(false);
       setImportFile(null);
       actionRef.current?.reload();

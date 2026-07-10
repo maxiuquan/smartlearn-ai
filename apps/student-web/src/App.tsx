@@ -13,6 +13,7 @@ import GameResult from './pages/GameResult';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import VocabLearning from './pages/VocabLearning';
+import MathLearning from './pages/MathLearning';
 import QuestionPractice from './pages/QuestionPractice';
 import PastExam from './pages/PastExam';
 import AITutor from './pages/AITutor';
@@ -41,6 +42,16 @@ function App() {
           <ProtectedRoute>
             <Layout>
               <VocabLearning />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/math"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <MathLearning />
             </Layout>
           </ProtectedRoute>
         }

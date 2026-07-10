@@ -1,0 +1,3722 @@
+{
+  "subject": "考研数学二",
+  "subject_code": "math2",
+  "version": "1.0.0",
+  "last_updated": "2026-07-10",
+  "description": "考研数学二历年真题",
+  "notice": "题目来源于公开的 GitHub 开源仓库，答案仅供参考，请以官方公布为准",
+  "papers": [
+    {
+      "id": "math2-2010",
+      "year": "2010",
+      "subject": "数学二",
+      "category": "math2",
+      "paper_name": "2010年考研数学二真题",
+      "questions": [
+        {
+          "id": "math2-2010-q1",
+          "number": 1,
+          "type": "choice",
+          "score": 4,
+          "content": "函数 $f(x) = \\frac{x^2 - x}{x^2 - 1}\\sqrt{1 + \\frac{1}{x^2}}$ 的无穷间断点的个数为……",
+          "options": {
+            "A": "0",
+            "B": "1",
+            "C": "2",
+            "D": "3"
+          },
+          "answer": "B",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "选择题",
+          "knowledge_points": [
+            "math-choice"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选择题",
+            "2010年数学二"
+          ]
+        },
+        {
+          "id": "math2-2010-q2",
+          "number": 2,
+          "type": "choice",
+          "score": 4,
+          "content": "设 $y_{1}, y_{2}$ 是一阶线性非齐次微分方程 $y' + p(x)y = q(x)$ 的两个特解, 若常数 $\\lambda, \\mu$ 使 $\\lambda y_{1} + \\mu y_{2}$ 是该方程的解, $\\lambda y_{1} - \\mu y_{2}$ 是该方程对应的齐次方程的解, 则 $\\cdot$ ( ",
+          "options": {
+            "A": "$\\lambda = \\frac{1}{2},\\mu = \\frac{1}{2}.$",
+            "B": "$\\lambda = -\\frac{1}{2}, \\mu = -\\frac{1}{2}$ ",
+            "C": "$\\lambda = \\frac{2}{3},\\mu = \\frac{1}{3}.$",
+            "D": "$\\lambda = \\frac{2}{3},\\mu = \\frac{2}{3}.$"
+          },
+          "answer": "A",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "选择题",
+          "knowledge_points": [
+            "math-choice"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选择题",
+            "2010年数学二"
+          ]
+        },
+        {
+          "id": "math2-2010-q3",
+          "number": 3,
+          "type": "choice",
+          "score": 4,
+          "content": "曲线 $y = x^{2}$ 与曲线 $y = a\\ln x$ （ $a \\neq 0$ ）相切，则 $a = \\dots \\dots \\dots \\dots \\dots \\dots \\dots \\dots \\dots \\dots \\dots \\dots \\dots \\dots$ ",
+          "options": {
+            "A": "4e",
+            "B": "3e",
+            "C": "$2\\mathbf{e}$",
+            "D": "e"
+          },
+          "answer": "C",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "选择题",
+          "knowledge_points": [
+            "math-choice"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选择题",
+            "2010年数学二"
+          ]
+        },
+        {
+          "id": "math2-2010-q4",
+          "number": 4,
+          "type": "choice",
+          "score": 4,
+          "content": "设向量组 $\\mathrm{I}:\\alpha_{1},\\alpha_{2},\\dots ,\\alpha_{r}$ 可由向量组 $\\mathrm{II}:\\beta_{1},\\beta_{2},\\dots ,\\beta_{s}$ 线性表示, 下列命题正确的是……( ",
+          "options": {
+            "A": "若向量组 I 线性无关, 则 $r \\leqslant s$ ",
+            "B": "若向量组 I 线性相关, 则 $r > s$ ",
+            "C": "若向量组 $\\mathrm{II}$ 线性无关，则 $r \\leqslant s$",
+            "D": "若向量组 $\\mathrm{II}$ 线性相关, 则 $r > s$ "
+          },
+          "answer": "A",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "选择题",
+          "knowledge_points": [
+            "math-choice"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选择题",
+            "2010年数学二"
+          ]
+        },
+        {
+          "id": "math2-2010-q5",
+          "number": 5,
+          "type": "fill",
+          "score": 4,
+          "content": "3 阶常系数线性齐次微分方程 $y''' - 2y'' + y' - 2y = 0$ 的通解为 $y =$ ________.",
+          "options": {},
+          "answer": "待补充",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "填空题",
+          "knowledge_points": [
+            "math-fill"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "填空题",
+            "2010年数学二"
+          ]
+        },
+        {
+          "id": "math2-2010-q6",
+          "number": 6,
+          "type": "fill",
+          "score": 4,
+          "content": "曲线 $y = \\frac{2x^3}{x^2 + 1}$ 的渐近线方程为",
+          "options": {},
+          "answer": "待补充",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "填空题",
+          "knowledge_points": [
+            "math-fill"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "填空题",
+            "2010年数学二"
+          ]
+        },
+        {
+          "id": "math2-2010-q7",
+          "number": 7,
+          "type": "fill",
+          "score": 4,
+          "content": "函数 $y = \\ln (1 - 2x)$ 在 $x = 0$ 处的 $n$ 阶导数 $y^{(n)}(0) =$ ________.",
+          "options": {},
+          "answer": "待补充",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "填空题",
+          "knowledge_points": [
+            "math-fill"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "填空题",
+            "2010年数学二"
+          ]
+        },
+        {
+          "id": "math2-2010-q8",
+          "number": 8,
+          "type": "fill",
+          "score": 4,
+          "content": "当 $0 \\leqslant \\theta \\leqslant \\pi$ 时, 对数螺线 $r = \\mathrm{e}^{\\theta}$ 的弧长为",
+          "options": {},
+          "answer": "待补充",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "填空题",
+          "knowledge_points": [
+            "math-fill"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "填空题",
+            "2010年数学二"
+          ]
+        },
+        {
+          "id": "math2-2010-q9",
+          "number": 9,
+          "type": "fill",
+          "score": 4,
+          "content": "已知一个长方形的长 $l$ 以 $2 \\mathrm{~cm} / \\mathrm{s}$ 的速率增加, 宽 $w$ 以 $3 \\mathrm{~cm} / \\mathrm{s}$ 的速率增加. 则当 $l = 12 \\mathrm{~cm}, w = 5 \\mathrm{~cm}$ 时, 它的对角线增加的速率为",
+          "options": {},
+          "answer": "待补充",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "填空题",
+          "knowledge_points": [
+            "math-fill"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "填空题",
+            "2010年数学二"
+          ]
+        },
+        {
+          "id": "math2-2010-q10",
+          "number": 10,
+          "type": "fill",
+          "score": 4,
+          "content": "设 $A, B$ 为3阶矩阵，且 $|A| = 3, |B| = 2, \\left|A^{-1} + B\\right| = 2$ ，则 $\\left|A + B^{-1}\\right| =$",
+          "options": {},
+          "answer": "待补充",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "填空题",
+          "knowledge_points": [
+            "math-fill"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "填空题",
+            "2010年数学二"
+          ]
+        },
+        {
+          "id": "math2-2010-q11",
+          "number": 11,
+          "type": "calculation",
+          "score": 10,
+          "content": "同试卷一第三 [16] 题.",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2010年数学二"
+          ]
+        },
+        {
+          "id": "math2-2010-q12",
+          "number": 12,
+          "type": "calculation",
+          "score": 10,
+          "content": "同试卷一第三[17]题",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2010年数学二"
+          ]
+        },
+        {
+          "id": "math2-2010-q13",
+          "number": 13,
+          "type": "calculation",
+          "score": 10,
+          "content": "本题满分 10 分) 设函数 $y = f(x)$ 由参数方程 $\\left\\{ \\begin{array}{l} x = 2t + t^2 \\\\ y = \\psi(t) \\end{array} \\right.$ ( $t > -1$ ) 所确定，其中 $\\psi(t)$ 具有 2 阶导数，且 $\\psi(1) = \\frac{5}{2}$ ， $\\psi'(1) = 6$ 。已知 $\\frac{\\mathrm{d}^2y}{\\mathrm{d}x^2} = \\frac{3}{4(1 + t)}$ ，求函数 $\\psi(t)$ 。",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2010年数学二"
+          ]
+        },
+        {
+          "id": "math2-2010-q14",
+          "number": 14,
+          "type": "calculation",
+          "score": 10,
+          "content": "本题满分 10 分) 一个高为 $l$ 的柱体形贮油罐, 底面是长轴为 $2 a$ , 短轴为 $2 b$ 的椭圆. 现将贮油罐平放, 当油罐中油面高度为 $\\frac{3}{2} b$ 时 (如图), 计算油的质量. ![](images/c6b9e873b37ebb40f02c91808d8a50b6d548585fb4a966ee4e25a973cd091037.jpg) (长度单位为 $\\mathrm{m}$ , 质量单位为 $\\mathrm{kg}$ , 油的密度为常数 $\\rho \\mathrm{kg} / \\mathrm{m}^{3}$ ",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2010年数学二"
+          ]
+        },
+        {
+          "id": "math2-2010-q15",
+          "number": 15,
+          "type": "calculation",
+          "score": 10,
+          "content": "本题满分 11 分) 设函数 $u = f(x,y)$ 具有二阶连续偏导数, 且满足等式 $4\\frac{\\partial^2 u}{\\partial x^2} + 12\\frac{\\partial^2 u}{\\partial x \\partial y} + 5\\frac{\\partial^2 u}{\\partial y^2} = 0$ 确定 $a, b$ 的值，使等式在变换 $\\xi = x + ay, \\eta = x + by$ 下化简为 $\\frac{\\partial^2 u}{\\partial \\xi \\partial \\eta} = 0$ .",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2010年数学二"
+          ]
+        },
+        {
+          "id": "math2-2010-q16",
+          "number": 16,
+          "type": "calculation",
+          "score": 10,
+          "content": "本题满分 10 分) 计算二重积分 $$ I = \\iint_ {D} r ^ {2} \\sin \\theta \\sqrt {1 - r ^ {2} \\cos 2 \\theta} d r d \\theta , $$ 其中 $D = \\left\\{(r,\\theta)\\bigg|0\\leqslant r\\leqslant \\sec \\theta ,0\\leqslant \\theta \\leqslant \\frac{\\pi}{4}\\right\\} .$",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2010年数学二"
+          ]
+        },
+        {
+          "id": "math2-2010-q17",
+          "number": 17,
+          "type": "calculation",
+          "score": 10,
+          "content": "本题满分 10 分) 设函数 $f(x)$ 在闭区间 $[0,1]$ 上连续，在开区间 $(0,1)$ 内可导，且 $f(0) = 0,f(1) = \\frac{1}{3}$ 证明：存在 $\\xi \\in \\left(0,\\frac{1}{2}\\right),\\eta \\in \\left(\\frac{1}{2},1\\right)$ ，使得 $f^{\\prime}(\\xi) + f^{\\prime}(\\eta) = \\xi^{2} + \\eta^{2}$",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2010年数学二"
+          ]
+        },
+        {
+          "id": "math2-2010-q18",
+          "number": 18,
+          "type": "calculation",
+          "score": 10,
+          "content": "同试卷一第三[20]题",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2010年数学二"
+          ]
+        },
+        {
+          "id": "math2-2010-q19",
+          "number": 19,
+          "type": "calculation",
+          "score": 10,
+          "content": "本题满分11分) 设 $A = \\left( \\begin{array}{rrr}0 & -1 & 4\\\\ -1 & 3 & a\\\\ 4 & a & 0 \\end{array} \\right)$ ，正交矩阵 $Q$ 使得 $Q^T A Q$ 为对角矩阵，若 $Q$ 的第1列为 $\\frac{1}{\\sqrt{6}} (1,2,1)^T$ ，求 $a,Q$",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2010年数学二"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "math2-2011",
+      "year": "2011",
+      "subject": "数学二",
+      "category": "math2",
+      "paper_name": "2011年考研数学二真题",
+      "questions": [
+        {
+          "id": "math2-2011-q1",
+          "number": 1,
+          "type": "choice",
+          "score": 4,
+          "content": "已知当 $x \\to 0$ 时, $f(x) = 3\\sin x - \\sin 3x$ 与 $cx^k$ 是等价无穷小, 则……( ",
+          "options": {
+            "A": "$k = 1, c = 4$",
+            "B": "$k = 1, c = -4$ ",
+            "C": "$k = 3, c = 4$",
+            "D": "$k = 3, c = -4$ "
+          },
+          "answer": "C",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "选择题",
+          "knowledge_points": [
+            "math-choice"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选择题",
+            "2011年数学二"
+          ]
+        },
+        {
+          "id": "math2-2011-q2",
+          "number": 2,
+          "type": "choice",
+          "score": 4,
+          "content": "已知 $f(x)$ 在 $x = 0$ 处可导，且 $f(0) = 0$ ，则 $\\lim_{x \\to 0} \\frac{x^2 f(x) - 2 f(x^3)}{x^3} = \\dots$ ",
+          "options": {
+            "A": "$-2f^{\\prime}(0)$",
+            "B": "$-f^{\\prime}(0)$",
+            "C": "$f^{\\prime}(0)$",
+            "D": "0"
+          },
+          "answer": "B",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "选择题",
+          "knowledge_points": [
+            "math-choice"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选择题",
+            "2011年数学二"
+          ]
+        },
+        {
+          "id": "math2-2011-q3",
+          "number": 3,
+          "type": "choice",
+          "score": 4,
+          "content": "函数 $f(x) = \\ln |(x - 1)(x - 2)(x - 3)|$ 的驻点个数为……",
+          "options": {
+            "A": "0",
+            "B": "1",
+            "C": "2",
+            "D": "3"
+          },
+          "answer": "C",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "选择题",
+          "knowledge_points": [
+            "math-choice"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选择题",
+            "2011年数学二"
+          ]
+        },
+        {
+          "id": "math2-2011-q4",
+          "number": 4,
+          "type": "choice",
+          "score": 4,
+          "content": "微分方程 $y'' - \\lambda^2 y = \\mathrm{e}^{\\lambda x} + \\mathrm{e}^{-\\lambda x}$ （ $\\lambda > 0$ ）的特解形式为……",
+          "options": {
+            "A": "$a(\\mathrm{e}^{\\lambda x} + \\mathrm{e}^{-\\lambda x})$",
+            "B": "$ax(\\mathrm{e}^{\\lambda x} + \\mathrm{e}^{-\\lambda x})$",
+            "C": "$x(a\\mathrm{e}^{\\lambda x} + b\\mathrm{e}^{-\\lambda x})$",
+            "D": "$x^{2}(a\\mathrm{e}^{\\lambda x} + b\\mathrm{e}^{-\\lambda x})$"
+          },
+          "answer": "C",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "选择题",
+          "knowledge_points": [
+            "math-choice"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选择题",
+            "2011年数学二"
+          ]
+        },
+        {
+          "id": "math2-2011-q5",
+          "number": 5,
+          "type": "fill",
+          "score": 4,
+          "content": "$\\lim_{x\\to 0}\\left(\\frac{1 + 2^x}{2}\\right)^{\\frac{1}{x}} = \\underline{\\quad}.$",
+          "options": {},
+          "answer": "待补充",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "填空题",
+          "knowledge_points": [
+            "math-fill"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "填空题",
+            "2011年数学二"
+          ]
+        },
+        {
+          "id": "math2-2011-q6",
+          "number": 6,
+          "type": "fill",
+          "score": 4,
+          "content": "同试卷一第二[10]题",
+          "options": {},
+          "answer": "待补充",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "填空题",
+          "knowledge_points": [
+            "math-fill"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "填空题",
+            "2011年数学二"
+          ]
+        },
+        {
+          "id": "math2-2011-q7",
+          "number": 7,
+          "type": "fill",
+          "score": 4,
+          "content": "同试卷一第二[9]题",
+          "options": {},
+          "answer": "待补充",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "填空题",
+          "knowledge_points": [
+            "math-fill"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "填空题",
+            "2011年数学二"
+          ]
+        },
+        {
+          "id": "math2-2011-q8",
+          "number": 8,
+          "type": "fill",
+          "score": 4,
+          "content": "设函数 $f(x) = \\left\\{ \\begin{array}{ll} \\lambda \\mathrm{e}^{-\\lambda x}, & x > 0, \\\\ 0, & x \\leqslant 0, \\end{array} \\right. \\lambda > 0$ ，则 $\\int_{-\\infty}^{+\\infty} x f(x) \\mathrm{d}x =$ ________.",
+          "options": {},
+          "answer": "待补充",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "填空题",
+          "knowledge_points": [
+            "math-fill"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "填空题",
+            "2011年数学二"
+          ]
+        },
+        {
+          "id": "math2-2011-q9",
+          "number": 9,
+          "type": "fill",
+          "score": 4,
+          "content": "设平面区域 $D$ 由直线 $y = x$ , 圆 $x^{2} + y^{2} = 2y$ 及 $y$ 轴围成, 则二重积分 $\\iint_{D} xy \\, \\mathrm{d}\\sigma =$ ________.",
+          "options": {},
+          "answer": "待补充",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "填空题",
+          "knowledge_points": [
+            "math-fill"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "填空题",
+            "2011年数学二"
+          ]
+        },
+        {
+          "id": "math2-2011-q10",
+          "number": 10,
+          "type": "fill",
+          "score": 4,
+          "content": "二次型 $f(x_{1}, x_{2}, x_{3}) = x_{1}^{2} + 3x_{2}^{2} + x_{3}^{2} + 2x_{1}x_{2} + 2x_{1}x_{3} + 2x_{2}x_{3}$ ，则 $f$ 的正惯性指数为 _______.",
+          "options": {},
+          "answer": "待补充",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "填空题",
+          "knowledge_points": [
+            "math-fill"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "填空题",
+            "2011年数学二"
+          ]
+        },
+        {
+          "id": "math2-2011-q11",
+          "number": 11,
+          "type": "calculation",
+          "score": 10,
+          "content": "本题满分 10 分) 已知函数 $F(x) = \\frac{\\int_0^x\\ln(1 + t^2)\\mathrm{d}t}{x^a}$ ，设 $\\lim_{x\\to +\\infty}F(x) = \\lim_{x\\to 0^{+}}F(x) = 0$ ，试求 $a$ 的取值范围.",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2011年数学二"
+          ]
+        },
+        {
+          "id": "math2-2011-q12",
+          "number": 12,
+          "type": "calculation",
+          "score": 10,
+          "content": "本题满分 11 分) 设函数 $y = y(x)$ 由参数方程 $\\left\\{ \\begin{array}{l} x = \\frac{1}{3} t^3 + t + \\frac{1}{3}, \\\\ y = \\frac{1}{3} t^3 - t + \\frac{1}{3}, \\end{array} \\right.$ 确定，求 $y = y(x)$ 的极值和曲线 $y = y(x)$ 的凹凸区间及拐点.",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2011年数学二"
+          ]
+        },
+        {
+          "id": "math2-2011-q13",
+          "number": 13,
+          "type": "calculation",
+          "score": 10,
+          "content": "同试卷一第三[16]题.",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2011年数学二"
+          ]
+        },
+        {
+          "id": "math2-2011-q14",
+          "number": 14,
+          "type": "calculation",
+          "score": 10,
+          "content": "本题满分 10 分) 设函数 $y(x)$ 具有二阶导数，且曲线 $l: y = y(x)$ 与直线 $y = x$ 相切于原点，记 $\\alpha$ 为曲线 $l$ 在点 $(x, y)$ 处切线的倾角，若 $\\frac{\\mathrm{d}\\alpha}{\\mathrm{d}x} = \\frac{\\mathrm{d}y}{\\mathrm{d}x}$ ，求 $y(x)$ 的表达式.",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2011年数学二"
+          ]
+        },
+        {
+          "id": "math2-2011-q15",
+          "number": 15,
+          "type": "calculation",
+          "score": 10,
+          "content": "同试卷一第三[18]题",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2011年数学二"
+          ]
+        },
+        {
+          "id": "math2-2011-q16",
+          "number": 16,
+          "type": "calculation",
+          "score": 10,
+          "content": "本题满分 11 分) 一容器的内侧是由图中曲线绕 $y$ 轴旋转一周而成的曲面, 该曲线由 $x^{2} + y^{2} = 2y$ $(y \\geqslant \\frac{1}{2})$ 与 $x^{2} + y^{2} = 1$ $(y \\leqslant \\frac{1}{2})$ 连接而成. ![](images/db6c1904899f4ef491d184d1d94471b573b7eceea893455393c6cfcbf1a8275e.jpg) (I) 求容器的容积; (II) 若将容器内盛满的水从容器顶部全部抽出，至少需要做多少功？ (长度单位: m, 重力加速度为 gm/s², 水的密度为 $10^{3} \\mathrm{~kg} / \\mathrm{m}^{3}$ .",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2011年数学二"
+          ]
+        },
+        {
+          "id": "math2-2011-q17",
+          "number": 17,
+          "type": "calculation",
+          "score": 10,
+          "content": "同试卷一第三[19]题",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2011年数学二"
+          ]
+        },
+        {
+          "id": "math2-2011-q18",
+          "number": 18,
+          "type": "calculation",
+          "score": 10,
+          "content": "同试卷一第三[20]题",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2011年数学二"
+          ]
+        },
+        {
+          "id": "math2-2011-q19",
+          "number": 19,
+          "type": "calculation",
+          "score": 10,
+          "content": "同试卷一第三[21]题",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2011年数学二"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "math2-2012",
+      "year": "2012",
+      "subject": "数学二",
+      "category": "math2",
+      "paper_name": "2012年考研数学二真题",
+      "questions": [
+        {
+          "id": "math2-2012-q1",
+          "number": 1,
+          "type": "choice",
+          "score": 4,
+          "content": "设 $a_{n} > 0 (n = 1,2,\\dots)$ , $S_{n} = a_{1} + a_{2} + \\dots + a_{n}$ , 则数列 $\\{s_{n}\\}$ 有界是数列 $\\{a_{n}\\}$ 收敛的……",
+          "options": {
+            "A": "充分必要条件",
+            "B": "充分非必要条件",
+            "C": "必要非充分条件",
+            "D": "即非充分也非必要条件"
+          },
+          "answer": "B",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "选择题",
+          "knowledge_points": [
+            "math-choice"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选择题",
+            "2012年数学二"
+          ]
+        },
+        {
+          "id": "math2-2012-q2",
+          "number": 2,
+          "type": "choice",
+          "score": 4,
+          "content": "设区域D由曲线 $y = \\sin x, x = \\pm \\frac{\\pi}{2}, y = 1$ 围成，则 $\\iint_{D} (x^5 y - 1) \\, \\mathrm{d}x \\, \\mathrm{d}y = \\dots (\\quad)$",
+          "options": {
+            "A": "$\\pi$",
+            "B": "2",
+            "C": "$-2$",
+            "D": "$-\\pi$"
+          },
+          "answer": "B",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "选择题",
+          "knowledge_points": [
+            "math-choice"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选择题",
+            "2012年数学二"
+          ]
+        },
+        {
+          "id": "math2-2012-q3",
+          "number": 3,
+          "type": "fill",
+          "score": 4,
+          "content": "设 $y = y(x)$ 是由方程 $x^{2} - y + 1 = \\mathrm{e}^{y}$ 所确定的隐函数, 则 $\\left.\\frac{\\mathrm{d}^2y}{\\mathrm{d}x^2}\\right|_{x=0} =$ ________.",
+          "options": {},
+          "answer": "待补充",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "填空题",
+          "knowledge_points": [
+            "math-fill"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "填空题",
+            "2012年数学二"
+          ]
+        },
+        {
+          "id": "math2-2012-q4",
+          "number": 4,
+          "type": "fill",
+          "score": 4,
+          "content": "计算 $\\lim_{x\\to \\infty}n\\left(\\frac{1}{1 + n^2} +\\frac{1}{2^2 + n^2} +\\dots +\\frac{1}{n^2 + n^2}\\right) = \\underline{\\quad}$",
+          "options": {},
+          "answer": "待补充",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "填空题",
+          "knowledge_points": [
+            "math-fill"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "填空题",
+            "2012年数学二"
+          ]
+        },
+        {
+          "id": "math2-2012-q5",
+          "number": 5,
+          "type": "fill",
+          "score": 4,
+          "content": "设 $z = f\\left(\\ln x + \\frac{1}{y}\\right)$ ，其中函数 $f(u)$ 可微，则 $x\\frac{\\partial z}{\\partial x} + y^2\\frac{\\partial z}{\\partial y} =$ ________.",
+          "options": {},
+          "answer": "待补充",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "填空题",
+          "knowledge_points": [
+            "math-fill"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "填空题",
+            "2012年数学二"
+          ]
+        },
+        {
+          "id": "math2-2012-q6",
+          "number": 6,
+          "type": "fill",
+          "score": 4,
+          "content": "微分方程 $y \\, \\mathrm{d}x + (x - 3y^2) \\, \\mathrm{d}y = 0$ 满足初始条件 $y|_{x=1} = 1$ 的解为 $y =$ ________.",
+          "options": {},
+          "answer": "待补充",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "填空题",
+          "knowledge_points": [
+            "math-fill"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "填空题",
+            "2012年数学二"
+          ]
+        },
+        {
+          "id": "math2-2012-q7",
+          "number": 7,
+          "type": "fill",
+          "score": 4,
+          "content": "曲线 $y = x^{2} + x$ （ $x < 0$ ）上曲率为 $\\frac{\\sqrt{2}}{2}$ 的点的坐标是",
+          "options": {},
+          "answer": "待补充",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "填空题",
+          "knowledge_points": [
+            "math-fill"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "填空题",
+            "2012年数学二"
+          ]
+        },
+        {
+          "id": "math2-2012-q8",
+          "number": 8,
+          "type": "fill",
+          "score": 4,
+          "content": "设 $A$ 为 3 阶矩阵, $|A| = 3$ , $A^{*}$ 为 $A$ 的伴随矩阵, 若交换 $A$ 的第一行与第二行得到矩阵 $B$ , 则 $\\left|BA^{*}\\right| =$",
+          "options": {},
+          "answer": "待补充",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "填空题",
+          "knowledge_points": [
+            "math-fill"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "填空题",
+            "2012年数学二"
+          ]
+        },
+        {
+          "id": "math2-2012-q9",
+          "number": 9,
+          "type": "calculation",
+          "score": 10,
+          "content": "本题满分 10 分) 已知函数 $f(x) = \\frac{1 + x}{\\sin x} - \\frac{1}{x}$ ，记 $a = \\lim_{x \\to 0} f(x)$ . (I) 求 $a$ 的值；(II) 若当 $x \\to 0$ 时， $f(x) - a$ 是 $x^k$ 的同阶无穷小，求 $k$ .",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2012年数学二"
+          ]
+        },
+        {
+          "id": "math2-2012-q10",
+          "number": 10,
+          "type": "calculation",
+          "score": 10,
+          "content": "同试卷一第三[16]题.",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2012年数学二"
+          ]
+        },
+        {
+          "id": "math2-2012-q11",
+          "number": 11,
+          "type": "calculation",
+          "score": 10,
+          "content": "本题满分 10 分) 过 (0,1) 点作曲线 $L: y = \\ln x$ 的切线，切点为 $A$ ，又 $L$ 与 $x$ 轴交于 $B$ 点，区域 $D$ 由 $L$ 与直线 $AB$ 围成，求区域 $D$ 的面积及 $D$ 绕 $x$ 轴旋转一周所得旋转体的体积.",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2012年数学二"
+          ]
+        },
+        {
+          "id": "math2-2012-q12",
+          "number": 12,
+          "type": "calculation",
+          "score": 10,
+          "content": "本题满分 10 分) 计算二重积分 $\\iint_{D} xy \\, \\mathrm{d}\\sigma$ ，其中区域 D 为曲线 $$ r = 1 + \\cos \\theta (0 \\leqslant \\theta \\leqslant \\pi) $$ 与极轴围成.",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2012年数学二"
+          ]
+        },
+        {
+          "id": "math2-2012-q13",
+          "number": 13,
+          "type": "calculation",
+          "score": 10,
+          "content": "本题满分 11 分) 设函数 $f(x)$ 满足方程 $f^{\\prime \\prime}(x) + f^{\\prime}(x) - 2f(x) = 0$ 及 $f^{\\prime}(x) + f(x) = 2\\mathrm{e}^{x}$ (I) 求表达式 $f(x)$ ; (II) 求曲线的拐点 $y = f(x^{2}) \\int_{0}^{x} f(-t^{2}) \\, \\mathrm{d}t$ .",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2012年数学二"
+          ]
+        },
+        {
+          "id": "math2-2012-q14",
+          "number": 14,
+          "type": "calculation",
+          "score": 10,
+          "content": "同试卷一第三[15]题",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2012年数学二"
+          ]
+        },
+        {
+          "id": "math2-2012-q15",
+          "number": 15,
+          "type": "calculation",
+          "score": 10,
+          "content": "本题满分11分) (I) 证明方程 $x^n + x^{n-1} + \\dots + x = 1$ （ $n$ 为大于 1 的整数）在区间 $\\left(\\frac{1}{2}, 1\\right)$ 内有且仅有一个实根； (II) 记 (I) 中的实根为 $x_{n}$ , 证明 $\\lim_{n \\to \\infty} x_{n}$ 存在, 并求此极限.",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2012年数学二"
+          ]
+        },
+        {
+          "id": "math2-2012-q16",
+          "number": 16,
+          "type": "calculation",
+          "score": 10,
+          "content": "同试卷一第三[20]题",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2012年数学二"
+          ]
+        },
+        {
+          "id": "math2-2012-q17",
+          "number": 17,
+          "type": "calculation",
+          "score": 10,
+          "content": "同试卷一第三[21]题",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2012年数学二"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "math2-2013",
+      "year": "2013",
+      "subject": "数学二",
+      "category": "math2",
+      "paper_name": "2013年考研数学二真题",
+      "questions": [
+        {
+          "id": "math2-2013-q1",
+          "number": 1,
+          "type": "choice",
+          "score": 4,
+          "content": "设 $\\cos x - 1 = x \\sin \\alpha(x)$ , 其中 $|\\alpha(x)| 2$ .",
+          "options": {
+            "A": "",
+            "B": "$I_{2} > 0$",
+            "C": "$I_{3} > 0$",
+            "D": "$I_4 > 0$"
+          },
+          "answer": "C",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "选择题",
+          "knowledge_points": [
+            "math-choice"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选择题",
+            "2013年数学二"
+          ]
+        },
+        {
+          "id": "math2-2013-q2",
+          "number": 2,
+          "type": "fill",
+          "score": 4,
+          "content": "$\\lim_{x\\to 0}\\left(2 - \\frac{\\ln(1 + x)}{x}\\right)^{\\frac{1}{x}} = \\underline{\\quad}.$",
+          "options": {},
+          "answer": "待补充",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "填空题",
+          "knowledge_points": [
+            "math-fill"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "填空题",
+            "2013年数学二"
+          ]
+        },
+        {
+          "id": "math2-2013-q3",
+          "number": 3,
+          "type": "fill",
+          "score": 4,
+          "content": "设函数 $f(x) = \\int_{-1}^{x} \\sqrt{1 - \\mathrm{e}^t} \\, \\mathrm{d}t$ ，则 $y = f(x)$ 的反函数 $x = f^{-1}(y)$ 在 $y = 0$ 处的导数 $\\left. \\frac{\\mathrm{d}x}{\\mathrm{d}y} \\right|_{y=0} =$ ________.",
+          "options": {},
+          "answer": "待补充",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "填空题",
+          "knowledge_points": [
+            "math-fill"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "填空题",
+            "2013年数学二"
+          ]
+        },
+        {
+          "id": "math2-2013-q4",
+          "number": 4,
+          "type": "fill",
+          "score": 4,
+          "content": "设封闭曲线 $L$ 的极坐标方程为 $r = \\cos 3\\theta \\left(-\\frac{\\pi}{6} \\leqslant \\theta \\leqslant \\frac{\\pi}{6}\\right)$ , 则 $L$ 所围成的平面图形的面积为",
+          "options": {},
+          "answer": "待补充",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "填空题",
+          "knowledge_points": [
+            "math-fill"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "填空题",
+            "2013年数学二"
+          ]
+        },
+        {
+          "id": "math2-2013-q5",
+          "number": 5,
+          "type": "fill",
+          "score": 4,
+          "content": "曲线 $\\left\\{ \\begin{array}{l} x = \\arctan t, \\\\ y = \\ln \\sqrt{1 + t^2} \\end{array} \\right.$ 上对应于 $t = 1$ 的点处的法线方程为",
+          "options": {},
+          "answer": "待补充",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "填空题",
+          "knowledge_points": [
+            "math-fill"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "填空题",
+            "2013年数学二"
+          ]
+        },
+        {
+          "id": "math2-2013-q6",
+          "number": 6,
+          "type": "fill",
+          "score": 4,
+          "content": "已知 $y_{1} = \\mathrm{e}^{3x} - x\\mathrm{e}^{2x}, y_{2} = \\mathrm{e}^{x} - x\\mathrm{e}^{2x}, y_{3} = -x\\mathrm{e}^{2x}$ 是某二阶常系数非齐次线性微分方程的 3 个解, 该方程满足条件 $y|_{x=0} = 0, y'|_{x=0} = 1$ 的解为 $y =$",
+          "options": {},
+          "answer": "待补充",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "填空题",
+          "knowledge_points": [
+            "math-fill"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "填空题",
+            "2013年数学二"
+          ]
+        },
+        {
+          "id": "math2-2013-q7",
+          "number": 7,
+          "type": "fill",
+          "score": 4,
+          "content": "同试卷一第二[13]题",
+          "options": {},
+          "answer": "待补充",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "填空题",
+          "knowledge_points": [
+            "math-fill"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "填空题",
+            "2013年数学二"
+          ]
+        },
+        {
+          "id": "math2-2013-q8",
+          "number": 8,
+          "type": "calculation",
+          "score": 10,
+          "content": "本题满分 10 分) 当 $x \\to 0$ 时， $1 - \\cos x \\cdot \\cos 2x \\cdot \\cos 3x$ 与 $ax^n$ 为等价无穷小，求 $n$ 与 $a$ 的值.",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2013年数学二"
+          ]
+        },
+        {
+          "id": "math2-2013-q9",
+          "number": 9,
+          "type": "calculation",
+          "score": 10,
+          "content": "本题满分 10 分) 设 $D$ 是由曲线 $y = x^{\\frac{1}{3}}$ , 直线 $x = a (a > 0)$ 及 $x$ 轴所围成的平面图形, $V_x, V_y$ 分别是 $D$ 绕 $x$ 轴, $y$ 轴旋转一周所得旋转体的体积, 若 $V_y = 10V_x$ , 求 $a$ 的值.",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2013年数学二"
+          ]
+        },
+        {
+          "id": "math2-2013-q10",
+          "number": 10,
+          "type": "calculation",
+          "score": 10,
+          "content": "本题满分 10 分) 设平面内区域 $D$ 由直线 $x = 3y, y = 3x$ 及 $x + y = 8$ 围成，计算 $\\iint_{D} x^{2} \\mathrm{d}x \\mathrm{d}y$ . 解 $\\iint_{D} x^{2} \\mathrm{~d}x \\mathrm{~d}y = \\int_{0}^{2} x^{2} \\mathrm{~d}x \\int_{\\frac{x}{3}}^{3x} \\mathrm{~d}y + \\int_{2}^{6} x^{2} \\mathrm{~d}x \\int_{\\frac{x}{3}}^{8-x} \\mathrm{~d}y = \\frac{416}{3}$ .",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2013年数学二"
+          ]
+        },
+        {
+          "id": "math2-2013-q11",
+          "number": 11,
+          "type": "calculation",
+          "score": 10,
+          "content": "同试卷一第三[18]题",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2013年数学二"
+          ]
+        },
+        {
+          "id": "math2-2013-q12",
+          "number": 12,
+          "type": "calculation",
+          "score": 10,
+          "content": "本题满分 11 分) 求曲线 $x^{3} - xy + y^{3} = 1 (x \\geqslant 0, y \\geqslant 0)$ 上的点到坐标原点的最长距离与最短距离.",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2013年数学二"
+          ]
+        },
+        {
+          "id": "math2-2013-q13",
+          "number": 13,
+          "type": "calculation",
+          "score": 10,
+          "content": "本题满分11分) 设函数 $f(x) = \\ln x + \\frac{1}{x}$ . (I) 求 $f(x)$ 的最小值； (II) 设数列 $\\{x_{n}\\}$ 满足 $\\ln x_{n} + \\frac{1}{x_{n+1}} < 1$ ，证明 $\\lim_{n \\to \\infty} x_{n}$ 存在，并求此极限.",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2013年数学二"
+          ]
+        },
+        {
+          "id": "math2-2013-q14",
+          "number": 14,
+          "type": "calculation",
+          "score": 10,
+          "content": "本题满分 11 分) 设曲线 $L$ 的方程为 $y = \\frac{1}{4} x^2 -\\frac{1}{2}\\ln x$ （ $1\\leqslant x\\leqslant \\mathbf{e})$ (I)求 $L$ 的弧长； (II) 设 $D$ 是由曲线 $L$ , 直线 $x = 1, x = \\mathrm{e}$ 及 $x$ 轴所围平面图形, 求 $D$ 的形心的横坐标.",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2013年数学二"
+          ]
+        },
+        {
+          "id": "math2-2013-q15",
+          "number": 15,
+          "type": "calculation",
+          "score": 10,
+          "content": "同试卷一第三[20]题",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2013年数学二"
+          ]
+        },
+        {
+          "id": "math2-2013-q16",
+          "number": 16,
+          "type": "calculation",
+          "score": 10,
+          "content": "同试卷一第三[21]题",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2013年数学二"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "math2-2014",
+      "year": "2014",
+      "subject": "数学二",
+      "category": "math2",
+      "paper_name": "2014年考研数学二真题",
+      "questions": [
+        {
+          "id": "math2-2014-q1",
+          "number": 1,
+          "type": "choice",
+          "score": 4,
+          "content": "当 $x \\to 0^{+}$ 时，若 $\\ln^{\\alpha}(1 + 2x)$ ， $(1 - \\cos x)^{\\frac{1}{\\alpha}}$ 均是比 $x$ 高阶的无穷小，则 $\\alpha$ 的可能取值范围是……",
+          "options": {
+            "A": "$(2, + \\infty)$",
+            "B": "$(1,2)$ ",
+            "C": "$\\left(\\frac{1}{2}, 1\\right)$ ",
+            "D": "$\\left(0,\\frac{1}{2}\\right)$"
+          },
+          "answer": "B",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "选择题",
+          "knowledge_points": [
+            "math-choice"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选择题",
+            "2014年数学二"
+          ]
+        },
+        {
+          "id": "math2-2014-q2",
+          "number": 2,
+          "type": "choice",
+          "score": 4,
+          "content": "曲线 $\\left\\{ \\begin{array}{l} x = t^2 + 7, \\\\ y = t^2 + 4t + 1 \\end{array} \\right.$ 上对应于 $t = 1$ 的点处的曲率半径是……",
+          "options": {
+            "A": "$\\frac{\\sqrt{10}}{50}$ ",
+            "B": "$\\frac{\\sqrt{10}}{100}$ ",
+            "C": "$10\\sqrt{10}$ ",
+            "D": "$5\\sqrt{10}$ "
+          },
+          "answer": "C",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "选择题",
+          "knowledge_points": [
+            "math-choice"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选择题",
+            "2014年数学二"
+          ]
+        },
+        {
+          "id": "math2-2014-q3",
+          "number": 3,
+          "type": "choice",
+          "score": 4,
+          "content": "设函数 $f(x) = \\arctan x$ ，若 $f(x) = xf'(\\xi)$ ，则 $\\lim_{x \\to 0} \\frac{\\xi^2}{x^2} = \\dots$",
+          "options": {
+            "A": "1",
+            "B": "$\\frac{2}{3}$ ",
+            "C": "$\\frac{1}{2}$ ",
+            "D": "$\\frac{1}{3}$ "
+          },
+          "answer": "C",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "选择题",
+          "knowledge_points": [
+            "math-choice"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选择题",
+            "2014年数学二"
+          ]
+        },
+        {
+          "id": "math2-2014-q4",
+          "number": 4,
+          "type": "choice",
+          "score": 4,
+          "content": "设 $u(x, y)$ 在平面有界闭区域 $D$ 上连续，在 $D$ 的内部具有二阶连续偏导数，且满足 $\\frac{\\partial^2 u}{\\partial x \\partial y} \\neq 0$ 及 $\\frac{\\partial^2 u}{\\partial x^2} + \\frac{\\partial^2 u}{\\partial y^2} = 0$ ，则",
+          "options": {
+            "A": "$u(x, y)$ 的最大值点和最小值点必定都在区域 $D$ 的边界上",
+            "B": "$u(x,y)$ 的最大值点和最小值点必定都在区域 $D$ 的内部",
+            "C": "$u(x, y)$ 的最大值点在区域 $D$ 的内部，最小值点在区域 $D$ 的边界上",
+            "D": "$u(x, y)$ 的最小值点在区域 $D$ 的内部，最大值点在区域 $D$ 的边界上"
+          },
+          "answer": "C",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "选择题",
+          "knowledge_points": [
+            "math-choice"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选择题",
+            "2014年数学二"
+          ]
+        },
+        {
+          "id": "math2-2014-q5",
+          "number": 5,
+          "type": "fill",
+          "score": 4,
+          "content": "$\\int_{-\\infty}^{1}\\frac{1}{x^2 + 2x + 5}\\mathrm{d}x = \\underline{\\quad}$",
+          "options": {},
+          "answer": "待补充",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "填空题",
+          "knowledge_points": [
+            "math-fill"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "填空题",
+            "2014年数学二"
+          ]
+        },
+        {
+          "id": "math2-2014-q6",
+          "number": 6,
+          "type": "fill",
+          "score": 4,
+          "content": "同试卷一第二[10]题",
+          "options": {},
+          "answer": "待补充",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "填空题",
+          "knowledge_points": [
+            "math-fill"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "填空题",
+            "2014年数学二"
+          ]
+        },
+        {
+          "id": "math2-2014-q7",
+          "number": 7,
+          "type": "fill",
+          "score": 4,
+          "content": "设 $z = z(x, y)$ 是由方程 $e^{2yz} + x + y^2 + z = \\frac{7}{4}$ 确定的函数, 则 $\\mathrm{d}z\\bigg|_{\\left(\\frac{1}{2}, \\frac{1}{2}\\right)} =$",
+          "options": {},
+          "answer": "待补充",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "填空题",
+          "knowledge_points": [
+            "math-fill"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "填空题",
+            "2014年数学二"
+          ]
+        },
+        {
+          "id": "math2-2014-q8",
+          "number": 8,
+          "type": "fill",
+          "score": 4,
+          "content": "曲线 $L$ 的极坐标方程为 $r = \\theta$ , 则 $L$ 在点 $(r, \\theta) = \\left(\\frac{\\pi}{2}, \\frac{\\pi}{2}\\right)$ 处的切线方程为",
+          "options": {},
+          "answer": "待补充",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "填空题",
+          "knowledge_points": [
+            "math-fill"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "填空题",
+            "2014年数学二"
+          ]
+        },
+        {
+          "id": "math2-2014-q9",
+          "number": 9,
+          "type": "fill",
+          "score": 4,
+          "content": "一根长为 1 的细棒位于 $x$ 轴的区间 $[0,1]$ 上，若其线密度 $\\rho(x) = -x^2 + 2x + 1$ 则该细棒的质心坐标 $\\overline{x} =$ ________.",
+          "options": {},
+          "answer": "待补充",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "填空题",
+          "knowledge_points": [
+            "math-fill"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "填空题",
+            "2014年数学二"
+          ]
+        },
+        {
+          "id": "math2-2014-q10",
+          "number": 10,
+          "type": "fill",
+          "score": 4,
+          "content": "同试卷一第二[13]题",
+          "options": {},
+          "answer": "待补充",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "填空题",
+          "knowledge_points": [
+            "math-fill"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "填空题",
+            "2014年数学二"
+          ]
+        },
+        {
+          "id": "math2-2014-q11",
+          "number": 11,
+          "type": "calculation",
+          "score": 10,
+          "content": "同试卷一第三[15]题",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2014年数学二"
+          ]
+        },
+        {
+          "id": "math2-2014-q12",
+          "number": 12,
+          "type": "calculation",
+          "score": 10,
+          "content": "本题满分10分） 已知函数 $y = y\\left( x\\right)$ 满足微分方程 ${x}^{2} + {y}^{2}{y}^{\\prime } = 1 - {y}^{\\prime }$ ,且 $y\\left( 2\\right) = 0$ ,求 $y\\left( x\\right)$ 的极大值和极小值.",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2014年数学二"
+          ]
+        },
+        {
+          "id": "math2-2014-q13",
+          "number": 13,
+          "type": "calculation",
+          "score": 10,
+          "content": "本题满分 10 分) 设平面区域 $D = \\left\\{(x,y) \\mid 1 \\leqslant x^2 + y^2 \\leqslant 4, x \\geqslant 0, y \\geqslant 0\\right\\}$ . 计算 $$ \\iint_ {D} \\frac {x \\sin (\\pi \\sqrt {x ^ {2} + y ^ {2}})}{x + y} \\mathrm {d} x \\mathrm {d} y. $$",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2014年数学二"
+          ]
+        },
+        {
+          "id": "math2-2014-q14",
+          "number": 14,
+          "type": "calculation",
+          "score": 10,
+          "content": "同试卷一第三[17]题",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2014年数学二"
+          ]
+        },
+        {
+          "id": "math2-2014-q15",
+          "number": 15,
+          "type": "calculation",
+          "score": 10,
+          "content": "本题满分 10 分) 设函数 $f(x), g(x)$ 在区间 $[a, b]$ 上连续，且 $f(x)$ 单调增加， $0 \\leqslant g(x) \\leqslant 1$ ，证明： (I) $0 \\leqslant \\int_{a}^{x} g(t) \\mathrm{d}t \\leqslant x - a, \\quad x \\in [a,b]$ ; (II) $\\int_{a}^{a + \\int_{a}^{b}g(t)\\mathrm{d}t}f(x)\\mathrm{d}x\\leqslant \\int_{a}^{b}f(x)g(x)\\mathrm{d}x.$",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2014年数学二"
+          ]
+        },
+        {
+          "id": "math2-2014-q16",
+          "number": 16,
+          "type": "calculation",
+          "score": 10,
+          "content": "本题满分11分) 设函数 $f(x) = \\frac{x}{1 + x},x\\in [0,1].$ 定义函数列 $$ f _ {1} (x) = f (x), \\quad f _ {2} (x) = f \\left(f _ {1} (x)\\right), \\quad \\dots , \\quad f _ {n} (x) = f \\left(f _ {n - 1} (x)\\right), \\dots $$ 设 $S_{n}$ 是曲线 $y = f_n(x)$ , 直线 $x = 1$ , $y = 0$ 所围平面图形的面积. 求极限 $\\lim_{n\\to \\infty}nS_n$ .",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2014年数学二"
+          ]
+        },
+        {
+          "id": "math2-2014-q17",
+          "number": 17,
+          "type": "calculation",
+          "score": 10,
+          "content": "本题满分 11 分) 已知函数 $f(x, y)$ 满足 $\\frac{\\partial f}{\\partial y} = 2(y + 1)$ ，且 $f(y, y) = (y + 1)^2 - (2 - y)\\ln y$ ，求曲线 $f(x, y) = 0$ 所围成的图形绕直线 $y = -1$ 旋转所成的旋转体的体积.",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2014年数学二"
+          ]
+        },
+        {
+          "id": "math2-2014-q18",
+          "number": 18,
+          "type": "calculation",
+          "score": 10,
+          "content": "同试卷一第三[20]题",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2014年数学二"
+          ]
+        },
+        {
+          "id": "math2-2014-q19",
+          "number": 19,
+          "type": "calculation",
+          "score": 10,
+          "content": "同试卷一第三[21]题",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2014年数学二"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "math2-2017",
+      "year": "2017",
+      "subject": "数学二",
+      "category": "math2",
+      "paper_name": "2017年考研数学二真题",
+      "questions": [
+        {
+          "id": "math2-2017-q1",
+          "number": 1,
+          "type": "choice",
+          "score": 4,
+          "content": "设二阶可导函数 $f(x)$ 满足 $f(1) = f(-1) = 1$ ， $f(0) = -1$ ，且 $f''(x) > 0$ ，则·",
+          "options": {
+            "A": "$\\int_{-1}^{1}f(x)\\mathrm{d}x > 0.$",
+            "B": "$f(0,0) f(1,0)$",
+            "C": "",
+            "D": "$f(0,1) < f(1,0)$"
+          },
+          "answer": "B",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "选择题",
+          "knowledge_points": [
+            "math-choice"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选择题",
+            "2017年数学二"
+          ]
+        },
+        {
+          "id": "math2-2017-q2",
+          "number": 2,
+          "type": "choice",
+          "score": 4,
+          "content": "设 $A$ 为3阶矩阵， $P = (\\alpha_{1}, \\alpha_{2}, \\alpha_{3})$ 为可逆矩阵，使得 $P^{-1}AP = \\begin{pmatrix} 0 & 0 & 0 \\\\ 0 & 1 & 0 \\\\ 0 & 0 & 2 \\end{pmatrix}$ ，则 $A(\\alpha_{1} + \\alpha_{2} + \\alpha_{3}) = \\dots \\dots \\dots \\dots \\dots \\dots \\dots \\dots \\dots \\dots \\dots \\dots \\dots \\dots \\dots \\dots \\dots \\dots \\dots \\dots \\dots \\dots \\dots \\dots \\dots \\dots \\dots \\dots \\dots \\dots \\dots \\dots \\dots \\dots \\dots \\dots \\dots \\dots \\dots \\dots \\dots \\dots$ ",
+          "options": {
+            "A": "$\\alpha_{1} + \\alpha_{2}$",
+            "B": "$\\alpha_{2} + 2\\alpha_{3}$",
+            "C": "$\\alpha_{2} + \\alpha_{3}$",
+            "D": "$\\alpha_{1} + 2\\alpha_{2}$"
+          },
+          "answer": "B",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "选择题",
+          "knowledge_points": [
+            "math-choice"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选择题",
+            "2017年数学二"
+          ]
+        },
+        {
+          "id": "math2-2017-q3",
+          "number": 3,
+          "type": "fill",
+          "score": 4,
+          "content": "曲线 $y = x\\left(1 + \\arcsin \\frac{2}{x}\\right)$ 的斜渐近线方程为",
+          "options": {},
+          "answer": "待补充",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "填空题",
+          "knowledge_points": [
+            "math-fill"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "填空题",
+            "2017年数学二"
+          ]
+        },
+        {
+          "id": "math2-2017-q4",
+          "number": 4,
+          "type": "fill",
+          "score": 4,
+          "content": "设函数 $y = y(x)$ 由参数方程 $\\left\\{ \\begin{array}{l} x = t + \\mathrm{e}^t \\\\ y = \\sin t \\end{array} \\right.$ 确定，则 $\\left.\\frac{\\mathrm{d}^2y}{\\mathrm{d}x^2}\\right|_{t=0} =$",
+          "options": {},
+          "answer": "待补充",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "填空题",
+          "knowledge_points": [
+            "math-fill"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "填空题",
+            "2017年数学二"
+          ]
+        },
+        {
+          "id": "math2-2017-q5",
+          "number": 5,
+          "type": "fill",
+          "score": 4,
+          "content": "$\\int_{0}^{+\\infty}\\frac{\\ln(1 + x)}{(1 + x)^{2}}\\mathrm{d}x = \\underline{\\quad}$",
+          "options": {},
+          "answer": "待补充",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "填空题",
+          "knowledge_points": [
+            "math-fill"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "填空题",
+            "2017年数学二"
+          ]
+        },
+        {
+          "id": "math2-2017-q6",
+          "number": 6,
+          "type": "fill",
+          "score": 4,
+          "content": "设函数 $f(x, y)$ 具有一阶连续偏导数，且 $\\mathrm{d}f(x, y) = y\\mathrm{e}^{y}\\mathrm{d}x + x(1 + y)\\mathrm{e}^{y}\\mathrm{d}y$ ， $f(0, 0) = 0$ ，则 $f(x, y) =$ ________.",
+          "options": {},
+          "answer": "待补充",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "填空题",
+          "knowledge_points": [
+            "math-fill"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "填空题",
+            "2017年数学二"
+          ]
+        },
+        {
+          "id": "math2-2017-q7",
+          "number": 7,
+          "type": "fill",
+          "score": 4,
+          "content": "$\\int_0^1\\mathrm{d}y\\int_y^1\\frac{\\tan x}{x}\\mathrm{d}x = \\underline{\\quad}$",
+          "options": {},
+          "answer": "待补充",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "填空题",
+          "knowledge_points": [
+            "math-fill"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "填空题",
+            "2017年数学二"
+          ]
+        },
+        {
+          "id": "math2-2017-q8",
+          "number": 8,
+          "type": "fill",
+          "score": 4,
+          "content": "设矩阵 $A = \\begin{pmatrix} 4 & 1 & -2 \\\\ 1 & 2 & a \\\\ 3 & 1 & -1 \\end{pmatrix}$ 的一个特征向量为 $\\begin{pmatrix} 1 \\\\ 1 \\\\ 2 \\end{pmatrix}$ , 则 $a =$ ________.",
+          "options": {},
+          "answer": "待补充",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "填空题",
+          "knowledge_points": [
+            "math-fill"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "填空题",
+            "2017年数学二"
+          ]
+        },
+        {
+          "id": "math2-2017-q9",
+          "number": 9,
+          "type": "calculation",
+          "score": 10,
+          "content": "本题满分 10 分) 求极限 $\\lim_{x\\to 0^{+}}\\frac{\\int_{0}^{x}\\sqrt{x - t}\\mathrm{e}^{t}\\mathrm{d}t}{\\sqrt{x^3}}.$",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2017年数学二"
+          ]
+        },
+        {
+          "id": "math2-2017-q10",
+          "number": 10,
+          "type": "calculation",
+          "score": 10,
+          "content": "同试卷一第三[15]题",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2017年数学二"
+          ]
+        },
+        {
+          "id": "math2-2017-q11",
+          "number": 11,
+          "type": "calculation",
+          "score": 10,
+          "content": "同试卷一第三[16]题",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2017年数学二"
+          ]
+        },
+        {
+          "id": "math2-2017-q12",
+          "number": 12,
+          "type": "calculation",
+          "score": 10,
+          "content": "同试卷一第三[17]题",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2017年数学二"
+          ]
+        },
+        {
+          "id": "math2-2017-q13",
+          "number": 13,
+          "type": "calculation",
+          "score": 10,
+          "content": "同试卷一第三[18]题",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2017年数学二"
+          ]
+        },
+        {
+          "id": "math2-2017-q14",
+          "number": 14,
+          "type": "calculation",
+          "score": 10,
+          "content": "本题满分 11 分) 已知平面区域 $D = \\left\\{(x, y) \\mid x^2 + y^2 \\leqslant 2y\\right\\}$ , 计算二重积分 $\\iint_{D} (x + 1)^{2} \\mathrm{d}x \\mathrm{~d}y$ .",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2017年数学二"
+          ]
+        },
+        {
+          "id": "math2-2017-q15",
+          "number": 15,
+          "type": "calculation",
+          "score": 10,
+          "content": "本题满分 11 分) 设 $y(x)$ 是区间 $\\left(0, \\frac{3}{2}\\right)$ 内的可导函数，且 $y(1) = 0$ 。点 $P$ 是曲线 $L: y = y(x)$ 上的任意一点。 $L$ 在 $P$ 处的切线与 $y$ 轴相交于点 $\\left(0, Y_p\\right)$ ，法线与 $x$ 轴相交于点 $\\left(X_p, 0\\right)$ ，若 $X_p = Y_p$ ，求 $L$ 上点的坐标 $(x, y)$ 满足的方程。",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2017年数学二"
+          ]
+        },
+        {
+          "id": "math2-2017-q16",
+          "number": 16,
+          "type": "calculation",
+          "score": 10,
+          "content": "同试卷一第三[20]题",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2017年数学二"
+          ]
+        },
+        {
+          "id": "math2-2017-q17",
+          "number": 17,
+          "type": "calculation",
+          "score": 10,
+          "content": "同试卷一第三[21]题",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2017年数学二"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "math2-2018",
+      "year": "2018",
+      "subject": "数学二",
+      "category": "math2",
+      "paper_name": "2018年考研数学二真题",
+      "questions": [
+        {
+          "id": "math2-2018-q1",
+          "number": 1,
+          "type": "choice",
+          "score": 4,
+          "content": "若 $\\lim_{x\\to 0}\\left(\\mathrm{e}^{x} + ax^{2} + bx\\right)^{\\frac{1}{x^{2}}} = 1$ ，则",
+          "options": {
+            "A": "$a = \\frac{1}{2}, b = -1.$",
+            "B": "$a = -\\frac{1}{2}, b = -1.$",
+            "C": "$a = \\frac{1}{2}, b = 1$ ",
+            "D": "$a = -\\frac{1}{2}, b = 1.$"
+          },
+          "answer": "B",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "选择题",
+          "knowledge_points": [
+            "math-choice"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选择题",
+            "2018年数学二"
+          ]
+        },
+        {
+          "id": "math2-2018-q2",
+          "number": 2,
+          "type": "choice",
+          "score": 4,
+          "content": "$\\int_{-1}^{0}\\mathrm{d}x\\int_{-x}^{2 - x^2}(1 - xy)\\mathrm{d}y + \\int_{0}^{1}\\mathrm{d}x\\int_{x}^{2 - x^2}(1 - xy)\\mathrm{d}y = \\dots \\dots \\dots \\dots \\dots \\dots \\dots \\dots \\dots \\dots$",
+          "options": {
+            "A": "$\\frac{5}{3}$ ",
+            "B": "$\\frac{5}{6}$ ",
+            "C": "$\\frac{7}{3}$ ",
+            "D": "$\\frac{7}{6}$ "
+          },
+          "answer": "D",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "选择题",
+          "knowledge_points": [
+            "math-choice"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选择题",
+            "2018年数学二"
+          ]
+        },
+        {
+          "id": "math2-2018-q3",
+          "number": 3,
+          "type": "fill",
+          "score": 4,
+          "content": "$\\lim_{x\\to +\\infty}x^{2}[\\arctan (x + 1) - \\arctan x] = \\underline{\\quad}$",
+          "options": {},
+          "answer": "待补充",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "填空题",
+          "knowledge_points": [
+            "math-fill"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "填空题",
+            "2018年数学二"
+          ]
+        },
+        {
+          "id": "math2-2018-q4",
+          "number": 4,
+          "type": "fill",
+          "score": 4,
+          "content": "曲线 $y = x^{2} + 2\\ln x$ 在其拐点处的切线方程是",
+          "options": {},
+          "answer": "待补充",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "填空题",
+          "knowledge_points": [
+            "math-fill"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "填空题",
+            "2018年数学二"
+          ]
+        },
+        {
+          "id": "math2-2018-q5",
+          "number": 5,
+          "type": "fill",
+          "score": 4,
+          "content": "$\\int_{5}^{+\\infty}\\frac{1}{x^2 - 4x + 3}\\mathrm{d}x = \\underline{\\quad}$",
+          "options": {},
+          "answer": "待补充",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "填空题",
+          "knowledge_points": [
+            "math-fill"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "填空题",
+            "2018年数学二"
+          ]
+        },
+        {
+          "id": "math2-2018-q6",
+          "number": 6,
+          "type": "fill",
+          "score": 4,
+          "content": "曲线 $\\left\\{ \\begin{array}{l} x = \\cos^3 t \\\\ y = \\sin^3 t \\end{array} \\right.$ 在 $t = \\frac{\\pi}{4}$ 对应点的曲率为",
+          "options": {},
+          "answer": "待补充",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "填空题",
+          "knowledge_points": [
+            "math-fill"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "填空题",
+            "2018年数学二"
+          ]
+        },
+        {
+          "id": "math2-2018-q7",
+          "number": 7,
+          "type": "fill",
+          "score": 4,
+          "content": "设函数 $z = z(x, y)$ 由方程 $\\ln z + \\mathrm{e}^{z - 1} = xy$ 确定，则 $\\left.\\frac{\\partial z}{\\partial x}\\right|_{(2, \\frac{1}{2})} =$",
+          "options": {},
+          "answer": "待补充",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "填空题",
+          "knowledge_points": [
+            "math-fill"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "填空题",
+            "2018年数学二"
+          ]
+        },
+        {
+          "id": "math2-2018-q8",
+          "number": 8,
+          "type": "fill",
+          "score": 4,
+          "content": "设 $A$ 为 3 阶矩阵, $\\alpha_{1}, \\alpha_{2}, \\alpha_{3}$ 为线性无关的向量组, 若 $A \\alpha_{1} = 2 \\alpha_{1} + \\alpha_{2} + \\alpha_{3}, A \\alpha_{2} = \\alpha_{2} + 2 \\alpha_{3}, A \\alpha_{3} = -\\alpha_{2} + \\alpha_{3}$ , 则 $A$ 的实特征值为",
+          "options": {},
+          "answer": "待补充",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "填空题",
+          "knowledge_points": [
+            "math-fill"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "填空题",
+            "2018年数学二"
+          ]
+        },
+        {
+          "id": "math2-2018-q9",
+          "number": 9,
+          "type": "calculation",
+          "score": 10,
+          "content": "同试卷一第三[15]题",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2018年数学二"
+          ]
+        },
+        {
+          "id": "math2-2018-q10",
+          "number": 10,
+          "type": "calculation",
+          "score": 10,
+          "content": "本题满分 10 分) 已知连续函数 $f(x)$ 满足 $\\int_0^x f(t)\\mathrm{d}t + \\int_0^x tf(x - t)\\mathrm{d}t = ax^2.$ (I) 求 $f(x)$ ; (II) 若 $f(x)$ 在区间 $[0,1]$ 上的平均值为 1，求 $a$ 的值.",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2018年数学二"
+          ]
+        },
+        {
+          "id": "math2-2018-q11",
+          "number": 11,
+          "type": "calculation",
+          "score": 10,
+          "content": "本题满分 10 分) 设平面区域 $D$ 由曲线 $\\left\\{ \\begin{array}{l}x = t - \\sin t\\\\ y = 1 - \\cos t \\end{array} \\right.$ （20 $(0\\leqslant t\\leqslant 2\\pi)$ 与 $x$ 轴围成，计算二重积分 $\\iint_{D}\\big(x + 2y\\big)\\mathrm{d}x\\mathrm{d}y.$ # 18.（本题满分10分） 已知常数 $k \\geqslant \\ln 2 - 1$ ，证明： $(x - 1)\\left(x - \\ln^2 x + 2k\\ln x - 1\\right) \\geqslant 0.$",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2018年数学二"
+          ]
+        },
+        {
+          "id": "math2-2018-q12",
+          "number": 12,
+          "type": "calculation",
+          "score": 10,
+          "content": "同试卷一第三[16]题.",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2018年数学二"
+          ]
+        },
+        {
+          "id": "math2-2018-q13",
+          "number": 13,
+          "type": "calculation",
+          "score": 10,
+          "content": "本题满分 11 分) 已知曲线 $L: y = \\frac{4}{9} x^{2} (x \\geqslant 0)$ , 点 $O(0,0)$ , 点 $A(0,1)$ . 设 $P$ 是 $L$ 上的动点, $S$ 是直线 $OA$ 与直线 $AP$ 及曲线 $L$ 所围图形的面积. 若 $P$ 运动到 $(3,4)$ 时沿 $x$ 轴正向的速度是 4 , 求此时 $S$ 关于时间 $t$ 的变化率.",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2018年数学二"
+          ]
+        },
+        {
+          "id": "math2-2018-q14",
+          "number": 14,
+          "type": "calculation",
+          "score": 10,
+          "content": "同试卷一第三[19]题.",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2018年数学二"
+          ]
+        },
+        {
+          "id": "math2-2018-q15",
+          "number": 15,
+          "type": "calculation",
+          "score": 10,
+          "content": "同试卷一第三[20]题",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2018年数学二"
+          ]
+        },
+        {
+          "id": "math2-2018-q16",
+          "number": 16,
+          "type": "calculation",
+          "score": 10,
+          "content": "同试卷一第三[21]题",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2018年数学二"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "math2-2020",
+      "year": "2020",
+      "subject": "数学二",
+      "category": "math2",
+      "paper_name": "2020年考研数学二真题",
+      "questions": [
+        {
+          "id": "math2-2020-q1",
+          "number": 1,
+          "type": "choice",
+          "score": 4,
+          "content": "当 $x\\to 0^{+}$ 时，下列无穷小量中最高阶的是（ ）.",
+          "options": {
+            "A": "$\\int_{0}^{x} (\\mathrm{e}^{t^2} - 1) \\, \\mathrm{d}t$",
+            "B": "$\\int_{0}^{x}\\ln (1 + \\sqrt{t^3})\\mathrm{d}t$",
+            "C": "$\\int_{0}^{\\sin x}\\sin t^{2}\\mathrm{d}t$",
+            "D": "$\\int_{0}^{1 - \\cos x}\\sqrt{\\sin^3t}\\mathrm{d}t$"
+          },
+          "answer": "A",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "选择题",
+          "knowledge_points": [
+            "math-choice"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选择题",
+            "2020年数学二"
+          ]
+        },
+        {
+          "id": "math2-2020-q2",
+          "number": 2,
+          "type": "choice",
+          "score": 4,
+          "content": "$f(x) = \\frac{\\mathrm{e}^{\\frac{1}{x - 1}}\\ln|1 + x|}{(\\mathrm{e}^x - 1)(x - 2)}$ 的第二类间断点的个数为（ ）.",
+          "options": {
+            "A": "1",
+            "B": "2",
+            "C": "3",
+            "D": "4"
+          },
+          "answer": "A",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "选择题",
+          "knowledge_points": [
+            "math-choice"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选择题",
+            "2020年数学二"
+          ]
+        },
+        {
+          "id": "math2-2020-q3",
+          "number": 3,
+          "type": "choice",
+          "score": 4,
+          "content": "$\\int_{0}^{1} \\frac{\\arcsin \\sqrt{x}}{\\sqrt{x(1 - x)}} \\mathrm{d}x = (\\quad)$ .",
+          "options": {
+            "A": "$\\frac{\\pi^2}{4}$",
+            "B": "$\\frac{\\pi^2}{8}$",
+            "C": "$\\frac{\\pi}{4}$",
+            "D": "$\\frac{\\pi}{8}$"
+          },
+          "answer": "A",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "选择题",
+          "knowledge_points": [
+            "math-choice"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选择题",
+            "2020年数学二"
+          ]
+        },
+        {
+          "id": "math2-2020-q4",
+          "number": 4,
+          "type": "choice",
+          "score": 4,
+          "content": "设 $f(x) = x^{2}\\ln (1 - x)$ ，当 $n\\geqslant 3$ 时， $f^{(n)}(0) = ()$",
+          "options": {
+            "A": "$-\\frac{n!}{n - 2}$",
+            "B": "$\\frac{n!}{n - 2}$ $(\\mathrm{C}) - \\frac{(n - 2)!}{n}$",
+            "C": "",
+            "D": "$\\frac{(n - 2)!}{n}$"
+          },
+          "answer": "A",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "选择题",
+          "knowledge_points": [
+            "math-choice"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选择题",
+            "2020年数学二"
+          ]
+        },
+        {
+          "id": "math2-2020-q5",
+          "number": 5,
+          "type": "choice",
+          "score": 4,
+          "content": "关于函数 $f(x,y) = \\left\\{ \\begin{array}{ll}xy, & xy\\neq 0,\\\\ x, & y = 0,\\\\ y, & x = 0, \\end{array} \\right.$ 给出如下结论 ① $\\left.\\frac{\\partial f}{\\partial x}\\right|_{(0,0)} = 1;$ ② $\\left.\\frac{\\partial^2f}{\\partial x\\partial y}\\right|_{(0,0)} = 1;$ ③ $\\lim_{(x,y)\\to (0,0)}f(x,y) = 0;$ ④ $\\lim_{y\\to 0}\\lim_{x\\to 0}f(x,y) = 0.$ 其中正确的个数是（ ）.",
+          "options": {
+            "A": "4",
+            "B": "3",
+            "C": "2",
+            "D": "1"
+          },
+          "answer": "A",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "选择题",
+          "knowledge_points": [
+            "math-choice"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选择题",
+            "2020年数学二"
+          ]
+        },
+        {
+          "id": "math2-2020-q6",
+          "number": 6,
+          "type": "choice",
+          "score": 4,
+          "content": "设函数 $f(x)$ 在 $[-2,2]$ 上可导，且 $f^{\\prime}(x) > f(x) > 0$ ，则（ ）.",
+          "options": {
+            "A": "$\\frac{f(-2)}{f(-1)} > 1$",
+            "B": "$\\frac{f(0)}{f(-1)} >\\mathrm{e}$",
+            "C": "$\\frac{f(1)}{f(-1)} 0)$ 的斜渐近线方程",
+            "D": ""
+          },
+          "answer": "A",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "选择题",
+          "knowledge_points": [
+            "math-choice"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选择题",
+            "2020年数学二"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "math2-2021",
+      "year": "2021",
+      "subject": "数学二",
+      "category": "math2",
+      "paper_name": "2021年考研数学二真题",
+      "questions": [
+        {
+          "id": "math2-2021-q1",
+          "number": 1,
+          "type": "choice",
+          "score": 4,
+          "content": "当 $x \\to 0$ 时， $\\int _ { 0 } ^ { x ^ { 2 } } \\left( e ^ { t ^ { 3 } } - 1 \\right) \\mathrm { d } t$ 是 $x ^ { 7 }$ 的",
+          "options": {
+            "A": "低阶无穷小",
+            "B": "等价无穷小",
+            "C": ". $| \\operatorname* { l i m } _ { x \\to 0 } { \\frac { \\int _ { 0 } ^ { x ^ { 2 } } ( e ^ { t ^ { 3 } } - 1 ) \\mathrm { d } t } { x ^ { 7 } } } = \\operatorname* { l i m } _ { x \\to 0 } { \\frac { 2 x ( e ^ { x ^ { 6 } } - 1 ) } { 7 x ^ { 6 } } } = \\operatorname* { l i m } _ { x \\to 0 } { \\frac { 2 } { 7 } } x = 0$ x²【解析二】 =lim ，故选",
+            "D": "同阶但非等价无穷小 【答案】选"
+          },
+          "answer": "选（C）.",
+          "solution": "因为 $\\operatorname* { l i m } _ { x \\to 0 } f ( x ) = \\operatorname* { l i m } _ { x \\to 0 } { \\frac { e ^ { x } - 1 } { x } } = 1 = f ( 0 )$ ，所以 $f ( x )$ 在 $x = 0$ 处连续； 因为 $\\operatorname* { l i m } _ { x \\to 0 } { \\frac { f ( x ) - f ( 0 ) } { x - 0 } } = \\operatorname* { l i m } _ { x \\to 0 } { \\frac { { \\frac { e ^ { x } - 1 } { x } } - 1 } { x - 0 } } = \\operatorname* { l i m } _ { x \\to 0 } { \\frac { e ^ { x } - 1 - x } { x ^ { 2 } } } = { \\frac { 1 } { 2 } }$ e-1-1 x→0 x² ，所以 . $f ^ { \\pri",
+          "analysis": "选择题",
+          "knowledge_points": [
+            "math-choice"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选择题",
+            "2021年数学二"
+          ]
+        },
+        {
+          "id": "math2-2021-q2",
+          "number": 2,
+          "type": "choice",
+          "score": 4,
+          "content": "函数 $f ( x ) = { \\left\\{ \\begin{array} { l l } { \\displaystyle e ^ { x } - 1 } , x \\neq 0 \\right.} \\\\ { \\qquad x } \\\\ { \\quad 1 , x = 0 } \\end{array} $ ，在 $x = 0$ 处",
+          "options": {
+            "A": "连续且取极大值",
+            "B": "连续且取极小值",
+            "C": "可导且导数为",
+            "D": ". 【解析】因为 $\\operatorname* { l i m } _ { x \\to 0 } f ( x ) = \\operatorname* { l i m } _ { x \\to 0 } { \\frac { e ^ { x } - 1 } { x } } = 1 = f ( 0 )$ ，所以 $f ( x )$ 在 $x = 0$ 处连续； 因为 $\\operatorname* { l i m } _ { x \\to 0 } { \\frac { f ( x ) - f ( 0 ) } { x - 0 } } = \\operatorname* { l i m } _ { x \\to 0 } { \\frac { { \\frac { e ^ { x } - 1 } { x } } - 1 } { x - 0 } } = \\operatorname* { l i m } _ { x \\to 0 } { \\frac { e ^ { x } - 1 - x } { x ^ { 2 } } } = { \\frac { 1 } { 2 } }$ e-1-1 x→0 x² ，所以 . $f ^ { \\prime } ( 0 ) = \\frac { 1 } { 2 }$"
+          },
+          "answer": "选（C）.",
+          "solution": "因为 $\\operatorname* { l i m } _ { x \\to 0 } f ( x ) = \\operatorname* { l i m } _ { x \\to 0 } { \\frac { e ^ { x } - 1 } { x } } = 1 = f ( 0 )$ ，所以 $f ( x )$ 在 $x = 0$ 处连续； 因为 $\\operatorname* { l i m } _ { x \\to 0 } { \\frac { f ( x ) - f ( 0 ) } { x - 0 } } = \\operatorname* { l i m } _ { x \\to 0 } { \\frac { { \\frac { e ^ { x } - 1 } { x } } - 1 } { x - 0 } } = \\operatorname* { l i m } _ { x \\to 0 } { \\frac { e ^ { x } - 1 - x } { x ^ { 2 } } } = { \\frac { 1 } { 2 } }$ e-1-1 x→0 x² ，所以 . $f ^ { \\pri",
+          "analysis": "选择题",
+          "knowledge_points": [
+            "math-choice"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选择题",
+            "2021年数学二"
+          ]
+        },
+        {
+          "id": "math2-2021-q3",
+          "number": 3,
+          "type": "choice",
+          "score": 4,
+          "content": "设函数 $f ( x ) = a x - b \\ln x ( a > 0 )$ 有两个零点，则 $\\frac { b } { a }$ 的取值范围是",
+          "options": {
+            "A": ". 【解析】由题可得 $x > 0$ ，令 $f ^ { \\prime } ( x ) = a - { \\frac { b } { x } } = 0$ ，可得 $x = { \\frac { b } { a } }$ L $f ^ { \\prime \\prime } ( x ) = { \\frac { b } { x ^ { 2 } } }$ ， 若 $b 0$ ，则此时至多一个零点，故 $b > 0$ ，则 $f ^ { \\prime \\prime } ( x ) > 0$ ，于是在$x = { \\frac { b } { a } }$ 处取得极小值 $f \\biggl ( { \\frac { b } { a } } \\biggr ) = a \\cdot { \\frac { b } { a } } - b \\ln { \\frac { b } { a } } = b - b \\ln { \\frac { b } { a } }$ ，又 $$ \\lim _ {x \\rightarrow 0 ^ {+}} f (x) = \\lim _ {x \\rightarrow 0 ^ {+}} (a x - b \\ln x) = + \\infty , \\lim _ {x \\rightarrow + \\infty} f (x) = \\lim _ {x \\rightarrow + \\infty} (a x - b \\ln x) = + \\infty , $$ 故函数有两个零点只需满足 $f \\biggl ( \\frac { b } { a } \\biggr ) = b - b \\ln \\frac { b } { a } e .$ ",
+            "B": "（",
+            "C": "$\\left( 0 , { \\frac { 1 } { e } } \\right)$",
+            "D": "【答案】选"
+          },
+          "answer": "选（C）.",
+          "solution": "因为 $\\operatorname* { l i m } _ { x \\to 0 } f ( x ) = \\operatorname* { l i m } _ { x \\to 0 } { \\frac { e ^ { x } - 1 } { x } } = 1 = f ( 0 )$ ，所以 $f ( x )$ 在 $x = 0$ 处连续； 因为 $\\operatorname* { l i m } _ { x \\to 0 } { \\frac { f ( x ) - f ( 0 ) } { x - 0 } } = \\operatorname* { l i m } _ { x \\to 0 } { \\frac { { \\frac { e ^ { x } - 1 } { x } } - 1 } { x - 0 } } = \\operatorname* { l i m } _ { x \\to 0 } { \\frac { e ^ { x } - 1 - x } { x ^ { 2 } } } = { \\frac { 1 } { 2 } }$ e-1-1 x→0 x² ，所以 . $f ^ { \\pri",
+          "analysis": "选择题",
+          "knowledge_points": [
+            "math-choice"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选择题",
+            "2021年数学二"
+          ]
+        },
+        {
+          "id": "math2-2021-q4",
+          "number": 4,
+          "type": "choice",
+          "score": 4,
+          "content": "设函数 $f ( x , y )$ 可微， $f ( x + 1 , e ^ { x } ) = x ( x + 1 ) ^ { 2 } , f ( x , x ^ { 2 } ) = 2 x ^ { 2 } \\mathrm { l n } x$ ，则 $\\mathrm { d } f ( 1 , 1 ) =$",
+          "options": {
+            "A": "（",
+            "B": "（",
+            "C": ". 【解析】 $\\begin{array} { r } { \\mathrm { d } f ( x , y ) = f _ { 1 } ^ { \\prime } ( x , y ) \\mathrm { d } x + f _ { 2 } ^ { \\prime } ( x , y ) \\mathrm { d } y , } \\end{array}$ ， $f ( x + 1 , e ^ { x } ) = x ( x + 1 ) ^ { 2 }$ 对 $_ x$ 求导可得 $$ f _ {1} ^ {\\prime} (x + 1, e ^ {x}) + e ^ {x} f _ {2} ^ {\\prime} (x + 1, e ^ {x}) = (x + 1) ^ {2} + 2 x (x + 1), $$ 将 $x = 0$ 带入可得 $f _ { 1 } ^ { \\prime } ( 1 , 1 ) + f _ { 2 } ^ { \\prime } ( 1 , 1 ) = 1$ ① 在 $f ( x , x ^ { 2 } ) = 2 x ^ { 2 } \\mathrm { l n } x$ 两边对 $_ x$ 求导可得 $$ f _ {1} ^ {\\prime} (x, x ^ {2}) + 2 x f _ {2} ^ {\\prime} (x, x ^ {2}) = 4 x \\ln x + 2 x $$ 将 $x = 1$ 带入可得 $f _ { 1 } ^ { \\prime } ( 1 , 1 ) + 2 f _ { 2 } ^ { \\prime } ( 1 , 1 ) = 2$ ② 由 $\\textcircled{1}$ 和 $\\textcircled{2}$ 可得 $f _ { 1 } ^ { \\prime } ( 1 , 1 ) = 0 , f _ { 2 } ^ { \\prime } ( 1 , 1 ) = 1$ ，故选",
+            "D": "【答案】选"
+          },
+          "answer": "选（C）.",
+          "solution": "因为 $\\operatorname* { l i m } _ { x \\to 0 } f ( x ) = \\operatorname* { l i m } _ { x \\to 0 } { \\frac { e ^ { x } - 1 } { x } } = 1 = f ( 0 )$ ，所以 $f ( x )$ 在 $x = 0$ 处连续； 因为 $\\operatorname* { l i m } _ { x \\to 0 } { \\frac { f ( x ) - f ( 0 ) } { x - 0 } } = \\operatorname* { l i m } _ { x \\to 0 } { \\frac { { \\frac { e ^ { x } - 1 } { x } } - 1 } { x - 0 } } = \\operatorname* { l i m } _ { x \\to 0 } { \\frac { e ^ { x } - 1 - x } { x ^ { 2 } } } = { \\frac { 1 } { 2 } }$ e-1-1 x→0 x² ，所以 . $f ^ { \\pri",
+          "analysis": "选择题",
+          "knowledge_points": [
+            "math-choice"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选择题",
+            "2021年数学二"
+          ]
+        },
+        {
+          "id": "math2-2021-q5",
+          "number": 5,
+          "type": "choice",
+          "score": 4,
+          "content": "二次型 $f ( x _ { 1 } , x _ { 2 } , x _ { 3 } ) = ( x _ { 1 } + x _ { 2 } ) ^ { 2 } + ( x _ { 2 } + x _ { 3 } ) ^ { 2 } - ( x _ { 3 } - x _ { 1 } ) ^ { 2 }$ 的正惯性指数与负惯性指数依次为",
+          "options": {
+            "A": "（",
+            "B": ". 【解析 2】 $f ( x _ { 1 } , x _ { 2 } , x _ { 3 } ) = 2 x _ { 2 } ^ { 2 } + 2 x _ { 1 } x _ { 2 } + 2 x _ { 2 } x _ { 3 } + 2 x _ { 1 } x _ { 3 }$ $$ = 2 \\left(\\frac {1}{2} x _ {1} + x _ {2} + \\frac {1}{2} x _ {3}\\right) ^ {2} - \\frac {1}{2} x _ {1} ^ {2} - \\frac {1}{2} x _ {3} ^ {2} + x _ {1} x _ {3} = 2 \\left(\\frac {1}{2} x _ {1} + x _ {2} + \\frac {1}{2} x _ {3}\\right) ^ {2} - \\frac {1}{2} \\left(x _ {1} - x _ {3}\\right) ^ {2}, $$ 由以上标准形可得正、负惯性指数分别为 ，故选",
+            "C": "（",
+            "D": "【答案】选"
+          },
+          "answer": "选（C）.",
+          "solution": "因为 $\\operatorname* { l i m } _ { x \\to 0 } f ( x ) = \\operatorname* { l i m } _ { x \\to 0 } { \\frac { e ^ { x } - 1 } { x } } = 1 = f ( 0 )$ ，所以 $f ( x )$ 在 $x = 0$ 处连续； 因为 $\\operatorname* { l i m } _ { x \\to 0 } { \\frac { f ( x ) - f ( 0 ) } { x - 0 } } = \\operatorname* { l i m } _ { x \\to 0 } { \\frac { { \\frac { e ^ { x } - 1 } { x } } - 1 } { x - 0 } } = \\operatorname* { l i m } _ { x \\to 0 } { \\frac { e ^ { x } - 1 - x } { x ^ { 2 } } } = { \\frac { 1 } { 2 } }$ e-1-1 x→0 x² ，所以 . $f ^ { \\pri",
+          "analysis": "选择题",
+          "knowledge_points": [
+            "math-choice"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选择题",
+            "2021年数学二"
+          ]
+        },
+        {
+          "id": "math2-2021-q6",
+          "number": 6,
+          "type": "choice",
+          "score": 4,
+          "content": "设 $A = \\left( \\alpha _ { 1 } , \\alpha _ { 2 } , \\alpha _ { 3 } , \\alpha _ { 4 } \\right)$ 为 阶正交矩阵，若矩阵 $B = \\left[ \\begin{array} { l } { \\pmb { \\alpha } _ { 1 } ^ { T } } \\\\ { \\pmb { \\alpha } _ { 2 } ^ { T } } \\\\ { \\pmb { \\alpha } _ { 3 } ^ { T } } \\end{array} \\right]$ $\\beta = { \\left[ \\begin{array} { l } { 1 } \\\\ { 1 } \\\\ { 1 } \\end{array} \\right] } , k$ $k$ 表示任意常数，则线性方程组 $B { \\pmb x } = \\beta$ 的通解 ${ \\pmb x } =$",
+          "options": {
+            "A": "$\\pmb { \\alpha } _ { 2 } + \\pmb { \\alpha } _ { 3 } + \\pmb { \\alpha } _ { 4 } + k \\pmb { \\alpha } _ { 1 }$",
+            "B": "= 3$ $\\begin{array} { r } { B \\pmb { \\alpha } _ { 4 } = \\left[ \\pmb { \\alpha } _ { 1 } ^ { T } \\right] _ { \\pmb { \\alpha } _ { 4 } = \\pmb { 0 } } } \\\\ { { \\pmb { \\alpha } } _ { 3 } ^ { T } } \\end{array}$ $\\pmb { B x } = \\mathbf { 0 }$ 的通解为 $k \\pmb { \\alpha } _ { 4 }$ $. B ( \\alpha _ { 1 } + \\alpha _ { 2 } + \\alpha _ { 3 } ) = { \\binom { \\alpha _ { 1 } ^ { T } } { \\alpha _ { 2 } ^ { T } } } \\left( \\alpha _ { 1 } + \\alpha _ { 2 } + \\alpha _ { 3 } \\right) = { \\binom { 1 } { 1 } } = \\beta$ ，故线性方程组 $\\pmb { B x } = \\beta$ 的通解为 ${ \\pmb x } = { \\pmb \\alpha } _ { 1 } + { \\pmb \\alpha } _ { 2 } + { \\pmb \\alpha } _ { 3 } + k { \\pmb \\alpha } _ { 4 }$ ，其中 $k$ 为任意常数，故选",
+            "C": "$\\pmb { \\alpha } _ { 1 } + \\pmb { \\alpha } _ { 2 } + \\pmb { \\alpha } _ { 4 } + k \\pmb { \\alpha } _ { 3 }$",
+            "D": ". 【解析】 $A = ( \\alpha _ { 1 } , \\alpha _ { 2 } , \\alpha _ { 3 } , \\alpha _ { 4 } )$ 为 阶正交矩阵，故 $\\pmb { \\alpha } _ { 1 } , \\pmb { \\alpha } _ { 2 } , \\pmb { \\alpha } _ { 3 } , \\pmb { \\alpha } _ { 4 }$ 为一组标准正交向量组，则 $r"
+          },
+          "answer": "选（D）.",
+          "solution": "因为 $\\operatorname* { l i m } _ { x \\to 0 } f ( x ) = \\operatorname* { l i m } _ { x \\to 0 } { \\frac { e ^ { x } - 1 } { x } } = 1 = f ( 0 )$ ，所以 $f ( x )$ 在 $x = 0$ 处连续； 因为 $\\operatorname* { l i m } _ { x \\to 0 } { \\frac { f ( x ) - f ( 0 ) } { x - 0 } } = \\operatorname* { l i m } _ { x \\to 0 } { \\frac { { \\frac { e ^ { x } - 1 } { x } } - 1 } { x - 0 } } = \\operatorname* { l i m } _ { x \\to 0 } { \\frac { e ^ { x } - 1 - x } { x ^ { 2 } } } = { \\frac { 1 } { 2 } }$ e-1-1 x→0 x² ，所以 . $f ^ { \\pri",
+          "analysis": "选择题",
+          "knowledge_points": [
+            "math-choice"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选择题",
+            "2021年数学二"
+          ]
+        },
+        {
+          "id": "math2-2021-q7",
+          "number": 7,
+          "type": "choice",
+          "score": 4,
+          "content": "已知矩阵 $\\pmb { A } = \\left[ \\begin{array} { c c c } { 1 } & { 0 } & { - 1 } \\\\ { 2 } & { - 1 } & { 1 } \\\\ { - 1 } & { 2 } & { - 5 } \\end{array} \\right] ,$ ，若下三角可逆矩阵 $\\pmb { P }$ 和上三角可逆矩阵 $\\pmb { Q }$ ，使$\\pmb { P A Q }$ 为对角矩阵，则 $\\mathbf { \\nabla } _ { P } , \\mathbf { \\nabla } _ { Q }$ 可以分别取",
+          "options": {
+            "A": "${ \\left[ \\begin{array} { l l l } { 1 } & { 0 } & { 0 } \\\\ { 0 } & { 1 } & { 0 } \\\\ { 0 } & { 0 } & { 1 } \\end{array} \\right] } , { \\left[ \\begin{array} { l l l } { 1 } & { 0 } & { 1 } \\\\ { 0 } & { 1 } & { 3 } \\\\ { 0 } & { 0 } & { 1 } \\end{array} \\right] }$ 1 0 0 1 0 0",
+            "B": "2 -1 0 ， 0 1 0 [-3 2i][061]",
+            "C": ". 【解析】 $| \\begin{array} { c c c c c } ( A , E ) = [ \\begin{array} { c c c c c c } { 1 } & { 0 } & { - 1 } & { 1 } & { 0 } & { 0 } \\\\ { 2 } & { - 1 } & { 1 } & { 0 } & { 1 } & { 0 } \\\\ { - 1 } & { 2 } & { - 5 } & { 0 } & { 0 } & { 1 } \\end{array} ] [ \\begin{array} { c c c c c c } { 1 } & { 0 } & { - 1 } & { 1 } & { 0 } & { 0 } \\\\ { 0 } & { - 1 } & { 3 } & { - 2 } & { 1 } & { 0 } \\\\ { 0 } & { 2 } & { - 6 } & { 1 } & { 0 } & { 1 } \\end{array} ] \\end{array}$ $ { [ \\begin{array} { l l l l l l } { 1 } & { 0 } & { - 1 } & { 1 } & { 0 } & { 0 } \\\\ { 0 } & { 1 } & { - 3 } & { 2 } & { - 1 } & { 0 } \\\\ { 0 } & { 0 } & { 0 } & { - 3 } & { 2 } & { 1 } \\end{array} ] } = ( B , P )$ ，即 $\\begin{array} { r } { P = \\left[ { \\begin{array} { c c c } { 1 } & { 0 } & { 0 } \\\\ { 2 } & { - 1 } & { 0 } \\\\ { - 3 } & { 2 } & { 1 } \\end{array} } \\right] . } \\end{array}$ $$ \\left[\\begin{array}{l}{\\pmb {B}}\\\\{\\pmb {E}}\\end{array}\\right] = \\left[\\begin{array}{l l l}{1}&{0}&{- 1}\\\\{0}&{1}&{- 3}\\\\{0}&{0}&{0}\\\\{1}&{0}&{0}\\\\{0}&{1}&{0}\\\\{0}&{0}&{1}\\end{array}\\right]\\rightarrow \\left[\\begin{array}{l l l}{1}&{0}&{0}\\\\{0}&{1}&{0}\\\\{0}&{0}&{0}\\\\{1}&{0}&{1}\\\\{0}&{1}&{3}\\\\{0}&{0}&{1}\\end{array}\\right] = \\left[\\begin{array}{l}{\\pmb {\\Lambda}}\\\\{\\pmb {Q}}\\end{array}\\right], \\text {则} {\\pmb {Q}} = \\left[\\begin{array}{l l l}{1}&{0}&{1}\\\\{0}&{1}&{3}\\\\{0}&{0}&{1}\\end{array}\\right]. $$",
+            "D": "0 1 0 0 -1 2 [i3i]o61] 【答案】选"
+          },
+          "answer": "选（C）.",
+          "solution": "因为 $\\operatorname* { l i m } _ { x \\to 0 } f ( x ) = \\operatorname* { l i m } _ { x \\to 0 } { \\frac { e ^ { x } - 1 } { x } } = 1 = f ( 0 )$ ，所以 $f ( x )$ 在 $x = 0$ 处连续； 因为 $\\operatorname* { l i m } _ { x \\to 0 } { \\frac { f ( x ) - f ( 0 ) } { x - 0 } } = \\operatorname* { l i m } _ { x \\to 0 } { \\frac { { \\frac { e ^ { x } - 1 } { x } } - 1 } { x - 0 } } = \\operatorname* { l i m } _ { x \\to 0 } { \\frac { e ^ { x } - 1 - x } { x ^ { 2 } } } = { \\frac { 1 } { 2 } }$ e-1-1 x→0 x² ，所以 . $f ^ { \\pri",
+          "analysis": "选择题",
+          "knowledge_points": [
+            "math-choice"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选择题",
+            "2021年数学二"
+          ]
+        },
+        {
+          "id": "math2-2021-q8",
+          "number": 8,
+          "type": "choice",
+          "score": 4,
+          "content": "设 $A , B$ 为随机事件，且 $0 P",
+          "options": {
+            "A": "P",
+            "B": "$ ，故",
+            "C": "正确",
+            "D": ". 【注】由 $P ( A |"
+          },
+          "answer": "选（C）.",
+          "solution": "因为 $\\operatorname* { l i m } _ { x \\to 0 } f ( x ) = \\operatorname* { l i m } _ { x \\to 0 } { \\frac { e ^ { x } - 1 } { x } } = 1 = f ( 0 )$ ，所以 $f ( x )$ 在 $x = 0$ 处连续； 因为 $\\operatorname* { l i m } _ { x \\to 0 } { \\frac { f ( x ) - f ( 0 ) } { x - 0 } } = \\operatorname* { l i m } _ { x \\to 0 } { \\frac { { \\frac { e ^ { x } - 1 } { x } } - 1 } { x - 0 } } = \\operatorname* { l i m } _ { x \\to 0 } { \\frac { e ^ { x } - 1 - x } { x ^ { 2 } } } = { \\frac { 1 } { 2 } }$ e-1-1 x→0 x² ，所以 . $f ^ { \\pri",
+          "analysis": "选择题",
+          "knowledge_points": [
+            "math-choice"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选择题",
+            "2021年数学二"
+          ]
+        },
+        {
+          "id": "math2-2021-q9",
+          "number": 9,
+          "type": "choice",
+          "score": 4,
+          "content": "设 $( X _ { 1 } , Y _ { 1 } ) , ( X _ { 2 } , Y _ { 2 } ) , \\cdots , ( X _ { n } , Y _ { n } )$ 为来自总体 $N ( \\mu _ { 1 } , \\mu _ { 2 } ; \\sigma _ { 1 } ^ { 2 } , \\sigma _ { 2 } ^ { 2 } ; \\rho )$ 的简单随机样本，令 $\\theta = \\mu _ { 1 } - \\mu _ { 2 } , \\overline { { X } } = \\frac { 1 } { n } \\sum _ { i = 1 } ^ { n } X _ { i } , \\overline { { Y } } = \\frac { 1 } { n } \\sum _ { i = 1 } ^ { n } Y _ { i } , \\hat { \\theta } = \\overline { { X } } - \\overline { { Y } }$ 1 ，则",
+          "options": {
+            "A": "E(@)=0,D(@)=σ²+σ² $E \\big ( \\widehat { \\theta } \\big ) = \\theta , D \\big ( \\widehat { \\theta } \\big ) = \\frac { \\sigma _ { 1 } ^ { 2 } + \\sigma _ { 2 } ^ { 2 } } { n }$",
+            "B": ". 【解析】由题意可得 $$ X \\sim N \\left(\\mu_ {1}, \\sigma_ {1} ^ {2}\\right), Y \\sim N \\left(\\mu_ {2}, \\sigma_ {2} ^ {2}\\right), \\bar {X} \\sim N \\left(\\mu_ {1}, \\frac {\\sigma_ {1} ^ {2}}{n}\\right), \\bar {Y} \\sim N \\left(\\mu_ {2}, \\frac {\\sigma_ {2} ^ {2}}{n}\\right), c o v (X, Y) = \\rho \\sigma_ {1} \\sigma_ {2}, $$ 由于 $( X , Y )$ 服从二维正态分布，所以 $\\textstyle { \\left( { \\overline { { X } } } , { \\overline { { Y } } } \\right) }$ 也服从二维正态分布，则 ${ \\overline { { X } } } - { \\overline { { Y } } }$ 服从一维正态分布，于是 $E { \\bigl ( } { \\hat { \\theta } } { \\bigr ) } = E { \\bigl ( } { \\overline { { X } } } - { \\overline { { Y } } } { \\bigr ) } = E { \\bigl ( } { \\overline { { X } } } { \\bigr ) } - E { \\bigl ( } { \\overline { { Y } } } { \\bigr ) } = \\mu _ { 1 } - \\mu _ { 2 } = \\theta ,$ ， $$ c o v \\left(\\bar {X}, \\bar {Y}\\right) = c o v \\left(\\frac {1}{n} \\sum_ {i = 1} ^ {n} X _ {i}, \\frac {1}{n} \\sum_ {i = 1} ^ {n} Y _ {i}\\right) = \\frac {1}{n ^ {2}} c o v \\left(\\sum_ {i = 1} ^ {n} X _ {i}, \\sum_ {i = 1} ^ {n} Y _ {i}\\right) = \\frac {n \\rho \\sigma_ {1} \\sigma_ {2}}{n ^ {2}} = \\frac {\\rho \\sigma_ {1} \\sigma_ {2}}{n}, $$ 于是 ${ \\cal D } \\big ( \\widehat { \\theta } \\big ) = D \\big ( \\overline { { X } } - \\overline { { Y } } \\big ) = D \\big ( \\overline { { X } } \\big ) + D \\big ( \\overline { { Y } } \\big ) - 2 c o v \\big ( \\overline { { X } } , \\overline { { Y } } \\big ) = \\frac { \\sigma _ { 1 } ^ { 2 } + \\sigma _ { 2 } ^ { 2 } - 2 \\rho \\sigma _ { 1 } \\sigma _ { 2 } } { n }$ ，选",
+            "C": "E(@)≠0,D(@)=σ²+² $E \\big ( \\widehat { \\theta } \\big ) \\neq \\theta , D \\big ( \\widehat { \\theta } \\big ) = \\frac { \\sigma _ { 1 } ^ { 2 } + \\sigma _ { 2 } ^ { 2 } } { n }$",
+            "D": "E(@)≠0,D(@)=O²+²-2pσの² $E \\big ( \\widehat { \\theta } \\big ) \\neq \\theta , D \\big ( \\widehat { \\theta } \\big ) = \\frac { \\sigma _ { 1 } ^ { 2 } + \\sigma _ { 2 } ^ { 2 } - 2 \\rho \\sigma _ { 1 } \\sigma _ { 2 } } { n }$ 【答案】选"
+          },
+          "answer": "选（B）.",
+          "solution": "因为 $\\operatorname* { l i m } _ { x \\to 0 } f ( x ) = \\operatorname* { l i m } _ { x \\to 0 } { \\frac { e ^ { x } - 1 } { x } } = 1 = f ( 0 )$ ，所以 $f ( x )$ 在 $x = 0$ 处连续； 因为 $\\operatorname* { l i m } _ { x \\to 0 } { \\frac { f ( x ) - f ( 0 ) } { x - 0 } } = \\operatorname* { l i m } _ { x \\to 0 } { \\frac { { \\frac { e ^ { x } - 1 } { x } } - 1 } { x - 0 } } = \\operatorname* { l i m } _ { x \\to 0 } { \\frac { e ^ { x } - 1 - x } { x ^ { 2 } } } = { \\frac { 1 } { 2 } }$ e-1-1 x→0 x² ，所以 . $f ^ { \\pri",
+          "analysis": "选择题",
+          "knowledge_points": [
+            "math-choice"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选择题",
+            "2021年数学二"
+          ]
+        },
+        {
+          "id": "math2-2021-q10",
+          "number": 10,
+          "type": "choice",
+          "score": 4,
+          "content": "设总体 $X$ 的概率分布为 $P \\left\\{ X = 1 \\right\\} = \\frac { 1 - \\theta } { 2 } , P \\left\\{ X = 2 \\right\\} = P \\left\\{ X = 3 \\right\\} = \\frac { 1 + \\theta } { 4 } ,$ ，则利用来自总体的样本值 $1 , 3 , 2 , 2 , 1 , 3 , 1 , 2$ ，可得 $\\theta$ 的最大似然估计值为",
+          "options": {
+            "A": "【解析】似然函数 $L ( \\theta ) = { \\bigg ( } { \\frac { 1 - \\theta } { 2 } } { \\bigg ) } ^ { 3 } { \\bigg ( } { \\frac { 1 + \\theta } { 4 } } { \\bigg ) } ^ { 5 }$ ，取对数 $$ \\ln L (\\theta) = 3 \\ln \\left(\\frac {1 - \\theta}{2}\\right) + 5 \\ln \\left(\\frac {1 + \\theta}{4}\\right), $$ 由 $\\frac { \\mathop { } { \\mathrm d } { } \\ln { } L \\left( \\theta \\right) } { \\mathop { } { \\mathrm d } \\theta } = \\frac { - 3 } { 1 - \\theta } + \\frac { 5 } { 1 + \\theta } = 0$ 4 ，得 $\\hat { \\theta } = \\frac { 1 } { 4 }$ ，故选",
+            "B": "",
+            "C": "1",
+            "D": "5 【答案】选"
+          },
+          "answer": "选（C）.",
+          "solution": "因为 $\\operatorname* { l i m } _ { x \\to 0 } f ( x ) = \\operatorname* { l i m } _ { x \\to 0 } { \\frac { e ^ { x } - 1 } { x } } = 1 = f ( 0 )$ ，所以 $f ( x )$ 在 $x = 0$ 处连续； 因为 $\\operatorname* { l i m } _ { x \\to 0 } { \\frac { f ( x ) - f ( 0 ) } { x - 0 } } = \\operatorname* { l i m } _ { x \\to 0 } { \\frac { { \\frac { e ^ { x } - 1 } { x } } - 1 } { x - 0 } } = \\operatorname* { l i m } _ { x \\to 0 } { \\frac { e ^ { x } - 1 - x } { x ^ { 2 } } } = { \\frac { 1 } { 2 } }$ e-1-1 x→0 x² ，所以 . $f ^ { \\pri",
+          "analysis": "选择题",
+          "knowledge_points": [
+            "math-choice"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选择题",
+            "2021年数学二"
+          ]
+        },
+        {
+          "id": "math2-2021-q11",
+          "number": 11,
+          "type": "fill",
+          "score": 4,
+          "content": "若 $y = \\cos e ^ { - { \\sqrt { x } } }$ ，则 $\\left. { \\frac { \\mathrm { d } y } { \\mathrm { d } x } } \\right| _ { x = 1 } = - .$ 【答案】 $\\frac { 1 } { 2 e } \\mathrm { s i n } \\frac { 1 } { e }$ 【解析】 ${ \\frac { \\mathrm { d } y } { \\mathrm { d } x } } = - \\sin e ^ { - { \\sqrt { x } } } \\left( e ^ { - { \\sqrt { x } } } \\cdot { \\frac { 1 } { - 2 { \\sqrt { x } } } } \\right)$ $\\left. { \\frac { \\operatorname { d } y } { \\operatorname { d } x } } \\right| _ { x = 1 } = { \\frac { 1 } { 2 e } } \\sin { \\frac { 1 } { e } } .$",
+          "options": {},
+          "answer": "$\\frac { 1 } { 2 e } \\mathrm { s i n } \\frac { 1 } { e }$",
+          "solution": "${ \\frac { \\mathrm { d } y } { \\mathrm { d } x } } = - \\sin e ^ { - { \\sqrt { x } } } \\left( e ^ { - { \\sqrt { x } } } \\cdot { \\frac { 1 } { - 2 { \\sqrt { x } } } } \\right)$ $\\left. { \\frac { \\operatorname { d } y } { \\operatorname { d } x } } \\right| _ { x = 1 } = { \\frac { 1 } { 2 e } } \\sin { \\frac { 1 } { e } } .$ （12） $\\int _ { { \\sqrt { 5 } } } ^ { 5 } { \\frac { x } { \\sqrt { \\left| x ^ { 2 } - 9 \\right| } } } \\mathrm { d } x = { \\cfrac { . } { } }$",
+          "analysis": "填空题",
+          "knowledge_points": [
+            "math-fill"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "填空题",
+            "2021年数学二"
+          ]
+        },
+        {
+          "id": "math2-2021-q12",
+          "number": 12,
+          "type": "fill",
+          "score": 4,
+          "content": "$\\int _ { { \\sqrt { 5 } } } ^ { 5 } { \\frac { x } { \\sqrt { \\left| x ^ { 2 } - 9 \\right| } } } \\mathrm { d } x = { \\cfrac { . } { } }$ 【答案】 . $$ \\begin{array}{l} = - \\frac {1}{2} \\int_ {\\sqrt {5}} ^ {3} \\frac {\\mathrm {d} (9 - x ^ {2})}{\\sqrt {9 - x ^ {2}}} + \\frac {1}{2} \\int_ {3} ^ {5} \\frac {\\mathrm {d} (x ^ {2} - 9)}{\\sqrt {x ^ {2} - 9}} \\\\ = - \\sqrt {9 - x ^ {2}} \\left| _ {\\sqrt {5}} ^ {3} + \\sqrt {x ^ {2} - 9} \\right| _ {3} ^ {5} = 6. \\\\ \\end{array} $$",
+          "options": {},
+          "answer": ".",
+          "solution": "${ \\frac { \\mathrm { d } y } { \\mathrm { d } x } } = - \\sin e ^ { - { \\sqrt { x } } } \\left( e ^ { - { \\sqrt { x } } } \\cdot { \\frac { 1 } { - 2 { \\sqrt { x } } } } \\right)$ $\\left. { \\frac { \\operatorname { d } y } { \\operatorname { d } x } } \\right| _ { x = 1 } = { \\frac { 1 } { 2 e } } \\sin { \\frac { 1 } { e } } .$ （12） $\\int _ { { \\sqrt { 5 } } } ^ { 5 } { \\frac { x } { \\sqrt { \\left| x ^ { 2 } - 9 \\right| } } } \\mathrm { d } x = { \\cfrac { . } { } }$",
+          "analysis": "填空题",
+          "knowledge_points": [
+            "math-fill"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "填空题",
+            "2021年数学二"
+          ]
+        },
+        {
+          "id": "math2-2021-q13",
+          "number": 13,
+          "type": "fill",
+          "score": 4,
+          "content": "设平面区域 $D$ 由曲线 $y = { \\sqrt { x } } \\sin \\pi x ( 0 \\leq x \\leq 1 )$ 与 $_ x$ 轴围成，则 $D$ 绕 $_ x$ 轴旋转所成旋转体的体积为 【答案】 $\\frac { \\pi } { 4 }$ 【解析】 $V = \\pi \\int _ { 0 } ^ { 1 } \\left( { \\sqrt { x } } \\sin \\pi x \\right) ^ { 2 } \\mathrm { { d } } x = \\pi \\int _ { 0 } ^ { 1 } x \\sin ^ { 2 } \\pi x \\mathrm { { d } } x { \\xrightarrow { \\pi x = t } } { \\frac { 1 } { \\pi } } \\int _ { 0 } ^ { \\pi } t \\sin ^ { 2 } t \\mathrm { { d } } t = { \\frac { \\pi } { 4 } } .$ sin2πxdc=t 4",
+          "options": {},
+          "answer": "$\\frac { \\pi } { 4 }$",
+          "solution": "${ \\frac { \\mathrm { d } y } { \\mathrm { d } x } } = - \\sin e ^ { - { \\sqrt { x } } } \\left( e ^ { - { \\sqrt { x } } } \\cdot { \\frac { 1 } { - 2 { \\sqrt { x } } } } \\right)$ $\\left. { \\frac { \\operatorname { d } y } { \\operatorname { d } x } } \\right| _ { x = 1 } = { \\frac { 1 } { 2 e } } \\sin { \\frac { 1 } { e } } .$ （12） $\\int _ { { \\sqrt { 5 } } } ^ { 5 } { \\frac { x } { \\sqrt { \\left| x ^ { 2 } - 9 \\right| } } } \\mathrm { d } x = { \\cfrac { . } { } }$",
+          "analysis": "填空题",
+          "knowledge_points": [
+            "math-fill"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "填空题",
+            "2021年数学二"
+          ]
+        },
+        {
+          "id": "math2-2021-q14",
+          "number": 14,
+          "type": "fill",
+          "score": 4,
+          "content": "差分方程 $\\triangle y _ { t } = t$ 的通解为 【答案】 $y = \\frac { 1 } { 2 } t ^ { 2 } - \\frac { 1 } { 2 } t + C$ t² ， $C$ 为任意常数. 【解析】 $\\triangle y _ { t } = y _ { t + 1 } - y _ { t } = t$ ，则 $\\triangle y _ { t } = y _ { t + 1 } - y _ { t } = 0$ 的通解为 ${ \\bar { y } } = C$ ，令特解为$\\boldsymbol { y } ^ { * } = ( a t + b ) t$ ，带入可得 $a = { \\frac { 1 } { 2 } } , b = - \\ { \\frac { 1 } { 2 } }$ ,b=- ， 则特解为 ${ \\frac { 1 } { 2 } } t ^ { 2 } - { \\frac { 1 } { 2 } } t$ ， 故可得通解为 $y = \\frac { 1 } { 2 } t ^ { 2 } - \\frac { 1 } { 2 } t + C$ ， $C$ 为任意常数.",
+          "options": {},
+          "answer": "$y = \\frac { 1 } { 2 } t ^ { 2 } - \\frac { 1 } { 2 } t + C$ t² ， $C$ 为任意常数.",
+          "solution": "${ \\frac { \\mathrm { d } y } { \\mathrm { d } x } } = - \\sin e ^ { - { \\sqrt { x } } } \\left( e ^ { - { \\sqrt { x } } } \\cdot { \\frac { 1 } { - 2 { \\sqrt { x } } } } \\right)$ $\\left. { \\frac { \\operatorname { d } y } { \\operatorname { d } x } } \\right| _ { x = 1 } = { \\frac { 1 } { 2 e } } \\sin { \\frac { 1 } { e } } .$ （12） $\\int _ { { \\sqrt { 5 } } } ^ { 5 } { \\frac { x } { \\sqrt { \\left| x ^ { 2 } - 9 \\right| } } } \\mathrm { d } x = { \\cfrac { . } { } }$",
+          "analysis": "填空题",
+          "knowledge_points": [
+            "math-fill"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "填空题",
+            "2021年数学二"
+          ]
+        },
+        {
+          "id": "math2-2021-q15",
+          "number": 15,
+          "type": "fill",
+          "score": 4,
+          "content": "多项式 $f ( x ) = { \\left| \\begin{array} { l l l l } { x } & { x } & { 1 } & { 2 x } \\\\ { 1 } & { x } & { 2 } & { - 1 } \\\\ { 2 } & { 1 } & { x } & { 1 } \\\\ { 2 } & { - 1 } & { 1 } & { x } \\end{array} \\right| }$ $x ^ { 3 }$ 项的系数为 【答案】 . 【解析】只找到函数中含有 $x ^ { 3 }$ 项即可，结果为 $$ - a _ {1 2} a _ {2 1} a _ {3 3} a _ {4 4} - a _ {1 4} a _ {2 2} a _ {3 3} a _ {4 1} = - x ^ {3} - 4 x ^ {3} = - 5 x ^ {3}, $$ 故 $x ^ { 3 }$ 项的系数为 .",
+          "options": {},
+          "answer": ".",
+          "solution": "${ \\frac { \\mathrm { d } y } { \\mathrm { d } x } } = - \\sin e ^ { - { \\sqrt { x } } } \\left( e ^ { - { \\sqrt { x } } } \\cdot { \\frac { 1 } { - 2 { \\sqrt { x } } } } \\right)$ $\\left. { \\frac { \\operatorname { d } y } { \\operatorname { d } x } } \\right| _ { x = 1 } = { \\frac { 1 } { 2 e } } \\sin { \\frac { 1 } { e } } .$ （12） $\\int _ { { \\sqrt { 5 } } } ^ { 5 } { \\frac { x } { \\sqrt { \\left| x ^ { 2 } - 9 \\right| } } } \\mathrm { d } x = { \\cfrac { . } { } }$",
+          "analysis": "填空题",
+          "knowledge_points": [
+            "math-fill"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "填空题",
+            "2021年数学二"
+          ]
+        },
+        {
+          "id": "math2-2021-q16",
+          "number": 16,
+          "type": "fill",
+          "score": 4,
+          "content": "甲乙两个盒子中各装有 2个红球和 个白球，先从甲盒中任取一球，观察颜色后放入乙盒中，再从乙盒中任取一球，令 分别表示从甲盒中和乙盒中取到的红球个数，则 $X$ 与 的相关系数 【答案】 1 【解析】由题可得 $$ (X, Y) \\sim \\left( \\begin{array}{c c c c} (0, 0) & (0, 1) & (1, 0) & (1, 1) \\\\ \\frac {3}{1 0} & \\frac {1}{5} & \\frac {1}{5} & \\frac {3}{1 0} \\end{array} \\right), \\quad X \\sim \\left( \\begin{array}{c c} 0 & 1 \\\\ \\frac {1}{2} & \\frac {1}{2} \\end{array} \\right), Y \\sim \\left( \\begin{array}{c c} 0 & 1 \\\\ \\frac {1}{2} & \\frac {1}{2} \\end{array} \\right), \\quad X Y \\sim \\left( \\begin{array}{c c} 0 & 1 \\\\ \\frac {7}{1 0} & \\frac {3}{1 0} \\end{array} \\right), $$ $$ E X = E Y = \\frac {1}{2}, D X = D Y = \\frac {1}{4}, E (X Y) = \\frac {3}{1 0}, c o v (X, Y) = E (X Y) - E X E Y = \\frac {1}{2 0}, $$ 则 . $\\rho _ { X Y } = \\frac { 1 } { 5 }$",
+          "options": {},
+          "answer": "1",
+          "solution": "${ \\frac { \\mathrm { d } y } { \\mathrm { d } x } } = - \\sin e ^ { - { \\sqrt { x } } } \\left( e ^ { - { \\sqrt { x } } } \\cdot { \\frac { 1 } { - 2 { \\sqrt { x } } } } \\right)$ $\\left. { \\frac { \\operatorname { d } y } { \\operatorname { d } x } } \\right| _ { x = 1 } = { \\frac { 1 } { 2 e } } \\sin { \\frac { 1 } { e } } .$ （12） $\\int _ { { \\sqrt { 5 } } } ^ { 5 } { \\frac { x } { \\sqrt { \\left| x ^ { 2 } - 9 \\right| } } } \\mathrm { d } x = { \\cfrac { . } { } }$",
+          "analysis": "填空题",
+          "knowledge_points": [
+            "math-fill"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "填空题",
+            "2021年数学二"
+          ]
+        },
+        {
+          "id": "math2-2021-q17",
+          "number": 17,
+          "type": "calculation",
+          "score": 10,
+          "content": "本题满分 10分） 已知 $\\operatorname* { l i m } _ { x \\to 0 } \\left[ a \\arctan { \\frac { 1 } { x } } + ( 1 + | x | ) ^ { \\frac { 1 } { x } } \\right]$ 存在，求 $^ { a }$ 的值.H 【解析】极限存在的充要条件是左右极限存在且相等. $$ \\lim _ {x \\rightarrow 0 ^ {+}} \\left[ a \\arctan \\frac {1}{x} + \\left(1 + | x | ^ {\\frac {1}{x}}\\right)\\right] = \\lim _ {x \\rightarrow 0 ^ {+}} \\left[ a \\arctan \\frac {1}{x} + \\left(1 + x ^ {\\frac {1}{x}}\\right)\\right] = \\frac {\\pi}{2} a + e, $$ $$ \\lim _ {x \\rightarrow 0 ^ {-}} \\left[ a \\arctan \\frac {1}{x} + \\left(1 + | x | ^ {\\frac {1}{x}}\\right)\\right] = \\lim _ {x \\rightarrow 0 ^ {-}} \\left[ a \\arctan \\frac {1}{x} + \\left(1 - x ^ {\\frac {1}{x}}\\right)\\right] = - \\frac {\\pi}{2} a + e ^ {- 1}, $$ 则 $\\frac { \\pi } { 2 } a + e = - \\frac { \\pi } { 2 } a + e ^ { - 1 }$ ，解得 $a = { \\frac { e ^ { - 1 } - e } { \\pi } }$ .",
+          "options": {},
+          "answer": "见解析",
+          "solution": "极限存在的充要条件是左右极限存在且相等. $$ \\lim _ {x \\rightarrow 0 ^ {+}} \\left[ a \\arctan \\frac {1}{x} + \\left(1 + | x | ^ {\\frac {1}{x}}\\right)\\right] = \\lim _ {x \\rightarrow 0 ^ {+}} \\left[ a \\arctan \\frac {1}{x} + \\left(1 + x ^ {\\frac {1}{x}}\\right)\\right] = \\frac {\\pi}{2} a + e, $$ $$ \\lim _ {x \\rightarrow 0 ^ {-}} \\left[ a \\arctan \\frac {1}{x} + \\left(1 + | x | ^ {\\frac {1}{x}}\\right)\\right] = \\lim _ {x \\rightarrow 0 ^ {-}} \\left[ a \\arctan \\frac {1}{x} + \\left(1 - x ^ {\\frac {1}{x}}\\right)\\right] = - \\frac ",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2021年数学二"
+          ]
+        },
+        {
+          "id": "math2-2021-q18",
+          "number": 18,
+          "type": "calculation",
+          "score": 10,
+          "content": "本题满分 12分） 求函数 $f ( x , y ) = 2 \\ln | x | + { \\frac { ( x - 1 ) ^ { 2 } + y ^ { 2 } } { 2 x ^ { 2 } } }$ 的极值. 【解析】由 $\\left\\{ { \\begin{array} { l } { f _ { x } ^ { \\prime } ( x , y ) = { \\frac { 2 x ^ { 2 } + x - 1 - y ^ { 2 } } { x ^ { 3 } } } = 0 } \\\\ { f _ { y } ^ { \\prime } ( x , y ) = { \\frac { y } { x ^ { 2 } } } = 0 } \\end{array} } \\right.$ ，解得 $\\left\\{ { x = - 1 \\atop y = 0 } \\right. \\boxed { \\frac { \\ d } { \\ d y } } \\Biggl \\{ { x = \\frac { 1 } { 2 } } \\Biggr .$ ，又 $$ \\left\\{ \\begin{array}{l} f _ {x x} ^ {\\prime \\prime} (x, y) = \\frac {- 2 x ^ {2} - 2 x + 3 + 3 y ^ {2}}{x ^ {4}} \\\\ f _ {x y} ^ {\\prime \\prime} = - \\frac {2 y}{x ^ {3}} \\\\ f _ {y y} ^ {\\prime \\prime} = \\frac {1}{x ^ {2}} \\end{array} , \\right. $$ 在驻点 $( - 1 , 0 )$ 处， $A = 3 , A C - B ^ { 2 } = 3$ ，故 $f ( x , y )$ 在 $( - 1 , 0 )$ 处取极小值 ； 在驻点 $\\left( { \\frac { 1 } { 2 } } , 0 \\right)$ 处， $A = 2 4 , A C - B ^ { 2 } = 9 6$ ，故 $f ( x , y )$ 在 $\\left( { \\frac { 1 } { 2 } } , 0 \\right)$ 处取极小值 ${ \\frac { 1 } { 2 } } - 2 \\ln 2$",
+          "options": {},
+          "answer": "见解析",
+          "solution": "极限存在的充要条件是左右极限存在且相等. $$ \\lim _ {x \\rightarrow 0 ^ {+}} \\left[ a \\arctan \\frac {1}{x} + \\left(1 + | x | ^ {\\frac {1}{x}}\\right)\\right] = \\lim _ {x \\rightarrow 0 ^ {+}} \\left[ a \\arctan \\frac {1}{x} + \\left(1 + x ^ {\\frac {1}{x}}\\right)\\right] = \\frac {\\pi}{2} a + e, $$ $$ \\lim _ {x \\rightarrow 0 ^ {-}} \\left[ a \\arctan \\frac {1}{x} + \\left(1 + | x | ^ {\\frac {1}{x}}\\right)\\right] = \\lim _ {x \\rightarrow 0 ^ {-}} \\left[ a \\arctan \\frac {1}{x} + \\left(1 - x ^ {\\frac {1}{x}}\\right)\\right] = - \\frac ",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2021年数学二"
+          ]
+        },
+        {
+          "id": "math2-2021-q19",
+          "number": 19,
+          "type": "calculation",
+          "score": 10,
+          "content": "本题满分 12分） 设有界区域 $D$ 是圆 $x ^ { 2 } + y ^ { 2 } = 1$ 和直线 $y = x$ 以及 $_ x$ 轴在第一象限围成的部分，计算二重积分 $\\iint _ { D } e ^ { ( x + y ) ^ { 2 } } ( x ^ { 2 } - y ^ { 2 } ) \\mathrm { d } x \\mathrm { d } y .$ $$ \\begin{array}{l} = \\frac {1}{2} \\int_ {0} ^ {\\frac {\\pi}{4}} \\cos 2 \\theta d \\theta \\int_ {0} ^ {1} e ^ {r ^ {2} (\\cos \\theta + \\sin \\theta) ^ {2}} \\cdot r ^ {2} d r ^ {2} \\\\ = \\frac {1}{2} \\int_ {0} ^ {\\frac {\\pi}{4}} \\cos 2 \\theta d \\theta \\int_ {0} ^ {1} u e ^ {u (\\cos \\theta + \\sin \\theta) ^ {2}} d u \\\\ \\end{array} $$ 其中 $$ \\begin{array}{l} \\int_ {0} ^ {1} u e ^ {u (\\cos \\theta + \\sin \\theta) ^ {2}} d u = \\frac {1}{(\\cos \\theta + \\sin \\theta) ^ {4}} \\int_ {0} ^ {1} u (\\cos \\theta + \\sin \\theta) ^ {2} e ^ {u (\\cos \\theta + \\sin \\theta) ^ {2}} d u (\\cos \\theta + \\sin \\theta) ^ {2} \\\\ = \\frac {1}{(\\cos \\theta + \\sin \\theta) ^ {4}} \\int_ {0} ^ {(\\cos \\theta + \\sin \\theta) ^ {2}} t e ^ {t} d t \\\\ = \\frac {e ^ {(\\cos \\theta + \\sin \\theta) ^ {2}}}{(\\cos \\theta + \\sin \\theta) ^ {2}} - \\frac {e ^ {(\\cos \\theta + \\sin \\theta) ^ {2}} - 1}{(\\cos \\theta + \\sin \\theta) ^ {4}}, \\\\ \\end{array} $$ 则原式 $: = \\frac { 1 } { 2 } \\int _ { 0 } ^ { \\frac { \\pi } { 4 } } \\frac { \\cos \\theta - \\sin \\theta } { \\cos \\theta + \\sin \\theta } e ^ { ( \\cos \\theta + \\sin \\theta ) ^ { 2 } } \\mathrm { d } \\theta - \\frac { 1 } { 2 } \\int _ { 0 } ^ { \\frac { \\pi } { 4 } } \\frac { \\cos \\theta - \\sin \\theta } { ( \\cos \\theta + \\sin \\theta ) ^ { 3 } } [ e ^ { ( \\cos \\theta + \\sin \\theta ) ^ { 2 } } - 1 ] \\mathrm { d } \\theta$ 2J $$ \\underline {{\\underline {{u = \\cos \\theta + \\sin \\theta}}}} \\frac {1}{2} \\int_ {1} ^ {\\sqrt {2}} \\frac {1}{u} e ^ {u ^ {2}} d u - \\frac {1}{2} \\int_ {1} ^ {\\sqrt {2}} \\frac {e ^ {u ^ {2}} - 1}{u ^ {3}} d u $$ 其中 $\\int _ { 1 } ^ { \\sqrt { 2 } } { \\frac { 1 } { u } } e ^ { u ^ { 2 } } \\mathrm { d } u = \\int _ { 1 } ^ { \\sqrt { 2 } } u ^ { - 2 } \\mathrm { d } \\left( { \\frac { 1 } { 2 } } e ^ { u ^ { 2 } } \\right) = { \\frac { 1 } { 4 } } e ^ { 2 } - { \\frac { 1 } { 2 } } e + \\int _ { 1 } ^ { \\sqrt { 2 } } { \\frac { e ^ { u ^ { 2 } } } { u ^ { 3 } } } \\mathrm { d } u ,$ 故原式 $= \\frac { 1 } { 8 } e ^ { 2 } - \\frac { 1 } { 4 } e + \\frac { 1 } { 8 }$ e² # （20）（本题满分 12分） 设 $n$ 为正整数， $y = y _ { n } ( x )$ 是微分方程 $x y ^ { \\prime } - ( n + 1 ) y = 0$ 满足条件 $y _ { n } ( 1 ) = { \\frac { 1 } { n ( n + 1 ) } }$ 的解. （Ⅰ）求 $y _ { n } ( x )$ ； （Ⅱ）求级数 $\\sum _ { n = 1 } ^ { \\infty } y _ { n } \\left( x \\right)$ 的收敛域及和函数. 【解析】（Ⅰ）由 $y ^ { \\prime } - { \\frac { n + 1 } { x } } y = 0$ n+1 y=0，得y=Ce $y = C e ^ { \\int \\frac { n + 1 } { x } \\mathrm { d } x } = C x ^ { n + 1 }$ n+1dx ，将 $y _ { n } \\left( 1 \\right) = \\frac { 1 } { n ( n + 1 ) }$ 带入可得 $C = \\frac { 1 } { n ( n + 1 ) }$ ，故 $y _ { n } ( x ) = { \\frac { x ^ { n + 1 } } { n ( n + 1 ) } }$ xn+1， . （Ⅱ） $\\sum _ { n = 1 } ^ { \\infty } y _ { n } \\left( x \\right) = \\sum _ { n = 1 } ^ { \\infty } \\frac { x ^ { n + 1 } } { n \\left( n + 1 \\right) }$ =n(n+1）' xn+1 ，显然收敛半径为 ，收敛区间为 $( - 1 , 1 )$ ， 当 $x = - 1$ 时， $\\sum _ { n = 1 } ^ { \\infty } { \\frac { ( - 1 ) ^ { n + 1 } } { n ( n + 1 ) } }$ 收敛；当 $n = 1$ 时， $\\sum _ { n = 1 } ^ { \\infty } { \\frac { 1 } { n ( n + 1 ) } }$ 收敛，故收敛域为[-1,1], $\\cdot S ( x ) = \\sum _ { n = 1 } ^ { \\infty } { \\frac { x ^ { n + 1 } } { n ( n + 1 ) } } = \\sum _ { n = 1 } ^ { \\infty } { \\frac { x ^ { n + 1 } } { n } } - \\sum _ { n = 1 } ^ { \\infty } { \\frac { x ^ { n + 1 } } { n + 1 } } = ( 1 - x ) \\mathrm { l n } ( 1 - x ) + x , x \\in ( - 1 , 1 ) ,$ xn+1 xn+1 令 =1 又因为 $S ( x )$ 在 连续，所以 $S ( 1 ) = \\operatorname* { l i m } _ { x 1 ^ { - } } S ( x ) = 1$ 所以 $S ( x ) = \\left\\{ { 1 - x ) \\mathrm { l n } \\left( { 1 - x } \\right) + x , x \\in \\left[ { - 1 , 1 } \\right) } _ { 1 , x = 1 } \\right. .$",
+          "options": {},
+          "answer": "见解析",
+          "solution": "极限存在的充要条件是左右极限存在且相等. $$ \\lim _ {x \\rightarrow 0 ^ {+}} \\left[ a \\arctan \\frac {1}{x} + \\left(1 + | x | ^ {\\frac {1}{x}}\\right)\\right] = \\lim _ {x \\rightarrow 0 ^ {+}} \\left[ a \\arctan \\frac {1}{x} + \\left(1 + x ^ {\\frac {1}{x}}\\right)\\right] = \\frac {\\pi}{2} a + e, $$ $$ \\lim _ {x \\rightarrow 0 ^ {-}} \\left[ a \\arctan \\frac {1}{x} + \\left(1 + | x | ^ {\\frac {1}{x}}\\right)\\right] = \\lim _ {x \\rightarrow 0 ^ {-}} \\left[ a \\arctan \\frac {1}{x} + \\left(1 - x ^ {\\frac {1}{x}}\\right)\\right] = - \\frac ",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2021年数学二"
+          ]
+        },
+        {
+          "id": "math2-2021-q20",
+          "number": 20,
+          "type": "calculation",
+          "score": 10,
+          "content": "本题满分 12分） 设矩阵 $\\pmb { A } = \\left[ \\begin{array} { l l l } { 2 } & { 1 } & { 0 } \\\\ { 1 } & { 2 } & { 0 } \\\\ { 1 } & { a } & { b } \\end{array} \\right]$ 仅有两个不同的特征值.若 $\\pmb { A }$ 相似与对角矩阵，求 $a , b$ 的值，并求可逆矩阵 $\\pmb { P }$ ，使 $\\pmb { P } ^ { - 1 } \\pmb { A } \\pmb { P }$ 为对角矩阵. 【解析】由 $| \\lambda \\pmb { { \\cal { E } } } - \\pmb { { \\cal { A } } } | = \\left| \\begin{array} { c c c } { { \\lambda - 2 } } & { { - 1 } } & { { 0 } } \\\\ { { - 1 } } & { { \\lambda - 2 } } & { { 0 } } \\\\ { { - 1 } } & { { - a } } & { { \\lambda - b } } \\end{array} \\right| = \\left( \\lambda - b \\right) \\left( \\lambda - 3 \\right) \\left( \\lambda - 1 \\right) = 0 ,$ 当 $b = 3$ 时，即 $\\lambda = 3$ 为二重特征值，此时 $\\pmb { A }$ 可相似对角化需满足 $\\lambda = 3$ 对应两个线性无关的特征向量，即 $r ( 3 E - A ) = 1$ ， $3 E - A = { \\left[ \\begin{array} { l l l } { 1 } & { - 1 } & { 0 } \\\\ { - 1 } & { 1 } & { 0 } \\\\ { - 1 } & { - a } & { 0 } \\end{array} \\right] } , a = - 1 ,$ ， 此时， $\\lambda _ { 1 } = \\lambda _ { 2 } = 3$ 对应的线性无关特征向量为 $\\pmb { \\alpha } _ { 1 } = ( 1 , 1 , 0 ) ^ { T } , \\pmb { \\alpha } _ { 2 } = ( 0 , 0 , 1 ) ^ { T }$ ； $\\lambda _ { 3 } = 1 , \\pmb { { \\cal E } } - \\pmb { { \\cal A } } = [ \\begin{array} { c c c } { - 1 } & { - 1 } & { 0 } \\\\ { - 1 } & { - 1 } & { 0 } \\\\ { - 1 } & { 1 } & { - 2 } \\end{array} ] [ \\begin{array} { c c c } { 1 } & { 1 } & { 0 } \\\\ { 0 } & { 1 } & { - 1 } \\\\ { 0 } & { 0 } & { 0 } \\end{array} ] ,$ ，对应特征向量为 $\\pmb { \\alpha } _ { 3 } = ( - 1 , 1 , 1 ) ^ { T }$ ， 令 $\\pmb { P } = ( \\pmb { \\alpha } _ { 1 } , \\pmb { \\alpha } _ { 2 } , \\pmb { \\alpha } _ { 3 } ) , \\pmb { P } ^ { - 1 } \\pmb { A } \\pmb { P } = \\left[ \\begin{array} { c c } { 3 } & \\\\ & { 3 } \\\\ & & { 1 } \\end{array} \\right] .$ 当 $b = 1$ 时，即 $\\lambda = 1$ 为二重特征值，类似以上求法，可得 $\\lambda _ { 1 } = \\lambda _ { 2 } = 1$ 所对应特征向量为 $\\pmb { \\beta } _ { 1 } = ( - 1 , 1 , 0 ) ^ { T } , \\pmb { \\beta } _ { 2 } = ( 0 , 0 , 1 ) ^ { T }$ $\\lambda _ { 3 } = 3$ 所对应特征向量为 $\\beta _ { 3 } = ( 1 , 1 , 1 ) ^ { T }$ ， $$ \\mathbf {\\text {令}} \\pmb {P} = (\\pmb {\\beta} _ {1}, \\pmb {\\beta} _ {2}, \\pmb {\\beta} _ {3}), \\pmb {P} ^ {- 1} \\pmb {A} \\pmb {P} = \\left[ \\begin{array}{c c c} {{1}} & {} & {} \\\\ {} & {{1}} & {} \\\\ {} & {} & {{3}} \\end{array} \\right]. $$",
+          "options": {},
+          "answer": "见解析",
+          "solution": "极限存在的充要条件是左右极限存在且相等. $$ \\lim _ {x \\rightarrow 0 ^ {+}} \\left[ a \\arctan \\frac {1}{x} + \\left(1 + | x | ^ {\\frac {1}{x}}\\right)\\right] = \\lim _ {x \\rightarrow 0 ^ {+}} \\left[ a \\arctan \\frac {1}{x} + \\left(1 + x ^ {\\frac {1}{x}}\\right)\\right] = \\frac {\\pi}{2} a + e, $$ $$ \\lim _ {x \\rightarrow 0 ^ {-}} \\left[ a \\arctan \\frac {1}{x} + \\left(1 + | x | ^ {\\frac {1}{x}}\\right)\\right] = \\lim _ {x \\rightarrow 0 ^ {-}} \\left[ a \\arctan \\frac {1}{x} + \\left(1 - x ^ {\\frac {1}{x}}\\right)\\right] = - \\frac ",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2021年数学二"
+          ]
+        },
+        {
+          "id": "math2-2021-q21",
+          "number": 21,
+          "type": "calculation",
+          "score": 10,
+          "content": "本题满分 12分） 在区间 $( 0 , 2 )$ 上随机取一点，将该区间分成两段，较短一段的长度记为 ，较长一段的长度记为 $Y$ .令 $Z = { \\frac { Y } { X } }$ . （Ⅰ）求 $X$ 的概率密度； （Ⅱ）求 $Z$ 的概率密度； （Ⅲ）求 $E { \\Bigg ( } { \\frac { X } { Y } } { \\Bigg ) }$ 【解析】（Ⅰ） $X + Y = 2 , X < Y$ ，由题意可得， $X { \\sim } U ( 0 , 1 )$ ，则 $X$ 的概率密度为 $$ f _ {X} (x) = \\left\\{ \\begin{array}{l l} 1, & 0 < x < 1 \\\\ 0, & \\text {其 他} \\end{array} ; \\right. $$ （Ⅱ）由题意可得 ，于是 ， $Y = 2 - X$ $Z = { \\frac { 2 - X } { X } }$ 先求 $Z$ 的分布函数： $$ F _ {Z} = P \\{Z \\leq z \\} = P \\left\\{\\frac {2 - X}{X} \\leq z \\right\\} = P \\left\\{\\frac {2}{X} - 1 \\leq z \\right\\}; $$ 当 $z < 1$ 时， $F _ { Z } ( z ) = 0$ ； 当 $z \\geq 1$ 时， $$ F _ {Z} (z) = P \\left\\{\\frac {2}{X} - 1 \\leq z \\right\\} = 1 - P \\left\\{X < \\frac {2}{z + 1} \\right\\} = 1 - \\int_ {0} ^ {\\frac {2}{z + 1}} 1 \\mathrm {d} x = 1 - \\frac {2}{z + 1}, $$ 所以 $Z$ 的概率密度为 $f _ { z } ( z ) = ( F _ { z } ( z ) ) ^ { \\prime } = \\left\\{ \\frac { 2 } { ( z + 1 ) ^ { 2 } } , z \\geq 1 \\right. .$ （x+1）2,2≥1 $E { \\bigg ( } { \\frac { X } { Y } } { \\bigg ) } = E { \\bigg ( } { \\frac { X } { 2 - X } } { \\bigg ) } = \\int _ { 0 } ^ { 1 } { \\frac { x } { 2 - x } } \\cdot 1 \\mathrm { d } x = 2 \\ln 2 - 1 .$",
+          "options": {},
+          "answer": "见解析",
+          "solution": "极限存在的充要条件是左右极限存在且相等. $$ \\lim _ {x \\rightarrow 0 ^ {+}} \\left[ a \\arctan \\frac {1}{x} + \\left(1 + | x | ^ {\\frac {1}{x}}\\right)\\right] = \\lim _ {x \\rightarrow 0 ^ {+}} \\left[ a \\arctan \\frac {1}{x} + \\left(1 + x ^ {\\frac {1}{x}}\\right)\\right] = \\frac {\\pi}{2} a + e, $$ $$ \\lim _ {x \\rightarrow 0 ^ {-}} \\left[ a \\arctan \\frac {1}{x} + \\left(1 + | x | ^ {\\frac {1}{x}}\\right)\\right] = \\lim _ {x \\rightarrow 0 ^ {-}} \\left[ a \\arctan \\frac {1}{x} + \\left(1 - x ^ {\\frac {1}{x}}\\right)\\right] = - \\frac ",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2021年数学二"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "math2-2022",
+      "year": "2022",
+      "subject": "数学二",
+      "category": "math2",
+      "paper_name": "2022年考研数学二真题",
+      "questions": [
+        {
+          "id": "math2-2022-q1",
+          "number": 1,
+          "type": "choice",
+          "score": 4,
+          "content": "当 $x \\to 0$ 时， $\\alpha ( { x } ) , \\beta ( { x } )$ 是非零无穷小量，给出下列四个命题： $\\textcircled{1}$ 若 $\\alpha ( x ) \\sim \\beta ( x )$ ，则 $\\alpha ^ { 2 } ( x ) \\sim \\beta ^ { 2 } ( x )$ $\\textcircled{2}$ 若 $\\alpha ^ { 2 } ( x ) \\sim \\beta ^ { 2 } ( x )$ ，则 $\\alpha ( x ) \\sim \\beta ( x )$ ； $\\textcircled{3}$ 若 $\\alpha ( x ) \\sim \\beta ( x )$ ，则 $\\alpha ( x ) - \\beta ( x ) = o ( \\alpha ( x ) )$ ； $\\textcircled{4}$ 若 $\\alpha ( x ) - \\beta ( x ) = o ( \\alpha ( x ) )$ ，则 $\\alpha ( x ) \\sim \\beta ( x )$ 其中正确的序号是",
+          "options": {
+            "A": "$\\textcircled{1} \\textcircled{2}$",
+            "B": "$\\textcircled{1} \\textcircled{4}$",
+            "C": ". 【解析】当 $x \\to 0$ 时，若 $\\alpha ( x ) \\sim \\beta ( x )$ ，即 $\\operatorname* { l i m } _ { x \\to 0 } { \\frac { \\alpha ( x ) } { \\beta ( x ) } } = 1$ ，则 $\\operatorname* { l i m } _ { x \\to 0 } { \\frac { \\alpha ^ { 2 } ( x ) } { \\beta ^ { 2 } ( x ) } } = \\operatorname* { l i m } _ { x \\to 0 } \\left[ { \\frac { \\alpha ( x ) } { \\beta ( x ) } } \\right] ^ { 2 } = 1$ ；且 $\\operatorname* { l i m } _ { x \\to 0 } { \\frac { \\alpha ( x ) - \\beta ( x ) } { \\alpha ( x ) } } = 0$ =0，则α(x)-β(𝑥)=o(α(𝑥))； $\\alpha ( x ) - \\beta ( x ) = o ( \\alpha ( x ) )$ 所以 $\\textcircled{1} \\textcircled{3}$ 正确. 若 $\\alpha ( x ) - \\beta ( x ) = o ( \\alpha ( x ) )$ ，则 $\\operatorname* { l i m } _ { x \\to 0 } { \\frac { \\alpha ( x ) } { \\beta ( x ) } } = \\operatorname* { l i m } _ { x \\to 0 } { \\frac { \\alpha ( x ) } { \\alpha ( x ) - o ( \\alpha ( x ) ) } } = \\operatorname* { l i m } _ { x \\to 0 } { \\frac { \\alpha ( x ) } { \\alpha ( x ) } } = 1$ lim ，则$\\alpha ( x ) \\sim \\beta ( x )$ ；故 $\\textcircled{4}$ 正确； 若取 $\\alpha ( x ) = - x , \\beta ( x ) = \\sin x$ ，则当 $x \\to 0$ 时， $\\alpha ^ { 2 } ( x ) \\sim \\beta ^ { 2 } ( x )$ ，但 $\\alpha ( x )$ 与 $\\beta ( x )$ 不是等价无穷小，故 $\\textcircled{2}$ 错误.综上，答案选",
+            "D": "②③④ 【答案】选"
+          },
+          "answer": "选(C).",
+          "solution": "当 $x \\to 0$ 时，若 $\\alpha ( x ) \\sim \\beta ( x )$ ，即 $\\operatorname* { l i m } _ { x \\to 0 } { \\frac { \\alpha ( x ) } { \\beta ( x ) } } = 1$ ，则 $\\operatorname* { l i m } _ { x \\to 0 } { \\frac { \\alpha ^ { 2 } ( x ) } { \\beta ^ { 2 } ( x ) } } = \\operatorname* { l i m } _ { x \\to 0 } \\left[ { \\frac { \\alpha ( x ) } { \\beta ( x ) } } \\right] ^ { 2 } = 1$ ；且 $\\operatorname* { l i m } _ { x \\to 0 } { \\frac { \\alpha ( x ) - \\beta ( x ) } { \\alpha ( x ) } } = 0$ =0，则α(x)-β(𝑥)=o(α(𝑥))； $\\alpha ( x ) - \\b",
+          "analysis": "选择题",
+          "knowledge_points": [
+            "math-choice"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选择题",
+            "2022年数学二"
+          ]
+        },
+        {
+          "id": "math2-2022-q2",
+          "number": 2,
+          "type": "choice",
+          "score": 4,
+          "content": "$\\int _ { 0 } ^ { 2 } \\mathrm { d } y \\int _ { y } ^ { 2 } \\frac { y } { \\sqrt { 1 + x ^ { 3 } } } \\mathrm { d } x =$ dy",
+          "options": {
+            "A": "$\\frac { \\sqrt { 2 } } { 6 }$",
+            "B": "1",
+            "C": "√23",
+            "D": ". 【解析】交换积分次序得 $$ \\begin{array}{l} \\int_ {0} ^ {2} \\mathrm {d} y \\int_ {y} ^ {2} \\frac {y}{\\sqrt {1 + x ^ {3}}} \\mathrm {d} x = \\int_ {0} ^ {2} \\mathrm {d} x \\int_ {0} ^ {x} \\frac {y}{\\sqrt {1 + x ^ {3}}} \\mathrm {d} y = \\int_ {0} ^ {2} \\frac {x ^ {2}}{2 \\sqrt {1 + x ^ {3}}} \\mathrm {d} x \\\\ = \\frac {1}{6} \\int_ {0} ^ {2} \\frac {1}{\\sqrt {1 + x ^ {3}}} d (1 + x ^ {3}) = \\frac {1}{3} \\sqrt {1 + x ^ {3}} | _ {0} ^ {2} = \\frac {2}{3}. \\\\ \\end{array} $$"
+          },
+          "answer": "选(C).",
+          "solution": "当 $x \\to 0$ 时，若 $\\alpha ( x ) \\sim \\beta ( x )$ ，即 $\\operatorname* { l i m } _ { x \\to 0 } { \\frac { \\alpha ( x ) } { \\beta ( x ) } } = 1$ ，则 $\\operatorname* { l i m } _ { x \\to 0 } { \\frac { \\alpha ^ { 2 } ( x ) } { \\beta ^ { 2 } ( x ) } } = \\operatorname* { l i m } _ { x \\to 0 } \\left[ { \\frac { \\alpha ( x ) } { \\beta ( x ) } } \\right] ^ { 2 } = 1$ ；且 $\\operatorname* { l i m } _ { x \\to 0 } { \\frac { \\alpha ( x ) - \\beta ( x ) } { \\alpha ( x ) } } = 0$ =0，则α(x)-β(𝑥)=o(α(𝑥))； $\\alpha ( x ) - \\b",
+          "analysis": "选择题",
+          "knowledge_points": [
+            "math-choice"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选择题",
+            "2022年数学二"
+          ]
+        },
+        {
+          "id": "math2-2022-q3",
+          "number": 3,
+          "type": "choice",
+          "score": 4,
+          "content": "设函数 $f ( x )$ 在 $x = x _ { 0 }$ 处有 2 阶导数，则",
+          "options": {
+            "A": "当 $f ( x )$ 在 $x _ { 0 }$ 的某邻域内单调增加时， $f ^ { \\prime } \\left( x _ { 0 } \\right) > 0$",
+            "B": ". 【解析】依题设，有 $$ f ^ {\\prime \\prime} \\left(x _ {0}\\right) = \\lim _ {x \\rightarrow x _ {0}} \\frac {f ^ {\\prime} (x) - f ^ {\\prime} \\left(x _ {0}\\right)}{x - x _ {0}} \\text {存 在}, $$ 当 $f ^ { \\prime } \\left( x _ { 0 } \\right) > 0$ 时，有 $\\operatorname* { l i m } _ { x x _ { 0 } } f ^ { \\prime } ( x ) = f ^ { \\prime } { ( x _ { 0 } ) } > 0$ .由保号性知，存在 $\\delta > 0$ ，当 $x \\in { \\cal U } \\big ( x _ { 0 } , \\delta \\big )$ 时，$f ^ { \\prime } ( x ) > 0$ ，故 $f ( x )$ 在 $x _ { 0 }$ 的某邻域内单调增加",
+            "C": "当 $f ( x )$ 在 $x _ { 0 }$ 的某邻域内是凹函数时， $f ^ { \\prime \\prime } { \\bigl ( } x _ { 0 } { \\bigr ) } > 0$",
+            "D": "当 $f ^ { \\prime \\prime } { \\bigl ( } x _ { 0 } { \\bigr ) } > 0$ 时， $f ( x )$ 在 $x _ { 0 }$ 的某邻域内是凹函数 【答案】选"
+          },
+          "answer": "选(C).",
+          "solution": "当 $x \\to 0$ 时，若 $\\alpha ( x ) \\sim \\beta ( x )$ ，即 $\\operatorname* { l i m } _ { x \\to 0 } { \\frac { \\alpha ( x ) } { \\beta ( x ) } } = 1$ ，则 $\\operatorname* { l i m } _ { x \\to 0 } { \\frac { \\alpha ^ { 2 } ( x ) } { \\beta ^ { 2 } ( x ) } } = \\operatorname* { l i m } _ { x \\to 0 } \\left[ { \\frac { \\alpha ( x ) } { \\beta ( x ) } } \\right] ^ { 2 } = 1$ ；且 $\\operatorname* { l i m } _ { x \\to 0 } { \\frac { \\alpha ( x ) - \\beta ( x ) } { \\alpha ( x ) } } = 0$ =0，则α(x)-β(𝑥)=o(α(𝑥))； $\\alpha ( x ) - \\b",
+          "analysis": "选择题",
+          "knowledge_points": [
+            "math-choice"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选择题",
+            "2022年数学二"
+          ]
+        },
+        {
+          "id": "math2-2022-q4",
+          "number": 4,
+          "type": "choice",
+          "score": 4,
+          "content": "设函数 $f ( t )$ 连续，令 $F ( x , y ) = \\int _ { 0 } ^ { x - y } ( x - y - t ) f ( t ) \\mathrm { d } t$ ，则",
+          "options": {
+            "A": "${ \\frac { \\partial F } { \\partial x } } = { \\frac { \\partial F } { \\partial y } } , { \\frac { \\partial ^ { 2 } F } { \\partial x ^ { 2 } } } = { \\frac { \\partial ^ { 2 } F } { \\partial y ^ { 2 } } }$",
+            "B": "$\\frac { \\partial F } { \\partial x } = \\frac { \\partial F } { \\partial y } , \\frac { \\partial ^ { 2 } F } { \\partial x ^ { 2 } } = - \\frac { \\partial ^ { 2 } F } { \\partial y ^ { 2 } }$",
+            "C": ". 【解析】由 $$ F (x, y) = \\int_ {0} ^ {x - y} (x - y - t) f (t) \\mathrm {d} t = (x - y) \\int_ {0} ^ {x - y} f (t) \\mathrm {d} t - \\int_ {0} ^ {x - y} t f (t) \\mathrm {d} t, $$ 则 $$ \\frac {\\partial F}{\\partial x} = \\int_ {0} ^ {x - y} f (t) \\mathrm {d} t + (x - y) f (x - y) - (x - y) f (x - y) = \\int_ {0} ^ {x - y} f (t) \\mathrm {d} t, $$ $$ \\frac {\\partial^ {2} F}{\\partial x ^ {2}} = f (x - y); $$ $$ \\frac {\\partial F}{\\partial y} = - \\int_ {0} ^ {x - y} f (t) \\mathrm {d} t - (x - y) f (x - y) + (x - y) f (x - y) = - \\int_ {0} ^ {x - y} f (t) \\mathrm {d} t, $$ 且 $$ \\frac {\\partial^ {2} F}{\\partial y ^ {2}} = f (x - y); $$ 故 $$ {\\frac {\\partial F}{\\partial x}} = - \\frac {\\partial F}{\\partial y}, {\\frac {\\partial^ {2} F}{\\partial x ^ {2}}} = {\\frac {\\partial^ {2} F}{\\partial y ^ {2}}}. $$",
+            "D": "$\\frac { \\partial F } { \\partial x } = - \\frac { \\partial F } { \\partial y } , \\frac { \\partial ^ { 2 } F } { \\partial x ^ { 2 } } = - \\frac { \\partial ^ { 2 } F } { \\partial y ^ { 2 } }$ 【答案】选"
+          },
+          "answer": "选(C).",
+          "solution": "当 $x \\to 0$ 时，若 $\\alpha ( x ) \\sim \\beta ( x )$ ，即 $\\operatorname* { l i m } _ { x \\to 0 } { \\frac { \\alpha ( x ) } { \\beta ( x ) } } = 1$ ，则 $\\operatorname* { l i m } _ { x \\to 0 } { \\frac { \\alpha ^ { 2 } ( x ) } { \\beta ^ { 2 } ( x ) } } = \\operatorname* { l i m } _ { x \\to 0 } \\left[ { \\frac { \\alpha ( x ) } { \\beta ( x ) } } \\right] ^ { 2 } = 1$ ；且 $\\operatorname* { l i m } _ { x \\to 0 } { \\frac { \\alpha ( x ) - \\beta ( x ) } { \\alpha ( x ) } } = 0$ =0，则α(x)-β(𝑥)=o(α(𝑥))； $\\alpha ( x ) - \\b",
+          "analysis": "选择题",
+          "knowledge_points": [
+            "math-choice"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选择题",
+            "2022年数学二"
+          ]
+        },
+        {
+          "id": "math2-2022-q5",
+          "number": 5,
+          "type": "choice",
+          "score": 4,
+          "content": "设 $p$ 为常数，若反常积分 $\\int _ { 0 } ^ { 1 } { \\frac { \\ln x } { x ^ { p } ( 1 - x ) ^ { 1 - p } } } \\mathrm { d } x$ 收敛，则 的取值范围是 $p$",
+          "options": {
+            "A": ". 【解析 ${ \\bf { l } } x = 0 , 1$ 为瑕点.对 $\\forall \\varepsilon > 0$ ，由 $\\operatorname* { l i m } _ { x \\to 0 ^ { + } } { \\frac { \\ln x } { x ^ { p } ( 1 - x ) ^ { 1 - p } } } x ^ { p + \\varepsilon } = \\operatorname* { l i m } _ { x \\to 0 ^ { + } } x ^ { \\varepsilon } \\ln x = 0 ,$ lnxx0+知当 $x \\to 0 ^ { + }$ 时， $\\frac { | \\ln x | } { x ^ { p } ( 1 - x ) ^ { 1 - p } } - 1$ 敛；综上， $- 1 1 > { \\frac { 1 + \\sin x } { 2 } }$ $$ \\frac {x}{2 (1 + \\cos x)} 0 , B = f _ { u v } ^ { \\prime \\prime } ( 0 , 0 ) = 0 , C = f _ { v v } ^ { \\prime \\prime } ( 0 , 0 ) = 2$ ， 由$B ^ { 2 } - A C 0$ ，知 $f ( 0 , 0 ) = 0$ 为极小值. 在 驻 点 $( 1 , 1 )$ 处 ， $A = f _ { u u } ^ { \\prime \\prime } ( 1 , 1 ) = 0 , B = f _ { u v } ^ { \\prime \\prime } ( 1 , 1 ) = - 2 { \\mathrm { e } } ^ { - 2 } , C = f _ { v v } ^ { \\prime \\prime } ( 1 , 1 ) = 0$ ， 由$B ^ { 2 } - A C > 0$ ，知 $( 1 , 1 )$ 不是极值点. # （21）（本题满分 12分） 设 $f ( x )$ 在 $( - \\infty , + \\infty )$ 上有二阶连续导数，证明： $f ^ { \\prime \\prime } ( x ) \\geq 0$ 的充要条件为对不同实数 $a , b$ ，有 $f { \\biggl ( } { \\frac { a + b } { 2 } } { \\biggr ) } \\leq { \\frac { 1 } { b - a } } { \\int _ { a } ^ { b } f ( x ) \\mathrm { d } x } .$ 【证明】先证明必要性：不妨假设 $a { \\frac { 1 } { b - a } } { \\int _ { a } ^ { b } f ( x ) \\mathrm { d } x }$ ，这与 $f { \\biggl ( } { \\frac { a + b } { 2 } } { \\biggr ) } \\leq { \\frac { 1 } { b - a } } { \\int _ { a } ^ { b } f ( x ) \\mathrm { d } x }$ 矛盾，故充分性得证",
+            "B": "（",
+            "C": "（",
+            "D": "【答案】选"
+          },
+          "answer": "选(C).",
+          "solution": "当 $x \\to 0$ 时，若 $\\alpha ( x ) \\sim \\beta ( x )$ ，即 $\\operatorname* { l i m } _ { x \\to 0 } { \\frac { \\alpha ( x ) } { \\beta ( x ) } } = 1$ ，则 $\\operatorname* { l i m } _ { x \\to 0 } { \\frac { \\alpha ^ { 2 } ( x ) } { \\beta ^ { 2 } ( x ) } } = \\operatorname* { l i m } _ { x \\to 0 } \\left[ { \\frac { \\alpha ( x ) } { \\beta ( x ) } } \\right] ^ { 2 } = 1$ ；且 $\\operatorname* { l i m } _ { x \\to 0 } { \\frac { \\alpha ( x ) - \\beta ( x ) } { \\alpha ( x ) } } = 0$ =0，则α(x)-β(𝑥)=o(α(𝑥))； $\\alpha ( x ) - \\b",
+          "analysis": "选择题",
+          "knowledge_points": [
+            "math-choice"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选择题",
+            "2022年数学二"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "math2-2024",
+      "year": "2024",
+      "subject": "数学二",
+      "category": "math2",
+      "paper_name": "2024年考研数学二真题",
+      "questions": [
+        {
+          "id": "math2-2024-q1",
+          "number": 1,
+          "type": "choice",
+          "score": 4,
+          "content": "函数 $f(x) = \\left|x\\right|^{\\frac{1}{(1 - x)(x - 2)}}$ 的第一类间断点的个数为",
+          "options": {
+            "A": "3",
+            "B": "2",
+            "C": "1",
+            "D": "0"
+          },
+          "answer": "写在答题纸指定位置上.",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "选择题",
+          "knowledge_points": [
+            "math-choice"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选择题",
+            "2024年数学二"
+          ]
+        },
+        {
+          "id": "math2-2024-q2",
+          "number": 2,
+          "type": "choice",
+          "score": 4,
+          "content": "已知 $\\left\\{ \\begin{array}{l} x = 1 + t^3 \\\\ y = e^{t^2} \\end{array} \\right.$ ，则 $\\lim_{x \\to +\\infty} x[f(2 + \\frac{2}{x}) - f(2)] =$ ",
+          "options": {
+            "A": "$2 e$",
+            "B": "$\\frac{4}{3} e$",
+            "C": "$\\frac{2}{3} e$",
+            "D": "$\\frac{e}{3}$"
+          },
+          "answer": "写在答题纸指定位置上.",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "选择题",
+          "knowledge_points": [
+            "math-choice"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选择题",
+            "2024年数学二"
+          ]
+        },
+        {
+          "id": "math2-2024-q3",
+          "number": 3,
+          "type": "choice",
+          "score": 4,
+          "content": "已知 $f(x) = \\int_{0}^{\\sin x} \\sin t^{3} dt$ ， $g(x) = \\int_{0}^{x} f(t) dt$ ，则（ ",
+          "options": {
+            "A": "$f(x)$ 为奇函数， $g(x)$ 为奇函数",
+            "B": "$f(x)$ 为奇函数， $g(x)$ 为偶函数",
+            "C": "$f(x)$ 为偶函数， $g(x)$ 为偶函数",
+            "D": "$f(x)$ 为偶函数, $g(x)$ 为奇函数"
+          },
+          "answer": "写在答题纸指定位置上.",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "选择题",
+          "knowledge_points": [
+            "math-choice"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选择题",
+            "2024年数学二"
+          ]
+        },
+        {
+          "id": "math2-2024-q4",
+          "number": 4,
+          "type": "choice",
+          "score": 4,
+          "content": "已知数列 $\\{a_{n}\\} (a_{n}\\neq 0)$ ，若数列 $\\{a_{n}\\}$ 发散，则",
+          "options": {
+            "A": "$\\left\\{a_{n} + \\frac{1}{a_{n}}\\right\\}$ 发散",
+            "B": "$\\left\\{a_{n} - \\frac{1}{a_{n}}\\right\\}$ 发散",
+            "C": "$\\left\\{e^{a_{n}} + \\frac{1}{e^{a_{n}}}\\right\\}$ 发散",
+            "D": "$\\left\\{e^{a_{n}} - \\frac{1}{e^{a_{n}}}\\right\\}$ 发散"
+          },
+          "answer": "写在答题纸指定位置上.",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "选择题",
+          "knowledge_points": [
+            "math-choice"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选择题",
+            "2024年数学二"
+          ]
+        },
+        {
+          "id": "math2-2024-q5",
+          "number": 5,
+          "type": "choice",
+          "score": 4,
+          "content": "已知函数 $f(x, y) = \\begin{cases} (x^2 + y^2) \\sin \\frac{1}{xy}, & xy \\neq 0 \\\\ 0, & xy = 0 \\end{cases}$ ，则在点(0,0)处",
+          "options": {
+            "A": "$\\frac{\\partial f(x, y)}{\\partial x}$ 连续， $f(x, y)$ 可微",
+            "B": "$\\frac{\\partial f(x, y)}{\\partial x}$ 连续， $f(x, y)$ 不可微",
+            "C": "$\\frac{\\partial f(x, y)}{\\partial x}$ 不连续， $f(x, y)$ 可微",
+            "D": "$\\frac{\\partial f(x, y)}{\\partial x}$ 不连续， $f(x, y)$ 不可微"
+          },
+          "answer": "写在答题纸指定位置上.",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "选择题",
+          "knowledge_points": [
+            "math-choice"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选择题",
+            "2024年数学二"
+          ]
+        },
+        {
+          "id": "math2-2024-q6",
+          "number": 6,
+          "type": "choice",
+          "score": 4,
+          "content": "设 $f(x, y)$ 是连续函数，则 $\\int_{\\frac{\\pi}{6}}^{\\frac{\\pi}{2}} dx \\int_{\\sin x}^{1} f(x, y) dy = (\\quad)$",
+          "options": {
+            "A": "$\\int_{\\frac{1}{2}}^{1}dy\\int_{\\frac{\\pi}{6}}^{\\arcsin y}f(x,y)dx;$",
+            "B": "$\\int_{\\frac{1}{2}}^{1}dy\\int_{\\arcsin y}^{\\frac{\\pi}{2}}f(x,y)dx;$",
+            "C": "$\\int_{0}^{\\frac{1}{2}} dy \\int_{\\frac{\\pi}{6}}^{\\arcsin y} f(x, y) dx$",
+            "D": "$\\int_{0}^{\\frac{1}{2}} dy \\int_{\\arcsin y}^{\\frac{\\pi}{2}} f(x, y) dx$ "
+          },
+          "answer": "写在答题纸指定位置上.",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "选择题",
+          "knowledge_points": [
+            "math-choice"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选择题",
+            "2024年数学二"
+          ]
+        },
+        {
+          "id": "math2-2024-q7",
+          "number": 7,
+          "type": "choice",
+          "score": 4,
+          "content": "若 $\\int_0^{+\\infty}f(x)dx$ 收敛，则存在 $p > 1$ ，使极限 $\\lim_{x\\to +\\infty}x^p f(x)$ 存在。 其中正确的个数为",
+          "options": {
+            "A": "0",
+            "B": "1",
+            "C": "2",
+            "D": "3"
+          },
+          "answer": "写在答题纸指定位置上.",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "选择题",
+          "knowledge_points": [
+            "math-choice"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选择题",
+            "2024年数学二"
+          ]
+        },
+        {
+          "id": "math2-2024-q8",
+          "number": 8,
+          "type": "choice",
+          "score": 4,
+          "content": "设 $A$ 为3阶矩阵， $P = \\begin{pmatrix} 1 & 0 & 0 \\\\ 0 & 1 & 0 \\\\ 1 & 0 & 1 \\end{pmatrix}$ ，若 $P^T A P^2 = \\begin{pmatrix} a + 2c & 0 & c \\\\ 0 & b & 0 \\\\ 2c & 0 & c \\end{pmatrix}$ ，则矩阵 $A$ 为",
+          "options": {
+            "A": "$\\left( \\begin{array}{lll}c & 0 & 0\\\\ 0 & a & 0\\\\ 0 & 0 & b \\end{array} \\right)$",
+            "B": "$\\left( \\begin{array}{lll}b & 0 & 0\\\\ 0 & c & 0\\\\ 0 & 0 & a \\end{array} \\right)$",
+            "C": "$\\left( \\begin{array}{lll}a & 0 & 0\\\\ 0 & b & 0\\\\ 0 & 0 & c \\end{array} \\right)$",
+            "D": "$\\left( \\begin{array}{lll}c & 0 & 0\\\\ 0 & b & 0\\\\ 0 & 0 & a \\end{array} \\right)$"
+          },
+          "answer": "写在答题纸指定位置上.",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "选择题",
+          "knowledge_points": [
+            "math-choice"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选择题",
+            "2024年数学二"
+          ]
+        },
+        {
+          "id": "math2-2024-q9",
+          "number": 9,
+          "type": "choice",
+          "score": 4,
+          "content": "设 $A$ 为四阶矩阵， $A^{*}$ 为 $A$ 的伴随矩阵，若 $A(A - A^{*}) = 0$ ，且 $A \\neq A^{*}$ ，则 $r",
+          "options": {
+            "A": "0 或 1",
+            "B": "1 或 3",
+            "C": "2 或 3",
+            "D": "1 或 2"
+          },
+          "answer": "写在答题纸指定位置上.",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "选择题",
+          "knowledge_points": [
+            "math-choice"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选择题",
+            "2024年数学二"
+          ]
+        },
+        {
+          "id": "math2-2024-q10",
+          "number": 10,
+          "type": "choice",
+          "score": 4,
+          "content": "设 $A, B$ 均为 2 阶矩阵，且 $AB = BA$ ，则“ $A$ 有两个不相等的特征值”是“ $B$ 可对角化”的",
+          "options": {
+            "A": "充要条件",
+            "B": "充分非必要条件",
+            "C": "必要非充分条件",
+            "D": "既非充分又非必要条件二、填空题: $11 \\sim 16$ 小题, 每小题 5 分, 共 30 分. 请将答案写在答题纸指定位置上"
+          },
+          "answer": "写在答题纸指定位置上.",
+          "solution": "答案待核实，请以官方公布为准。",
+          "analysis": "选择题",
+          "knowledge_points": [
+            "math-choice"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选择题",
+            "2024年数学二"
+          ]
+        },
+        {
+          "id": "math2-2024-q11",
+          "number": 11,
+          "type": "calculation",
+          "score": 10,
+          "content": "本题满分10分) 设已知区域 $D$ 是第一象限内的有界区域，它由 $xy = \\frac{1}{3}, xy = 3, y = \\frac{1}{3} x, y = 3x$ 围成，计算 $\\iint_{D}(1 + x - y)dxdy$ 。",
+          "options": {},
+          "answer": "写在答题纸指定位置上。",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2024年数学二"
+          ]
+        },
+        {
+          "id": "math2-2024-q12",
+          "number": 12,
+          "type": "calculation",
+          "score": 10,
+          "content": "本题满分12分） 设 $y = y(x)$ 满足方程 $xy'' + xy' - 9y = 0$ ，且 $y|_{x=1} = 2, y'|_{x=1} = 6$",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2024年数学二"
+          ]
+        },
+        {
+          "id": "math2-2024-q13",
+          "number": 13,
+          "type": "calculation",
+          "score": 10,
+          "content": "利用变换 $x = e^{t}$ 化简方程，并求 $y = y(x)$ 的表达式；",
+          "options": {},
+          "answer": "写在答题纸指定位置上。",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2024年数学二"
+          ]
+        },
+        {
+          "id": "math2-2024-q14",
+          "number": 14,
+          "type": "calculation",
+          "score": 10,
+          "content": "求 $\\int_{1}^{2}y(x)\\sqrt{4 - x^2} dx$",
+          "options": {},
+          "answer": "写在答题纸指定位置上。",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2024年数学二"
+          ]
+        },
+        {
+          "id": "math2-2024-q15",
+          "number": 15,
+          "type": "calculation",
+          "score": 10,
+          "content": "本题满分12分） 已知 $t > 0$ ，曲线 $y = \\sqrt{x} e^{-x}$ 与 $x = t,x = 2t$ 及 $x$ 轴所围平面图形，绕 $x$ 轴旋转所得的旋转体体积为 $V(t)$ ，求 $V(t)$ 的最大值。",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2024年数学二"
+          ]
+        },
+        {
+          "id": "math2-2024-q16",
+          "number": 16,
+          "type": "calculation",
+          "score": 10,
+          "content": "本题满分12分） 设 $f(u,v)$ 具有二阶连续偏导， $g(x,y) = f(2x + y,3x - y)$ ，且 $\\frac{\\partial^2g}{\\partial x^2} +\\frac{\\partial^2g}{\\partial x\\partial y} -6\\frac{\\partial^2g}{\\partial y^2} = 1$",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2024年数学二"
+          ]
+        },
+        {
+          "id": "math2-2024-q17",
+          "number": 17,
+          "type": "calculation",
+          "score": 10,
+          "content": "求 $\\frac{\\partial^2f}{\\partial u\\partial v}$",
+          "options": {},
+          "answer": "写在答题纸指定位置上。",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2024年数学二"
+          ]
+        },
+        {
+          "id": "math2-2024-q18",
+          "number": 18,
+          "type": "calculation",
+          "score": 10,
+          "content": "若 $\\frac{\\partial f(u,0)}{\\partial u} = ue^{-u}$ ，且 $f(0,v) = \\frac{1}{50} v^2 - 1$ ，求 $f(u,v)$ 的表达式。",
+          "options": {},
+          "answer": "写在答题纸指定位置上。",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2024年数学二"
+          ]
+        },
+        {
+          "id": "math2-2024-q19",
+          "number": 19,
+          "type": "calculation",
+          "score": 10,
+          "content": "本题满分12分） 设函数 $f(x)$ 由2阶导数， $f^{\\prime}(0) = f^{\\prime}(1),\\left|f^{\\prime \\prime}(x)\\right|\\leq 1$ ① 当 $x \\in (0,1)$ 时， $\\left|f(x) - f(0)(1 - x) - f(1)x\\right| \\leq \\frac{x(1 - x)}{2}$ ② $\\left|\\int_0^1 f(x)dx - \\frac{f(0) + f(1)}{2}\\right|\\leq \\frac{1}{12}.$",
+          "options": {},
+          "answer": "见解析",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2024年数学二"
+          ]
+        },
+        {
+          "id": "math2-2024-q20",
+          "number": 20,
+          "type": "calculation",
+          "score": 10,
+          "content": "本题满分12分） 设矩阵 $A = \\begin{pmatrix} 0 & 1 & a \\\\ 1 & 0 & 1 \\end{pmatrix}$ , $B = \\begin{pmatrix} 1 & 1 \\\\ 1 & 1 \\\\ b & 2 \\end{pmatrix}$ , 二次型 $f(x_{1},x_{2},x_{3}) = x^{T}BAx$ , 已知方程组 $Ax = 0$ 高联 的解是 $B^{T}x = 0$ 的解，但两个方程组不同解。",
+          "options": {},
+          "answer": "写在答题纸指定位置上。",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2024年数学二"
+          ]
+        },
+        {
+          "id": "math2-2024-q21",
+          "number": 21,
+          "type": "calculation",
+          "score": 10,
+          "content": "求 $a,b$ 的值；",
+          "options": {},
+          "answer": "写在答题纸指定位置上。",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2024年数学二"
+          ]
+        },
+        {
+          "id": "math2-2024-q22",
+          "number": 22,
+          "type": "calculation",
+          "score": 10,
+          "content": "求正交矩阵 $x = Qy$ 将 $f(x_{1},x_{2},x_{3})$ 化为标准型。 ![](images/7884391bcaec6d4b3b606a079c578a4913ccb65a0f43986faeb8ca2af3e7e68e.jpg) ![](images/d98314f433fa3074d0317cf7d9672b1e6b185e8a8e5a3e2a22ab1853b1498ae1.jpg) ![](images/ccde6b36e7a52892b052d64b0476872615cb2aba24502e52d014c6603b5e2c11.jpg",
+          "options": {},
+          "answer": "写在答题纸指定位置上。",
+          "solution": "解题过程待补充，请参考相关教材。",
+          "analysis": "解答题",
+          "knowledge_points": [
+            "math-calculation"
+          ],
+          "difficulty": 4,
+          "tags": [
+            "解答题",
+            "2024年数学二"
+          ]
+        }
+      ]
+    }
+  ]
+}

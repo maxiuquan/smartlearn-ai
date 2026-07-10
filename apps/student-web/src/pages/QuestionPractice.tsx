@@ -15,6 +15,14 @@ const SUBJECT_OPTIONS = [
   { value: 'english', label: '英语' },
 ];
 
+/** 英语分类选项（按 tags 筛选 CET4/CET6/考研） */
+const CATEGORY_OPTIONS = [
+  { value: '', label: '全部分类' },
+  { value: 'CET4', label: '英语四级' },
+  { value: 'CET6', label: '英语六级' },
+  { value: '考研', label: '考研英语' },
+];
+
 /** 题型选项 */
 const TYPE_OPTIONS = [
   { value: '', label: '全部题型' },
@@ -44,6 +52,7 @@ export default function QuestionPractice() {
 
   // 筛选条件
   const [subject, setSubject] = useState('');
+  const [category, setCategory] = useState('');
   const [type, setType] = useState('');
   const [difficulty, setDifficulty] = useState('');
 
@@ -79,7 +88,7 @@ export default function QuestionPractice() {
 
   // 初始加载
   useEffect(() => {
-    loadQuestions(1, { subject, type, difficulty });
+    loadQuestions(1, { subject, category, type, difficulty });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -87,13 +96,13 @@ export default function QuestionPractice() {
   function handleFilter() {
     setPage(1);
     setSelectedQuestion(null);
-    loadQuestions(1, { subject, type, difficulty });
+    loadQuestions(1, { subject, category, type, difficulty });
   }
 
   /** 翻页 */
   function handlePageChange(newPage: number) {
     setPage(newPage);
-    loadQuestions(newPage, { subject, type, difficulty });
+    loadQuestions(newPage, { subject, category, type, difficulty });
   }
 
   /** 选择题目进入答题 */
@@ -319,6 +328,20 @@ export default function QuestionPractice() {
               ))}
             </select>
           </div>
+          {subject === 'english' && (
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">分类</label>
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-blue-400 focus:outline-none"
+              >
+                {CATEGORY_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </div>
+          )}
           <div>
             <label className="block text-xs text-gray-500 mb-1">题型</label>
             <select
