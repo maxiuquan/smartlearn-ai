@@ -27,12 +27,14 @@ from app.models.rag_index import (
     RetrievalTrace,
 )
 from app.models.subscription import Subscription
+from app.models.subscription_ledger import SubscriptionLedger
 from app.models.user import User
 
 __all__ = [
     "Base",
     "User",
     "Subscription",
+    "SubscriptionLedger",
     "AuditLog",
     "AuthSession",
     "KnowledgePoint",

@@ -371,13 +371,19 @@ async def get_system_logs(
 
 @router.post(
     "/clear-cache",
-    summary="清空 Redis 缓存（保留 system:config）",
+    summary="清空 Redis 业务缓存（仅 cache: 命名空间，保留 session/auth/队列/限流等安全状态）",
 )
 async def clear_cache(
     db: AsyncSession = Depends(get_db),
     current: User = Depends(get_current_admin_user),
 ) -> dict:
-    """清空 Redis 当前 db，但保留 system:config 键。"""
+    """清空 Redis 业务缓存。
+
+    P1-4.8: 删除危险的全库 `flushdb()`，改为按 namespace 精准清理：
+    - 仅删除 `cache:*` 命名空间的键（业务缓存）
+    - 严格保留 `session:*` / `auth:*` / `ratelimit:*` / `celery:*` / `system:config` 等安全/队列状态
+    - 一次最多 SCAN 1000 个键，避免阻塞 Redis
+    """
     redis = _get_redis_client()
     if redis is None:
         await _record_audit(
@@ -389,27 +395,49 @@ async def clear_cache(
         )
         return {"message": "Redis 不可用，未执行清理"}
 
+    deleted = 0
+    errors = 0
+    # 仅清理业务缓存命名空间；安全/队列状态绝对不删
+    safe_namespaces = ("cache:",)
     try:
-        # 先备份 system:config
-        config_backup = await redis.get("system:config")
-        await redis.flushdb()
-        if config_backup is not None:
-            await redis.set("system:config", config_backup)
-        cleared = True
-        message = "Redis 缓存已清空（system:config 已保留）"
+        cursor = 0
+        while True:
+            cursor, keys = await redis.scan(
+                cursor=cursor, match="cache:*", count=200
+            )
+            if keys:
+                # 用 pipeline 批量删除以减少 RTT
+                pipe = redis.pipeline()
+                for k in keys:
+                    pipe.delete(k)
+                results = await pipe.execute()
+                deleted += sum(1 for r in results if r)
+            if cursor == 0:
+                break
+        message = (
+            f"已清理业务缓存 {deleted} 个键（命名空间 cache:*）；"
+            f"session/auth/限流/队列状态已保留"
+        )
     except Exception as e:  # noqa: BLE001
-        cleared = False
-        message = f"清空缓存失败：{e}"
+        errors += 1
+        message = f"清理缓存失败：{e}"
 
     await _record_audit(
         db,
         actor=current,
         action="system.clear_cache",
         target="redis",
-        details={"success": cleared},
+        details={
+            "deleted": deleted,
+            "errors": errors,
+            "namespaces_cleared": list(safe_namespaces),
+            "protected_namespaces": [
+                "session:*", "auth:*", "ratelimit:*", "celery:*", "system:config"
+            ],
+        },
     )
 
-    return {"message": message}
+    return {"message": message, "deleted": deleted}
 
 
 # ── 备份与恢复 ──

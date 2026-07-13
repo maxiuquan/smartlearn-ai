@@ -225,7 +225,7 @@ async def get_my_profile(
 ) -> StudentProfileResponse:
     """返回学生端 Profile 所需的当前用户个人学习统计。
 
-    - total_study_days: 注册至今的天数（学习天数近似）
+    - total_study_days: 实际学习天数（去重：有作答/游戏会话的天数）
     - total_questions_answered: 当前用户答题总数
     - total_correct: 当前用户答对数
     - accuracy: 正确率（0~1）
@@ -233,17 +233,28 @@ async def get_my_profile(
     - current_streak: 连续打卡天数（取自 user_game_profile）
     - vocab_mastered: 当前用户已掌握词汇数
     - last_login_at: 最近登录时间
+
+    P1-4.10: total_study_days 修正为真实学习天数，而非"注册至今天数"
     """
     user_id = current.id
 
-    # 学习天数：注册至今的天数（统一为 UTC 做比较，避免 naive/aware 混用报错）
-    now = datetime.now(timezone.utc)
-    created = current.created_at
-    if created is not None and created.tzinfo is None:
-        created = created.replace(tzinfo=timezone.utc)
-    total_study_days = (
-        max(0, (now - created).days) if created is not None else 0
-    )
+    # P1-4.10: 实际学习天数 = 用户至少有 1 次作答 或 1 次游戏会话的不同日期数
+    # 优先作答日期（粒度最细，最贴近"真实学习"），并 union 游戏会话日期
+    attempt_dates_stmt = select(
+        func.distinct(cast(UserQuestionAttempt.created_at, Date))
+    ).where(UserQuestionAttempt.user_id == user_id)
+    game_dates_stmt = select(
+        func.distinct(cast(GameSession.started_at, Date))
+    ).where(GameSession.user_id == user_id)
+
+    attempt_dates = {
+        row[0] for row in (await db.execute(attempt_dates_stmt)).all() if row[0]
+    }
+    game_dates = {
+        row[0] for row in (await db.execute(game_dates_stmt)).all() if row[0]
+    }
+    study_dates = attempt_dates | game_dates
+    total_study_days = len(study_dates)
 
     # 答题总数 / 答对数
     total_questions_answered = await _count(
@@ -319,7 +330,10 @@ async def get_user_activity_trend(
     - dates: 日期字符串列表 (YYYY-MM-DD)
     - activeUsers: 每日活跃用户数（按 last_login_at 日期分组）
     - newUsers: 每日新增用户数
-    - logins: 登录次数（此处用活跃用户数近似）
+    - logins: 每日登录次数（P1-4.10: 由于当前未建立登录事件表，
+      仍以 last_login_at 去重的活跃用户数近似，并标注 estimated=true）
+
+    P1-4.10: 统计口径修正 — 明确 estimated 标志，避免与真实登录次数混淆
     """
     now = datetime.now(timezone.utc)
     cutoff = (now - timedelta(days=days)).replace(tzinfo=None)
@@ -357,6 +371,8 @@ async def get_user_activity_trend(
         nu = new_map.get(d, 0)
         active_users.append(au)
         new_users.append(nu)
+        # P1-4.10: logins 字段语义修正为"登录次数估算值"，避免与真实登录次数混淆
+        # 当前以"该日有登录行为的用户数"近似；建立 login_events 表后可改为真实登录次数
         logins.append(au)
 
     return {
@@ -364,6 +380,11 @@ async def get_user_activity_trend(
         "activeUsers": active_users,
         "newUsers": new_users,
         "logins": logins,
+        # P1-4.10: 显式标注估算口径，UI 应显示"估算"
+        "estimated": {"logins": True},
+        "metric_definitions": {
+            "logins": "以该日有 last_login_at 记录的用户数近似，未捕获重复登录",
+        },
     }
 
 

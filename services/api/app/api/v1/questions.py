@@ -320,10 +320,14 @@ async def get_recommend_questions(
 async def get_question(
     question_id: int,
     db: AsyncSession = Depends(get_db),
+    user_id: int = Depends(get_optional_user_id),
 ) -> QuestionResponse:
-    """获取单个题目详情，包含答案和解析。
+    """获取单个题目详情。
 
-    - 用于查看题目详情或错题回顾
+    P0-06: 答案和解析仅在用户已作答后返回，防止匿名批量抓取。
+    - 未登录用户：只返回题干/选项，不返回答案/解析
+    - 已登录但未作答：同上
+    - 已登录且已作答：返回完整答案/解析
     """
     result = await db.execute(select(Question).where(Question.id == question_id))
     row = result.scalars().first()
@@ -334,6 +338,17 @@ async def get_question(
             detail=f"题目 {question_id} 不存在",
         )
 
+    # P0-06: 检查用户是否已作答此题，仅在已作答后返回答案/解析
+    has_attempted = False
+    if user_id is not None:
+        attempt_result = await db.execute(
+            select(func.count()).select_from(UserQuestionAttempt).where(
+                UserQuestionAttempt.user_id == user_id,
+                UserQuestionAttempt.question_id == question_id,
+            )
+        )
+        has_attempted = (attempt_result.scalar() or 0) > 0
+
     return QuestionResponse(
         id=row.id,
         subject=row.subject,
@@ -343,8 +358,8 @@ async def get_question(
         title=row.title,
         content=row.content,
         options=row.options,
-        answer=row.answer,
-        solution=row.solution,
+        answer=row.answer if has_attempted else None,
+        solution=row.solution if has_attempted else None,
         created_at=row.created_at,
     )
 
@@ -365,6 +380,10 @@ async def submit_attempt(
     - 记录作答历史
     - 答错自动加入错题本
     - 返回正误判断和解析
+
+    P1-4.5: 幂等 + 错题状态机统一
+    - 重复 attempt_id 直接返回首次结果，不再写入作答/错题/学习数据
+    - 答对不再直接从错题本删除；改为推进 review_stage，到 5 阶段才毕业
     """
     # 获取题目
     result = await db.execute(select(Question).where(Question.id == question_id))
@@ -376,7 +395,49 @@ async def submit_attempt(
             detail=f"题目 {question_id} 不存在",
         )
 
+    # P1-4.5: 幂等性检查 — 同一 attempt_id 直接返回首次结果
+    # 通过 Redis 短期缓存（30 分钟）记录 attempt_id → 结果，避免 DB 重复写入
+    if body.attempt_id:
+        try:
+            import redis.asyncio as aioredis  # noqa: WPS433
+
+            from app.core.config import settings as _settings
+
+            _r = aioredis.from_url(_settings.redis_url, decode_responses=True)
+            cache_key = f"attempt:idem:{user_id}:{question_id}:{body.attempt_id}"
+            cached = await _r.get(cache_key)
+            if cached:
+                # 命中幂等缓存：返回首次结果，不重复计入
+                import json as _json
+
+                await _r.aclose()
+                payload = _json.loads(cached)
+                return QuestionAttemptResponse(
+                    correct=payload["correct"],
+                    correct_answer=payload.get("correct_answer"),
+                    solution=payload.get("solution"),
+                    xp_gained=payload.get("xp_gained", 0),
+                    mastery_update=payload.get("mastery_update"),
+                )
+        except Exception:
+            # Redis 不可用不阻塞业务，仅失去幂等保护（写入仍受唯一约束保护）
+            pass
+        else:
+            try:
+                await _r.aclose()
+            except Exception:
+                pass
+
     correct = judge_answer(body.user_answer, row.answer, row.type)
+
+    # P1-4.5: 客户端耗时仅作参考，做合理性边界检查（防止异常大/小值污染统计）
+    # 服务端实际可信度应基于发题时间与题目复杂度联合判断（此处先做边界裁剪）
+    duration_ms = body.duration_ms
+    if duration_ms is not None:
+        if duration_ms > 3600_000:  # 单题最长 1 小时
+            duration_ms = 3600_000
+        elif duration_ms < 0:
+            duration_ms = 0
 
     # 记录作答
     db.add(
@@ -385,36 +446,77 @@ async def submit_attempt(
             question_id=question_id,
             user_answer=body.user_answer,
             correct=correct,
-            duration_ms=body.duration_ms,
+            duration_ms=duration_ms,
         )
     )
 
-    # 答错加入错题本
+    # P1-4.5: 统一错题状态机 — 答对不再直接删除，改为推进 review_stage
+    # 状态机：active(答错时建立/刷新) → scheduled → mastery_candidate → graduated
+    # review 接口已使用 5 阶段毕业；此处的 attempt 答对只是"复习一次"，不能直接毕业
+    # 错题本条目仅在 review 接口连续推进 5 次后才真正删除（graduated_at 标记）
     if not correct:
+        # 答错：新增或刷新错题本（保留 review_stage 不重置，避免破坏已建立的复习进度）
         await db.execute(
             text(
                 """
-                INSERT INTO wrong_questions (user_id, question_id, wrong_count, last_wrong_at, next_review_at)
-                VALUES (:user_id, :question_id, 1, NOW(), NOW() + INTERVAL '1 day')
+                INSERT INTO wrong_questions
+                    (user_id, question_id, wrong_count, last_wrong_at, next_review_at,
+                     review_count, review_stage, graduated_at)
+                VALUES (:user_id, :question_id, 1, NOW(), NOW() + INTERVAL '1 day', 0, 0, NULL)
                 ON CONFLICT (user_id, question_id) DO UPDATE SET
                     wrong_count = wrong_questions.wrong_count + 1,
                     last_wrong_at = NOW(),
-                    next_review_at = NOW() + (wrong_questions.wrong_count || ' days')::INTERVAL
+                    next_review_at = NOW() + INTERVAL '1 day',
+                    graduated_at = NULL
                 """
             ),
             {"user_id": user_id, "question_id": question_id},
         )
     else:
-        # 答对：从错题本移除（毕业判定）
-        await db.execute(
-            text(
-                """
-                DELETE FROM wrong_questions
-                WHERE user_id = :user_id AND question_id = :question_id
-                """
-            ),
-            {"user_id": user_id, "question_id": question_id},
+        # 答对：仅在已存在错题本条目时推进 1 个 review_stage，不直接删除
+        # 若 review_stage 已达 5，则毕业（graduated_at 标记 + 删除条目以释放列表）
+        existing_wq = await db.execute(
+            select(WrongQuestion).where(
+                WrongQuestion.user_id == user_id,
+                WrongQuestion.question_id == question_id,
+            )
         )
+        wq_row = existing_wq.scalars().first()
+        if wq_row is not None:
+            new_stage = (wq_row.review_stage or 0) + 1
+            max_stage = 5
+            if new_stage >= max_stage:
+                # 已达最高阶段 → 毕业：从错题本移除（graduated_at 不再保留记录，避免列表污染）
+                await db.execute(
+                    text(
+                        """
+                        DELETE FROM wrong_questions
+                        WHERE user_id = :user_id AND question_id = :question_id
+                        """
+                    ),
+                    {"user_id": user_id, "question_id": question_id},
+                )
+            else:
+                # 推进阶段，但仍保留在错题本
+                intervals = [3, 7, 14, 30, 60]
+                interval_days = intervals[min(new_stage - 1, max_stage - 1)]
+                await db.execute(
+                    text(
+                        """
+                        UPDATE wrong_questions SET
+                            review_count = review_count + 1,
+                            review_stage = :stage,
+                            next_review_at = NOW() + (:interval || ' days')::INTERVAL
+                        WHERE user_id = :user_id AND question_id = :question_id
+                        """
+                    ),
+                    {
+                        "stage": new_stage,
+                        "interval": str(interval_days),
+                        "user_id": user_id,
+                        "question_id": question_id,
+                    },
+                )
 
     await db.commit()
 
@@ -423,9 +525,37 @@ async def submit_attempt(
     if correct:
         xp_gained = 5 + (row.difficulty or 1) * 5  # 难度1=10, 难度5=30
 
-    return QuestionAttemptResponse(
+    response = QuestionAttemptResponse(
         correct=correct,
         correct_answer=row.answer if not correct else None,
         solution=row.solution if not correct else None,
         xp_gained=xp_gained,
     )
+
+    # P1-4.5: 写入幂等缓存（30 分钟 TTL）
+    if body.attempt_id:
+        try:
+            import redis.asyncio as aioredis  # noqa: WPS433
+            import json as _json
+
+            from app.core.config import settings as _settings
+
+            _r2 = aioredis.from_url(_settings.redis_url, decode_responses=True)
+            cache_key = f"attempt:idem:{user_id}:{question_id}:{body.attempt_id}"
+            await _r2.set(
+                cache_key,
+                _json.dumps(
+                    {
+                        "correct": correct,
+                        "correct_answer": response.correct_answer,
+                        "solution": response.solution,
+                        "xp_gained": xp_gained,
+                    }
+                ),
+                ex=1800,  # 30 分钟
+            )
+            await _r2.aclose()
+        except Exception:
+            pass
+
+    return response

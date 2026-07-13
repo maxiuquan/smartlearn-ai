@@ -92,6 +92,9 @@ class Settings(BaseSettings):
     # 复用 api 服务的 JWT 签名密钥（同一密钥，由 compose 注入相同值）
     JWT_SECRET: str = ""
     JWT_ALGORITHM: str = "HS256"
+    # P0-02: JWT iss/aud 校验（与 API 服务保持一致）
+    JWT_ISSUER: str = "smartlearn-ai"
+    JWT_AUDIENCE: str = "smartlearn-users"
     # SSRF 防护：允许服务端出网抓取的域名白名单（逗号分隔）
     AI_ENGINE_SSRF_ALLOWLIST: str = ""
 

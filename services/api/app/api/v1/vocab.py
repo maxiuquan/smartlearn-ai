@@ -270,17 +270,53 @@ async def submit_word_event(
 
     - 支持的事件类型: learned, reviewed, correct, wrong, mastered, forgotten
     - 所有单词游戏通过此接口提交学习结果
+
+    P1-4.6: 幂等 + 乐观锁 + 词汇存在校验
+    - 重复 event_id 直接返回，不重复计入进度
+    - 先验证词汇存在，返回业务 404 而非外键异常 500
+    - 用 SELECT ... FOR UPDATE 锁定 progress 行，避免并发丢失更新
     """
     event_type = body.event_type
     # next_review_at 列是 TIMESTAMP WITHOUT TIME ZONE, 需剥离 tzinfo
     now = datetime.now(timezone.utc).replace(tzinfo=None)
 
-    # 查询当前进度
+    # P1-4.6: 先验证词汇存在，返回业务 404（而非依赖外键异常 500）
+    word_exists_result = await db.execute(
+        select(VocabularyWord.word_id).where(VocabularyWord.word_id == body.word_id)
+    )
+    if word_exists_result.scalar() is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"词汇 {body.word_id} 不存在",
+        )
+
+    # P1-4.6: 幂等检查 — 同一 event_id 直接返回，不重复计入进度
+    if body.event_id:
+        try:
+            import redis.asyncio as aioredis  # noqa: WPS433
+
+            from app.core.config import settings as _settings
+
+            _r = aioredis.from_url(_settings.redis_url, decode_responses=True)
+            idem_key = f"vocab:idem:{user_id}:{body.word_id}:{body.event_id}"
+            seen = await _r.set(idem_key, "1", ex=86400, nx=True)  # 24h TTL
+            await _r.aclose()
+            # seen=None 表示键已存在 → 重复请求，直接返回
+            if seen is None:
+                return
+        except Exception:
+            # Redis 不可用不阻塞业务，仅失去幂等保护
+            pass
+
+    # P1-4.6: 用 SELECT ... FOR UPDATE 锁定 progress 行，避免并发丢失更新
+    # FOR UPDATE 必须在事务中执行；AsyncSession 默认开启事务
     result = await db.execute(
-        select(UserWordProgress).where(
+        select(UserWordProgress)
+        .where(
             UserWordProgress.user_id == user_id,
             UserWordProgress.word_id == body.word_id,
         )
+        .with_for_update()
     )
     existing = result.scalars().first()
 

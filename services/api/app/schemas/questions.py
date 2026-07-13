@@ -39,6 +39,13 @@ class QuestionAttemptRequest(BaseModel):
 
     user_answer: str = Field(..., min_length=1)
     duration_ms: Optional[int] = Field(None, ge=0, description="作答耗时（毫秒）")
+    # P1-4.5: 幂等键，防止网络重试导致重复作答
+    # 同一 attempt_id 的重复请求返回首次结果，不重复计入错题/作答历史
+    attempt_id: Optional[str] = Field(
+        None,
+        max_length=128,
+        description="幂等键（UUID），同一 attempt_id 的重试返回首次结果",
+    )
 
     model_config = {"extra": "forbid"}
 

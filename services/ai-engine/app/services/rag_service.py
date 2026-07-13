@@ -25,7 +25,15 @@ from app.providers.router import get_router
 
 
 # ─── 数据路径 ───────────────────────────────────────────────
-DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent / "data"
+# P0-05: 使用环境变量强制指定数据路径，禁止从 parents[n] 猜测
+# Docker 环境: /app/data；开发环境: 项目根目录/data
+_DATA_DIR_ENV = os.environ.get("RAG_DATA_DIR", "")
+if _DATA_DIR_ENV:
+    DATA_DIR = Path(_DATA_DIR_ENV)
+else:
+    # 回退: 从当前文件向上查找 data 目录（开发环境）
+    _project_root = Path(__file__).resolve().parent.parent.parent.parent.parent
+    DATA_DIR = _project_root / "data"
 KNOWLEDGE_POINTS_DIR = DATA_DIR / "knowledge-points"
 QUESTIONS_DIR = DATA_DIR / "questions"
 
@@ -44,18 +52,27 @@ class RAGService:
 
     # ── 初始化 ──────────────────────────────────────────────
 
-    def initialize(self) -> None:
-        """加载所有知识数据并构建索引（同步，内部用 asyncio.run 调用异步嵌入）"""
+    async def initialize(self) -> None:
+        """加载所有知识数据并构建索引（异步）
+
+        P0-05: 重写为真正的 async 初始化，禁止在 async 上下文中调用 asyncio.run()。
+        """
         if self._initialized:
             return
+        # P0-05: 启动时打印规范化路径和语料数量摘要
+        print(f"   RAG DATA_DIR = {DATA_DIR}")
+        print(f"   知识点目录: {KNOWLEDGE_POINTS_DIR} (exists={KNOWLEDGE_POINTS_DIR.exists()})")
+        print(f"   题目目录: {QUESTIONS_DIR} (exists={QUESTIONS_DIR.exists()})")
         self._load_knowledge_points()
         self._load_questions()
-        self._build_embeddings_sync()
+        await self._build_embeddings()
         self._initialized = True
         print(
             f"RAG 服务已初始化: {len(self._knowledge_chunks)} 个知识点, "
             f"{len(self._question_chunks)} 道题目"
         )
+        if len(self._knowledge_chunks) == 0 and len(self._question_chunks) == 0:
+            print("⚠️  警告: RAG 语料为 0，请检查 DATA_DIR 路径配置")
 
     def _load_knowledge_points(self) -> None:
         """从 JSON 文件加载知识点，展平为 chunks"""
@@ -148,14 +165,17 @@ class RAGService:
                 }
                 self._question_chunks.append(chunk)
 
-    def _build_embeddings_sync(self) -> None:
-        """构建文本嵌入向量（同步包装，内部用 asyncio.run 调用异步嵌入）"""
+    async def _build_embeddings(self) -> None:
+        """构建文本嵌入向量（异步）
+
+        P0-05: 重写为真正的 async 方法，禁止使用 asyncio.run()。
+        """
         use_ai = settings.has_any_provider
 
         # 构建知识点嵌入
         if self._knowledge_chunks:
             if use_ai:
-                self._knowledge_embeddings = self._embed_texts_sync(
+                self._knowledge_embeddings = await self._embed_texts(
                     [c["text"] for c in self._knowledge_chunks]
                 )
             else:
@@ -169,7 +189,7 @@ class RAGService:
         # 构建题目嵌入
         if self._question_chunks:
             if use_ai:
-                self._question_embeddings = self._embed_texts_sync(
+                self._question_embeddings = await self._embed_texts(
                     [c["text"] for c in self._question_chunks]
                 )
             else:
@@ -181,15 +201,6 @@ class RAGService:
             self._question_embeddings = np.array([]).reshape(0, self._embedding_dim)
 
     # ── 嵌入方法 ────────────────────────────────────────────
-
-    def _embed_texts_sync(self, texts: list[str]) -> np.ndarray:
-        """同步包装：使用路由层异步生成文本嵌入（用于初始化阶段）"""
-        try:
-            embeddings = asyncio.run(self._router.generate_embeddings(texts))
-            return np.array(embeddings, dtype=np.float32)
-        except Exception as e:
-            print(f"嵌入生成失败，回退到关键词向量: {e}")
-            return self._simple_keyword_embed(texts, [[] for _ in texts])
 
     async def _embed_texts(self, texts: list[str]) -> np.ndarray:
         """异步：使用路由层生成文本嵌入"""
@@ -229,12 +240,19 @@ class RAGService:
         return vectors
 
     def _char_hash_embed(self, texts: list[str]) -> np.ndarray:
-        """基于字符哈希的简单嵌入（无关键词时的回退）"""
+        """基于字符哈希的简单嵌入（无关键词时的回退）
+
+        P0-05: 使用 hashlib 确定性哈希替代 Python 内置 hash()，
+        避免跨进程 hash 随机化导致结果不稳定。
+        """
+        import hashlib
         dim = self._embedding_dim
         vectors = np.zeros((len(texts), dim), dtype=np.float32)
         for i, text in enumerate(texts):
-            for j, ch in enumerate(text):
-                idx = hash(ch) % dim
+            for ch in text:
+                # 使用 hashlib.md5 生成确定性哈希值
+                h = int(hashlib.md5(ch.encode("utf-8")).hexdigest(), 16)
+                idx = h % dim
                 vectors[i, idx] += 1.0
             norm = np.linalg.norm(vectors[i])
             if norm > 0:
@@ -334,9 +352,8 @@ _rag_service: RAGService | None = None
 
 
 def get_rag_service() -> RAGService:
-    """获取 RAG 服务单例"""
+    """获取 RAG 服务单例（不自动初始化，需在 lifespan 中显式 await initialize()）"""
     global _rag_service
     if _rag_service is None:
         _rag_service = RAGService()
-        _rag_service.initialize()
     return _rag_service

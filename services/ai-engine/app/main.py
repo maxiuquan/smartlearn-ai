@@ -40,6 +40,8 @@ async def lifespan(app: FastAPI):
 
     # 预初始化 RAG 服务
     rag = get_rag_service()
+    # P0-05: 使用 async 初始化，禁止在 async 上下文中调用 asyncio.run()
+    await rag.initialize()
     print(f"   知识库加载完成: {len(rag._knowledge_chunks)} 知识点, {len(rag._question_chunks)} 题目")
 
     yield

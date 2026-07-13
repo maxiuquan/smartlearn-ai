@@ -255,6 +255,80 @@ async def is_session_revoked(session_id: str, redis_client=None) -> bool:
         return False
 
 
+async def revoke_all_user_sessions(user_id: int, db=None) -> int:
+    """撤销指定用户的所有会话（全部设备退出）.
+
+    P0-03: 通过 auth_sessions 表查找所有 active 会话并逐个撤销。
+    返回受影响的会话数量。Redis 不可用时降级为无操作。
+
+    Args:
+        user_id: 用户 ID
+        db: 可选的 AsyncSession，用于查询 auth_sessions 表
+    """
+    count = 0
+    redis_client = None
+    try:
+        import redis.asyncio as aioredis
+        from app.core.config import settings
+        redis_client = aioredis.from_url(settings.redis_url, decode_responses=True)
+        await redis_client.ping()
+    except Exception:
+        redis_client = None
+
+    try:
+        # 从 auth_sessions 表查询所有 active 会话
+        if db is not None:
+            from sqlalchemy import select, update
+            from app.models.auth_session import AuthSession
+            result = await db.execute(
+                select(AuthSession.session_id).where(
+                    AuthSession.user_id == user_id,
+                    AuthSession.is_revoked == False,  # noqa: E712
+                )
+            )
+            session_ids = [row[0] for row in result.fetchall()]
+            for sid in session_ids:
+                if redis_client:
+                    await revoke_session(sid, redis_client)
+                count += 1
+            # 标记数据库中的会话为已撤销
+            if session_ids:
+                await db.execute(
+                    update(AuthSession)
+                    .where(
+                        AuthSession.user_id == user_id,
+                        AuthSession.is_revoked == False,  # noqa: E712
+                    )
+                    .values(is_revoked=True, revoked_at=datetime.now(timezone.utc))
+                )
+                await db.commit()
+    except Exception:
+        pass
+    finally:
+        if redis_client:
+            try:
+                await redis_client.aclose()
+            except Exception:
+                pass
+    return count
+
+
+async def get_redis_client():
+    """获取 Redis 客户端（用于 auth 路由中的 token 撤销检查）.
+
+    P0-03: 替代 getattr(db, "_redis", None) 的正确方式。
+    Redis 不可用时返回 None。
+    """
+    try:
+        import redis.asyncio as aioredis
+        from app.core.config import settings
+        client = aioredis.from_url(settings.redis_url, decode_responses=True)
+        await client.ping()
+        return client
+    except Exception:
+        return None
+
+
 # ── API Key 管理（P0-3: HMAC + 恒定时间比较）──
 
 

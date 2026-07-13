@@ -2,10 +2,17 @@
 
 所有端点要求管理员权限（admin 或 super_admin）；
 写操作均记录到 AuditLog 表。
+
+P1-4.7 整改：
+- 审计日志与业务变更在同一事务内提交（_record_audit 不再独立 commit）
+- 用户删除改为软删除（status=deleted + deleted_at + PII 匿名化）
+- PII 响应最小化：默认对 phone/email/wechat_openid 脱敏；
+  管理员需显式 ?reveal_pii=true 才能查看明文（同时记录审计）
 """
 import csv
 import io
 import json
+import logging
 from datetime import datetime, timezone
 from typing import Optional
 
@@ -40,6 +47,34 @@ from app.schemas.admin import (
 )
 
 router = APIRouter()
+logger = logging.getLogger("api.users")
+
+
+# ── P1-4.7: PII 脱敏工具 ──
+
+
+def _mask_phone(phone: Optional[str]) -> Optional[str]:
+    """手机号脱敏：保留前 3 + 后 4，中间 ****。"""
+    if not phone or len(phone) < 7:
+        return phone
+    return f"{phone[:3]}****{phone[-4:]}"
+
+
+def _mask_email(email: Optional[str]) -> Optional[str]:
+    """邮箱脱敏：保留首字符 + 域名，中间 ****。"""
+    if not email or "@" not in email:
+        return email
+    local, domain = email.split("@", 1)
+    if len(local) <= 1:
+        return f"{local}***@{domain}"
+    return f"{local[0]}***@{domain}"
+
+
+def _mask_openid(openid: Optional[str]) -> Optional[str]:
+    """微信 openid 脱敏：保留前 4 + 后 4，中间 ****。"""
+    if not openid or len(openid) < 8:
+        return openid
+    return f"{openid[:4]}****{openid[-4:]}"
 
 
 # ── 辅助函数 ──
@@ -57,14 +92,20 @@ async def _get_user_or_404(db: AsyncSession, user_id: int) -> User:
     return user
 
 
-async def _build_user_detail(db: AsyncSession, user: User) -> UserDetailResponse:
+async def _build_user_detail(
+    db: AsyncSession,
+    user: User,
+    *,
+    reveal_pii: bool = False,
+) -> UserDetailResponse:
     """构造用户详情响应（含订阅与统计）。
 
     每个子查询独立 try/except，避免单点失败导致整个接口 500。
-    """
-    import logging
-    logger = logging.getLogger("api.users")
 
+    P1-4.7:
+    - 默认对 phone/email/wechat_openid 做脱敏
+    - reveal_pii=True 时返回明文（调用方需自行记录审计）
+    """
     def _strip_tz(dt):
         """安全地剥离 datetime 的 tzinfo。"""
         if dt and hasattr(dt, 'tzinfo') and dt.tzinfo:
@@ -118,21 +159,36 @@ async def _build_user_detail(db: AsyncSession, user: User) -> UserDetailResponse
     # updated_at 可能不存在（旧迁移），安全获取
     updated_at = _strip_tz(getattr(user, 'updated_at', None) or user.created_at)
 
+    # P1-4.7: PII 脱敏
+    raw_phone = user.phone
+    raw_email = user.email
+    raw_openid = getattr(user, 'wechat_openid', None)
+    if reveal_pii:
+        phone_out, email_out, openid_out = raw_phone, raw_email, raw_openid
+        pii_masked = False
+    else:
+        phone_out = _mask_phone(raw_phone)
+        email_out = _mask_email(raw_email)
+        openid_out = _mask_openid(raw_openid)
+        pii_masked = True
+
     return UserDetailResponse(
         id=user.id,
-        phone=user.phone,
-        email=user.email,
+        phone=phone_out,
+        email=email_out,
         role=user.role,
         status=user.status,
         nickname=user.nickname,
         avatar=user.avatar,
-        wechat_openid=getattr(user, 'wechat_openid', None),
+        wechat_openid=openid_out,
         vip_level=user.vip_level,
         vip_expire_at=_strip_tz(user.vip_expire_at),
         ai_quota_daily_override=user.ai_quota_daily_override,
         last_login_at=_strip_tz(user.last_login_at),
         created_at=_strip_tz(user.created_at),
         updated_at=updated_at,
+        deleted_at=_strip_tz(getattr(user, 'deleted_at', None)),
+        pii_masked=pii_masked,
         subscription=(
             SubscriptionInfo(
                 plan=sub.plan,
@@ -161,7 +217,11 @@ async def _record_audit(
     target: str,
     details: Optional[dict] = None,
 ) -> None:
-    """记录审计日志并提交。"""
+    """P1-4.7: 记录审计日志（仅 add，不单独 commit）。
+
+    调用方必须在调用本函数后自行 `await db.commit()`，
+    以保证审计与业务变更在同一事务内原子提交。
+    """
     log = AuditLog(
         actor=actor.display_name,
         actor_id=actor.id,
@@ -170,7 +230,6 @@ async def _record_audit(
         details=details or {},
     )
     db.add(log)
-    await db.commit()
 
 
 def _apply_sort(query, model, sort: str, order: str):
@@ -196,14 +255,18 @@ async def list_users(
     page_size: int = Query(20, ge=1, le=100),
     search: Optional[str] = Query(None, description="按 phone/email/nickname 模糊搜索"),
     role: Optional[str] = Query(None, description="按角色筛选"),
-    status_filter: Optional[str] = Query(None, alias="status", description="按状态筛选"),
+    status_filter: Optional[str] = Query(None, alias="status", description="按状态筛选（active/banned/deleted）"),
     vip_level: Optional[int] = Query(None, ge=0, le=3, description="按 VIP 等级筛选"),
+    include_deleted: bool = Query(False, description="是否包含已软删除用户（默认不包含）"),
     sort: str = Query("created_at", description="排序字段"),
     order: str = Query("desc", description="asc / desc"),
     db: AsyncSession = Depends(get_db),
     current: User = Depends(get_current_admin_user),
 ) -> UserListResponse:
-    """获取用户列表（支持分页、搜索、筛选、排序）。"""
+    """获取用户列表（支持分页、搜索、筛选、排序）。
+
+    P1-4.7: 默认不返回已软删除用户；显式 include_deleted=true 可查看。
+    """
     conditions = []
     if search:
         conditions.append(
@@ -217,6 +280,9 @@ async def list_users(
         conditions.append(User.role == role)
     if status_filter:
         conditions.append(User.status == status_filter)
+    elif not include_deleted:
+        # P1-4.7: 默认排除软删除用户
+        conditions.append(User.status != "deleted")
     if vip_level is not None:
         conditions.append(User.vip_level == vip_level)
 
@@ -233,8 +299,28 @@ async def list_users(
     result = await db.execute(base_query)
     users = result.scalars().all()
 
+    # P1-4.7: 列表也做 PII 脱敏（列表场景不开放 reveal）
+    items = []
+    for u in users:
+        items.append(
+            UserListItem(
+                id=u.id,
+                phone=_mask_phone(u.phone),
+                email=_mask_email(u.email),
+                role=u.role,
+                status=u.status,
+                nickname=u.nickname,
+                avatar=u.avatar,
+                vip_level=u.vip_level,
+                vip_expire_at=u.vip_expire_at,
+                last_login_at=u.last_login_at,
+                created_at=u.created_at,
+                deleted_at=getattr(u, 'deleted_at', None),
+            )
+        )
+
     return UserListResponse(
-        items=[UserListItem.model_validate(u) for u in users],
+        items=items,
         total=total,
         page=page,
         page_size=page_size,
@@ -248,12 +334,33 @@ async def list_users(
 )
 async def get_user(
     user_id: int,
+    reveal_pii: bool = Query(
+        False,
+        description="P1-4.7: 显式请求明文 PII；为 true 时记录审计",
+    ),
     db: AsyncSession = Depends(get_db),
     current: User = Depends(get_current_admin_user),
 ) -> UserDetailResponse:
-    """获取用户详情（含订阅与学习统计）。"""
+    """获取用户详情（含订阅与学习统计）。
+
+    P1-4.7: 默认对 phone/email/wechat_openid 脱敏；
+    reveal_pii=true 时返回明文，并记录一条审计日志。
+    """
     user = await _get_user_or_404(db, user_id)
-    return await _build_user_detail(db, user)
+
+    if reveal_pii:
+        # P1-4.7: PII 解密查看需记审计（与"读"操作不在同一事务，
+        # 但读取为副作用 commit 仍可接受；至少保证被记录）
+        _record_audit(
+            db,
+            actor=current,
+            action="user.pii.reveal",
+            target=f"user:{user.id}",
+            details={"fields": ["phone", "email", "wechat_openid"]},
+        )
+        await db.commit()
+
+    return await _build_user_detail(db, user, reveal_pii=reveal_pii)
 
 
 # ── 创建 / 更新 ──
@@ -315,16 +422,18 @@ async def create_user(
         nickname=body.nickname,
     )
     db.add(user)
-    await db.commit()
-    await db.refresh(user)
+    await db.flush()  # 获取 user.id，但不提交
 
-    await _record_audit(
+    # P1-4.7: 审计与业务同事务（add 但不 commit）
+    _record_audit(
         db,
         actor=current,
         action="user.create",
         target=f"user:{user.id}",
         details={"phone": body.phone, "email": body.email, "role": body.role},
     )
+    await db.commit()
+    await db.refresh(user)
 
     return await _build_user_detail(db, user)
 
@@ -378,15 +487,16 @@ async def update_user(
         user.email = body.email
 
     if changes:
-        await db.commit()
-        await db.refresh(user)
-        await _record_audit(
+        # P1-4.7: 审计与业务同事务
+        _record_audit(
             db,
             actor=current,
             action="user.update",
             target=f"user:{user.id}",
             details=changes,
         )
+        await db.commit()
+        await db.refresh(user)
 
     return await _build_user_detail(db, user)
 
@@ -420,16 +530,16 @@ async def ban_user(
         )
 
     user.status = "banned"
-    await db.commit()
-    await db.refresh(user)
-
-    await _record_audit(
+    # P1-4.7: 审计与业务同事务
+    _record_audit(
         db,
         actor=current,
         action="user.ban",
         target=f"user:{user.id}",
         details={"reason": body.reason},
     )
+    await db.commit()
+    await db.refresh(user)
 
     return await _build_user_detail(db, user)
 
@@ -444,34 +554,50 @@ async def enable_user(
     db: AsyncSession = Depends(get_db),
     current: User = Depends(get_current_admin_user),
 ) -> UserDetailResponse:
-    """启用用户（status=active）。"""
+    """启用用户（status=active）。
+
+    P1-4.7: 不能启用已软删除的用户（需专门的恢复流程）。
+    """
     user = await _get_user_or_404(db, user_id)
 
-    user.status = "active"
-    await db.commit()
-    await db.refresh(user)
+    if user.is_deleted:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="用户已被软删除，不能直接启用（需先恢复）",
+        )
 
-    await _record_audit(
+    user.status = "active"
+    # P1-4.7: 审计与业务同事务
+    _record_audit(
         db,
         actor=current,
         action="user.enable",
         target=f"user:{user.id}",
         details={},
     )
+    await db.commit()
+    await db.refresh(user)
 
     return await _build_user_detail(db, user)
 
 
 @router.delete(
     "/{user_id}",
-    summary="删除用户（仅 super_admin）",
+    summary="删除用户（仅 super_admin，软删除）",
 )
 async def delete_user(
     user_id: int,
     db: AsyncSession = Depends(get_db),
     current: User = Depends(get_current_super_admin),
 ) -> dict:
-    """删除用户。仅超级管理员可执行。"""
+    """P1-4.7: 软删除用户。
+
+    - 仅超级管理员可执行
+    - 设置 status=deleted + deleted_at 时间戳
+    - 匿名化 PII（phone/email/wechat_openid 加 deleted_ 前缀）
+    - 撤销所有会话
+    - 业务变更与审计同事务写入
+    """
     user = await _get_user_or_404(db, user_id)
 
     if user.id == current.id:
@@ -480,20 +606,60 @@ async def delete_user(
             detail="不能删除当前登录账号",
         )
 
-    display = user.display_name
-    await db.delete(user)
-    await db.commit()
+    if user.is_deleted:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="用户已被软删除",
+        )
 
-    # 删除后单独记录审计日志（user 已被 delete，不能再读其字段）
-    await _record_audit(
+    display = user.display_name
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
+
+    # P1-4.7: 软删除 + PII 匿名化
+    user.status = "deleted"
+    user.deleted_at = now
+    # 匿名化 PII（保留唯一性前缀，避免冲突）
+    if user.phone:
+        user.phone = f"deleted_{user.id}_{user.phone}"
+    if user.email:
+        user.email = f"deleted_{user.id}_{user.email}"
+    if user.wechat_openid:
+        user.wechat_openid = f"deleted_{user.id}_{user.wechat_openid}"
+    # 清空密码哈希，防止后续误用
+    user.password_hash = None
+    # 清空 VIP 相关
+    user.vip_level = 0
+    user.vip_expire_at = None
+    user.ai_quota_daily_override = None
+
+    # P1-4.7: 审计与业务同事务
+    _record_audit(
         db,
         actor=current,
         action="user.delete",
-        target=f"user:{user_id}",
-        details={"display_name": display},
+        target=f"user:{user.id}",
+        details={
+            "display_name": display,
+            "soft_delete": True,
+            "anonymized_pii": True,
+            "deleted_at": now.isoformat(),
+        },
     )
+    await db.commit()
+    await db.refresh(user)
 
-    return {"message": f"用户 {display}（id={user_id}）已删除"}
+    # 撤销所有会话（独立操作，不阻塞主事务）
+    try:
+        from app.core.security import revoke_all_user_sessions
+        await revoke_all_user_sessions(user.id, db)
+    except Exception as e:
+        logger.warning("软删除后撤销会话失败（非阻塞）: user_id=%s err=%s", user.id, e)
+
+    return {
+        "message": f"用户 {display}（id={user_id}）已软删除，PII 已匿名化",
+        "soft_delete": True,
+        "deleted_at": now.isoformat(),
+    }
 
 
 # ── 密码 ──
@@ -509,21 +675,38 @@ async def reset_password(
     db: AsyncSession = Depends(get_db),
     current: User = Depends(get_current_admin_user),
 ) -> dict:
-    """管理员重置目标用户密码。"""
+    """管理员重置目标用户密码。
+
+    P0-07: 目标用户为 super_admin 时，仅允许另一名 super_admin 操作。
+    """
     user = await _get_user_or_404(db, user_id)
 
-    user.password_hash = hash_password(body.new_password)
-    await db.commit()
+    # P0-07: super_admin 保护 — 仅 super_admin 可重置 super_admin 密码
+    if user.is_super_admin and not current.is_super_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="仅超级管理员可重置超级管理员密码",
+        )
 
-    await _record_audit(
+    user.password_hash = hash_password(body.new_password)
+    # P1-4.7: 审计与业务同事务
+    _record_audit(
         db,
         actor=current,
         action="user.reset_password",
         target=f"user:{user.id}",
-        details={},
+        details={"revoked_sessions": True},
     )
+    await db.commit()
 
-    return {"message": f"用户 {user.id} 密码已重置"}
+    # P0-07: 撤销目标用户所有会话（密码重置后强制重新登录）
+    try:
+        from app.core.security import revoke_all_user_sessions
+        await revoke_all_user_sessions(user.id, db)
+    except Exception:
+        pass  # Redis 不可用时降级
+
+    return {"message": f"用户 {user.id} 密码已重置，所有会话已撤销"}
 
 
 # ── 角色与 VIP ──
@@ -568,16 +751,16 @@ async def update_user_role(
 
     old_role = user.role
     user.role = body.role
-    await db.commit()
-    await db.refresh(user)
-
-    await _record_audit(
+    # P1-4.7: 审计与业务同事务
+    _record_audit(
         db,
         actor=current,
         action="user.role.update",
         target=f"user:{user.id}",
         details={"from": old_role, "to": body.role},
     )
+    await db.commit()
+    await db.refresh(user)
 
     return await _build_user_detail(db, user)
 
@@ -615,16 +798,16 @@ async def update_user_vip(
         }
         user.ai_quota_daily_override = body.ai_quota_daily_override
 
-    await db.commit()
-    await db.refresh(user)
-
-    await _record_audit(
+    # P1-4.7: 审计与业务同事务
+    _record_audit(
         db,
         actor=current,
         action="user.vip.update",
         target=f"user:{user.id}",
         details=details,
     )
+    await db.commit()
+    await db.refresh(user)
 
     return await _build_user_detail(db, user)
 
@@ -747,7 +930,8 @@ async def import_users(
             # 回滚当前未提交的事务
             await db.rollback()
 
-    await _record_audit(
+    # P1-4.7: 审计与业务同事务（add 但不 commit；最后一次统一 commit）
+    _record_audit(
         db,
         actor=current,
         action="user.import",
@@ -758,6 +942,7 @@ async def import_users(
             "filename": file.filename,
         },
     )
+    await db.commit()
 
     return {
         "success_count": success_count,
@@ -774,8 +959,14 @@ async def export_users(
     db: AsyncSession = Depends(get_db),
     current: User = Depends(get_current_admin_user),
 ) -> StreamingResponse:
-    """导出全部用户列表为 CSV。"""
-    result = await db.execute(select(User).order_by(desc(User.created_at)))
+    """导出全部用户列表为 CSV。
+
+    P1-4.7: 导出明文 PII 属于敏感操作；审计日志记录操作者与数量。
+    导出范围默认排除已软删除用户。
+    """
+    result = await db.execute(
+        select(User).where(User.status != "deleted").order_by(desc(User.created_at))
+    )
     users = result.scalars().all()
 
     output = io.StringIO()
@@ -810,14 +1001,15 @@ async def export_users(
             ]
         )
 
-    # 记录导出审计日志
-    await _record_audit(
+    # P1-4.7: 记录导出审计日志（只读操作，审计单独 commit 可接受）
+    _record_audit(
         db,
         actor=current,
         action="user.export",
         target="users:all",
-        details={"count": len(users)},
+        details={"count": len(users), "include_pii": True},
     )
+    await db.commit()
 
     content = output.getvalue()
     output.close()

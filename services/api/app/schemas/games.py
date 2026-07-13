@@ -79,6 +79,8 @@ class GameSessionRequest(BaseModel):
     started_at: datetime = Field(...)
     finished_at: Optional[datetime] = None
     details: Optional[dict[str, Any]] = None
+    # P0-08: 幂等性 nonce，防止重复提交
+    nonce: Optional[str] = Field(None, description="幂等键，防止重复提交")
 
     model_config = {"extra": "forbid"}
 
@@ -100,6 +102,8 @@ class LeaderboardEntry(BaseModel):
     rank: int
     user_id: int
     username: Optional[str] = None
+    nickname: Optional[str] = None
+    avatar: Optional[str] = None
     score: int
     level: int = 1
     badge: Optional[str] = None

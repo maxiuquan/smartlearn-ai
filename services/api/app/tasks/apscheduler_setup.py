@@ -11,6 +11,7 @@
   - 每天 04:00  数据完整性校验
   - 每小时整点   批量向量化知识点
   - 每周日 02:00 清理题目解答 AI 痕迹
+  - 每 10 分钟   Outbox dispatcher（P1-4.9，事务性 Outbox 可靠投递）
 """
 import logging
 
@@ -26,10 +27,20 @@ def _run_task(task_func, task_name: str):
     """安全执行定时任务,异常不传播（避免调度器崩溃）。"""
     try:
         logger.info(f"[APScheduler] 开始执行: {task_name}")
-        result = task_func()
+        import asyncio
+        try:
+            # asyncio 协程任务（如 Outbox dispatcher）
+            loop = asyncio.new_event_loop()
+            try:
+                result = loop.run_until_complete(task_func())
+            finally:
+                loop.close()
+        except (RuntimeError, TypeError):
+            # 同步任务
+            result = task_func()
         logger.info(f"[APScheduler] 完成: {task_name} → {result}")
     except Exception as e:
-        logger.error(f"[APScheduler] 失败: {task_name} → {e}")
+        logger.error(f"[APScheduler] 失败: {task_name} → {e}", exc_info=True)
 
 
 def start_scheduler() -> None:
@@ -82,11 +93,26 @@ def start_scheduler() -> None:
         replace_existing=True,
     )
 
+    # ── P1-4.9: 每 10 分钟执行 Outbox dispatcher ──
+    try:
+        from app.services.outbox_dispatcher import dispatch_batch
+
+        _scheduler.add_job(
+            lambda: _run_task(dispatch_batch, "Outbox dispatcher"),
+            trigger=CronTrigger(minute="*/10"),
+            id="outbox-dispatcher",
+            replace_existing=True,
+        )
+        logger.info("Outbox dispatcher 已注册（每 10 分钟执行）")
+    except ImportError as e:
+        logger.warning(f"Outbox dispatcher 模块导入失败,跳过: {e}")
+
     _scheduler.start()
     logger.info(
-        "APScheduler 已注册 4 个定时任务: "
+        "APScheduler 已注册定时任务: "
         "backup-database-daily, validate-data-integrity-daily, "
         "batch-embed-knowledge-points-hourly, clean-question-solutions-weekly"
+        + (", outbox-dispatcher" if "outbox-dispatcher" in [j.id for j in _scheduler.get_jobs()] else "")
     )
 
 

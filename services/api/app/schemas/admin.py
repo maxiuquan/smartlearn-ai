@@ -25,6 +25,7 @@ class UserListItem(BaseModel):
     vip_expire_at: Optional[datetime] = None
     last_login_at: Optional[datetime] = None
     created_at: datetime
+    deleted_at: Optional[datetime] = None
 
     model_config = {"from_attributes": True}
 
@@ -76,6 +77,9 @@ class UserDetailResponse(BaseModel):
     last_login_at: Optional[datetime] = None
     created_at: datetime
     updated_at: datetime
+    deleted_at: Optional[datetime] = None
+    # P1-4.7: PII 是否被脱敏（默认脱敏；管理员显式 reveal_pii=true 时为 false）
+    pii_masked: bool = True
     subscription: Optional[SubscriptionInfo] = None
     stats: UserStatsSummary = Field(default_factory=UserStatsSummary)
 

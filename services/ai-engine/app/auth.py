@@ -72,13 +72,34 @@ def ensure_auth_configured() -> None:
 
 
 def _verify_jwt(token: str) -> Optional[dict]:
-    """校验 JWT，成功返回 payload，失败返回 None。"""
+    """校验 JWT，成功返回 payload，失败返回 None。
+
+    P0-02: 与 API 服务对齐 — 校验 iss/aud/token_use，不再仅校验签名。
+    """
     if not JWT_SECRET:
         return None
     try:
-        return jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        payload = jwt.decode(
+            token,
+            JWT_SECRET,
+            algorithms=[JWT_ALGORITHM],
+            issuer=settings.JWT_ISSUER,
+            audience=settings.JWT_AUDIENCE,
+        )
+        # P0-02: 校验 token_use 必须为 access
+        token_use = payload.get("token_use") or payload.get("type")
+        if token_use != "access":
+            logger.warning("JWT token_use 不符: %s", token_use)
+            return None
+        return payload
     except jwt.ExpiredSignatureError:
         logger.warning("JWT 已过期")
+        return None
+    except jwt.InvalidIssuerError:
+        logger.warning("JWT issuer 校验失败")
+        return None
+    except jwt.InvalidAudienceError:
+        logger.warning("JWT audience 校验失败")
         return None
     except jwt.InvalidTokenError as e:
         logger.warning("JWT 校验失败: %s", e)

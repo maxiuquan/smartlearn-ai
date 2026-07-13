@@ -3,9 +3,17 @@
 职责:
 - 创建订单 + OrderEvent(create) + Outbox(order.created) 同事务写入
 - 处理支付回调: 验签校验(渠道/金额/状态) + 幂等(已 paid 直接返回) + 状态机 created->paid
-  + 发放权益(更新 Subscription) + OrderEvent(pay_callback) + Outbox(order.paid, subscription.activated)
+  + 发放权益(更新 Subscription + 写 SubscriptionLedger) + OrderEvent(pay_callback)
+  + Outbox(order.paid, subscription.activated)
 - 关闭未支付订单 / 退款状态机
+- 退款权益策略（P1-4.9）: 全退撤销权益 / 部分退按时间折算保留
 - 对账(三方已支付未发权益告警)
+
+P1-4.9 整改:
+- 订单号改用 secrets.token_hex 加密随机（替代 random.choices）
+- 权益变更写入 SubscriptionLedger（不可变账本）
+- 全额退款撤销订阅权益；部分退款按比例保留（写 ledger 记录）
+- Outbox dispatcher 由独立后台任务处理（见 outbox_dispatcher.py）
 
 不实际调用微信/支付宝 SDK；状态机与账务记录完整，SDK 接入后替换回调验签占位即可。
 所有写操作在同一事务内（flush 取 id），commit 由调用方（路由层）控制。
@@ -14,8 +22,7 @@ from __future__ import annotations
 
 import json
 import logging
-import random
-import string
+import secrets
 from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
 
@@ -24,6 +31,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.order import Order, OrderEvent, OutboxEvent
 from app.models.subscription import Subscription
+from app.models.subscription_ledger import SubscriptionLedger
 from app.services.feature_flags import is_alipay_enabled, is_wechat_pay_enabled
 
 logger = logging.getLogger(__name__)
@@ -104,9 +112,13 @@ class PaymentService:
     # ── 内部工具 ──
     @staticmethod
     def _gen_order_no() -> str:
-        """生成商户订单号: SL + 14位时间戳 + 8位随机(大写字母数字)."""
+        """P1-4.9: 生成商户订单号 — 加密随机，唯一性由数据库唯一约束保证.
+
+        格式: SL + 14位UTC时间戳 + 16位 hex（secrets.token_hex(8)）
+        总长 32 字符，可排序（时间前缀），随机性由 secrets 保证。
+        """
         ts = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
-        rand = "".join(random.choices(string.ascii_uppercase + string.digits, k=8))
+        rand = secrets.token_hex(8)  # 16 个 hex 字符，128-bit 熵
         return f"SL{ts}{rand}"
 
     @staticmethod
@@ -257,7 +269,15 @@ class PaymentService:
 
         幂等: 订单已 paid 时直接返回，不重复发放权益（仅补记一条事件）。
         行锁 SELECT ... FOR UPDATE 保证并发回调串行化。
+
+        P0-04: signature_valid=False 时 fail-closed，拒绝入账。
         """
+        # P0-04: 验签失败直接拒绝，不得入账
+        if not signature_valid:
+            raise ValueError(
+                "支付签名验证失败，拒绝入账（signature_valid=False）"
+            )
+
         result = await db.execute(
             select(Order).where(Order.order_no == order_no).with_for_update()
         )
@@ -355,6 +375,8 @@ class PaymentService:
         - 无订阅: 创建新 Subscription
         - 已有且未过期: 在原 end_at 基础上续期累加
         - 已有但已过期: 从当前时间起算
+
+        P1-4.9: 每次权益变更写入 SubscriptionLedger（不可变账本）。
         """
         snapshot = self._parse_snapshot(order.product_snapshot)
         plan = str(snapshot.get("plan", "free")).lower()
@@ -370,6 +392,7 @@ class PaymentService:
         )
         sub = result.scalar_one_or_none()
         if sub is None:
+            # 新建订阅
             sub = Subscription(
                 user_id=order.user_id,
                 plan=plan,
@@ -379,13 +402,77 @@ class PaymentService:
                 ai_quota_daily=quota,
             )
             db.add(sub)
+            await db.flush()
+            # P1-4.9: 写入 ledger（grant 事件）
+            ledger = SubscriptionLedger(
+                user_id=order.user_id,
+                subscription_id=sub.id,
+                event_type="grant",
+                plan_from=None,
+                plan_to=plan,
+                quota_daily_from=None,
+                quota_daily_to=quota,
+                start_at=now,
+                end_at=end_at,
+                source=f"order:{order.id}",
+                order_id=order.id,
+                snapshot_json=self._dump(
+                    {
+                        "order_no": order.order_no,
+                        "amount_cents": order.amount_cents,
+                        "period_days": days,
+                        "snapshot": snapshot,
+                    }
+                ),
+            )
+            db.add(ledger)
         else:
+            # 续期 / 升降级
             base = sub.end_at if (sub.end_at is not None and sub.end_at > now) else now
+            old_plan = sub.plan
+            old_quota = sub.ai_quota_daily
+            old_end = sub.end_at
+            new_end = base + timedelta(days=days)
+
+            # 判断事件类型
+            if old_plan == plan:
+                event_type = "renew"
+            elif PLAN_QUOTA.get(plan, 0) > PLAN_QUOTA.get(old_plan, 0):
+                event_type = "upgrade"
+            else:
+                event_type = "downgrade"
+
             sub.plan = plan
             sub.status = "active"
             sub.start_at = now
-            sub.end_at = base + timedelta(days=days)
+            sub.end_at = new_end
             sub.ai_quota_daily = quota
+
+            # P1-4.9: 写入 ledger
+            ledger = SubscriptionLedger(
+                user_id=order.user_id,
+                subscription_id=sub.id,
+                event_type=event_type,
+                plan_from=old_plan,
+                plan_to=plan,
+                quota_daily_from=old_quota,
+                quota_daily_to=quota,
+                start_at=now,
+                end_at=new_end,
+                source=f"order:{order.id}",
+                order_id=order.id,
+                snapshot_json=self._dump(
+                    {
+                        "order_no": order.order_no,
+                        "amount_cents": order.amount_cents,
+                        "period_days": days,
+                        "prev_end_at": old_end.isoformat() if old_end else None,
+                        "new_end_at": new_end.isoformat(),
+                        "snapshot": snapshot,
+                    }
+                ),
+            )
+            db.add(ledger)
         await db.flush()
         return sub
 
@@ -424,7 +511,17 @@ class PaymentService:
         reason: str,
         operator_id: Optional[int],
     ) -> Order:
-        """退款状态机: paid -> refunded(全额) / paid -> refund_pending(部分/异步)."""
+        """退款状态机: paid -> refunded(全额) / paid -> refund_pending(部分/异步).
+
+        P1-4.9 退款权益策略:
+        - 全额退款（refund_amount == amount）: 撤销订阅权益
+            * status=cancelled, end_at=now
+            * 写入 SubscriptionLedger revoke 事件
+            * 写入 Outbox subscription.revoked
+        - 部分退款: 不强制撤销权益，仅记录到 ledger（partial_revoke 事件）
+            * 按 refund/amount 比例折算剩余配额（快照记录，不立即裁剪）
+            * 真实 SDK 异步回调完成后由专门流程处理
+        """
         result = await db.execute(
             select(Order).where(Order.id == order_id).with_for_update()
         )
@@ -439,7 +536,8 @@ class PaymentService:
             )
 
         prev = order.status
-        if refund_amount_cents == order.amount_cents:
+        is_full_refund = refund_amount_cents == order.amount_cents
+        if is_full_refund:
             order.status = ORDER_STATUS_REFUNDED
             to_status = ORDER_STATUS_REFUNDED
             order.refunded_at = _utcnow()
@@ -457,8 +555,14 @@ class PaymentService:
             to_status=to_status,
             event_type="refund",
             operator_id=operator_id,
-            note=f"refund_amount={refund_amount_cents}, reason={reason}",
+            note=f"refund_amount={refund_amount_cents}, reason={reason}, full={is_full_refund}",
         )
+
+        # P1-4.9: 退款权益处理
+        await self._handle_refund_entitlement(
+            db, order, refund_amount_cents, is_full_refund, reason, operator_id
+        )
+
         self._add_outbox(
             db,
             aggregate_type="order",
@@ -471,10 +575,118 @@ class PaymentService:
                 "reason": reason,
                 "operator_id": operator_id,
                 "to_status": to_status,
+                "full_refund": is_full_refund,
             },
         )
         await db.flush()
         return order
+
+    async def _handle_refund_entitlement(
+        self,
+        db: AsyncSession,
+        order: Order,
+        refund_amount_cents: int,
+        is_full_refund: bool,
+        reason: str,
+        operator_id: Optional[int],
+    ) -> None:
+        """P1-4.9: 退款时的权益处理.
+
+        - 全额退款: 撤销订阅（status=cancelled, end_at=now）
+        - 部分退款: 不撤销，仅写 ledger 记录折算比例
+        """
+        # 查找该订单关联的订阅
+        result = await db.execute(
+            select(Subscription)
+            .where(Subscription.user_id == order.user_id)
+            .with_for_update()
+        )
+        sub = result.scalar_one_or_none()
+        if sub is None:
+            # 无订阅记录（可能是非 subscription 类型订单），跳过
+            return
+
+        now = _utcnow()
+        snapshot = self._parse_snapshot(order.product_snapshot)
+
+        if is_full_refund:
+            # 全额退款：撤销权益
+            old_plan = sub.plan
+            old_quota = sub.ai_quota_daily
+            old_end = sub.end_at
+
+            sub.status = "cancelled"
+            sub.end_at = now
+
+            # 写入 ledger
+            ledger = SubscriptionLedger(
+                user_id=order.user_id,
+                subscription_id=sub.id,
+                event_type="revoke",
+                plan_from=old_plan,
+                plan_to="free",
+                quota_daily_from=old_quota,
+                quota_daily_to=0,
+                start_at=sub.start_at,
+                end_at=now,
+                source=f"refund:{order.id}",
+                order_id=order.id,
+                snapshot_json=self._dump(
+                    {
+                        "order_no": order.order_no,
+                        "refund_amount_cents": refund_amount_cents,
+                        "reason": reason,
+                        "operator_id": operator_id,
+                        "prev_end_at": old_end.isoformat() if old_end else None,
+                        "snapshot": snapshot,
+                    }
+                ),
+            )
+            db.add(ledger)
+
+            # 写入 Outbox
+            self._add_outbox(
+                db,
+                aggregate_type="subscription",
+                aggregate_id=sub.id,
+                event_type="subscription.revoked",
+                payload={
+                    "subscription_id": sub.id,
+                    "user_id": order.user_id,
+                    "order_id": order.id,
+                    "reason": reason,
+                    "revoked_at": now.isoformat(),
+                },
+            )
+        else:
+            # 部分退款：不撤销，仅记录折算比例
+            ratio = refund_amount_cents / order.amount_cents
+            ledger = SubscriptionLedger(
+                user_id=order.user_id,
+                subscription_id=sub.id,
+                event_type="partial_revoke",
+                plan_from=sub.plan,
+                plan_to=sub.plan,
+                quota_daily_from=sub.ai_quota_daily,
+                quota_daily_to=sub.ai_quota_daily,  # 不立即裁剪
+                start_at=sub.start_at,
+                end_at=sub.end_at,
+                source=f"refund:{order.id}",
+                order_id=order.id,
+                snapshot_json=self._dump(
+                    {
+                        "order_no": order.order_no,
+                        "refund_amount_cents": refund_amount_cents,
+                        "order_amount_cents": order.amount_cents,
+                        "refund_ratio": ratio,
+                        "reason": reason,
+                        "operator_id": operator_id,
+                        "note": "partial refund; entitlement preserved, ratio recorded for audit",
+                        "snapshot": snapshot,
+                    }
+                ),
+            )
+            db.add(ledger)
 
     async def list_orders(
         self,

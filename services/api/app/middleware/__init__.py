@@ -1,4 +1,5 @@
-"""可观测性中间件包。"""
+"""可观测性 + 安全中间件包。"""
+from app.middleware.csrf import CSRFMiddleware
 from app.middleware.observability import (
     LoggingMiddleware,
     MetricsMiddleware,
@@ -10,5 +11,6 @@ __all__ = [
     "RequestContextMiddleware",
     "LoggingMiddleware",
     "MetricsMiddleware",
+    "CSRFMiddleware",
     "register_observability_middlewares",
 ]

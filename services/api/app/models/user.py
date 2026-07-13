@@ -12,10 +12,11 @@ class User(Base):
     """用户表。
 
     role: user / teacher / admin / super_admin
-    status: active / banned
+    status: active / banned / deleted（P1-4.7 软删除）
     vip_level: 0=普通, 1=基础, 2=高级, 3=至尊 (由 admin 手动调整)
     vip_expire_at: VIP 过期时间，NULL 表示永久或非 VIP
     ai_quota_daily_override: 覆盖 subscriptions.ai_quota_daily，NULL 表示走订阅默认值
+    deleted_at: 软删除时间戳；非 NULL 时该用户被视为已删除（PII 已匿名化）
     """
 
     __tablename__ = "users"
@@ -40,6 +41,9 @@ class User(Base):
     vip_expire_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     ai_quota_daily_override: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
 
+    # P1-4.7: 软删除字段
+    deleted_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True, index=True)
+
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.now(), onupdate=func.now(), nullable=False
@@ -60,6 +64,11 @@ class User(Base):
     @property
     def is_banned(self) -> bool:
         return self.status == "banned"
+
+    @property
+    def is_deleted(self) -> bool:
+        """P1-4.7: 是否已被软删除。"""
+        return self.status == "deleted" or self.deleted_at is not None
 
     @property
     def display_name(self) -> str:

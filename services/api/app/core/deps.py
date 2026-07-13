@@ -157,6 +157,12 @@ async def get_current_user(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="账号已被禁用，请联系管理员",
         )
+    # P1-4.7: 拒绝软删除用户
+    if getattr(user, "is_deleted", False):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="账号已被删除",
+        )
     return user
 
 

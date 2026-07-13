@@ -22,9 +22,11 @@ from app.core.security import (
     decode_access_token,
     decode_refresh_token,
     decode_token,
+    get_redis_client,
     hash_password,
     is_session_revoked,
     is_token_revoked,
+    revoke_all_user_sessions,
     revoke_session,
     revoke_token,
     verify_password,
@@ -242,17 +244,20 @@ async def refresh_token(
     # P0-2: 检查 refresh token 是否已被撤销（重放检测）
     token_jti = payload.get("jti", "")
     session_id = payload.get("sid", "")
-    redis_client = getattr(db, "_redis", None)  # 可选 Redis
+    # P0-03: 修复 — 不再从 db._redis 获取（始终为 None），改用独立 Redis 客户端
+    redis_client = await get_redis_client()
 
     if redis_client:
         if await is_token_revoked(token_jti, redis_client):
             # 旧 token 重放！撤销整条会话链
             await revoke_session(session_id, redis_client)
+            await redis_client.aclose()
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="检测到 refresh token 重放，会话已撤销",
             )
         if await is_session_revoked(session_id, redis_client):
+            await redis_client.aclose()
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="会话已撤销，请重新登录",
@@ -276,6 +281,13 @@ async def refresh_token(
     if redis_client and token_jti:
         exp = payload.get("exp", 0)
         await revoke_token(token_jti, int(exp), redis_client)
+
+    # P0-03: 关闭 Redis 客户端
+    if redis_client:
+        try:
+            await redis_client.aclose()
+        except Exception:
+            pass
 
     # 生成新 token 对（使用新 session_id 实现会话轮转）
     new_session_id = str(uuid.uuid4())
@@ -353,20 +365,9 @@ async def change_password(
     current.password_hash = hash_password(body.new_password)
     await db.commit()
 
-    # 撤销当前会话（Redis 不可用时降级，前端需主动清 token）
+    # P0-03: 撤销当前用户所有会话（强制全部设备重新登录）
     try:
-        auth_header = request.headers.get("Authorization", "")
-        if auth_header.startswith("Bearer "):
-            token = auth_header[7:]
-            payload = decode_access_token(token)
-            if payload:
-                sid = payload.get("sid", "")
-                if sid:
-                    import redis.asyncio as aioredis
-                    from app.core.config import settings
-                    r = aioredis.from_url(settings.redis_url, decode_responses=True)
-                    await revoke_session(sid, r)
-                    await r.aclose()
+        await revoke_all_user_sessions(current.id, db)
     except Exception:
         pass  # Redis 不可用降级
 
@@ -380,33 +381,34 @@ async def change_password(
 async def revoke_all_sessions(
     request: Request,
     current: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ) -> dict:
-    """P0-2: 撤销当前用户的所有会话（全部设备退出）.
+    """P0-03: 撤销当前用户的所有会话（全部设备退出）.
 
-    实现：撤销当前 token 的 sid（其它设备的 sid 因服务端未持久化会话表，
-    将在后续 auth_sessions 表落地后支持）。当前先撤销当前会话。
+    通过 auth_sessions 表查询并撤销所有 active 会话，
+    同时在 Redis 中标记所有 session_id 为已撤销。
     """
+    # P0-03: 撤销用户所有会话（通过 auth_sessions 表 + Redis）
+    revoked_count = await revoke_all_user_sessions(current.id, db)
+
+    # 同时撤销当前 token 的 jti
     try:
         auth_header = request.headers.get("Authorization", "")
         if auth_header.startswith("Bearer "):
             token = auth_header[7:]
             payload = decode_access_token(token)
             if payload:
-                sid = payload.get("sid", "")
                 jti = payload.get("jti", "")
                 exp = int(payload.get("exp", 0))
-                if sid or jti:
-                    import redis.asyncio as aioredis
-                    from app.core.config import settings
-                    r = aioredis.from_url(settings.redis_url, decode_responses=True)
-                    if jti:
-                        await revoke_token(jti, exp, r)
-                    if sid:
-                        await revoke_session(sid, r)
-                    await r.aclose()
+                if jti:
+                    redis_client = await get_redis_client()
+                    if redis_client:
+                        await revoke_token(jti, exp, redis_client)
+                        await redis_client.aclose()
     except Exception:
         pass
-    return {"message": "已撤销所有会话，请重新登录"}
+
+    return {"message": f"已撤销 {revoked_count} 个会话，请重新登录"}
 
 
 @router.post(

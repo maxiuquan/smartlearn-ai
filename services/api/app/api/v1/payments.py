@@ -232,6 +232,82 @@ async def admin_reconcile(
     return await payment_service.admin_reconcile(db, date=parsed_date)
 
 
+# ── P1-4.9: Outbox 管理端点 ──
+
+
+@router.get(
+    "/admin/outbox/stats",
+    summary="Outbox 统计（管理员）",
+)
+async def outbox_stats(
+    admin: User = Depends(get_current_admin_user),
+) -> dict:
+    """P1-4.9: 查看 Outbox 投递状态统计（pending/processing/sent/dead 计数 + 延迟监控）。"""
+    from app.services.outbox_dispatcher import get_outbox_stats
+    return await get_outbox_stats()
+
+
+@router.post(
+    "/admin/outbox/{event_id}/replay",
+    summary="人工重放 Outbox 事件（管理员）",
+)
+async def outbox_replay(
+    event_id: int,
+    admin: User = Depends(get_current_admin_user),
+) -> dict:
+    """P1-4.9: 人工重放 DLQ 中的事件（将 status=dead 重置为 pending）。"""
+    from app.services.outbox_dispatcher import replay_event
+    ok = await replay_event(event_id)
+    if not ok:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"事件 {event_id} 不存在或当前状态不可重放（仅 dead/failed 可重放）",
+        )
+    return {"message": f"事件 {event_id} 已重置为 pending，将在下次 dispatcher 执行时重投"}
+
+
+@router.get(
+    "/admin/subscription-ledger/{user_id}",
+    summary="查看用户权益账本（管理员）",
+)
+async def view_subscription_ledger(
+    user_id: int,
+    db: AsyncSession = Depends(get_db),
+    admin: User = Depends(get_current_admin_user),
+) -> dict:
+    """P1-4.9: 查看用户的所有权益变更历史（不可变账本）。"""
+    from sqlalchemy import select
+    from app.models.subscription_ledger import SubscriptionLedger
+
+    result = await db.execute(
+        select(SubscriptionLedger)
+        .where(SubscriptionLedger.user_id == user_id)
+        .order_by(SubscriptionLedger.created_at.desc())
+        .limit(100)
+    )
+    items = result.scalars().all()
+    return {
+        "user_id": user_id,
+        "count": len(items),
+        "items": [
+            {
+                "id": i.id,
+                "event_type": i.event_type,
+                "plan_from": i.plan_from,
+                "plan_to": i.plan_to,
+                "quota_daily_from": i.quota_daily_from,
+                "quota_daily_to": i.quota_daily_to,
+                "source": i.source,
+                "order_id": i.order_id,
+                "created_at": i.created_at.isoformat() if i.created_at else None,
+                "start_at": i.start_at.isoformat() if i.start_at else None,
+                "end_at": i.end_at.isoformat() if i.end_at else None,
+            }
+            for i in items
+        ],
+    }
+
+
 async def _handle_callback(
     channel: str, payload: CallbackPayload, db: AsyncSession
 ) -> dict:

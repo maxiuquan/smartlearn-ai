@@ -164,13 +164,18 @@ app.add_middleware(
 
 # 可观测性中间件（P1-5）
 # FastAPI/Starlette 中 add_middleware 是反向 wrap：后注册的更外层。
-# 期望请求顺序：RequestContext(最外) → Logging → Metrics → CORS → 业务
-# 因此注册顺序倒过来：Metrics → Logging → RequestContext
+# 期望请求顺序：RequestContext(最外) → Logging → Metrics → CSRF → CORS → 业务
+# 因此注册顺序倒过来：CSRF → Metrics → Logging → RequestContext
 from app.middleware import (  # noqa: E402
+    CSRFMiddleware,
     LoggingMiddleware,
     MetricsMiddleware,
     RequestContextMiddleware,
 )
+
+# P1-4.1: CSRF Origin 校验中间件
+# 与 SameSite Cookie 配合，纵深防御跨站点请求
+app.add_middleware(CSRFMiddleware, allowed_origins=settings.cors_origins_list)
 
 app.add_middleware(MetricsMiddleware)
 app.add_middleware(LoggingMiddleware)
