@@ -12,7 +12,7 @@ import {
 } from 'antd';
 import { EyeOutlined, DownloadOutlined } from '@ant-design/icons';
 import ProTable from '@ant-design/pro-table';
-import type { ColumnsType, ActionType } from '@ant-design/pro-table';
+import type { ProColumns, ActionType } from '@ant-design/pro-table';
 import { useNavigate } from 'react-router-dom';
 import { getUserAnalysis, getUserDetailStats } from '@/services/statisticsService';
 import { UserStats } from '@/types';
@@ -24,7 +24,7 @@ const UserAnalysis: React.FC = () => {
   const actionRef = useRef<ActionType>();
 
   // 表格列定义
-  const columns: ColumnsType<UserStats> = [
+  const columns: ProColumns<UserStats>[] = [
     {
       title: '用户ID',
       dataIndex: 'userId',
@@ -41,7 +41,7 @@ const UserAnalysis: React.FC = () => {
       title: '学习时长',
       dataIndex: 'totalStudyTime',
       width: 120,
-      render: (time: number) => `${Math.round(time / 60)}小时`,
+      renderText: (time: number) => `${Math.round(time / 60)}小时`,
       sorter: true,
     },
     {
@@ -54,7 +54,7 @@ const UserAnalysis: React.FC = () => {
       title: '正确率',
       dataIndex: 'accuracy',
       width: 150,
-      render: (accuracy: number) => (
+      renderText: (accuracy: number) => (
         <Progress
           percent={Math.round(accuracy * 100)}
           size="small"
@@ -77,7 +77,7 @@ const UserAnalysis: React.FC = () => {
       title: '知识点掌握',
       dataIndex: 'knowledgePoints',
       width: 200,
-      render: (points: any[]) => {
+      renderText: (points: any[]) => {
         if (!points || points.length === 0) return '-';
         const avgProgress = points.reduce((sum, p) => sum + p.progress, 0) / points.length;
         return (
@@ -97,7 +97,7 @@ const UserAnalysis: React.FC = () => {
           type="link"
           size="small"
           icon={<EyeOutlined />}
-          onClick={() => navigate(`/user/${record.userId}`)}
+          onClick={() => navigate(`/user/${(record as any).userId}`)}
         >
           详情
         </Button>

@@ -47,10 +47,10 @@ const KnowledgeTreeSelect: React.FC<KnowledgeTreeSelectProps> = ({
           ? filterTreeData(item.children, search)
           : [];
 
-        if (matchTitle || filteredChildren.length > 0) {
+        if (matchTitle || (filteredChildren && filteredChildren.length > 0)) {
           return {
             ...item,
-            children: filteredChildren.length > 0 ? filteredChildren : item.children,
+            children: filteredChildren && filteredChildren.length > 0 ? filteredChildren : item.children,
           };
         }
         return null;

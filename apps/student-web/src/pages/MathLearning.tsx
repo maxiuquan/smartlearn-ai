@@ -375,7 +375,7 @@ export default function MathLearning() {
                   questionContent={selectedQuestion.content || selectedQuestion.title || ''}
                   correctAnswer={attemptResult?.correct_answer || selectedQuestion.answer || ''}
                   questionType={selectedQuestion.type || 'calculation'}
-                  options={selectedQuestion.options}
+                  options={Array.isArray(selectedQuestion.options) ? null : selectedQuestion.options}
                   knowledgePoints={selectedQuestion.knowledge_points}
                   height={320}
                   onGraded={(result) => {

@@ -23,7 +23,7 @@ import {
   CloseCircleOutlined,
 } from '@ant-design/icons';
 import ProTable from '@ant-design/pro-table';
-import type { ColumnsType, ActionType } from '@ant-design/pro-table';
+import type { ProColumns, ActionType } from '@ant-design/pro-table';
 import {
   getWordBookList,
   createWordBook,
@@ -42,7 +42,7 @@ const WordBookList: React.FC = () => {
   const [form] = Form.useForm();
 
   // 表格列定义
-  const columns: ColumnsType<WordBook> = [
+  const columns: ProColumns<WordBook>[] = [
     {
       title: 'ID',
       dataIndex: 'id',
@@ -72,7 +72,7 @@ const WordBookList: React.FC = () => {
       title: '状态',
       dataIndex: 'status',
       width: 80,
-      render: (status: boolean) => (
+      renderText: (status: boolean) => (
         <Tag color={status ? 'green' : 'red'}>
           {status ? '启用' : '禁用'}
         </Tag>
@@ -82,7 +82,7 @@ const WordBookList: React.FC = () => {
       title: '创建时间',
       dataIndex: 'createdAt',
       width: 150,
-      render: (date: string) => dayjs(date).format('YYYY-MM-DD HH:mm'),
+      renderText: (date: string) => dayjs(date).format('YYYY-MM-DD HH:mm'),
     },
     {
       title: '操作',

@@ -21,7 +21,7 @@ import {
   CheckCircleOutlined,
 } from '@ant-design/icons';
 import ProTable from '@ant-design/pro-table';
-import type { ColumnsType, ActionType } from '@ant-design/pro-table';
+import type { ProColumns, ActionType } from '@ant-design/pro-table';
 import { useNavigate } from 'react-router-dom';
 import {
   getWorkbookList,
@@ -41,7 +41,7 @@ const WorkbookList: React.FC = () => {
   const [form] = Form.useForm();
 
   // 表格列定义
-  const columns: ColumnsType<Workbook> = [
+  const columns: ProColumns<Workbook>[] = [
     {
       title: 'ID',
       dataIndex: 'id',
@@ -61,13 +61,13 @@ const WorkbookList: React.FC = () => {
       title: '题目数',
       dataIndex: 'questions',
       width: 80,
-      render: (questions: string[]) => questions?.length || 0,
+      renderText: (questions: string[]) => questions?.length || 0,
     },
     {
       title: '难度',
       dataIndex: 'difficulty',
       width: 80,
-      render: (difficulty: number) => (
+      renderText: (difficulty: number) => (
         <Tag color={difficulty <= 2 ? 'green' : difficulty <= 4 ? 'orange' : 'red'}>
           {difficulty}星
         </Tag>
@@ -77,7 +77,7 @@ const WorkbookList: React.FC = () => {
       title: '公开',
       dataIndex: 'isPublic',
       width: 80,
-      render: (isPublic: boolean) => (
+      renderText: (isPublic: boolean) => (
         <Tag color={isPublic ? 'blue' : 'default'}>
           {isPublic ? '公开' : '私有'}
         </Tag>
@@ -87,7 +87,7 @@ const WorkbookList: React.FC = () => {
       title: '状态',
       dataIndex: 'status',
       width: 80,
-      render: (status: boolean) => (
+      renderText: (status: boolean) => (
         <Tag color={status ? 'green' : 'default'}>
           {status ? '已发布' : '草稿'}
         </Tag>
@@ -97,7 +97,7 @@ const WorkbookList: React.FC = () => {
       title: '创建时间',
       dataIndex: 'createdAt',
       width: 150,
-      render: (date: string) => dayjs(date).format('YYYY-MM-DD HH:mm'),
+      renderText: (date: string) => dayjs(date).format('YYYY-MM-DD HH:mm'),
     },
     {
       title: '操作',

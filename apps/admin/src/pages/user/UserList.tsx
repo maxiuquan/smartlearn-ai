@@ -28,7 +28,7 @@ import {
   InboxOutlined,
   UserOutlined,
 } from '@ant-design/icons';
-import type { ColumnsType, ActionType } from '@ant-design/pro-table';
+import type { ProColumns, ActionType } from '@ant-design/pro-table';
 import ProTable from '@ant-design/pro-table';
 import type { UploadProps } from 'antd';
 import {
@@ -91,7 +91,7 @@ const UserList: React.FC = () => {
   };
 
   // 表格列定义
-  const columns: ColumnsType<User> = [
+  const columns: ProColumns<User>[] = [
     {
       title: 'ID',
       dataIndex: 'id',
@@ -120,14 +120,14 @@ const UserList: React.FC = () => {
     {
       title: '角色',
       dataIndex: 'role',
-      render: (role: UserRole) => (
+      renderText: (role: UserRole) => (
         <Tag color={roleColorMap[role]}>{roleTextMap[role]}</Tag>
       ),
     },
     {
       title: 'VIP 等级',
       dataIndex: 'vip_level',
-      render: (level: number) => (
+      renderText: (level: number) => (
         <Tag color={level > 0 ? 'gold' : 'default'}>
           {vipTextMap[level] ?? `VIP${level}`}
         </Tag>
@@ -136,20 +136,20 @@ const UserList: React.FC = () => {
     {
       title: '状态',
       dataIndex: 'status',
-      render: (status: UserStatus) => (
+      renderText: (status: UserStatus) => (
         <Tag color={statusColorMap[status]}>{statusTextMap[status]}</Tag>
       ),
     },
     {
       title: '注册时间',
       dataIndex: 'created_at',
-      render: (date: string) => dayjs(date).format('YYYY-MM-DD HH:mm'),
+      renderText: (date: string) => dayjs(date).format('YYYY-MM-DD HH:mm'),
       sorter: true,
     },
     {
       title: '最后登录',
       dataIndex: 'last_login_at',
-      render: (date: string) =>
+      renderText: (date: string) =>
         date ? dayjs(date).format('YYYY-MM-DD HH:mm') : '-',
     },
     {
@@ -219,7 +219,7 @@ const UserList: React.FC = () => {
   // 启用用户
   const handleEnable = async (user: User) => {
     try {
-      await enableUser(user.id);
+      await enableUser(String(user.id));
       message.success('用户已启用');
       actionRef.current?.reload();
     } catch (error) {
@@ -231,7 +231,7 @@ const UserList: React.FC = () => {
   const handleBan = async (values: { reason: string }) => {
     if (!currentUser) return;
     try {
-      await banUser(currentUser.id, values.reason);
+      await banUser(String(currentUser.id), values.reason);
       message.success('用户已禁用');
       setBanModalVisible(false);
       setCurrentUser(null);
@@ -245,7 +245,7 @@ const UserList: React.FC = () => {
   // 删除用户
   const handleDelete = async (user: User) => {
     try {
-      await deleteUser(user.id);
+      await deleteUser(String(user.id));
       message.success('用户已删除');
       actionRef.current?.reload();
     } catch (error) {

@@ -8,6 +8,9 @@ dist/
 build/
 **/build/
 *.tsbuildinfo
+# tsc -b composite project emit artifacts (vite.config.ts -> .d.ts/.js)
+**/vite.config.d.ts
+**/vite.config.js
 
 # Environment files
 .env
@@ -122,8 +125,17 @@ check_*.py
 check_*.js
 eval_*.js
 click_*.js
+
+# P1-07: 运行日志/测试产物/状态快照（禁止提交）
 hf_log_new.txt
+hf_log_raw.txt
 hf_space_status.json
+login_test.json
+dump_hf_log.py
+hf_log*.txt
+hf_log*.json
+*_test_response.json
+*_status_snapshot.json
 
 # Build artifacts
 target/

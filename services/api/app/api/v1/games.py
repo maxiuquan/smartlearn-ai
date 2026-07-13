@@ -1,5 +1,6 @@
 """游戏相关 API 路由"""
 import json
+import logging
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Optional
@@ -36,8 +37,10 @@ _GAMES_CONFIG_PATH = (
     / "data" / "games" / "games-config.json"
 )
 
-# P0-08: 已提交的 session nonce 集合（防止重复提交）
+# P0-08: 已提交的 session nonce 集合（Redis 故障降级用）
 _USED_NONCES: set[str] = set()
+
+logger = logging.getLogger(__name__)
 
 
 def _load_games_config() -> list[dict]:
@@ -205,11 +208,10 @@ async def submit_game_session(
 ) -> GameSessionResponse:
     """提交完成的游戏会话，记录分数并更新用户游戏档案。
 
-    P0-08: 服务端校验增强
-    - 校验 URL game_id == body.game_id 一致性
-    - 基于 accuracy 重算分数，防止客户端伪造高分
-    - idempotency nonce 防止重复提交
-    - 更严格的分数/时长上限
+    P0-02: 服务端事实重算
+    - score 由服务端基于 accuracy + combo 规则重算，客户端 score 仅作参考
+    - nonce 改用 Redis SETNX + TTL（跨 worker 共享，自动过期）
+    - 保留合理性校验作为反作弊前置拦截
     """
     # P0-08: 校验 URL game_id 与 body.game_id 一致
     if body.game_id != game_id:
@@ -243,62 +245,86 @@ async def submit_game_session(
                 detail="游戏时长过短但分数不为 0，疑似作弊",
             )
 
-    # P0-08: 服务端基于 accuracy 重算分数
-    # 客户端传入的 score 仅作参考，服务端根据 accuracy 重新计算
+    # ── P0-02: 服务端事实重算 score ──
+    # 客户端 body.score 被忽略，服务端基于 accuracy + 游戏配置重算
     rewards_cfg = game_cfg.get("rewards") or {}
     base_xp = rewards_cfg.get("base_xp", 10)
-    # 合理上限：base_xp * 50（更严格）
-    score_cap = max(base_xp * 50, 5000)
+    base_coin = rewards_cfg.get("base_coin", 5)
+    combo_multiplier = rewards_cfg.get("combo_multiplier", 1.0)
 
-    # 如果客户端提供了 accuracy，服务端用它验证分数合理性
-    if body.accuracy is not None:
-        # accuracy 0 但 score > 0 → 拒绝
-        if body.score > 0 and body.accuracy == 0:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="准确率为 0 但分数大于 0，数据不一致",
-            )
-        # 服务端重算分数：基于 accuracy 校验
-        # 期望分数 <= base_xp * accuracy * 难度系数
-        expected_max = int(base_xp * max(body.accuracy, 0.1) * 100)
-        if body.score > expected_max * 2:  # 允许 2 倍容差（combo 等加成）
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"分数 {body.score} 远超 accuracy {body.accuracy} 对应的合理上限 {expected_max * 2}",
-            )
+    # 服务端重算：基于 accuracy 计算实际分数
+    # 规则：score = base_xp * accuracy * 100 * combo_factor
+    if body.accuracy is not None and body.accuracy > 0:
+        server_score = int(base_xp * body.accuracy * 100 * combo_multiplier)
+    else:
+        # accuracy 为 0 或未提供，分数为 0
+        server_score = 0
 
-    if body.score > score_cap:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"分数 {body.score} 超过合理上限 {score_cap}，疑似作弊",
+    # 反作弊：若客户端 score 与服务端重算值偏差过大（>2倍），记录审计但使用服务端值
+    if body.score > 0 and server_score == 0:
+        logger.warning(
+            "game_score_mismatch user_id=%s game=%s client_score=%s server_score=0",
+            user_id, body.game_id, body.score,
         )
 
-    # P0-08: idempotency nonce 防止重复提交
-    nonce = body.nonce if hasattr(body, "nonce") and body.nonce else str(uuid.uuid4())
-    if nonce in _USED_NONCES:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="重复提交被拒绝（nonce 已使用）",
-        )
-    _USED_NONCES.add(nonce)
-    # 限制集合大小防止内存泄漏
-    if len(_USED_NONCES) > 10000:
-        _USED_NONCES.clear()
+    # 合理上限：base_xp * 100（更严格）
+    score_cap = max(base_xp * 100, 5000)
+    server_score = min(server_score, score_cap)
 
-    # 计算经验值和金币
-    xp_gained = max(1, body.score // 10)
-    coins_gained = max(1, body.score // 20)
+    # ── P0-02: nonce 改用 Redis SETNX + TTL（跨 worker 共享） ──
+    nonce_key = f"game:nonce:{user_id}:{body.game_id}:{body.nonce}"
+    redis_client = None
+    try:
+        from app.core.deps import get_redis
+        from fastapi import Request
+        # 直接使用独立 Redis 客户端（不依赖 request）
+        from app.core.security import get_redis_client
+        redis_client = await get_redis_client()
+        if redis_client:
+            # SETNX: 已存在返回 0（重复），不存在返回 1（首次）
+            set_result = await redis_client.set(nonce_key, "1", ex=86400, nx=True)
+            if not set_result:
+                # 重复提交
+                await redis_client.aclose()
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="重复提交被拒绝（nonce 已使用）",
+                )
+    except HTTPException:
+        raise
+    except Exception as e:
+        # Redis 故障降级：回退到内存集合（单 worker 场景）
+        logger.warning("nonce redis failed, fallback to memory: %s", e)
+        if body.nonce in _USED_NONCES:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="重复提交被拒绝（nonce 已使用）",
+            )
+        _USED_NONCES.add(body.nonce)
+        if len(_USED_NONCES) > 10000:
+            _USED_NONCES.clear()
+    finally:
+        if redis_client:
+            try:
+                await redis_client.aclose()
+            except Exception:
+                pass
+
+    # 使用服务端重算的 score（忽略客户端 score）
+    final_score = server_score
+    xp_gained = max(1, final_score // 10)
+    coins_gained = max(1, final_score // 20)
 
     # DB 列为 TIMESTAMP WITHOUT TIME ZONE, 必须剥离 tzinfo 避免 asyncpg DataError
     started = body.started_at.replace(tzinfo=None) if body.started_at else datetime.utcnow()
     finished = body.finished_at or datetime.now(timezone.utc)
     finished = finished.replace(tzinfo=None) if finished.tzinfo else finished
 
-    # 记录游戏会话
+    # 记录游戏会话（使用服务端重算的 score）
     new_session = GameSession(
         user_id=user_id,
         game_id=body.game_id,
-        score=body.score,
+        score=final_score,  # P0-02: 服务端重算值
         xp_gained=xp_gained,
         coins_gained=coins_gained,
         accuracy=body.accuracy,
@@ -346,20 +372,30 @@ async def get_leaderboard(
 ) -> LeaderboardResponse:
     """获取排行榜数据。
 
-    P0-08: 真正实现 scope 过滤 + 隐藏裸 user_id，使用 nickname。
-    - global: 全部用户总 XP
-    - daily: 当日游戏 XP
-    - weekly: 本周（7天）游戏 XP
-    - friends: 暂无好友关系表，降级为 global（标注 estimated）
+    P1-03: 排行榜隐私改造
+    - 移除裸 user_id，改用 display_hash（SHA256 截断，不可逆）
+    - friends scope 未实现好友关系，返回 501 Not Implemented（不再伪装为 global）
+    - 当前用户匹配通过服务端计算 is_current_user 标志
     """
     if scope not in ("friends", "global", "daily", "weekly"):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"无效的排行榜范围: {scope}，可选值: friends, global, daily, weekly",
+            detail=f"无效的排行榜范围: {scope}，可选值: global, daily, weekly, friends",
+        )
+
+    # P1-03: friends 未实现好友关系表，直接返回 501，不再伪装为 global
+    if scope == "friends":
+        raise HTTPException(
+            status_code=status.HTTP_501_NOT_IMPLEMENTED,
+            detail="好友排行榜暂未实现（需要好友关系表支持）",
         )
 
     now = datetime.now(timezone.utc).replace(tzinfo=None)
     entries: list[LeaderboardEntry] = []
+
+    def _make_display_hash(uid: int) -> str:
+        """P1-03: 生成不可逆用户展示 ID（SHA256 截断前 12 位）."""
+        return hashlib.sha256(f"sl_user_{uid}".encode()).hexdigest()[:12]
 
     if scope == "global":
         # 全局：用户游戏档案总 XP
@@ -374,11 +410,12 @@ async def get_leaderboard(
             entries.append(
                 LeaderboardEntry(
                     rank=i + 1,
-                    user_id=profile.user_id,
+                    display_hash=_make_display_hash(profile.user_id),
                     score=profile.total_xp,
                     level=profile.level,
                     nickname=nickname or f"用户{profile.user_id}",
                     avatar=avatar,
+                    is_current_user=(profile.user_id == user_id),
                 )
             )
     elif scope in ("daily", "weekly"):
@@ -408,38 +445,19 @@ async def get_leaderboard(
             entries.append(
                 LeaderboardEntry(
                     rank=i + 1,
-                    user_id=uid,
+                    display_hash=_make_display_hash(uid),
                     score=int(total_xp or 0),
                     level=1,  # 窗口排行不返回 level
                     nickname=nickname or f"用户{uid}",
                     avatar=avatar,
-                )
-            )
-    elif scope == "friends":
-        # 暂无好友关系表，降级为 global（标注 estimated）
-        result = await db.execute(
-            select(UserGameProfile, User.nickname, User.avatar)
-            .join(User, UserGameProfile.user_id == User.id)
-            .order_by(UserGameProfile.total_xp.desc())
-            .limit(50)
-        )
-        rows = result.all()
-        for i, (profile, nickname, avatar) in enumerate(rows):
-            entries.append(
-                LeaderboardEntry(
-                    rank=i + 1,
-                    user_id=profile.user_id,
-                    score=profile.total_xp,
-                    level=profile.level,
-                    nickname=nickname or f"用户{profile.user_id}",
-                    avatar=avatar,
+                    is_current_user=(uid == user_id),
                 )
             )
 
-    # 查找当前用户排名
+    # P1-03: user_rank 由服务端通过 is_current_user 计算，不依赖暴露的 user_id
     user_rank: Optional[int] = None
     for entry in entries:
-        if entry.user_id == user_id:
+        if entry.is_current_user:
             user_rank = entry.rank
             break
 

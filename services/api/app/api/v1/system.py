@@ -12,6 +12,7 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Optional
+from urllib.parse import urlparse, unquote
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -38,6 +39,60 @@ logger = logging.getLogger(__name__)
 
 # 备份 ID 白名单：仅允许字母、数字、下划线、连字符、点（覆盖 .sql.gz 文件名）
 _BACKUP_ID_PATTERN = re.compile(r"^[A-Za-z0-9_.-]+$")
+
+
+def _parse_db_url(db_url: str) -> dict[str, str]:
+    """P1-06: 解析数据库连接 URL，返回分离的连接参数。
+
+    将 postgresql://user:pass@host:port/dbname 拆解为独立字段，
+    避免将完整连接串作为命令行参数传递（防止 ps aux 泄露密码）。
+
+    Returns:
+        dict with keys: host, port, username, password, dbname
+    """
+    parsed = urlparse(db_url)
+    return {
+        "host": parsed.hostname or "localhost",
+        "port": str(parsed.port or 5432),
+        "username": unquote(parsed.username or ""),
+        "password": unquote(parsed.password or ""),
+        "dbname": parsed.path.lstrip("/") or "postgres",
+    }
+
+
+def _build_pg_env(extra: dict[str, str] | None = None) -> dict[str, str]:
+    """P1-06: 构建包含 PGPASSWORD 的环境变量，不将密码放入 argv。"""
+    env = os.environ.copy()
+    db_params = _parse_db_url(settings.database_url_sync)
+    env["PGPASSWORD"] = db_params["password"]
+    if extra:
+        env.update(extra)
+    return env
+
+
+def _build_pg_args(*extra: str) -> list[str]:
+    """P1-06: 构建 pg_dump/psql 连接参数（不含密码，密码通过 PGPASSWORD 环境变量传递）。"""
+    db_params = _parse_db_url(settings.database_url_sync)
+    return [
+        "--host", db_params["host"],
+        "--port", db_params["port"],
+        "--username", db_params["username"],
+        "--dbname", db_params["dbname"],
+        *extra,
+    ]
+
+
+async def _set_maintenance_mode(redis_client: Any, enabled: bool) -> None:
+    """P1-06: 设置/清除维护模式（Redis key system:maintenance_mode）。"""
+    if redis_client is None:
+        return
+    try:
+        if enabled:
+            await redis_client.set("system:maintenance_mode", "1", ex=3600)
+        else:
+            await redis_client.delete("system:maintenance_mode")
+    except Exception as e:
+        logger.warning(f"设置维护模式失败：{e}")
 
 # ── Redis 客户端（懒加载，导入失败也不影响模块加载）──
 _redis_client = None
@@ -495,15 +550,17 @@ async def create_backup(
     db: AsyncSession = Depends(get_db),
     current: User = Depends(get_current_admin_user),
 ) -> dict:
-    """使用 pg_dump + gzip 创建备份文件。"""
+    """使用 pg_dump + gzip 创建备份文件。
+
+    P1-06: 数据库密码通过 PGPASSWORD 环境变量传递，不放入命令行 argv（防止 ps aux 泄露）。
+    """
     bdir = _backups_dir()
     ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
     filename = f"{ts}.sql.gz"
     filepath = bdir / filename
 
-    # 用同步 URL（不含 +asyncpg），pg_dump 直接用连接串
-    db_url = settings.database_url_sync
-    env = os.environ.copy()
+    # P1-06: 使用 PGPASSWORD 环境变量，不将 DB URL 作为 argv
+    env = _build_pg_env()
 
     try:
         # pg_dump | gzip > file
@@ -515,10 +572,7 @@ async def create_backup(
                 stderr=subprocess.PIPE,
             )
             dump_proc = subprocess.Popen(
-                [
-                    "pg_dump",
-                    db_url,
-                ],
+                ["pg_dump"] + _build_pg_args(),
                 stdout=proc.stdin,
                 stderr=subprocess.PIPE,
                 env=env,
@@ -570,12 +624,20 @@ async def create_backup(
 )
 async def restore_backup(
     backup_id: str,
+    confirm: str = Query(..., description="P1-06: 二次确认，必须输入当前环境名（如 production / development）"),
     db: AsyncSession = Depends(get_db),
     current: User = Depends(get_current_admin_user),
 ) -> dict:
     """从指定 .sql.gz 备份恢复（gunzip | psql）。
 
-    需要超级管理员权限（此处沿用 admin 权限，由调用方谨慎使用）。
+    P1-06 安全改造：
+    1. 数据库密码通过 PGPASSWORD 环境变量传递，不放入 argv
+    2. 恢复前自动创建预恢复快照（pre-restore snapshot）
+    3. 恢复期间设置维护模式（Redis key system:maintenance_mode）
+    4. 恢复后执行 smoke test（SELECT 1）验证数据库可用
+    5. 需要 confirm 参数匹配当前 ENVIRONMENT，防止误操作
+
+    需要超级管理员权限。
     """
     if not current.is_super_admin:
         raise HTTPException(
@@ -583,15 +645,19 @@ async def restore_backup(
             detail="恢复数据库需要超级管理员权限",
         )
 
+    # P1-06: 目标环境二次确认
+    if confirm != settings.ENVIRONMENT:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"确认参数不匹配，请输入当前环境名：{settings.ENVIRONMENT}",
+        )
+
     # ── 路径遍历防护 ──
-    # 1) 白名单：禁止包含 / \ 或任何非法字符（仅允许字母数字 _ - .）
     if not _BACKUP_ID_PATTERN.match(backup_id or ""):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="非法的备份 ID（仅允许字母、数字、下划线、连字符、点）",
         )
-    # 2) 安全拼接 + 真实路径必须仍位于备份根目录内
-    #    （禁止 ".." 逃逸、禁止绝对路径越界）
     bdir = _backups_dir()
     bdir_resolved = bdir.resolve()
     filepath = (bdir_resolved / backup_id).resolve()
@@ -606,8 +672,37 @@ async def restore_backup(
             detail=f"备份文件 {backup_id} 不存在",
         )
 
-    env = os.environ.copy()
-    db_url = settings.database_url_sync
+    redis_client = _get_redis_client()
+    env = _build_pg_env()
+
+    # P1-06: 预恢复快照 — 恢复前自动备份当前数据库
+    pre_restore_filename = f"pre_restore_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.sql.gz"
+    pre_restore_path = bdir / pre_restore_filename
+    pre_restore_size = 0
+    try:
+        with pre_restore_path.open("wb") as f_out:
+            gzip_proc_pre = subprocess.Popen(
+                ["gzip"],
+                stdin=subprocess.PIPE,
+                stdout=f_out,
+                stderr=subprocess.PIPE,
+            )
+            dump_proc_pre = subprocess.Popen(
+                ["pg_dump"] + _build_pg_args(),
+                stdout=gzip_proc_pre.stdin,
+                stderr=subprocess.PIPE,
+                env=env,
+            )
+            gzip_proc_pre.stdin.close()
+            dump_proc_pre.communicate()
+            gzip_proc_pre.communicate()
+        pre_restore_size = pre_restore_path.stat().st_size
+        logger.info(f"预恢复快照已创建：{pre_restore_filename} ({pre_restore_size} bytes)")
+    except Exception as e:
+        logger.warning(f"预恢复快照创建失败（非阻塞）：{e}")
+
+    # P1-06: 设置维护模式
+    await _set_maintenance_mode(redis_client, True)
 
     try:
         with filepath.open("rb") as f_in:
@@ -618,12 +713,7 @@ async def restore_backup(
                 stderr=subprocess.PIPE,
             )
             psql_proc = subprocess.Popen(
-                [
-                    "psql",
-                    db_url,
-                    "--set",
-                    "ON_ERROR_STOP=on",
-                ],
+                ["psql"] + _build_pg_args("--set", "ON_ERROR_STOP=on"),
                 stdin=gunzip_proc.stdout,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
@@ -639,14 +729,47 @@ async def restore_backup(
             err_msg = (gunzip_err or b"") + b" | " + (psql_err or b"")
             raise RuntimeError(err_msg.decode("utf-8", errors="replace"))
 
+        # P1-06: 恢复后 smoke test — 验证数据库可用
+        smoke_test_ok = False
+        smoke_test_error = ""
+        try:
+            from sqlalchemy import text
+            from app.db.session import async_session_factory
+            async with async_session_factory() as smoke_session:
+                result = await smoke_session.execute(text("SELECT 1"))
+                smoke_test_ok = result.scalar() == 1
+        except Exception as e:
+            smoke_test_error = str(e)
+
         await _record_audit(
             db,
             actor=current,
             action="system.restore",
             target=f"backup:{backup_id}",
-            details={"filename": backup_id},
+            details={
+                "filename": backup_id,
+                "pre_restore_snapshot": pre_restore_filename,
+                "pre_restore_size": pre_restore_size,
+                "smoke_test_passed": smoke_test_ok,
+                "smoke_test_error": smoke_test_error,
+            },
         )
-        return {"message": f"已从 {backup_id} 恢复数据库"}
+
+        if not smoke_test_ok:
+            return {
+                "message": f"数据库已从 {backup_id} 恢复，但 smoke test 失败：{smoke_test_error}",
+                "filename": backup_id,
+                "pre_restore_snapshot": pre_restore_filename,
+                "smoke_test_passed": False,
+                "warning": "请检查数据库状态，必要时使用预恢复快照回滚",
+            }
+
+        return {
+            "message": f"已从 {backup_id} 恢复数据库，smoke test 通过",
+            "filename": backup_id,
+            "pre_restore_snapshot": pre_restore_filename,
+            "smoke_test_passed": True,
+        }
     except FileNotFoundError as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -659,6 +782,9 @@ async def restore_backup(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"恢复失败：{e}",
         )
+    finally:
+        # P1-06: 无论成功失败，清除维护模式
+        await _set_maintenance_mode(redis_client, False)
 
 
 # ── 服务连通性测试 ──

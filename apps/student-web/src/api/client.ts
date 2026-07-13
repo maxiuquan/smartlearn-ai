@@ -4,11 +4,13 @@ const client = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || '',
   timeout: 15000,
   headers: { 'Content-Type': 'application/json' },
+  // P0-01: 跨域请求携带 Cookie（用于 HttpOnly refresh_token）
+  withCredentials: true,
 });
 
-const TOKEN_KEY = 'smartlearn_token';
+const TOKEN_KEY = 'smartlearn_access_token'; // P0-01: 仅 access_token，refresh_token 在 Cookie
 
-// ─── 请求拦截器：从 localStorage 读取 token 并注入 Authorization 头 ───
+// ─── 请求拦截器：从 localStorage 读取 access_token 并注入 Authorization 头 ───
 client.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem(TOKEN_KEY);
@@ -20,20 +22,79 @@ client.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// ─── 响应拦截器：401 时清除 token 并跳转登录页 ───
+// ─── P0-01: 响应拦截器 — 401 自动 refresh + 重试，失败才跳转登录 ───
+let isRefreshing = false;
+let failedQueue: Array<{ resolve: (token: string | null) => void; reject: (err: unknown) => void }> = [];
+
+const processQueue = (error: unknown, token: string | null = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
+
 client.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error?.response?.status === 401) {
-      // 清除无效 token
+  async (error) => {
+    const originalRequest = error?.config;
+
+    // 非 401 错误直接拒绝
+    if (error?.response?.status !== 401) {
+      return Promise.reject(error);
+    }
+
+    // P0-01: 已经在 refresh 中，排队等待
+    if (isRefreshing) {
+      return new Promise((resolve, reject) => {
+        failedQueue.push({ resolve, reject });
+      }).then((newToken) => {
+        if (newToken) {
+          originalRequest.headers.Authorization = `Bearer ${newToken}`;
+          return client(originalRequest);
+        }
+        return Promise.reject(error);
+      });
+    }
+
+    // P0-01: 避免对 /auth/refresh 本身的 401 重试（防止死循环）
+    if (originalRequest?.url?.includes('/auth/refresh') || originalRequest?.url?.includes('/auth/login')) {
       localStorage.removeItem(TOKEN_KEY);
-      localStorage.removeItem('smartlearn_refresh_token');
-      // 避免在 /login 页面死循环跳转
       if (!window.location.pathname.startsWith('/login')) {
         window.location.href = '/login';
       }
+      return Promise.reject(error);
     }
-    return Promise.reject(error);
+
+    isRefreshing = true;
+    try {
+      // P0-01: 尝试通过 HttpOnly Cookie refresh
+      const refreshRes = await axios.post(
+        `${client.defaults.baseURL}/api/v1/auth/refresh`,
+        {},
+        { withCredentials: true }
+      );
+      const newToken = refreshRes.data.access_token;
+      localStorage.setItem(TOKEN_KEY, newToken);
+      processQueue(null, newToken);
+
+      // 重试原请求
+      originalRequest.headers.Authorization = `Bearer ${newToken}`;
+      return client(originalRequest);
+    } catch (refreshError) {
+      // refresh 失败，清除并跳转
+      localStorage.removeItem(TOKEN_KEY);
+      processQueue(refreshError, null);
+      if (!window.location.pathname.startsWith('/login')) {
+        window.location.href = '/login';
+      }
+      return Promise.reject(refreshError);
+    } finally {
+      isRefreshing = false;
+    }
   }
 );
 

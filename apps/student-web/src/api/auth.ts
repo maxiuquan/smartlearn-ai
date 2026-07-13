@@ -61,12 +61,22 @@ export const authApi = {
   },
 
   /**
+   * P0-01: 刷新 access_token — POST /api/v1/auth/refresh
+   * 浏览器自动携带 HttpOnly Cookie 中的 refresh_token，无需手动传参。
+   * 后端返回新的 access_token，并 Set-Cookie 新的 refresh_token。
+   */
+  async refresh(): Promise<LoginResponse> {
+    const res = await client.post('/api/v1/auth/refresh', {}, { withCredentials: true });
+    return res.data;
+  },
+
+  /**
    * 退出登录：POST /api/v1/auth/logout
-   * 后端使 token 失效（可选调用，前端也会清除 localStorage）。
+   * P0-01: 后端撤销 session + 清除 HttpOnly Cookie。
    */
   async logout(): Promise<void> {
     try {
-      await client.post('/api/v1/auth/logout');
+      await client.post('/api/v1/auth/logout', {}, { withCredentials: true });
     } catch {
       // 即使后端 logout 失败也不影响前端清除
     }

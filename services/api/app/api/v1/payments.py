@@ -2,14 +2,17 @@
 
 - 用户: 创建/查看/关闭自己的订单
 - 管理员: 退款/对账/全量订单列表
-- 回调: 微信/支付宝 webhook（无鉴权，验签由 service 处理，当前为占位）
+- 回调: 微信/支付宝 webhook（无鉴权，验签由 service 处理）
+
+P1-01: 已接入微信支付 V3 SDK (wechatpayv3) 和支付宝 RSA2 SDK (alipay-sdk-python)。
+当 SDK 已安装且凭证完整配置时执行真实签名验证；否则 fail-closed 返回 False。
 """
 import json
 import logging
 from datetime import datetime
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.deps import get_current_admin_user, get_current_user, get_db
@@ -185,14 +188,19 @@ async def admin_list_orders(
     summary="微信支付回调",
 )
 async def wechat_callback(
+    request: Request,
     payload: CallbackPayload,
     db: AsyncSession = Depends(get_db),
 ) -> dict:
-    """微信支付回调（无鉴权，验签由 service 处理）。
+    """微信支付回调（无鉴权，验签由 SDK 处理）。
 
-    真实接入需解析微信 XML/JSON 报文并校验签名，当前以通用 dict 载荷传入。
+    P1-01: 使用 wechatpayv3 SDK 验签。
+    从请求头提取 Wechatpay-Signature / Wechatpay-Serial / Wechatpay-Timestamp / Wechatpay-Nonce，
+    配合原始请求体进行 V3 验签。
     """
-    return await _handle_callback("wechat", payload, db)
+    headers = dict(request.headers)
+    raw_body = (await request.body()).decode("utf-8", errors="replace")
+    return await _handle_callback("wechat", payload, db, headers=headers, raw_body=raw_body)
 
 
 @router.post(
@@ -200,14 +208,18 @@ async def wechat_callback(
     summary="支付宝回调",
 )
 async def alipay_callback(
+    request: Request,
     payload: CallbackPayload,
     db: AsyncSession = Depends(get_db),
 ) -> dict:
-    """支付宝回调（无鉴权，验签由 service 处理）。
+    """支付宝回调（无鉴权，验签由 SDK 处理）。
 
-    真实接入需解析支付宝表单报文并校验签名，当前以通用 dict 载荷传入。
+    P1-01: 使用 alipay-sdk-python 执行 RSA2 验签。
+    从 payload 中提取 sign / sign_type 字段进行验证。
     """
-    return await _handle_callback("alipay", payload, db)
+    headers = dict(request.headers)
+    raw_body = (await request.body()).decode("utf-8", errors="replace")
+    return await _handle_callback("alipay", payload, db, headers=headers, raw_body=raw_body)
 
 
 @router.post(
@@ -309,13 +321,19 @@ async def view_subscription_ledger(
 
 
 async def _handle_callback(
-    channel: str, payload: CallbackPayload, db: AsyncSession
+    channel: str,
+    payload: CallbackPayload,
+    db: AsyncSession,
+    *,
+    headers: dict[str, str] | None = None,
+    raw_body: str = "",
 ) -> dict:
-    """统一处理微信/支付宝回调：提取字段 + 调用 service + 事务提交。
+    """统一处理微信/支付宝回调：通知去重 + 验签 + 调用 service + 事务提交。
 
-    P0-05: 未接入官方验签 SDK 前禁止把请求视为验签通过。
-    - 已配置渠道密钥时调用真实验签；
-    - 未配置或验签失败时返回 501/400，不得调用 handle_pay_callback()。
+    P1-01 安全改造：
+    1. 通知去重：Redis SETNX (trade_no, 24h TTL)，防止重复回调
+    2. 真实验签：SDK 已安装且凭证配置时执行官方验签，否则 fail-closed
+    3. 验签失败返回 400，不得调用 handle_pay_callback()
     """
     order_no = payload.order_no or payload.out_trade_no
     trade_no = payload.transaction_id or payload.trade_no
@@ -333,14 +351,37 @@ async def _handle_callback(
             ),
         )
 
+    # P1-01: 通知去重 — Redis SETNX 防止重复处理同一交易号
+    redis_client = None
+    try:
+        import redis.asyncio as aioredis
+        from app.core.config import settings as _settings
+        redis_client = aioredis.from_url(_settings.redis_url, decode_responses=True)
+        dedup_key = f"pay:callback:{channel}:{trade_no}"
+        set_result = await redis_client.set(dedup_key, "1", ex=86400, nx=True)
+        if not set_result:
+            logger.info("payment_callback_duplicate channel=%s trade_no=%s", channel, trade_no)
+            if hasattr(redis_client, "aclose"):
+                await redis_client.aclose()
+            else:
+                await redis_client.close()
+            return {"code": "SUCCESS", "message": "OK (duplicate, already processed)"}
+    except Exception as e:
+        logger.warning(f"Redis 去重检查失败（非阻塞，继续处理）：{e}")
+        if redis_client and hasattr(redis_client, "aclose"):
+            await redis_client.aclose()
+        elif redis_client:
+            await redis_client.close()
+        redis_client = None
+
     callback_raw = json.dumps(payload.model_dump(), ensure_ascii=False, default=str)
 
-    # P0-05: 真实验签 — 按渠道校验签名
-    # 微信/支付宝官方 SDK 未接入前，禁止把任何请求标记为验签通过。
-    signature_valid = await _verify_channel_signature(channel, payload, callback_raw)
+    # P1-01: 真实验签 — 按渠道调用官方 SDK
+    signature_valid = await _verify_channel_signature(
+        channel, payload, callback_raw, headers or {}, raw_body
+    )
 
     if not signature_valid:
-        # 验签失败：fail-closed，不得入账
         logger.warning(
             "payment_callback_signature_invalid channel=%s order_no=%s",
             channel, order_no,
@@ -374,36 +415,110 @@ async def _handle_callback(
 
 
 async def _verify_channel_signature(
-    channel: str, payload: "CallbackPayload", callback_raw: str
+    channel: str,
+    payload: "CallbackPayload",
+    callback_raw: str,
+    headers: dict[str, str],
+    raw_body: str,
 ) -> bool:
-    """P0-05: 渠道真实验签。
+    """P1-01: 渠道真实验签。
 
-    - 未接入官方 SDK 时返回 False（fail-closed），禁止伪造支付。
-    - 真实接入后在此处替换为微信 V3 / 支付宝 RSA2 验签实现。
-    - 仅当对应渠道的凭证完整配置且验签通过时返回 True。
+    - 微信支付 V3: 使用 wechatpayv3 SDK 验签（需 V3 凭证完整配置）
+    - 支付宝: 使用 alipay-sdk-python RSA2 验签（需支付宝公钥/私钥配置）
+    - SDK 未安装或凭证未配置时返回 False（fail-closed），禁止伪造支付
+    - 验签通过后额外校验：商户号/appid、金额、交易状态
     """
     from app.core.config import settings
 
-    # 微信支付：需要 API V3 证书/密钥验签
+    # ── 微信支付 V3 验签 ──
     if channel == "wechat":
-        if not settings.is_wechat_pay_enabled:
-            # 渠道未配置 → 拒绝回调（防止伪造）
+        if not settings.is_wechat_pay_v3_enabled:
+            logger.warning("wechat_pay_v3_credentials_incomplete")
             return False
-        # TODO: 接入微信支付 SDK 后实现真实签名校验
-        # from wechatpayv3 import WeChatPay
-        # wxpay = WeChatPay(...)
-        # return wxpay.verify_signature(callback_raw, headers)
-        return False
+        try:
+            from wechatpayv3 import WeChatPay, WeChatPayType
+        except ImportError:
+            logger.warning("wechatpayv3 SDK not installed, callback fail-closed")
+            return False
 
-    # 支付宝：需要支付宝公钥 RSA2 验签
+        try:
+            wxpay = WeChatPay(
+                wechatpay_type=WeChatPayType.NATIVE,
+                mchid=settings.WECHAT_MCH_ID,
+                private_key=settings.WECHAT_PRIVATE_KEY,
+                cert_serial_no=settings.WECHAT_CERT_SERIAL_NO,
+                apiv3_key=settings.WECHAT_API_V3_KEY,
+                appid=settings.WECHAT_APP_ID,
+                notify_url="",
+            )
+            # SDK callback 验签：需要 headers + raw_body
+            result = wxpay.callback(headers, raw_body)
+            if not result:
+                return False
+            # P1-01: 额外校验关键字段
+            # result 是解密后的 dict，包含 resource 数据
+            resource = result if isinstance(result, dict) else {}
+            # 校验商户号
+            if resource.get("mchid") and resource["mchid"] != settings.WECHAT_MCH_ID:
+                logger.error("wechat_callback_mchid_mismatch")
+                return False
+            # 校验 appid
+            if resource.get("appid") and resource["appid"] != settings.WECHAT_APP_ID:
+                logger.error("wechat_callback_appid_mismatch")
+                return False
+            # 校验交易状态
+            trade_state = resource.get("trade_state", "")
+            if trade_state not in ("SUCCESS", "REFUND"):
+                logger.warning("wechat_callback_trade_state=%s", trade_state)
+                return False
+            return True
+        except Exception as e:
+            logger.error("wechat_callback_verify_error: %s", e)
+            return False
+
+    # ── 支付宝 RSA2 验签 ──
     if channel == "alipay":
         if not settings.is_alipay_enabled:
+            logger.warning("alipay_credentials_incomplete")
             return False
-        # TODO: 接入支付宝 SDK 后实现真实签名校验
-        # from alipay import AliPay
-        # alipay = AliPay(...)
-        # return alipay.verify(callback_raw, payload.signature)
-        return False
+        try:
+            from alipay import AliPay
+        except ImportError:
+            logger.warning("alipay-sdk-python not installed, callback fail-closed")
+            return False
+
+        try:
+            alipay_client = AliPay(
+                appid=settings.ALIPAY_APP_ID,
+                app_notify_url=None,
+                app_private_key_string=settings.ALIPAY_PRIVATE_KEY,
+                alipay_public_key_string=settings.ALIPAY_PUBLIC_KEY,
+                sign_type="RSA2",
+            )
+            # 从 payload 提取签名相关字段
+            payload_dict = payload.model_dump()
+            sign = payload_dict.get("sign", "")
+            if not sign:
+                logger.warning("alipay_callback_missing_sign")
+                return False
+            # 构建待验签数据（排除 sign 和 sign_type）
+            data = {
+                k: v for k, v in payload_dict.items()
+                if k not in ("sign", "sign_type") and v is not None
+            }
+            is_valid = alipay_client.verify(data, sign)
+            if not is_valid:
+                logger.warning("alipay_callback_signature_invalid")
+                return False
+            # P1-01: 额外校验交易状态
+            trade_status = payload_dict.get("trade_status", "")
+            if trade_status and trade_status not in ("TRADE_SUCCESS", "TRADE_FINISHED"):
+                logger.warning("alipay_callback_trade_status=%s", trade_status)
+                return False
+            return True
+        except Exception as e:
+            logger.error("alipay_callback_verify_error: %s", e)
+            return False
 
     # 未知渠道
     return False

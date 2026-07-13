@@ -20,7 +20,7 @@ import {
   ImportOutlined,
 } from '@ant-design/icons';
 import ProTable from '@ant-design/pro-table';
-import type { ColumnsType, ActionType } from '@ant-design/pro-table';
+import type { ProColumns, ActionType } from '@ant-design/pro-table';
 import {
   getWordList,
   createWord,
@@ -50,7 +50,7 @@ const WordList: React.FC = () => {
   };
 
   // 表格列定义
-  const columns: ColumnsType<Word> = [
+  const columns: ProColumns<Word>[] = [
     {
       title: 'ID',
       dataIndex: 'word_id',
@@ -76,7 +76,7 @@ const WordList: React.FC = () => {
       title: '词书',
       dataIndex: 'tags',
       width: 120,
-      render: (tags: string[] | null) =>
+      renderText: (tags: string[] | null) =>
         tags && tags.length > 0 ? (
           <Tag color="blue">{tags.join(', ')}</Tag>
         ) : (
@@ -87,7 +87,7 @@ const WordList: React.FC = () => {
       title: '难度',
       dataIndex: 'frequency',
       width: 80,
-      render: (freq: number) => (
+      renderText: (freq: number) => (
         <Tag color={freq >= 80 ? 'red' : freq >= 40 ? 'orange' : 'green'}>
           {freq || 0}
         </Tag>
@@ -153,7 +153,7 @@ const WordList: React.FC = () => {
   // 删除单词
   const handleDelete = async (word: Word) => {
     try {
-      await deleteWord(word.word_id);
+      await deleteWord(word.id);
       message.success('单词已删除');
       actionRef.current?.reload();
     } catch (error) {

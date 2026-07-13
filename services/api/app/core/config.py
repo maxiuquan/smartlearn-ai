@@ -128,6 +128,10 @@ class Settings(BaseSettings):
     WECHAT_APP_ID: Optional[str] = None
     WECHAT_MCH_ID: Optional[str] = None
     WECHAT_API_KEY: Optional[str] = None
+    # P1-01: 微信支付 V3 SDK 验签所需凭证
+    WECHAT_API_V3_KEY: Optional[str] = None
+    WECHAT_PRIVATE_KEY: Optional[str] = None
+    WECHAT_CERT_SERIAL_NO: Optional[str] = None
     ALIPAY_APP_ID: Optional[str] = None
     ALIPAY_PRIVATE_KEY: Optional[str] = None
     ALIPAY_PUBLIC_KEY: Optional[str] = None
@@ -289,6 +293,14 @@ class Settings(BaseSettings):
     @property
     def is_wechat_pay_enabled(self) -> bool:
         return all(_is_set(x) for x in (self.WECHAT_APP_ID, self.WECHAT_MCH_ID, self.WECHAT_API_KEY))
+
+    @property
+    def is_wechat_pay_v3_enabled(self) -> bool:
+        """P1-01: 微信支付 V3 SDK 验签就绪检查（需要 V3 专用凭证）。"""
+        return all(_is_set(x) for x in (
+            self.WECHAT_APP_ID, self.WECHAT_MCH_ID,
+            self.WECHAT_API_V3_KEY, self.WECHAT_PRIVATE_KEY, self.WECHAT_CERT_SERIAL_NO,
+        ))
 
     @property
     def is_alipay_enabled(self) -> bool:

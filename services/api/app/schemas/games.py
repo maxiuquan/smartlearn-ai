@@ -92,8 +92,8 @@ class GameSessionRequest(BaseModel):
     started_at: datetime = Field(...)
     finished_at: Optional[datetime] = None
     details: Optional[dict[str, Any]] = None
-    # P0-08: 幂等性 nonce，防止重复提交
-    nonce: Optional[str] = Field(None, description="幂等键，防止重复提交")
+    # P0-02: 幂等性 nonce 必填，防止重复提交（服务端不再随机生成）
+    nonce: str = Field(..., min_length=8, max_length=128, description="幂等键，客户端生成 UUID，防止重复提交")
 
     model_config = {"extra": "forbid"}
 
@@ -110,16 +110,22 @@ class GameSessionResponse(BaseModel):
 
 
 class LeaderboardEntry(BaseModel):
-    """排行榜条目"""
+    """排行榜条目.
+
+    P1-03: 移除裸 user_id，改为 display_hash（不可逆展示 ID）。
+    当前用户匹配通过服务端计算的 is_current_user 标志。
+    """
 
     rank: int
-    user_id: int
-    username: Optional[str] = None
+    # P1-03: 不再暴露裸 user_id，使用不可逆 display_hash
+    display_hash: Optional[str] = Field(None, description="用户不可逆展示 ID（SHA256 截断）")
     nickname: Optional[str] = None
     avatar: Optional[str] = None
     score: int
     level: int = 1
     badge: Optional[str] = None
+    # P1-03: 标识是否为当前请求用户（服务端计算，不暴露 user_id）
+    is_current_user: bool = False
 
 
 class LeaderboardResponse(BaseModel):

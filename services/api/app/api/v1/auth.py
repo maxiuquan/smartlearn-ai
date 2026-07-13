@@ -7,14 +7,20 @@
 - 登录兼容前端 username 字段（可传 phone 或 email）
 - 登录时更新 last_login_at
 - banned 用户拒绝登录
+
+P0-01: Refresh Token 同时通过 HttpOnly Cookie 下发，前端不再需要 localStorage 存储。
+- /login 和 /refresh 设置 `refresh_token` HttpOnly Cookie
+- /logout 清除 Cookie
+- /refresh 优先从 Cookie 读取 refresh_token，fallback 到 body
 """
 from datetime import datetime, timezone
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
 from app.core.deps import get_current_user, get_db
 from app.core.security import (
     create_access_token,
@@ -45,13 +51,38 @@ from app.schemas.auth import (
 router = APIRouter()
 
 
+def _set_refresh_cookie(response: Response, refresh_token: str) -> None:
+    """P0-01: 设置 HttpOnly + Secure + SameSite=Lax 的 refresh_token Cookie.
+
+    - HttpOnly: JavaScript 无法读取，防 XSS 窃取
+    - Secure: 仅 HTTPS 传输（HF Space 强制 HTTPS）
+    - SameSite=Lax: 防 CSRF（跨站请求仅允许顶级导航的 GET）
+    - Path=/api/v1/auth: 限制 Cookie 仅发往 auth 相关端点
+    """
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        httponly=True,
+        secure=True,
+        samesite="lax",
+        path="/api/v1/auth",
+        max_age=settings.JWT_REFRESH_TOKEN_EXPIRE_DAYS * 86400,
+    )
+
+
+def _clear_refresh_cookie(response: Response) -> None:
+    """P0-01: 清除 refresh_token Cookie."""
+    response.delete_cookie(
+        key="refresh_token",
+        path="/api/v1/auth",
+    )
+
+
 def _issue_tokens(user: User, session_id: str | None = None) -> TokenResponse:
     """为用户签发 access + refresh token（带 role/status/sid claim）.
 
     P0-2: 传入 session_id 用于会话轮转（refresh 时生成新 sid）
     """
-    from app.core.config import settings
-
     sid = session_id or str(uuid.uuid4())
     extra_claims = {"role": user.role, "status": user.status}
     access_token = create_access_token(str(user.id), extra_claims=extra_claims, session_id=sid)
@@ -156,6 +187,7 @@ async def register(
 @limit_login
 async def login(
     request: Request,
+    response: Response,
     body: LoginRequest,
     db: AsyncSession = Depends(get_db),
 ) -> TokenResponse:
@@ -164,6 +196,7 @@ async def login(
     - 兼容前端 username 字段：若传入 username，自动判断为 phone 或 email
     - 成功返回 JWT access + refresh token
     - banned 用户拒绝登录
+    - P0-01: refresh_token 同时通过 HttpOnly Cookie 下发
     """
     # 兼容前端 username 字段
     phone = body.phone
@@ -208,7 +241,10 @@ async def login(
     user.last_login_at = datetime.now(timezone.utc).replace(tzinfo=None)
     await db.commit()
 
-    return _issue_tokens(user)
+    tokens = _issue_tokens(user)
+    # P0-01: 设置 HttpOnly Cookie（前端不再需要 localStorage 存 refresh_token）
+    _set_refresh_cookie(response, tokens.refresh_token)
+    return tokens
 
 
 @router.post(
@@ -217,6 +253,8 @@ async def login(
     summary="刷新访问令牌",
 )
 async def refresh_token(
+    request: Request,
+    response: Response,
     body: RefreshRequest,
     db: AsyncSession = Depends(get_db),
 ) -> TokenResponse:
@@ -226,9 +264,21 @@ async def refresh_token(
     - 旧 refresh token 用后即弃（加入 Redis 黑名单）
     - 检测到旧 token 重放时撤销整条会话链
     - 新 token 对使用新 session_id
+
+    P0-01: 优先从 HttpOnly Cookie 读取 refresh_token，fallback 到 body
     """
-    payload = decode_refresh_token(body.refresh_token)
+    # P0-01: 优先从 Cookie 读取 refresh_token
+    refresh_token_value = request.cookies.get("refresh_token") or body.refresh_token
+    if not refresh_token_value:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="缺少 refresh token",
+        )
+
+    payload = decode_refresh_token(refresh_token_value)
     if not payload:
+        # Cookie 中的 token 无效时清除 Cookie
+        _clear_refresh_cookie(response)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="无效或已过期的 refresh token",
@@ -236,6 +286,7 @@ async def refresh_token(
 
     user_id = payload.get("sub")
     if user_id is None:
+        _clear_refresh_cookie(response)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token 缺少用户标识",
@@ -252,12 +303,14 @@ async def refresh_token(
             # 旧 token 重放！撤销整条会话链
             await revoke_session(session_id, redis_client)
             await redis_client.aclose()
+            _clear_refresh_cookie(response)
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="检测到 refresh token 重放，会话已撤销",
             )
         if await is_session_revoked(session_id, redis_client):
             await redis_client.aclose()
+            _clear_refresh_cookie(response)
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="会话已撤销，请重新登录",
@@ -267,11 +320,13 @@ async def refresh_token(
     result = await db.execute(select(User).where(User.id == int(user_id)))
     user = result.scalar_one_or_none()
     if user is None:
+        _clear_refresh_cookie(response)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="用户不存在",
         )
     if user.is_banned:
+        _clear_refresh_cookie(response)
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="账号已被禁用",
@@ -291,7 +346,10 @@ async def refresh_token(
 
     # 生成新 token 对（使用新 session_id 实现会话轮转）
     new_session_id = str(uuid.uuid4())
-    return _issue_tokens(user, session_id=new_session_id)
+    tokens = _issue_tokens(user, session_id=new_session_id)
+    # P0-01: 轮转后设置新 Cookie
+    _set_refresh_cookie(response, tokens.refresh_token)
+    return tokens
 
 
 @router.get(
@@ -311,11 +369,13 @@ async def get_me(current: User = Depends(get_current_user)) -> UserProfileRespon
 async def logout(
     current: User = Depends(get_current_user),
     request: Request = None,
+    response: Response = None,
 ) -> dict:
     """退出登录.
 
     P0-2: 将当前 token 的 jti 加入 Redis 黑名单，实现真正的 logout
     如 Redis 不可用则降级为无状态 logout（前端清 token）
+    P0-01: 同时清除 refresh_token Cookie
     """
     # 尝试从请求头获取 token 并提取 jti/sid
     auth_header = request.headers.get("Authorization", "") if request else ""
@@ -339,6 +399,10 @@ async def logout(
                 await r.close()
             except Exception:
                 pass  # Redis 不可用时降级为无状态 logout
+
+    # P0-01: 清除 HttpOnly refresh_token Cookie
+    if response is not None:
+        _clear_refresh_cookie(response)
 
     return {"message": "已退出登录"}
 

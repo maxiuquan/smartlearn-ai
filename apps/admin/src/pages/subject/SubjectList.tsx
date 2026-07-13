@@ -20,7 +20,7 @@ import {
   CloseCircleOutlined,
 } from '@ant-design/icons';
 import ProTable from '@ant-design/pro-table';
-import type { ColumnsType, ActionType } from '@ant-design/pro-table';
+import type { ProColumns, ActionType } from '@ant-design/pro-table';
 import {
   getSubjectList,
   createSubject,
@@ -38,7 +38,7 @@ const SubjectList: React.FC = () => {
   const [form] = Form.useForm();
 
   // 表格列定义
-  const columns: ColumnsType<Subject> = [
+  const columns: ProColumns<Subject>[] = [
     {
       title: 'ID',
       dataIndex: 'id',
@@ -63,7 +63,7 @@ const SubjectList: React.FC = () => {
       title: '颜色',
       dataIndex: 'color',
       width: 80,
-      render: (color: string) => (
+      renderText: (color: string) => (
         <div
           style={{
             width: 24,
@@ -77,7 +77,7 @@ const SubjectList: React.FC = () => {
     {
       title: '年级范围',
       dataIndex: 'gradeRange',
-      render: (grades: string[]) => (
+      renderText: (grades: string[]) => (
         <Space size="small" wrap>
           {grades?.map((g) => (
             <Tag key={g}>{g}</Tag>
@@ -89,7 +89,7 @@ const SubjectList: React.FC = () => {
       title: '状态',
       dataIndex: 'status',
       width: 80,
-      render: (status: boolean) => (
+      renderText: (status: boolean) => (
         <Tag color={status ? 'green' : 'red'}>
           {status ? '启用' : '禁用'}
         </Tag>
@@ -99,7 +99,7 @@ const SubjectList: React.FC = () => {
       title: '创建时间',
       dataIndex: 'createdAt',
       width: 150,
-      render: (date: string) => dayjs(date).format('YYYY-MM-DD HH:mm'),
+      renderText: (date: string) => dayjs(date).format('YYYY-MM-DD HH:mm'),
     },
     {
       title: '操作',

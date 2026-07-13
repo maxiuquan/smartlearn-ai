@@ -154,12 +154,14 @@ except ImportError:
     logger.warning("slowapi 未安装，登录/注册限流不可用")
 
 # CORS
+# P0-01: allow_credentials=True 需要显式指定 allow_origins（不能用 *）
+# P1-04: 显式列出允许的方法和头，不用通配符
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins_list,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "X-Requested-With", "X-Api-Key"],
 )
 
 # 可观测性中间件（P1-5）
@@ -219,6 +221,8 @@ except Exception as exc:  # pragma: no cover - 防御性：可观测性失败不
 async def health():
     """健康检查端点（增强版）- docker-compose healthcheck 依赖。
 
+    P1-04: 生产环境仅返回最小状态，不暴露 environment/uptime/checks 细节。
+
     返回字段：
         status: ok / degraded / unhealthy
         service / version / environment / uptime_seconds
@@ -229,6 +233,8 @@ async def health():
                 metrics_enabled / tracing_enabled / logging_renderer
     """
     uptime = time.time() - _APP_START_EPOCH
+    # P1-04: 生产环境最小化 health 响应
+    is_prod = settings.is_production
     result: dict = {
         "status": "ok",
         "service": "smartlearn-api",
@@ -277,6 +283,13 @@ async def health():
         }
     except Exception as e:
         result["checks"]["observability"] = f"error: {e}"
+
+    # P1-04: 生产环境最小化响应（仅返回 status + service，不暴露 checks/uptime/environment）
+    if is_prod:
+        return {
+            "status": result["status"],
+            "service": result["service"],
+        }
 
     return result
 
@@ -331,9 +344,10 @@ async def keepalive():
 
 @app.get("/")
 async def root():
+    # P1-04: 生产环境不暴露 docs 路径
     return {
         "message": "SmartLearn AI API",
-        "docs": "/docs",
+        "docs": "/docs" if not settings.is_production else None,
         "health": "/health",
     }
 
