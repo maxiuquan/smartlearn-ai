@@ -31,5 +31,5 @@ opentelemetry-instrumentation-httpx==0.48b0
 prometheus-client==0.20.0
 
 # P1-01: 支付 SDK（微信支付 V3 + 支付宝 RSA2 验签）
-wechatpayv3==0.3.0
+wechatpayv3>=1.2.7,<2.0.0
 python-alipay-sdk>=3.0.0,<4.0.0
