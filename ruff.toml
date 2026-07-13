@@ -1,0 +1,112 @@
+# SmartLearn AI - Ruff 配置
+# 文档: https://docs.astral.sh/ruff/configuration/
+#
+# 配置原则：
+# - line-length = 100（与 black 默认一致，兼顾可读性）
+# - target Python 3.11（项目最低支持版本）
+# - 启用常用规则集 + 严格度
+# - 排除自动生成 / 第三方目录
+
+# 行宽（ruff format 也读这个）
+line-length = 100
+
+# 目标 Python 版本（影响可用语法）
+target-version = "py311"
+
+# 输出缩进宽度（ruff format）
+indent-width = 4
+
+# 文件编码
+output-format = "concise"
+
+# 默认启用规则集
+# E  pycodestyle errors
+# W  pycodestyle warnings
+# F  pyflakes（未使用变量、未定义变量等）
+# I  isort（import 排序）
+# N  pep8-naming（命名规范）
+# B  flake8-bugbear（常见 bug 模式）
+# C4 flake8-comprehensions（推导式优化）
+# UP pyupgrade（升级到现代语法）
+# SIM flake8-simplify（代码简化）
+# RUF ruff 专属规则
+select = ["E", "F", "W", "I", "N", "B", "C4", "UP", "SIM", "RUF"]
+
+# 忽略规则
+ignore = [
+    "E501",  # line too long —— 由 line-length 控制，ruff format 会处理
+    "B008",  # Do not perform function call in argument defaults（FastAPI Depends() 常用）
+    "B904",  # raise from —— 部分场景需保留原始异常链
+    "SIM108", # if-else 转 ternary —— 可读性优先
+    "RUF001", # ambiguous unicode character —— 中文项目误报多
+    "RUF002", # ambiguous unicode character (docstring)
+    "RUF003", # ambiguous unicode character (comment)
+    "N805",   # first argument of method should be self（pydantic validator 例外）
+    "N818",   # error suffix on exception names（项目已有命名风格）
+]
+
+# 每条规则的细粒度覆盖
+[per-file-ignores]
+# 测试文件允许一些魔法值与未使用导入
+"tests/**" = ["S101", "PLR2004"]
+"**/test_*.py" = ["S101", "PLR2004"]
+# alembic 迁移自动生成，允许一些不规整
+"**/alembic/versions/*.py" = ["E", "W", "F401", "I001"]
+# __init__.py 重新导出，允许未使用 import
+"**/__init__.py" = ["F401", "F403"]
+
+# isort 配置
+[isort]
+known-first-party = ["app"]
+known-third-party = ["fastapi", "sqlalchemy", "pydantic", "redis", "celery"]
+section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
+combine-as-imports = true
+split-on-trailing-comma = true
+
+# flake8-quotes 配置
+[flake8-quotes]
+docstring-quotes = "double"
+inline-quotes = "double"
+multiline-quotes = "double"
+
+# 排除路径
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".github",
+    ".hg",
+    ".idea",
+    ".ipynb_checkpoints",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pyenv",
+    ".pytest_cache",
+    ".pytype",
+    ".ruff_cache",
+    ".run",
+    ".tox",
+    ".venv",
+    ".vscode",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "site-packages",
+    "venv",
+    # 项目特定排除
+    "alembic/versions",        # 自动生成的迁移文件
+    "**/migrations/versions/*",
+    "scripts/md_cache/**",     # 第三方 markdown 数据
+    "data/**",                 # 数据文件目录
+]
+
+# 自动修复
+fix = true
+fix-only = false
+unsafe-fixes = false

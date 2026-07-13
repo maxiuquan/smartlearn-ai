@@ -19,7 +19,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from config import settings
-from app.routers import chat_router, rag_router, study_router, media_router, moderation_router, prompt_router, word_games_router
+from app.routers import chat_router, rag_router, study_router, media_router, moderation_router, prompt_router, word_games_router, handwriting_router
 from app.services.rag_service import get_rag_service
 from app.auth import ensure_auth_configured
 
@@ -69,8 +69,10 @@ app = FastAPI(
 - 不设置则使用离线模式（模拟响应）
     """,
     version="1.0.0",
-    docs_url="/docs",
-    redoc_url="/redoc",
+    # P0-4: 生产环境关闭 OpenAPI/Swagger/ReDoc，防止接口与模型信息泄露
+    docs_url=None if settings.is_production else "/docs",
+    redoc_url=None if settings.is_production else "/redoc",
+    openapi_url=None if settings.is_production else "/openapi.json",
     lifespan=lifespan,
 )
 
@@ -91,11 +93,17 @@ app.include_router(media_router)
 app.include_router(moderation_router)
 app.include_router(prompt_router)
 app.include_router(word_games_router)
+app.include_router(handwriting_router)
 
 
 @app.get("/")
 async def root():
-    """服务根路径"""
+    """服务根路径
+
+    P0-4: 生产环境仅返回最小状态，不暴露模型/端点信息
+    """
+    if settings.is_production:
+        return {"status": "running"}
     return {
         "name": f"{settings.APP_NAME} - RAG & LLM",
         "version": settings.APP_VERSION,
@@ -121,7 +129,12 @@ async def root():
 
 @app.get("/health")
 async def health():
-    """健康检查端点"""
+    """健康检查端点
+
+    P0-4: 生产环境仅返回最小状态，不暴露模型/嵌入模型/运行模式信息
+    """
+    if settings.is_production:
+        return {"status": "ok", "service": "smartlearn-ai-engine"}
     return {
         "status": "ok",
         "service": "smartlearn-ai-engine",
@@ -135,4 +148,6 @@ async def health():
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=8001)
+    # P0-4: 生产环境仅监听 127.0.0.1（由 Nginx/API Service 反代访问）
+    host = "127.0.0.1" if settings.is_production else settings.HOST
+    uvicorn.run(app, host=host, port=settings.PORT)

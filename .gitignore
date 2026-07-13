@@ -112,6 +112,19 @@ temp/
 backups/
 *.bak
 
+# 审查报告（不上传 GitHub）
+docs/*审查报告*.md
+docs/*全面审查报告*.md
+docs/*商用级审查报告*.md
+
+# 临时检查脚本
+check_*.py
+check_*.js
+eval_*.js
+click_*.js
+hf_log_new.txt
+hf_space_status.json
+
 # Build artifacts
 target/
 sdist/

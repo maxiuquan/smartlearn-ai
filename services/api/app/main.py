@@ -4,6 +4,7 @@ SmartLearn AI - FastAPI 主服务
 import logging
 import os
 import sys
+import time
 
 from contextlib import asynccontextmanager
 
@@ -12,8 +13,17 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.v1 import api_router
 from app.core.config import settings
+# P1-5 可观测性：结构化日志 / 指标 / 链路追踪
+from app.core.logging import get_logger as _get_structlog_logger
+from app.core.logging import setup_logging
 
-logger = logging.getLogger(__name__)
+# 在创建任何 logger / FastAPI 实例之前完成日志初始化，确保所有后续日志结构化
+setup_logging(settings.ENVIRONMENT)
+
+logger = _get_structlog_logger(__name__)
+
+# 应用启动时间戳（用于 /health 计算 uptime）
+_APP_START_EPOCH: float = time.time()
 
 
 @asynccontextmanager
@@ -51,25 +61,27 @@ async def lifespan(app: FastAPI):
 
 def _startup_security_check() -> None:
     """启动时安全检查（可选模块未配置只 warning，不阻塞启动）"""
-    # JWT 密钥强度校验（生产环境 fail-fast）
-    try:
-        settings.validate_jwt_secret()
-    except ValueError as exc:
-        if settings.is_production:
-            logger.error("❌ 生产环境启动失败（JWT 安全校验未通过）：%s", exc)
+    # 生产环境 fail-fast：全面安全校验
+    if settings.is_production:
+        try:
+            settings.validate_production()
+        except ValueError as exc:
+            logger.error("❌ 生产环境启动失败（安全校验未通过）：%s", exc)
             sys.exit(1)
-        logger.warning(
-            "⚠️  JWT 安全校验未通过（非生产环境仅告警，生产环境将拒绝启动）：%s",
-            exc,
-        )
-    if not settings.DATABASE_URL and settings.DB_PASSWORD == "postgres":
-        logger.warning(
-            "⚠️  数据库密码使用默认值，生产环境请设置 DATABASE_URL 或 POSTGRES_PASSWORD"
-        )
-    if not settings.REDIS_URL and settings.REDIS_PASSWORD == "redis":
-        logger.warning(
-            "⚠️  Redis 密码使用默认值，生产环境请设置 REDIS_URL 或 REDIS_PASSWORD"
-        )
+        logger.info("✅ 生产环境安全校验通过")
+    else:
+        # 非生产环境：JWT 校验仅 warning
+        try:
+            settings.validate_jwt_secret()
+        except ValueError as exc:
+            logger.warning(
+                "⚠️  JWT 安全校验未通过（非生产环境仅告警，生产环境将拒绝启动）：%s",
+                exc,
+            )
+        if not settings.DATABASE_URL and not settings.DB_PASSWORD:
+            logger.warning("⚠️  数据库密码未设置，请配置 DATABASE_URL 或 DB_PASSWORD")
+        if not settings.REDIS_URL and not settings.REDIS_PASSWORD:
+            logger.warning("⚠️  Redis 密码未设置，生产环境请配置 REDIS_URL 或 REDIS_PASSWORD")
 
     # 可选第三方服务状态提示（不阻塞启动）
     if not settings.is_ai_enabled:
@@ -110,6 +122,10 @@ app = FastAPI(
     title=settings.APP_NAME,
     description="智能学习平台 API 服务",
     version=settings.APP_VERSION,
+    # P0-4: 生产环境关闭 OpenAPI/Swagger/ReDoc，防止接口结构泄露
+    docs_url=None if settings.is_production else "/docs",
+    redoc_url=None if settings.is_production else "/redoc",
+    openapi_url=None if settings.is_production else "/openapi.json",
     lifespan=lifespan,
 )
 
@@ -146,18 +162,118 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# 可观测性中间件（P1-5）
+# FastAPI/Starlette 中 add_middleware 是反向 wrap：后注册的更外层。
+# 期望请求顺序：RequestContext(最外) → Logging → Metrics → CORS → 业务
+# 因此注册顺序倒过来：Metrics → Logging → RequestContext
+from app.middleware import (  # noqa: E402
+    LoggingMiddleware,
+    MetricsMiddleware,
+    RequestContextMiddleware,
+)
+
+app.add_middleware(MetricsMiddleware)
+app.add_middleware(LoggingMiddleware)
+app.add_middleware(RequestContextMiddleware)
+
 # 注册 API 路由
 app.include_router(api_router)
+
+# ---------------------------------------------------------------------------
+# P1-1 统一异常处理（标准化 JSON 错误响应 + 错误码）
+# ---------------------------------------------------------------------------
+try:
+    from app.core.exception_handler import register_exception_handlers
+
+    register_exception_handlers(app)
+except Exception as exc:  # pragma: no cover
+    logger.warning("exception_handlers_setup_failed", error=str(exc))
+
+# ---------------------------------------------------------------------------
+# P1-5 可观测性：/metrics 端点 + OpenTelemetry tracing
+# ---------------------------------------------------------------------------
+# 注意：FastAPIInstrumentor.instrument_app 必须在路由注册之后调用，
+#       因此 setup_tracing 放在 include_router 之后
+try:
+    from app.core.metrics import get_metrics_asgi_app
+    from app.core.tracing import setup_tracing as _setup_tracing
+
+    _metrics_app = get_metrics_asgi_app()
+    if _metrics_app is not None:
+        app.mount("/metrics", _metrics_app)
+        logger.info("observability.metrics_endpoint_mounted", path="/metrics")
+    else:
+        logger.warning("observability.metrics_endpoint_skipped", reason="prometheus_client unavailable")
+
+    _setup_tracing(app, "smartlearn-api", settings.ENVIRONMENT)
+except Exception as exc:  # pragma: no cover - 防御性：可观测性失败不阻塞启动
+    logger.error("observability.setup_failed", error=str(exc), exc_info=True)
 
 
 @app.get("/health")
 async def health():
-    """健康检查端点 - docker-compose healthcheck 依赖"""
-    return {
+    """健康检查端点（增强版）- docker-compose healthcheck 依赖。
+
+    返回字段：
+        status: ok / degraded / unhealthy
+        service / version / environment / uptime_seconds
+        checks:
+            database: ok / error: <msg>
+            redis:    ok / error: <msg> / disabled
+            observability:
+                metrics_enabled / tracing_enabled / logging_renderer
+    """
+    uptime = time.time() - _APP_START_EPOCH
+    result: dict = {
         "status": "ok",
         "service": "smartlearn-api",
         "version": settings.APP_VERSION,
+        "environment": settings.ENVIRONMENT,
+        "uptime_seconds": round(uptime, 2),
+        "checks": {},
     }
+
+    # ── 数据库连接检查 ──
+    try:
+        from sqlalchemy import text
+        from app.db.session import async_session_factory
+
+        async with async_session_factory() as session:
+            await session.execute(text("SELECT 1"))
+        result["checks"]["database"] = "ok"
+    except Exception as e:
+        result["checks"]["database"] = f"error: {e}"
+        result["status"] = "degraded"
+
+    # ── Redis 连接检查（可选，不可用不影响 health）──
+    try:
+        import redis.asyncio as aioredis
+
+        redis_client = aioredis.from_url(settings.redis_url, decode_responses=True)
+        await redis_client.ping()
+        if hasattr(redis_client, "aclose"):
+            await redis_client.aclose()
+        else:
+            await redis_client.close()
+        result["checks"]["redis"] = "ok"
+    except Exception as e:
+        # Redis 不可用不改变 status（有内存降级）
+        result["checks"]["redis"] = f"error: {e}"
+
+    # ── 可观测性组件状态 ──
+    try:
+        from app.core.metrics import _HAS_PROMETHEUS
+        from app.core.tracing import _HAS_OTEL
+
+        result["checks"]["observability"] = {
+            "metrics_enabled": bool(_HAS_PROMETHEUS),
+            "tracing_enabled": bool(_HAS_OTEL),
+            "logging_renderer": "json" if settings.is_production else "console",
+        }
+    except Exception as e:
+        result["checks"]["observability"] = f"error: {e}"
+
+    return result
 
 
 @app.get("/keepalive")

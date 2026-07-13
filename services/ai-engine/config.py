@@ -9,12 +9,17 @@ from functools import lru_cache
 
 class Settings(BaseSettings):
     """Application Settings"""
-    
+
     # Service Info
     APP_NAME: str = "SmartLearn AI Engine"
     APP_VERSION: str = "1.0.0"
+    ENVIRONMENT: str = "development"
     DEBUG: bool = False
-    
+
+    @property
+    def is_production(self) -> bool:
+        return self.ENVIRONMENT.lower() == "production"
+
     # Server Config
     HOST: str = "0.0.0.0"
     PORT: int = 8001

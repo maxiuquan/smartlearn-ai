@@ -17,6 +17,10 @@ import app.models.business  # noqa: F401
 import app.models.user  # noqa: F401
 import app.models.subscription  # noqa: F401
 import app.models.audit_log  # noqa: F401
+import app.models.auth_session  # noqa: F401  P0-2
+import app.models.content_asset  # noqa: F401  P0-5
+import app.models.order  # noqa: F401  P1-4
+import app.models.rag_index  # noqa: F401  P1-2
 
 # Alembic Config 对象
 config = context.config

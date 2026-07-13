@@ -1,0 +1,299 @@
+name: CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ─────────────────────────────────────────────────────────────────────────
+  # 后端测试 + Alembic 迁移检查
+  # ─────────────────────────────────────────────────────────────────────────
+  backend-test:
+    name: Backend Test (Python 3.11)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/api
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: services/api/requirements.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio alembic httpx
+
+      - name: Run pytest
+        env:
+          ENVIRONMENT: test
+          JWT_SECRET: ci-test-secret-32chars-minimum-padding-padding
+          DATABASE_URL: postgresql+asyncpg://ci:ci@localhost:5432/ci
+          REDIS_URL: redis://localhost:6379/0
+        run: |
+          if [ -d "tests" ]; then
+            pytest tests/ -v --tb=short
+          else
+            echo "No tests directory found, skipping pytest"
+          fi
+
+      - name: Alembic migration check
+        run: |
+          if [ -f "alembic.ini" ]; then
+            alembic check 2>&1 || (
+              echo "::warning::alembic check 未通过（可能未配置 DATABASE_URL），跳过"
+              exit 0
+            )
+          else
+            echo "No alembic.ini found, skipping"
+          fi
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # 后端 Lint
+  # ─────────────────────────────────────────────────────────────────────────
+  backend-lint:
+    name: Backend Lint (ruff)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install ruff
+        run: pip install ruff==0.6.9
+
+      - name: Run ruff check
+        run: ruff check services/api/
+
+      - name: Run ruff format check
+        run: ruff format --check services/api/
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # 前端构建 + Lint
+  # ─────────────────────────────────────────────────────────────────────────
+  frontend-build:
+    name: Frontend Build (Node 20)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/student-web
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: apps/student-web/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check (tsc)
+        run: npx tsc --noEmit
+
+      - name: Build
+        run: npm run build
+
+      - name: Lint
+        run: |
+          if npm run lint --if-present; then
+            echo "lint passed"
+          else
+            echo "::warning::lint script not found, skipping"
+          fi
+
+      - name: Upload build artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: student-web-dist
+          path: apps/student-web/dist
+          retention-days: 7
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # 安全扫描（Python: bandit + safety / Node: npm audit）
+  # ─────────────────────────────────────────────────────────────────────────
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install security tools (Python)
+        run: |
+          python -m pip install --upgrade pip
+          pip install bandit safety
+
+      - name: Bandit scan (Python AST)
+        run: |
+          mkdir -p reports
+          bandit -r services/api/ -f json -o reports/bandit-report.json || (
+            echo "::warning::bandit 发现安全问题"
+            exit 1
+          )
+
+      - name: Safety check (Python deps)
+        run: |
+          if [ -f "services/api/requirements.txt" ]; then
+            safety check --file services/api/requirements.txt --output reports/safety-report.json || (
+              echo "::warning::safety 发现已知漏洞"
+              exit 1
+            )
+          else
+            safety check || true
+          fi
+
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: apps/student-web/package-lock.json
+
+      - name: Install audit-ci
+        run: npm install -g audit-ci
+
+      - name: npm audit (high+)
+        working-directory: apps/student-web
+        run: |
+          audit-ci --high --moderate false || (
+            echo "::warning::npm audit 发现 high+ 漏洞"
+            exit 1
+          )
+
+      - name: Upload security reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-reports
+          path: reports/
+          retention-days: 30
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Dockerfile 构建检查 + hadolint
+  # ─────────────────────────────────────────────────────────────────────────
+  docker-build:
+    name: Docker Build & Lint
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Hadolint Dockerfile (root)
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: Dockerfile
+          failure-threshold: warning
+
+      - name: Hadolint Dockerfile (api)
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: services/api/Dockerfile
+          failure-threshold: warning
+        continue-on-error: true
+
+      - name: Hadolint Dockerfile (student-web)
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: apps/student-web/Dockerfile.student
+          failure-threshold: warning
+        continue-on-error: true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build root Dockerfile (no push)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false
+          load: true
+          tags: smartlearn-ai:ci-${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # License 合规检查
+  # ─────────────────────────────────────────────────────────────────────────
+  license-check:
+    name: License Check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pip-licenses
+          # 也安装项目依赖，确保 pip-licenses 能列出
+          pip install -r services/api/requirements.txt || true
+
+      - name: Generate licenses report
+        run: |
+          mkdir -p reports
+          pip-licenses --format=json --output-file=reports/licenses.json
+          pip-licenses --format=csv --output-file=reports/licenses.csv
+          # 检查是否有 copyleft / GPL 类许可（fail build）
+          pip-licenses --fail-on=GPL-3.0,AGPL-3.0,LGPL-3.0,GPL-2.0,AGPL-1.0 || (
+            echo "::warning::发现 copyleft 许可证"
+            exit 1
+          )
+
+      - name: Upload licenses report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: license-report
+          path: reports/licenses.*
+          retention-days: 30

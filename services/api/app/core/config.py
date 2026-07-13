@@ -62,7 +62,7 @@ class Settings(BaseSettings):
     DB_HOST: str = "localhost"
     DB_PORT: int = 5432
     DB_USER: str = "smartlearn_user"
-    DB_PASSWORD: str = "postgres"
+    DB_PASSWORD: str = ""  # 无默认密码，必须由环境变量提供
     DB_NAME: str = "smartlearn"
     POSTGRES_SERVER: Optional[str] = None
     POSTGRES_PORT: Optional[int] = None
@@ -76,10 +76,10 @@ class Settings(BaseSettings):
     REDIS_URL: Optional[str] = None
     REDIS_HOST: str = "localhost"
     REDIS_PORT: int = 6379
-    REDIS_PASSWORD: str = "redis"
+    REDIS_PASSWORD: str = ""  # 无默认密码，必须由环境变量提供
 
     # ---------- JWT ----------
-    JWT_SECRET: str = "change-me-in-production"
+    JWT_SECRET: str = ""  # 无默认密钥，必须由环境变量提供
     JWT_ALGORITHM: str = "HS256"
     JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     JWT_REFRESH_TOKEN_EXPIRE_DAYS: int = 7
@@ -338,6 +338,58 @@ class Settings(BaseSettings):
             raise ValueError(
                 f"JWT_SECRET 长度不足 32 字符（当前 {len(secret)} 字符），"
                 "存在被暴力破解风险，请使用更长的随机密钥。"
+            )
+
+    def validate_production(self) -> None:
+        """生产环境 fail-fast 校验：缺失关键配置或使用不安全值时拒绝启动。
+
+        检查项：
+        1. DEBUG 必须为 False
+        2. CORS 不能包含通配符 *
+        3. JWT_SECRET 必须通过强度校验
+        4. DB_PASSWORD 不能为空或弱默认值
+        5. REDIS_PASSWORD 不能为弱默认值（可空，表示无密码 Redis）
+        6. 不能使用 localhost Origin（生产环境）
+        """
+        errors: list[str] = []
+
+        # 1. DEBUG 必须关闭
+        if self.DEBUG:
+            errors.append("DEBUG=true 在生产环境禁止使用")
+
+        # 2. CORS 不能含通配符
+        cors_list = self.cors_origins_list
+        if "*" in cors_list:
+            errors.append("CORS_ORIGINS 不能包含通配符 '*'（生产环境）")
+
+        # 3. JWT_SECRET 强度校验
+        try:
+            self.validate_jwt_secret()
+        except ValueError as e:
+            errors.append(str(e))
+
+        # 4. DB_PASSWORD 校验
+        db_pw = (self.DB_PASSWORD or "").strip()
+        if not db_pw and not self.DATABASE_URL:
+            errors.append("DB_PASSWORD 未设置（生产环境必须配置数据库密码）")
+        elif db_pw in ("postgres", "password", "123456", "admin"):
+            errors.append(f"DB_PASSWORD 使用了弱默认值 '{db_pw}'")
+
+        # 5. REDIS_PASSWORD 校验（允许空，但禁止弱默认值）
+        redis_pw = (self.REDIS_PASSWORD or "").strip()
+        if redis_pw in ("redis", "password", "123456"):
+            errors.append(f"REDIS_PASSWORD 使用了弱默认值 '{redis_pw}'")
+
+        # 6. localhost Origin 检查
+        for origin in cors_list:
+            if "localhost" in origin or "127.0.0.1" in origin:
+                errors.append(f"CORS_ORIGINS 包含 localhost 来源 '{origin}'（生产环境禁止）")
+
+        if errors:
+            raise ValueError(
+                "生产环境安全校验失败（fail-fast）：\n  - "
+                + "\n  - ".join(errors)
+                + "\n请修正以上配置后重启服务。"
             )
 
 

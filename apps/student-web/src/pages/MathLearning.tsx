@@ -353,7 +353,7 @@ export default function MathLearning() {
                     : 'border-gray-200 text-gray-600 hover:bg-gray-50'
                 }`}
               >
-                ✍️ 手写板
+                ✍️ 手写答题
               </button>
               <button
                 type="button"
@@ -368,12 +368,28 @@ export default function MathLearning() {
               </button>
             </div>
 
-            {/* 手写板面板 */}
+            {/* 手写答题区面板 */}
             {toolPanel === 'handwriting' && (
               <div className="mt-3">
-                <HandwritingPad height={260} />
+                <HandwritingPad
+                  questionContent={selectedQuestion.content || selectedQuestion.title || ''}
+                  correctAnswer={attemptResult?.correct_answer || selectedQuestion.answer || ''}
+                  questionType={selectedQuestion.type || 'calculation'}
+                  options={selectedQuestion.options}
+                  knowledgePoints={selectedQuestion.knowledge_points}
+                  height={320}
+                  onGraded={(result) => {
+                    if (result.is_correct) {
+                      setAttemptResult({
+                        correct: true,
+                        correct_answer: selectedQuestion.answer || '',
+                        solution: result.feedback,
+                      } as any);
+                    }
+                  }}
+                />
                 <p className="text-xs text-gray-400 mt-1">
-                  支持鼠标/触摸手写，可撤销、清空、保存图片。用于书写推导步骤或绘制图形。
+                  手写答案后点击"提交批改"，AI 将识别手写内容并对照标准答案给分纠错
                 </p>
               </div>
             )}

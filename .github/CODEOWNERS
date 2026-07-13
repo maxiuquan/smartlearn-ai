@@ -1,0 +1,68 @@
+# Codeowners - SmartLearn AI
+# 文档: https://docs.github.com/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+#
+# 规则：
+# 1. 默认所有者放在最后（最不精确的模式）
+# 2. 各模块有明确 owner，便于精准 review
+# 3. .github/ 与生产部署相关文件必须由 owner 亲自 review
+
+# ── 默认所有者（兜底）──
+*                            @maxiuquan
+
+# ── 后端 API（FastAPI）──
+services/api/                @maxiuquan
+services/api/app/core/       @maxiuquan
+services/api/app/api/        @maxiuquan
+services/api/app/middleware/ @maxiuquan
+services/api/app/db/         @maxiuquan
+services/api/app/services/   @maxiuquan
+services/api/app/models/     @maxiuquan
+services/api/app/schemas/    @maxiuquan
+services/api/app/tasks/      @maxiuquan
+services/api/requirements.txt @maxiuquan
+services/api/alembic/        @maxiuquan
+
+# ── AI Engine（FastAPI）──
+services/ai-engine/          @maxiuquan
+
+# ── 前端（学生端）──
+apps/student-web/            @maxiuquan
+apps/student-web/src/        @maxiuquan
+apps/student-web/package.json @maxiuquan
+apps/student-web/vite.config.ts @maxiuquan
+
+# ── 前端（管理端）──
+apps/admin/                  @maxiuquan
+apps/admin/src/              @maxiuquan
+
+# ── 移动端（React Native）──
+apps/mobile/                 @maxiuquan
+apps/mobile-web/             @maxiuquan
+
+# ── 基础设施 / 部署 ──
+infra/                       @maxiuquan
+infra/docker/                @maxiuquan
+infra/nginx/                 @maxiuquan
+hf-space/                    @maxiuquan
+Dockerfile                   @maxiuquan
+docker-compose*.yml          @maxiuquan
+
+# ── CI/CD & 治理（必须严格 review）──
+.github/                     @maxiuquan
+.github/workflows/           @maxiuquan
+.github/CODEOWNERS           @maxiuquan
+
+# ── 安全与合规 ──
+SECURITY.md                  @maxiuquan
+LICENSE                      @maxiuquan
+.env.example                 @maxiuquan
+ruff.toml                    @maxiuquan
+
+# ── 脚本与运维 ──
+scripts/                     @maxiuquan
+scripts/backup_db.sh         @maxiuquan
+scripts/restore_db.sh        @maxiuquan
+
+# ── 文档 ──
+docs/                        @maxiuquan
+README.md                    @maxiuquan

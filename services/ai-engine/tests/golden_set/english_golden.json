@@ -1,0 +1,92 @@
+[
+  {
+    "id": "eng_001",
+    "type": "vocabulary_choice",
+    "question": "选择与单词 'abandon' 含义最接近的选项：A. embrace  B. forsake  C. acquire  D. maintain",
+    "expected_answer": "B",
+    "expected_keywords": ["forsake", "B"],
+    "knowledge_points": ["词汇", "近义词辨析"],
+    "difficulty": "easy"
+  },
+  {
+    "id": "eng_002",
+    "type": "cloze",
+    "question": "完形填空：She has been studying for the exam ____ three hours. (填入正确介词)",
+    "expected_answer": "for",
+    "expected_keywords": ["for"],
+    "knowledge_points": ["完形填空", "现在完成进行时", "介词"],
+    "difficulty": "easy"
+  },
+  {
+    "id": "eng_003",
+    "type": "grammar",
+    "question": "改正句子中的语法错误：He don't likes playing basketball.",
+    "expected_answer": "He doesn't like playing basketball.",
+    "expected_keywords": ["doesn't", "doesn't like", "does not like"],
+    "knowledge_points": ["语法", "第三人称单数", "助动词"],
+    "difficulty": "medium"
+  },
+  {
+    "id": "eng_004",
+    "type": "translation",
+    "question": "将下列中文翻译为英文：学习外语需要坚持和耐心。",
+    "expected_answer": "Learning a foreign language requires persistence and patience.",
+    "expected_keywords": ["learning", "foreign language", "persistence", "patience", "requires"],
+    "knowledge_points": ["翻译", "动名词作主语"],
+    "difficulty": "medium"
+  },
+  {
+    "id": "eng_005",
+    "type": "reading_comprehension",
+    "question": "阅读理解：Tom woke up early, made breakfast, and then went to work. Question: What did Tom do first?",
+    "expected_answer": "He woke up early (woke up).",
+    "expected_keywords": ["woke up", "wake up"],
+    "knowledge_points": ["阅读理解", "事件顺序"],
+    "difficulty": "easy"
+  },
+  {
+    "id": "eng_006",
+    "type": "vocabulary_choice",
+    "question": "选择与单词 'enormous' 含义最接近的选项：A. tiny  B. huge  C. narrow  D. shallow",
+    "expected_answer": "B",
+    "expected_keywords": ["huge", "B"],
+    "knowledge_points": ["词汇", "近义词辨析"],
+    "difficulty": "easy"
+  },
+  {
+    "id": "eng_007",
+    "type": "cloze",
+    "question": "完形填空：The book is worth ____ (read). (用动词正确形式填空)",
+    "expected_answer": "reading",
+    "expected_keywords": ["reading", "worth reading"],
+    "knowledge_points": ["完形填空", "be worth doing"],
+    "difficulty": "medium"
+  },
+  {
+    "id": "eng_008",
+    "type": "grammar",
+    "question": "用 if 引导的条件状语从句改写：I will go to the party. I have time. (虚拟语气/真实条件句)",
+    "expected_answer": "If I have time, I will go to the party.",
+    "expected_keywords": ["if", "have time", "will go"],
+    "knowledge_points": ["语法", "条件状语从句"],
+    "difficulty": "medium"
+  },
+  {
+    "id": "eng_009",
+    "type": "translation",
+    "question": "将下列英文翻译为中文：Knowledge is power.",
+    "expected_answer": "知识就是力量。",
+    "expected_keywords": ["知识", "力量"],
+    "knowledge_points": ["翻译", "谚语"],
+    "difficulty": "easy"
+  },
+  {
+    "id": "eng_010",
+    "type": "reading_comprehension",
+    "question": "阅读理解：The library closes at 9 PM on weekdays. Question: When does the library close on weekdays?",
+    "expected_answer": "At 9 PM (9:00 PM).",
+    "expected_keywords": ["9", "pm", "9 pm", "9:00"],
+    "knowledge_points": ["阅读理解", "细节查找"],
+    "difficulty": "easy"
+  }
+]
