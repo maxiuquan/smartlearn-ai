@@ -265,4 +265,14 @@ export async function getGameTypes() {
   return res.data;
 }
 
+/** P0-03 (R3): 检查支付功能是否可用（未配置凭证时后端返回 {enabled:false}） */
+export async function checkPaymentEnabled(): Promise<boolean> {
+  try {
+    const res = await client.get('/api/v1/payments/status');
+    return res.data?.enabled === true;
+  } catch {
+    return false;
+  }
+}
+
 export default client;

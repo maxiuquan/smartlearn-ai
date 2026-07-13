@@ -78,6 +78,40 @@ def _clear_refresh_cookie(response: Response) -> None:
     )
 
 
+def _validate_csrf_origin(request: Request) -> None:
+    """P0-01 (R3): CSRF 防护 — 校验 Origin/Referer 是否在 CORS 允许列表内.
+
+    Cookie 自动随请求发送，需防止跨站 CSRF。
+    - 优先检查 Origin 头（包含 scheme + host + port）
+    - 若无 Origin，检查 Referer 头
+    - 两者都无时拒绝（生产模式）/ 放行（开发模式）
+    """
+    if not settings.is_production:
+        return  # 开发模式跳过 CSRF 校验
+
+    origin = request.headers.get("origin", "")
+    referer = request.headers.get("referer", "")
+
+    allowed_origins = settings.cors_origins_list
+    # 允许同源请求（Origin 为空时浏览器可能不发送）
+    if not origin and not referer:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="CSRF 校验失败：缺少 Origin/Referer 头",
+        )
+
+    check_value = origin or referer
+    # 匹配允许的 Origin（精确匹配 scheme + host + port）
+    for allowed in allowed_origins:
+        if allowed and check_value.startswith(allowed):
+            return
+
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="CSRF 校验失败：Origin 不在允许列表内",
+    )
+
+
 def _issue_tokens(user: User, session_id: str | None = None) -> TokenResponse:
     """为用户签发 access + refresh token（带 role/status/sid claim）.
 
@@ -266,7 +300,11 @@ async def refresh_token(
     - 新 token 对使用新 session_id
 
     P0-01: 优先从 HttpOnly Cookie 读取 refresh_token，fallback 到 body
+    P0-01 (R3): 增加 CSRF Origin/Referer 校验
     """
+    # P0-01 (R3): CSRF 防护
+    _validate_csrf_origin(request)
+
     # P0-01: 优先从 Cookie 读取 refresh_token
     refresh_token_value = request.cookies.get("refresh_token") or body.refresh_token
     if not refresh_token_value:
@@ -376,7 +414,11 @@ async def logout(
     P0-2: 将当前 token 的 jti 加入 Redis 黑名单，实现真正的 logout
     如 Redis 不可用则降级为无状态 logout（前端清 token）
     P0-01: 同时清除 refresh_token Cookie
+    P0-01 (R3): 增加 CSRF Origin/Referer 校验
     """
+    # P0-01 (R3): CSRF 防护
+    if request is not None:
+        _validate_csrf_origin(request)
     # 尝试从请求头获取 token 并提取 jti/sid
     auth_header = request.headers.get("Authorization", "") if request else ""
     if auth_header.startswith("Bearer "):

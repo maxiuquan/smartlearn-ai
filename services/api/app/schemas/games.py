@@ -135,3 +135,81 @@ class LeaderboardResponse(BaseModel):
     entries: list[LeaderboardEntry]
     user_rank: Optional[int] = None
     updated_at: datetime
+
+
+# ── P0-02 (R3): 服务端逐题作答会话架构 ──
+
+
+class GameSessionStartRequest(BaseModel):
+    """开始游戏会话请求 — P0-02 (R3).
+
+    客户端仅需声明 game_id 与可选难度；题目集、nonce、过期时间均由服务端生成。
+    """
+
+    game_id: str = Field(..., min_length=1)
+    difficulty: Optional[str] = Field(None, description="难度级别")
+    model_config = {"extra": "forbid"}
+
+
+class GameSessionStartResponse(BaseModel):
+    """开始游戏会话响应 — P0-02 (R3).
+
+    返回 session_id、server_nonce、题目集（不含答案）、过期时间与限时秒数。
+    题目集中 correct_answer 字段由服务端剥离，客户端仅可见 question_id / sequence / 题面。
+    """
+
+    session_id: int
+    server_nonce: str
+    questions: list[dict[str, Any]]
+    expires_at: datetime
+    time_limit_sec: int
+
+
+class GameAnswerSubmitRequest(BaseModel):
+    """提交单题答案请求 — P0-02 (R3).
+
+    客户端仅发送题目 ID、答案、序号与幂等键，由服务端判定正误并落库。
+    """
+
+    question_id: str = Field(..., min_length=1)
+    answer: str = Field(...)
+    sequence: int = Field(..., ge=0)
+    idempotency_key: str = Field(..., min_length=8, max_length=128)
+    model_config = {"extra": "forbid"}
+
+
+class GameAnswerSubmitResponse(BaseModel):
+    """提交单题答案响应 — P0-02 (R3).
+
+    返回判定结果、累计已答题数与总题数。correct_answer 仅在 finish 阶段返回，
+    避免客户端通过逐题试探反推答案。
+    """
+
+    is_correct: bool
+    correct_answer: Optional[str] = None
+    answered_count: int
+    total_questions: int
+
+
+class GameSessionFinishRequest(BaseModel):
+    """结束游戏会话请求 — P0-02 (R3).
+
+    无需客户端字段；服务端基于已写入的 GameAnswerEvent 一次性结算。
+    """
+
+    model_config = {"extra": "forbid"}
+
+
+class GameSessionFinishResponse(BaseModel):
+    """结束游戏会话响应 — P0-02 (R3).
+
+    服务端一次性返回最终结算结果：分数、XP、金币、正确率、正确题数、总题数。
+    """
+
+    session_id: int
+    score: int
+    xp_gained: int
+    coins_gained: int
+    accuracy: float
+    correct_count: int
+    total_questions: int

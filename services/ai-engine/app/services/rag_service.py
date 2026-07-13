@@ -660,11 +660,21 @@ class RAGService:
         return contexts
 
     async def search_similar_questions(
-        self, query: str, top_k: int | None = None
+        self,
+        query: str,
+        top_k: int | None = None,
+        include_answers: bool = False,
     ) -> list[dict[str, Any]]:
         """异步检索与查询最相似的题目
 
         P1-02: 结果中增加引用可见性字段 source_id / data_version / embedding_model。
+        P1-R3: 默认不返回 answer / solution，防止匿名用户通过检索接口爬取题库答案。
+            仅当 include_answers=True（如已授权的教师/管理员上下文）时才返回。
+
+        Args:
+            query: 查询文本
+            top_k: 返回结果数量
+            include_answers: 是否包含答案和解析（默认 False，脱敏）
         """
         if not self._initialized:
             await self.initialize()
@@ -686,6 +696,10 @@ class RAGService:
             chunk["source_id"] = chunk.get("id", "")
             chunk["data_version"] = self._data_version
             chunk["embedding_model"] = self._embedding_model_name()
+            # P1-R3: 默认脱敏 — 移除 answer / solution，防止答案泄露
+            if not include_answers:
+                chunk.pop("answer", None)
+                chunk.pop("solution", None)
             questions.append(chunk)
         return questions
 

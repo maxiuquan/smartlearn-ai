@@ -10,19 +10,14 @@ import {
 import { authApi, type UserInfo } from '../api/auth';
 
 /**
- * P0-01: Token 存储安全改造
+ * P0-01 (R3): Token 存储安全改造 — 纯内存化
  *
- * - access_token 仅保存在内存（useState + ref），不写入 localStorage
+ * - access_token 仅保存在内存（useState + ref），不写 localStorage / sessionStorage / IndexedDB
  * - refresh_token 由后端通过 HttpOnly Cookie 自动管理，前端 JS 无法读取
  * - 401 拦截器自动调用 /auth/refresh（带 Cookie），获取新 access_token
  * - logout 调用后端 /auth/logout 清除 Cookie + Redis 黑名单
- *
- * 兼容性：仍保留 localStorage 作为 sessionStorage 级别的 access_token 缓存，
- * 用于页面刷新后恢复（access_token 短期有效，风险可控）。
- * refresh_token 永不写入 localStorage。
+ * - 页面刷新时：内存 token 丢失 → 自动调用 refresh（Cookie 仍存在）→ 获取新 access_token
  */
-
-const TOKEN_KEY = 'smartlearn_access_token'; // 仅 access_token，短期有效
 
 interface AuthContextValue {
   user: UserInfo | null;
@@ -49,13 +44,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const updateToken = useCallback((newToken: string | null) => {
     tokenRef.current = newToken;
     setToken(newToken);
-    if (newToken) {
-      // access_token 短期缓存于 localStorage（仅用于页面刷新恢复）
-      // refresh_token 永不写入 localStorage
-      localStorage.setItem(TOKEN_KEY, newToken);
-    } else {
-      localStorage.removeItem(TOKEN_KEY);
-    }
+    // P0-01 (R3): access_token 仅保存在内存，不写 localStorage
   }, []);
 
   /**
@@ -77,46 +66,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [updateToken]);
 
   /**
-   * 应用启动时尝试从 localStorage 恢复 access_token。
-   * 如果 token 存在则调 /auth/me 获取用户信息；
-   * 若 token 无效（401）则尝试 refresh，refresh 也失败则清除。
+   * P0-01 (R3): 应用启动时尝试通过 Cookie refresh 获取 access_token。
+   * access_token 不再从 localStorage 恢复（纯内存），页面刷新时自动 refresh。
    */
   useEffect(() => {
-    const storedToken = localStorage.getItem(TOKEN_KEY);
-    if (!storedToken) {
-      setLoading(false);
-      return;
-    }
-
-    tokenRef.current = storedToken;
-    setToken(storedToken);
     (async () => {
-      try {
-        const me = await authApi.getMe(storedToken);
-        setUser(me);
-      } catch {
-        // access_token 无效，尝试通过 Cookie refresh
-        const newToken = await refreshAccessToken();
-        if (newToken) {
-          try {
-            const me = await authApi.getMe(newToken);
-            setUser(me);
-          } catch {
-            updateToken(null);
-            setUser(null);
-          }
-        } else {
+      const newToken = await refreshAccessToken();
+      if (newToken) {
+        try {
+          const me = await authApi.getMe(newToken);
+          setUser(me);
+        } catch {
           updateToken(null);
           setUser(null);
         }
-      } finally {
-        setLoading(false);
+      } else {
+        // 无有效 refresh cookie，未登录
       }
+      setLoading(false);
     })();
   }, [refreshAccessToken, updateToken]);
 
   /**
-   * 登录：调 /auth/login 获取 access_token，存内存 + localStorage。
+   * 登录：调 /auth/login 获取 access_token，存内存。
    * refresh_token 由后端 Set-Cookie 自动管理，前端不处理。
    */
   const login = useCallback(async (username: string, password: string) => {

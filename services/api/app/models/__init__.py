@@ -7,6 +7,9 @@ from app.models.auth_session import AuthSession
 from app.models.base import Base
 from app.models.business import (
     AIConversation,
+    GameAnswerEvent,
+    GameQuestion,
+    GameRewardsLedger,
     GameSession,
     KnowledgePoint,
     Question,
@@ -49,6 +52,10 @@ __all__ = [
     "GameSession",
     "UserGameProfile",
     "WordGameSession",
+    # P0-02 (R3): 逐题作答会话架构
+    "GameQuestion",
+    "GameAnswerEvent",
+    "GameRewardsLedger",
     # P1-03/05: 学习事件流（不可变，用于幂等与回放）
     "WordLearningEvent",
     "QuestionAttemptEvent",

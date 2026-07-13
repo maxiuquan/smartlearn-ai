@@ -15,6 +15,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
 from app.core.deps import get_current_admin_user, get_current_user, get_db
 from app.models.user import User
 from app.schemas.payment import (
@@ -28,6 +29,19 @@ from app.services.payment_service import payment_service
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
+
+
+@router.get(
+    "/status",
+    summary="支付功能可用性查询",
+)
+async def payment_status() -> dict:
+    """P0-03 (R3): 查询支付功能是否启用。
+
+    前端在渲染支付入口前调用此接口；未配置支付凭证时返回 {"enabled": false}，
+    前端据此隐藏支付相关 UI。无需鉴权，仅返回布尔状态，不泄露任何凭证细节。
+    """
+    return {"enabled": settings.is_payment_enabled}
 
 
 @router.post(
@@ -46,6 +60,12 @@ async def create_order(
     统一 SDK 下单（微信/支付宝预下单生成支付参数）由调用方在拿到订单后接入，
     本接口仅落账务记录 + Outbox(order.created)。
     """
+    # P0-03 (R3): 未配置支付凭证时返回 501，禁止下单
+    if not settings.is_payment_enabled:
+        raise HTTPException(
+            status_code=status.HTTP_501_NOT_IMPLEMENTED,
+            detail="支付功能未启用 — 请配置微信支付或支付宝凭证后再使用",
+        )
     try:
         order = await payment_service.create_order(
             db,
@@ -334,7 +354,23 @@ async def _handle_callback(
     1. 通知去重：Redis SETNX (trade_no, 24h TTL)，防止重复回调
     2. 真实验签：SDK 已安装且凭证配置时执行官方验签，否则 fail-closed
     3. 验签失败返回 400，不得调用 handle_pay_callback()
+
+    P0-03 (R3): 渠道支付凭证未配置时直接返回 501（明确“支付未启用”，区别于验签失败 400）。
     """
+    # P0-03 (R3): 渠道支付凭证未配置时回调返回 501
+    channel_configured = (
+        settings.is_wechat_pay_v3_enabled
+        if channel == "wechat"
+        else settings.is_alipay_enabled
+        if channel == "alipay"
+        else False
+    )
+    if not channel_configured:
+        raise HTTPException(
+            status_code=status.HTTP_501_NOT_IMPLEMENTED,
+            detail=f"{channel} 支付功能未启用 — 回调验签凭证未配置，无法处理回调",
+        )
+
     order_no = payload.order_no or payload.out_trade_no
     trade_no = payload.transaction_id or payload.trade_no
     amount_cents = (

@@ -5,7 +5,7 @@
 from datetime import datetime
 from typing import Any, Optional
 
-from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, Text, Boolean, func
+from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, Text, Boolean, UniqueConstraint, func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -223,6 +223,95 @@ class GameSession(Base):
     started_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     finished_at: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.now(), nullable=False
+    )
+    # P0-02 (R3): 服务端生成的 nonce 与过期时间，支持逐题作答会话
+    server_nonce: Mapped[Optional[str]] = mapped_column(String(128), nullable=True, index=True)
+    expires_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    status: Mapped[str] = mapped_column(String(20), server_default="active", nullable=False)
+
+
+class GameQuestion(Base):
+    """游戏题目（session 绑定的题目集）— P0-02 (R3).
+
+    每个 game session 在 start 时由服务端生成一组题目并写入此表。
+    correct_answer 仅服务端持有，客户端不可见。
+    """
+
+    __tablename__ = "game_questions"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    session_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("game_sessions.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    question_id: Mapped[str] = mapped_column(String(200), nullable=False)
+    sequence: Mapped[int] = mapped_column(Integer, nullable=False)
+    correct_answer: Mapped[str] = mapped_column(Text, nullable=False)
+    user_answer: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    is_correct: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
+    answered_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+
+    __table_args__ = (
+        UniqueConstraint("session_id", "sequence", name="uq_game_questions_session_seq"),
+    )
+
+
+class GameAnswerEvent(Base):
+    """游戏答题事件（不可变事件流）— P0-02 (R3).
+
+    每次提交单题答案时写入一条不可变事件记录，配合 idempotency_key 防止重复写入。
+    """
+
+    __tablename__ = "game_answer_events"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    session_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("game_sessions.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    user_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    question_id: Mapped[str] = mapped_column(String(200), nullable=False)
+    sequence: Mapped[int] = mapped_column(Integer, nullable=False)
+    user_answer: Mapped[str] = mapped_column(Text, nullable=False)
+    is_correct: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    idempotency_key: Mapped[str] = mapped_column(String(128), nullable=False, index=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, server_default=func.now(), nullable=False
+    )
+
+    __table_args__ = (
+        UniqueConstraint("session_id", "idempotency_key", name="uq_game_answer_idempotency"),
+        UniqueConstraint("user_id", "idempotency_key", name="uq_game_answer_user_idempotency"),
+    )
+
+
+class GameRewardsLedger(Base):
+    """游戏奖励账本（不可变）— P0-02 (R3).
+
+    每个 game session 在 finish 时由服务端一次性结算，写入一条不可变奖励记录。
+    uq_game_rewards_session 约束保证一个 session 仅结算一次。
+    """
+
+    __tablename__ = "game_rewards_ledger"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    session_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("game_sessions.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    user_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    game_id: Mapped[str] = mapped_column(String(100), nullable=False)
+    xp_gained: Mapped[int] = mapped_column(Integer, server_default="0", nullable=False)
+    coins_gained: Mapped[int] = mapped_column(Integer, server_default="0", nullable=False)
+    score: Mapped[int] = mapped_column(Integer, server_default="0", nullable=False)
+    accuracy: Mapped[float] = mapped_column(Float, server_default="0.0", nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, server_default=func.now(), nullable=False
+    )
+
+    __table_args__ = (
+        UniqueConstraint("session_id", name="uq_game_rewards_session"),
     )
 
 

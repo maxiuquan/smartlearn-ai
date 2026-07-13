@@ -1,6 +1,7 @@
 """
 SmartLearn AI - FastAPI 主服务
 """
+import json
 import logging
 import os
 import sys
@@ -219,22 +220,38 @@ except Exception as exc:  # pragma: no cover - 防御性：可观测性失败不
 
 @app.get("/health")
 async def health():
-    """健康检查端点（增强版）- docker-compose healthcheck 依赖。
+    """存活探针（Liveness probe）- 仅判断进程是否存活。
 
-    P1-04: 生产环境仅返回最小状态，不暴露 environment/uptime/checks 细节。
+    最小化响应: 进程能处理请求即返回 200 {"status": "ok"}。
+    不检查任何外部依赖（DB/Redis/RAG），避免因依赖抖动导致容器被反复重启。
+    docker-compose healthcheck / HF Spaces 存活探针应使用此端点。
 
-    返回字段：
+    详细的依赖就绪检查请使用 GET /health/ready。
+    """
+    return {"status": "ok"}
+
+
+@app.get("/health/ready")
+async def health_ready():
+    """就绪探针（Readiness probe）- 检查所有关键依赖是否就绪。
+
+    用于判断服务是否准备好接收流量。任一关键依赖不可用时返回 503，
+    负载均衡器/编排器应暂时将流量从本实例摘除（但不重启容器）。
+
+    检查项:
+        database:        PostgreSQL SELECT 1（关键，失败 → 503）
+        redis:           Redis PING（非关键，有内存降级，失败 → degraded）
+        rag:             RAG 索引表可查询（非关键，失败 → degraded）
+        observability:   metrics/tracing/logging 状态（仅展示）
+
+    返回字段:
         status: ok / degraded / unhealthy
         service / version / environment / uptime_seconds
-        checks:
-            database: ok / error: <msg>
-            redis:    ok / error: <msg> / disabled
-            observability:
-                metrics_enabled / tracing_enabled / logging_renderer
+        checks: 各依赖详细状态
     """
+    from fastapi import Response
+
     uptime = time.time() - _APP_START_EPOCH
-    # P1-04: 生产环境最小化 health 响应
-    is_prod = settings.is_production
     result: dict = {
         "status": "ok",
         "service": "smartlearn-api",
@@ -244,7 +261,8 @@ async def health():
         "checks": {},
     }
 
-    # ── 数据库连接检查 ──
+    # ── 数据库连接检查（关键依赖）──
+    db_ok = False
     try:
         from sqlalchemy import text
         from app.db.session import async_session_factory
@@ -252,11 +270,12 @@ async def health():
         async with async_session_factory() as session:
             await session.execute(text("SELECT 1"))
         result["checks"]["database"] = "ok"
+        db_ok = True
     except Exception as e:
         result["checks"]["database"] = f"error: {e}"
-        result["status"] = "degraded"
+        result["status"] = "unhealthy"
 
-    # ── Redis 连接检查（可选，不可用不影响 health）──
+    # ── Redis 连接检查（非关键，不可用有内存降级）──
     try:
         import redis.asyncio as aioredis
 
@@ -268,10 +287,34 @@ async def health():
             await redis_client.close()
         result["checks"]["redis"] = "ok"
     except Exception as e:
-        # Redis 不可用不改变 status（有内存降级）
+        # Redis 不可用降级为 degraded（有内存兜底）
         result["checks"]["redis"] = f"error: {e}"
+        if result["status"] == "ok":
+            result["status"] = "degraded"
 
-    # ── 可观测性组件状态 ──
+    # ── RAG 就绪检查（非关键，依赖 DB）──
+    # RAG 索引存储在 DB 中（rag_index 模型），DB 不可用时跳过此项
+    if db_ok:
+        try:
+            from sqlalchemy import text as _sa_text
+            from app.db.session import async_session_factory
+
+            async with async_session_factory() as session:
+                # 检查 RAG 核心表是否可查询（knowledge_documents 为 RAG 索引主表）
+                await session.execute(
+                    _sa_text("SELECT 1 FROM knowledge_documents LIMIT 1")
+                )
+            result["checks"]["rag"] = "ok"
+        except Exception as e:
+            # RAG 不可用降级为 degraded（AI 检索功能受影响，但核心业务不受影响）
+            result["checks"]["rag"] = f"error: {e}"
+            if result["status"] == "ok":
+                result["status"] = "degraded"
+    else:
+        # DB 不可用时无法检查 RAG
+        result["checks"]["rag"] = "skipped: database unavailable"
+
+    # ── 可观测性组件状态（仅展示，不影响就绪判定）──
     try:
         from app.core.metrics import _HAS_PROMETHEUS
         from app.core.tracing import _HAS_OTEL
@@ -285,12 +328,26 @@ async def health():
         result["checks"]["observability"] = f"error: {e}"
 
     # P1-04: 生产环境最小化响应（仅返回 status + service，不暴露 checks/uptime/environment）
-    if is_prod:
-        return {
+    if settings.is_production:
+        minimal = {
             "status": result["status"],
             "service": result["service"],
         }
+        if result["status"] == "unhealthy":
+            return Response(
+                status_code=503,
+                content=json.dumps(minimal),
+                media_type="application/json",
+            )
+        return minimal
 
+    # 非生产环境: unhealthy 返回 503，degraded 仍返回 200
+    if result["status"] == "unhealthy":
+        return Response(
+            status_code=503,
+            content=json.dumps(result),
+            media_type="application/json",
+        )
     return result
 
 
