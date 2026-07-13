@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from 'react';
 import { authApi, type UserInfo } from '../api/auth';
+import { setAccessToken } from '../api/client';
 
 /**
  * P0-01 (R3): Token 存储安全改造 — 纯内存化
@@ -44,7 +45,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const updateToken = useCallback((newToken: string | null) => {
     tokenRef.current = newToken;
     setToken(newToken);
-    // P0-01 (R3): access_token 仅保存在内存，不写 localStorage
+    // P0-01 (R4): 同步注入到 axios client 的内存 token
+    setAccessToken(newToken);
   }, []);
 
   /**

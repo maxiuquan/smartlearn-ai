@@ -820,18 +820,18 @@ async def submit_game_session(
     user_id: int = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db),
 ) -> GameSessionResponse:
-    """提交完成的游戏会话，记录分数并更新用户游戏档案（已弃用）。
+    """提交完成的游戏会话（已弃用，不发奖励）。
 
-    **Deprecated (P0-02 R3)**：此端点保留用于向后兼容，但已不推荐使用。
-    新接入的客户端应使用三段式逐题作答流程：
+    **Deprecated (P0-01 R4)**：此端点已弃用，不再发放任何 XP/金币奖励。
+    客户端必须使用三段式逐题作答流程才能获得奖励：
     1. POST /{game_id}/sessions/start — 服务端生成题目集
     2. POST /{game_id}/sessions/{session_id}/answers — 逐题提交
     3. POST /{game_id}/sessions/{session_id}/finish — 服务端结算
 
-    P0-02 旧版（仍生效）：
-    - score 由服务端基于 accuracy + combo 规则重算，客户端 score 仅作参考
-    - nonce 改用 Redis SETNX + TTL（跨 worker 共享，自动过期）
-    - 保留合理性校验作为反作弊前置拦截
+    P0-01 (R4) 安全整改：
+    - 旧接口仅记录会话历史（score=0, xp=0, coins=0），不发放任何奖励
+    - 客户端 accuracy 不再驱动任何奖励计算
+    - 防止用户通过伪造 accuracy 刷 XP/金币/排行榜
     """
     # P0-08: 校验 URL game_id 与 body.game_id 一致
     if body.game_id != game_id:
@@ -840,7 +840,7 @@ async def submit_game_session(
             detail=f"game_id 不一致: URL={game_id}, body={body.game_id}",
         )
 
-    # 服务端校验：加载游戏配置，验证分数合理性
+    # 服务端校验：加载游戏配置，验证游戏存在
     games_raw = _load_games_config()
     game_cfg = next((g for g in games_raw if g["game_id"] == body.game_id), None)
     if not game_cfg:
@@ -849,62 +849,15 @@ async def submit_game_session(
             detail=f"游戏 '{body.game_id}' 不存在",
         )
 
-    # 校验时长合理性（不超过配置时长的 2 倍，防止超时作弊）
-    session_cfg = game_cfg.get("session") or {}
-    configured_time = session_cfg.get("time_limit_sec", 0)
-    if configured_time > 0 and body.duration is not None:
-        if body.duration > configured_time * 2:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="游戏时长异常，疑似作弊",
-            )
-        # P0-08: 时长过短也疑似作弊（低于配置的 10%）
-        if body.duration < configured_time * 0.1 and body.score > 0:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="游戏时长过短但分数不为 0，疑似作弊",
-            )
-
-    # ── P0-02: 服务端事实重算 score ──
-    # 客户端 body.score 被忽略，服务端基于 accuracy + 游戏配置重算
-    rewards_cfg = game_cfg.get("rewards") or {}
-    base_xp = rewards_cfg.get("base_xp", 10)
-    base_coin = rewards_cfg.get("base_coin", 5)
-    combo_multiplier = rewards_cfg.get("combo_multiplier", 1.0)
-
-    # 服务端重算：基于 accuracy 计算实际分数
-    # 规则：score = base_xp * accuracy * 100 * combo_factor
-    if body.accuracy is not None and body.accuracy > 0:
-        server_score = int(base_xp * body.accuracy * 100 * combo_multiplier)
-    else:
-        # accuracy 为 0 或未提供，分数为 0
-        server_score = 0
-
-    # 反作弊：若客户端 score 与服务端重算值偏差过大（>2倍），记录审计但使用服务端值
-    if body.score > 0 and server_score == 0:
-        logger.warning(
-            "game_score_mismatch user_id=%s game=%s client_score=%s server_score=0",
-            user_id, body.game_id, body.score,
-        )
-
-    # 合理上限：base_xp * 100（更严格）
-    score_cap = max(base_xp * 100, 5000)
-    server_score = min(server_score, score_cap)
-
-    # ── P0-02: nonce 改用 Redis SETNX + TTL（跨 worker 共享） ──
+    # P0-01 (R4): nonce 去重仍保留，防止重复提交
     nonce_key = f"game:nonce:{user_id}:{body.game_id}:{body.nonce}"
     redis_client = None
     try:
-        from app.core.deps import get_redis
-        from fastapi import Request
-        # 直接使用独立 Redis 客户端（不依赖 request）
         from app.core.security import get_redis_client
         redis_client = await get_redis_client()
         if redis_client:
-            # SETNX: 已存在返回 0（重复），不存在返回 1（首次）
             set_result = await redis_client.set(nonce_key, "1", ex=86400, nx=True)
             if not set_result:
-                # 重复提交
                 await redis_client.aclose()
                 raise HTTPException(
                     status_code=status.HTTP_409_CONFLICT,
@@ -913,7 +866,6 @@ async def submit_game_session(
     except HTTPException:
         raise
     except Exception as e:
-        # Redis 故障降级：回退到内存集合（单 worker 场景）
         logger.warning("nonce redis failed, fallback to memory: %s", e)
         if body.nonce in _USED_NONCES:
             raise HTTPException(
@@ -930,21 +882,21 @@ async def submit_game_session(
             except Exception:
                 pass
 
-    # 使用服务端重算的 score（忽略客户端 score）
-    final_score = server_score
-    xp_gained = max(1, final_score // 10)
-    coins_gained = max(1, final_score // 20)
+    # P0-01 (R4): 旧接口不发放任何奖励 — score/xp/coins 全部为 0
+    final_score = 0
+    xp_gained = 0
+    coins_gained = 0
 
     # DB 列为 TIMESTAMP WITHOUT TIME ZONE, 必须剥离 tzinfo 避免 asyncpg DataError
     started = body.started_at.replace(tzinfo=None) if body.started_at else datetime.utcnow()
     finished = body.finished_at or datetime.now(timezone.utc)
     finished = finished.replace(tzinfo=None) if finished.tzinfo else finished
 
-    # 记录游戏会话（使用服务端重算的 score）
+    # 仅记录会话历史（不发奖励）
     new_session = GameSession(
         user_id=user_id,
         game_id=body.game_id,
-        score=final_score,  # P0-02: 服务端重算值
+        score=final_score,
         xp_gained=xp_gained,
         coins_gained=coins_gained,
         accuracy=body.accuracy,
@@ -953,28 +905,12 @@ async def submit_game_session(
         finished_at=finished,
     )
     db.add(new_session)
-    await db.flush()  # 获取自增 ID
-    session_id = new_session.id
-
-    # 更新用户游戏档案
-    await db.execute(
-        text(
-            """
-            INSERT INTO user_game_profile (user_id, level, total_xp, coins, streak_days, updated_at)
-            VALUES (:user_id, 1, :xp, :coins, 0, NOW())
-            ON CONFLICT (user_id) DO UPDATE SET
-                total_xp = user_game_profile.total_xp + :xp,
-                coins = user_game_profile.coins + :coins,
-                updated_at = NOW()
-            """
-        ),
-        {"user_id": user_id, "xp": xp_gained, "coins": coins_gained},
-    )
-
     await db.commit()
 
+    # P0-01 (R4): 不更新 user_game_profile — 旧接口不发放任何 XP/金币
+
     return GameSessionResponse(
-        session_id=session_id,
+        session_id=new_session.id,
         xp_gained=xp_gained,
         coins_gained=coins_gained,
     )

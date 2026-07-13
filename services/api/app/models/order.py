@@ -16,6 +16,7 @@ from sqlalchemy import (
     Integer,
     String,
     Text,
+    UniqueConstraint,
     func,
 )
 from sqlalchemy.orm import Mapped, mapped_column
@@ -35,6 +36,13 @@ class Order(Base):
     """
 
     __tablename__ = "orders"
+
+    # P0-02 (R4): DB 级唯一约束兜底 — Redis 故障时仍可防止重复回调处理
+    __table_args__ = (
+        UniqueConstraint(
+            "channel", "third_party_trade_no", name="uq_order_channel_trade_no"
+        ),
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     order_no: Mapped[str] = mapped_column(

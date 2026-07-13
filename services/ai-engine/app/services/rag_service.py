@@ -56,6 +56,10 @@ _DEFAULT_EMBED_CONCURRENCY: int = 4
 _RETRY_BASE_DELAY: float = 1.0
 _RETRY_MAX_DELAY: float = 30.0
 _RETRY_MAX_ATTEMPTS: int = 3
+# P1-02 (R4): 单批 embedding 超时（秒）
+_EMBED_BATCH_TIMEOUT: float = 30.0
+# P1-02 (R4): 单次初始化 embedding 预算上限（估算 tokens，按 chars/4 近似）
+_MAX_EMBEDDING_TOKENS_PER_INIT: int = 500000
 
 
 class RAGService:
@@ -273,6 +277,15 @@ class RAGService:
         if not settings.has_any_provider:
             return self._simple_keyword_embed(texts, [[] for _ in texts])
 
+        # P1-02 (R4): 预算上限检查（估算 tokens ≈ chars / 4）
+        total_chars = sum(len(t) for t in texts)
+        estimated_tokens = total_chars // 4
+        if estimated_tokens > _MAX_EMBEDDING_TOKENS_PER_INIT:
+            print(
+                f"⚠️  RAG 语料预算预警: 估算 {estimated_tokens} tokens 超过上限 "
+                f"{_MAX_EMBEDDING_TOKENS_PER_INIT}，将分批处理"
+            )
+
         # 按批大小切片
         batch_size = max(1, self._embed_batch_size)
         batches: list[list[str]] = [
@@ -311,8 +324,30 @@ class RAGService:
             # 共 1 + _RETRY_MAX_ATTEMPTS 次尝试（首次 + 3 次重试）
             for attempt in range(_RETRY_MAX_ATTEMPTS + 1):
                 try:
-                    embeddings = await self._router.generate_embeddings(texts)
+                    # P1-02 (R4): 添加单批超时（默认 30 秒）
+                    embeddings = await asyncio.wait_for(
+                        self._router.generate_embeddings(texts),
+                        timeout=_EMBED_BATCH_TIMEOUT,
+                    )
                     return np.array(embeddings, dtype=np.float32)
+                except asyncio.TimeoutError:
+                    # P1-02 (R4): 超时视为可重试错误
+                    last_exc = TimeoutError(
+                        f"Embedding batch timed out after {_EMBED_BATCH_TIMEOUT}s "
+                        f"(batch_size={len(texts)})"
+                    )
+                    if attempt < _RETRY_MAX_ATTEMPTS:
+                        # 指数退避：1s, 2s, 4s ... 不超过 30s
+                        delay = min(
+                            _RETRY_BASE_DELAY * (2 ** attempt),
+                            _RETRY_MAX_DELAY,
+                        )
+                        print(
+                            f"⚠️  批处理 embedding 超时 (尝试 {attempt + 1}/"
+                            f"{_RETRY_MAX_ATTEMPTS + 1})，{delay:.1f}s 后重试"
+                        )
+                        await asyncio.sleep(delay)
+                        continue
                 except Exception as e:
                     last_exc = e
                     if attempt < _RETRY_MAX_ATTEMPTS:
@@ -536,6 +571,7 @@ class RAGService:
         - embedding_dim: 配置的维度
         - knowledge_embedding_dim / question_embedding_dim: 实际维度
         - is_ready: 基础就绪门禁结果
+        - reason: 就绪失败原因（空字符串表示无失败）
         - golden_samples: 黄金样本检索结果（验证检索结果非空）
         - golden_samples_passed: 黄金样本是否全部通过
         - overall_ready: 基础就绪 AND 黄金样本通过
@@ -573,6 +609,35 @@ class RAGService:
         # 基础就绪门禁
         checks["is_ready"] = self.is_ready()
 
+        # P1-02 (R4): 显式就绪失败原因（语料为 0 / 维度不符）
+        reason = ""
+        if len(self._knowledge_chunks) == 0 and len(self._question_chunks) == 0:
+            reason = "语料为 0，请检查 DATA_DIR 路径配置"
+        # P1-02 (R4): 维度校验
+        if not reason and self._knowledge_embeddings is not None and self._knowledge_embeddings.size > 0:
+            actual_dim = (
+                self._knowledge_embeddings.shape[1]
+                if self._knowledge_embeddings.ndim > 1
+                else 0
+            )
+            if actual_dim != self._embedding_dim:
+                reason = (
+                    f"embedding维度不匹配: expected={self._embedding_dim}, "
+                    f"actual={actual_dim}"
+                )
+        if not reason and self._question_embeddings is not None and self._question_embeddings.size > 0:
+            actual_dim = (
+                self._question_embeddings.shape[1]
+                if self._question_embeddings.ndim > 1
+                else 0
+            )
+            if actual_dim != self._embedding_dim:
+                reason = (
+                    f"embedding维度不匹配: expected={self._embedding_dim}, "
+                    f"actual={actual_dim}"
+                )
+        checks["reason"] = reason
+
         # 黄金样本验证：检索结果非空
         golden_results: list[dict[str, Any]] = []
         golden_all_passed = True
@@ -608,6 +673,10 @@ class RAGService:
 
         checks["golden_samples"] = golden_results
         checks["golden_samples_passed"] = golden_all_passed
+        # P1-02 (R4): 黄金检索失败时补充 reason
+        if not golden_all_passed and not reason:
+            reason = "黄金样本检索失败（部分查询返回空结果）"
+            checks["reason"] = reason
         checks["overall_ready"] = bool(checks["is_ready"]) and golden_all_passed
         return checks
 

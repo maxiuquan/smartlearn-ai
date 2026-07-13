@@ -8,34 +8,68 @@ const client = axios.create({
   withCredentials: true,
 });
 
-const TOKEN_KEY = 'smartlearn_access_token'; // P0-01: 仅 access_token，refresh_token 在 Cookie
+// P0-01 (R4): access_token 纯内存存储 — 不再使用 localStorage
+// Token 由 AuthContext 通过 setAccessToken() 注入
+let _memoryAccessToken: string | null = null;
 
-// ─── 请求拦截器：从 localStorage 读取 access_token 并注入 Authorization 头 ───
+/** P0-01 (R4): AuthContext 调用此方法注入内存 token */
+export function setAccessToken(token: string | null): void {
+  _memoryAccessToken = token;
+}
+
+/** P0-01 (R4): 获取当前内存 token */
+export function getAccessToken(): string | null {
+  return _memoryAccessToken;
+}
+
+// ─── 请求拦截器：从内存读取 access_token 并注入 Authorization 头 ───
 client.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem(TOKEN_KEY);
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    // P0-01 (R4): 从内存读取，不再使用 localStorage
+    if (_memoryAccessToken) {
+      config.headers.Authorization = `Bearer ${_memoryAccessToken}`;
     }
     return config;
   },
   (error) => Promise.reject(error)
 );
 
-// ─── P0-01: 响应拦截器 — 401 自动 refresh + 重试，失败才跳转登录 ───
-let isRefreshing = false;
-let failedQueue: Array<{ resolve: (token: string | null) => void; reject: (err: unknown) => void }> = [];
+// ─── P0-01 (R4): 响应拦截器 — 单飞 refresh + 请求队列 ───
+// 全局 refreshPromise：首个 401 触发 refresh，其余并发请求 await 同一 Promise
+let _refreshPromise: Promise<string | null> | null = null;
 
-const processQueue = (error: unknown, token: string | null = null) => {
-  failedQueue.forEach((prom) => {
-    if (error) {
-      prom.reject(error);
-    } else {
-      prom.resolve(token);
+/**
+ * P0-01 (R4): 单飞 refresh — 确保多个并发 401 只触发一次 refresh
+ * 成功后重放所有排队请求，失败后只执行一次 logout
+ */
+async function _singleFlightRefresh(): Promise<string | null> {
+  // 已有 refresh 进行中，复用同一 Promise
+  if (_refreshPromise) {
+    return _refreshPromise;
+  }
+
+  _refreshPromise = (async () => {
+    try {
+      const refreshRes = await axios.post(
+        `${client.defaults.baseURL}/api/v1/auth/refresh`,
+        {},
+        { withCredentials: true }
+      );
+      const newToken = refreshRes.data.access_token;
+      _memoryAccessToken = newToken;
+      return newToken;
+    } catch {
+      // refresh 失败 — 清除内存 token
+      _memoryAccessToken = null;
+      return null;
+    } finally {
+      // 清除 promise 引用，允许后续 refresh
+      _refreshPromise = null;
     }
-  });
-  failedQueue = [];
-};
+  })();
+
+  return _refreshPromise;
+}
 
 client.interceptors.response.use(
   (response) => response,
@@ -47,54 +81,32 @@ client.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // P0-01: 已经在 refresh 中，排队等待
-    if (isRefreshing) {
-      return new Promise((resolve, reject) => {
-        failedQueue.push({ resolve, reject });
-      }).then((newToken) => {
-        if (newToken) {
-          originalRequest.headers.Authorization = `Bearer ${newToken}`;
-          return client(originalRequest);
-        }
-        return Promise.reject(error);
-      });
-    }
-
-    // P0-01: 避免对 /auth/refresh 本身的 401 重试（防止死循环）
-    if (originalRequest?.url?.includes('/auth/refresh') || originalRequest?.url?.includes('/auth/login')) {
-      localStorage.removeItem(TOKEN_KEY);
+    // P0-01 (R4): 避免对 /auth/refresh 和 /auth/login 本身的 401 重试（防止死循环）
+    if (
+      originalRequest?.url?.includes('/auth/refresh') ||
+      originalRequest?.url?.includes('/auth/login')
+    ) {
+      _memoryAccessToken = null;
       if (!window.location.pathname.startsWith('/login')) {
         window.location.href = '/login';
       }
       return Promise.reject(error);
     }
 
-    isRefreshing = true;
-    try {
-      // P0-01: 尝试通过 HttpOnly Cookie refresh
-      const refreshRes = await axios.post(
-        `${client.defaults.baseURL}/api/v1/auth/refresh`,
-        {},
-        { withCredentials: true }
-      );
-      const newToken = refreshRes.data.access_token;
-      localStorage.setItem(TOKEN_KEY, newToken);
-      processQueue(null, newToken);
+    // P0-01 (R4): 单飞 refresh — 所有并发 401 共享同一个 refresh Promise
+    const newToken = await _singleFlightRefresh();
 
+    if (newToken) {
       // 重试原请求
       originalRequest.headers.Authorization = `Bearer ${newToken}`;
       return client(originalRequest);
-    } catch (refreshError) {
-      // refresh 失败，清除并跳转
-      localStorage.removeItem(TOKEN_KEY);
-      processQueue(refreshError, null);
-      if (!window.location.pathname.startsWith('/login')) {
-        window.location.href = '/login';
-      }
-      return Promise.reject(refreshError);
-    } finally {
-      isRefreshing = false;
     }
+
+    // refresh 失败，跳转登录
+    if (!window.location.pathname.startsWith('/login')) {
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
   }
 );
 

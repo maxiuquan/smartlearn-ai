@@ -13,10 +13,12 @@ from datetime import datetime
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.deps import get_current_admin_user, get_current_user, get_db
+from app.models.order import Order
 from app.models.user import User
 from app.schemas.payment import (
     CallbackPayload,
@@ -340,6 +342,36 @@ async def view_subscription_ledger(
     }
 
 
+def _sanitize_callback_for_log(raw_body: str, headers: dict) -> dict:
+    """P0-02 (R4): 脱敏回调原文 — 不记录完整凭证/签名/敏感字段。
+
+    - 敏感请求头（authorization / cookie / x-api-key / 微信支付签名相关）统一遮蔽
+    - 非敏感请求头截断至 100 字符
+    - 原始 body 仅保留长度与前 500 字符预览，不记录完整凭证
+    """
+    sensitive_headers = {
+        "authorization",
+        "cookie",
+        "x-api-key",
+        "wechatpay-signature",
+        "wechatpay-serial",
+        "wechatpay-timestamp",
+        "wechatpay-nonce",
+    }
+    sanitized_headers = {}
+    for k, v in (headers or {}).items():
+        if k.lower() in sensitive_headers:
+            sanitized_headers[k] = "***REDACTED***"
+        else:
+            sanitized_headers[k] = v[:100]
+    sanitized_body = raw_body[:500] if raw_body else ""
+    return {
+        "headers": sanitized_headers,
+        "body_length": len(raw_body) if raw_body else 0,
+        "body_preview": sanitized_body,
+    }
+
+
 async def _handle_callback(
     channel: str,
     payload: CallbackPayload,
@@ -387,6 +419,14 @@ async def _handle_callback(
             ),
         )
 
+    # P0-02 (R4): 脱敏记录回调 — 不得在日志中暴露完整凭证/签名/敏感字段
+    logger.info(
+        "payment_callback channel=%s trade_no=%s sanitized=%s",
+        channel,
+        trade_no,
+        _sanitize_callback_for_log(raw_body, headers or {}),
+    )
+
     # P1-01: 通知去重 — Redis SETNX 防止重复处理同一交易号
     redis_client = None
     try:
@@ -409,6 +449,20 @@ async def _handle_callback(
         elif redis_client:
             await redis_client.close()
         redis_client = None
+
+    # P0-02 (R4): DB 级别去重兜底 — Redis 故障时仍可防止重复处理
+    existing = await db.execute(
+        select(Order).where(
+            Order.channel == channel,
+            Order.third_party_trade_no == trade_no,
+        )
+    )
+    if existing.scalar_one_or_none():
+        logger.info(
+            "payment_callback_db_duplicate channel=%s trade_no=%s",
+            channel, trade_no,
+        )
+        return {"code": "SUCCESS", "message": "OK (duplicate, already processed)"}
 
     callback_raw = json.dumps(payload.model_dump(), ensure_ascii=False, default=str)
 

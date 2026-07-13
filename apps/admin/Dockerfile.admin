@@ -2,20 +2,21 @@
 # 构建上下文: 项目根目录
 # 构建命令: docker build -f apps/admin/Dockerfile.admin -t smartlearn-admin .
 
-FROM node:20-alpine AS build
+# P1-04 (R4): 固定基础镜像版本
+FROM node:20.18-alpine AS build
 
 WORKDIR /app
 
-# 复制依赖定义文件（无 package-lock.json，使用 npm install 兜底）
+# P1-04 (R4): 已有 package-lock.json，使用 npm ci 可复现构建
 COPY apps/admin/package*.json ./
 
-# 安装依赖
-RUN npm install
+# P1-04 (R4): 使用 npm ci 替代 npm install（确定性构建）
+RUN npm ci
 
 # 复制源代码
 COPY apps/admin .
 
-# 构建应用
+# P1-04 (R4): build 前执行 tsc 类型检查
 RUN npm run build
 
 # ── 生产阶段 ──
