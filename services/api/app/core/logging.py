@@ -145,7 +145,7 @@ def setup_logging(environment: str = "development") -> None:
         structlog.contextvars.merge_contextvars,
         # 兼容标准 logging 的 %-style 格式化：logger.warning("msg %s", val) → "msg val"
         # 必须放在 add_log_level 之前，确保 event 字段已格式化
-        structlog.processors.PositionalArgumentsFormatter(),
+        structlog.stdlib.PositionalArgumentsFormatter(),
         structlog.processors.add_log_level,
         structlog.processors.TimeStamper(fmt="iso", utc=True),
         _inject_context_processor,
