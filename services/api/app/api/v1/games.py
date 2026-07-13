@@ -11,7 +11,8 @@ from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.deps import get_current_user_id, get_db
-from app.models.business import GameSession, UserGameProfile, User
+from app.models.business import GameSession, UserGameProfile
+from app.models.user import User
 from app.schemas.games import (
     GameConfigResponse,
     GameDetailResponse,
