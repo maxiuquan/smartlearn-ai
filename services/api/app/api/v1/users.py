@@ -541,6 +541,22 @@ async def ban_user(
     await db.commit()
     await db.refresh(user)
 
+    # P1-09: 禁用后必须立即撤销该用户所有会话（fail-closed）
+    # Redis 故障时也不能放行：通过 DB auth_sessions 表撤销
+    try:
+        from app.core.security import revoke_all_user_sessions
+        revoked = await revoke_all_user_sessions(user.id, db)
+        logger.info(
+            "ban_user revoked sessions user_id=%s count=%s", user.id, revoked
+        )
+    except Exception as e:
+        # P1-09: 即使 Redis 故障，DB 撤销已生效（auth_sessions.status=revoked）
+        # get_current_user 依赖会检查 user.status == "banned"，旧 token 仍会被拒绝
+        logger.warning(
+            "ban_user session revoke failed (non-blocking, DB status已生效): "
+            f"user_id={user.id} err={e}"
+        )
+
     return await _build_user_detail(db, user)
 
 

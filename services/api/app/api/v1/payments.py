@@ -311,7 +311,12 @@ async def view_subscription_ledger(
 async def _handle_callback(
     channel: str, payload: CallbackPayload, db: AsyncSession
 ) -> dict:
-    """统一处理微信/支付宝回调：提取字段 + 调用 service + 事务提交。"""
+    """统一处理微信/支付宝回调：提取字段 + 调用 service + 事务提交。
+
+    P0-05: 未接入官方验签 SDK 前禁止把请求视为验签通过。
+    - 已配置渠道密钥时调用真实验签；
+    - 未配置或验签失败时返回 501/400，不得调用 handle_pay_callback()。
+    """
     order_no = payload.order_no or payload.out_trade_no
     trade_no = payload.transaction_id or payload.trade_no
     amount_cents = (
@@ -327,9 +332,24 @@ async def _handle_callback(
                 "transaction_id/trade_no, amount_cents/total_fee"
             ),
         )
+
     callback_raw = json.dumps(payload.model_dump(), ensure_ascii=False, default=str)
-    # 验签占位: 真实接入需用各渠道 SDK/公钥校验签名，此处先标记为 True
-    signature_valid = True
+
+    # P0-05: 真实验签 — 按渠道校验签名
+    # 微信/支付宝官方 SDK 未接入前，禁止把任何请求标记为验签通过。
+    signature_valid = await _verify_channel_signature(channel, payload, callback_raw)
+
+    if not signature_valid:
+        # 验签失败：fail-closed，不得入账
+        logger.warning(
+            "payment_callback_signature_invalid channel=%s order_no=%s",
+            channel, order_no,
+        )
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="支付回调验签失败，订单状态未变更",
+        )
+
     try:
         order = await payment_service.handle_pay_callback(
             db,
@@ -351,3 +371,39 @@ async def _handle_callback(
         "order_no": order.order_no,
         "status": order.status,
     }
+
+
+async def _verify_channel_signature(
+    channel: str, payload: "CallbackPayload", callback_raw: str
+) -> bool:
+    """P0-05: 渠道真实验签。
+
+    - 未接入官方 SDK 时返回 False（fail-closed），禁止伪造支付。
+    - 真实接入后在此处替换为微信 V3 / 支付宝 RSA2 验签实现。
+    - 仅当对应渠道的凭证完整配置且验签通过时返回 True。
+    """
+    from app.core.config import settings
+
+    # 微信支付：需要 API V3 证书/密钥验签
+    if channel == "wechat":
+        if not settings.is_wechat_pay_enabled:
+            # 渠道未配置 → 拒绝回调（防止伪造）
+            return False
+        # TODO: 接入微信支付 SDK 后实现真实签名校验
+        # from wechatpayv3 import WeChatPay
+        # wxpay = WeChatPay(...)
+        # return wxpay.verify_signature(callback_raw, headers)
+        return False
+
+    # 支付宝：需要支付宝公钥 RSA2 验签
+    if channel == "alipay":
+        if not settings.is_alipay_enabled:
+            return False
+        # TODO: 接入支付宝 SDK 后实现真实签名校验
+        # from alipay import AliPay
+        # alipay = AliPay(...)
+        # return alipay.verify(callback_raw, payload.signature)
+        return False
+
+    # 未知渠道
+    return False

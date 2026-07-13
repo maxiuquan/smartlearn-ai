@@ -10,11 +10,13 @@ from app.models.business import (
     GameSession,
     KnowledgePoint,
     Question,
+    QuestionAttemptEvent,
     UserGameProfile,
     UserQuestionAttempt,
     UserWordProgress,
     VocabularyWord,
     WordGameSession,
+    WordLearningEvent,
     WrongQuestion,
 )
 from app.models.content_asset import ContentAsset, ContentTakedownRequest
@@ -47,6 +49,9 @@ __all__ = [
     "GameSession",
     "UserGameProfile",
     "WordGameSession",
+    # P1-03/05: 学习事件流（不可变，用于幂等与回放）
+    "WordLearningEvent",
+    "QuestionAttemptEvent",
     # P0-5 内容版权
     "ContentAsset",
     "ContentTakedownRequest",

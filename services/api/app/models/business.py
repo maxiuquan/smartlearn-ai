@@ -84,9 +84,67 @@ class UserWordProgress(Base):
     review_count: Mapped[int] = mapped_column(Integer, server_default="0", nullable=False)
     correct_count: Mapped[int] = mapped_column(Integer, server_default="0", nullable=False)
     wrong_count: Mapped[int] = mapped_column(Integer, server_default="0", nullable=False)
+    # P1-05: 乐观锁版本号，防止并发更新丢失
+    version: Mapped[int] = mapped_column(Integer, server_default="0", nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.now(), onupdate=func.now(), nullable=False
+    )
+
+
+class WordLearningEvent(Base):
+    """词汇学习事件表（不可变事件流，用于回放/审计/统计）.
+
+    P1-05: 建立独立事件表，配合 event_id 幂等键防止重复写入。
+    每次词汇学习行为（review/answer/game）写入一条不可变事件记录。
+    """
+
+    __tablename__ = "word_learning_events"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    event_id: Mapped[str] = mapped_column(String(128), nullable=False, index=True)
+    user_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    word_id: Mapped[str] = mapped_column(
+        String(100), ForeignKey("vocabulary_words.word_id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    event_type: Mapped[str] = mapped_column(String(30), nullable=False)  # review/answer/game
+    source: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)  # vocab/game/recommend
+    correct: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
+    score: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    question_id: Mapped[Optional[int]] = mapped_column(
+        Integer, ForeignKey("questions.id", ondelete="SET NULL"), nullable=True
+    )
+    evidence: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # 题目/游戏证据快照 JSON
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, server_default=func.now(), nullable=False
+    )
+
+
+class QuestionAttemptEvent(Base):
+    """题目作答事件表（不可变事件流，用于回放/审计/统计）.
+
+    P1-03: 配合 attempt_id 幂等键防止重复写入，DB 层唯一约束兜底。
+    每次作答行为写入一条不可变事件记录。
+    """
+
+    __tablename__ = "question_attempt_events"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    attempt_id: Mapped[str] = mapped_column(String(128), nullable=False, index=True)
+    user_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    question_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("questions.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    user_answer: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    correct: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    duration_ms: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    knowledge_points: Mapped[Optional[list[Any]]] = mapped_column(JSONB, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, server_default=func.now(), nullable=False
     )
 
 

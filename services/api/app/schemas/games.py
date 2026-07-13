@@ -29,7 +29,10 @@ class GameLeaderboardConfig(BaseModel):
 
 
 class GameConfigResponse(BaseModel):
-    """游戏配置响应"""
+    """游戏配置响应（公开端点用）.
+
+    P1-06: 对外 DTO 收敛 — 隐藏 tech_notes / business_value / config 等内部字段。
+    """
 
     game_id: str
     name: str
@@ -43,12 +46,22 @@ class GameConfigResponse(BaseModel):
     subjects: Optional[list[str]] = None
     learning_goal: Optional[str] = None
     core_mechanisms: Optional[list[str]] = None
-    data_sources: Optional[list[str]] = None
     difficulty_levels: Optional[list[str]] = None
     session: Optional[GameSessionConfig] = None
     rewards: Optional[GameRewards] = None
     props: Optional[list[str]] = None
     leaderboard: Optional[GameLeaderboardConfig] = None
+    # P1-06: 以下内部字段不暴露给客户端（data_sources/stage/tech_notes/business_value/config）
+    # 如需展示，使用管理端 GameConfigAdminResponse 显式请求
+
+
+class GameConfigAdminResponse(GameConfigResponse):
+    """游戏配置管理端响应（含内部字段）.
+
+    P1-06: 仅管理员可访问，包含 tech_notes/business_value/config 等内部字段。
+    """
+
+    data_sources: Optional[list[str]] = None
     stage: Optional[int] = None
     tech_notes: Optional[str] = None
     business_value: Optional[str] = None

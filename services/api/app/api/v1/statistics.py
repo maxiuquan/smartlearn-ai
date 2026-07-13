@@ -229,7 +229,7 @@ async def get_my_profile(
     - total_questions_answered: 当前用户答题总数
     - total_correct: 当前用户答对数
     - accuracy: 正确率（0~1）
-    - total_study_minutes: 游戏会话累计时长（分钟）
+    - total_study_minutes: 游戏会话 + 作答累计时长（分钟）
     - current_streak: 连续打卡天数（取自 user_game_profile）
     - vocab_mastered: 当前用户已掌握词汇数
     - last_login_at: 最近登录时间
@@ -278,14 +278,24 @@ async def get_my_profile(
         else 0.0
     )
 
-    # 学习时长：游戏会话 duration 累计（秒 → 分钟）
-    study_seconds_result = await db.execute(
+    # 学习时长：游戏会话 duration 累计 + 作答 duration_ms 累计（秒 → 分钟）
+    # P1-02: 修正统计口径，纳入 UserQuestionAttempt.duration_ms 避免低估学习时长
+    game_seconds_result = await db.execute(
         select(func.coalesce(func.sum(GameSession.duration), 0)).where(
             GameSession.user_id == user_id
         )
     )
-    study_seconds = study_seconds_result.scalar() or 0
-    total_study_minutes = int(study_seconds / 60) if study_seconds else 0
+    game_seconds = game_seconds_result.scalar() or 0
+
+    attempt_ms_result = await db.execute(
+        select(func.coalesce(func.sum(UserQuestionAttempt.duration_ms), 0)).where(
+            UserQuestionAttempt.user_id == user_id
+        )
+    )
+    attempt_ms = attempt_ms_result.scalar() or 0
+    # 游戏秒 + 作答毫秒转秒，再转分钟
+    total_seconds = int(game_seconds) + int(attempt_ms) // 1000
+    total_study_minutes = total_seconds // 60 if total_seconds else 0
 
     # 连续打卡天数：取自用户游戏档案
     streak_result = await db.execute(

@@ -6,7 +6,7 @@
 # ──────────────────────────────────────────────────────────────
 
 # 强制打破 Docker 缓存(每次构建都重新执行所有层)
-ARG CACHE_BUSTER=v2026-07-13-v20
+ARG CACHE_BUSTER=v2026-07-13-v21
 
 # ========== Stage 1: 构建前端 (student-web + admin) ==========
 FROM node:20-alpine AS frontend
@@ -63,7 +63,8 @@ FROM python:3.11-slim AS final
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PYTHONFAULTHANDLER=1 \
-    PIP_NO_CACHE_DIR=1
+    PIP_NO_CACHE_DIR=1 \
+    RAG_DATA_DIR=/app/data
 
 # 运行时依赖:
 #   nginx          反向代理 + 静态托管

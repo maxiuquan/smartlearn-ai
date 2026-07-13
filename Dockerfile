@@ -63,7 +63,8 @@ FROM python:3.11-slim AS final
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PYTHONFAULTHANDLER=1 \
-    PIP_NO_CACHE_DIR=1
+    PIP_NO_CACHE_DIR=1 \
+    RAG_DATA_DIR=/app/data
 
 # 运行时依赖:
 #   nginx          反向代理 + 静态托管

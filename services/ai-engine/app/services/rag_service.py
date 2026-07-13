@@ -49,6 +49,8 @@ class RAGService:
         self._embedding_dim: int = settings.EMBEDDING_DIMENSIONS
         self._initialized: bool = False
         self._router = get_router()
+        # P0-03: 防止并发首请求触发多次构建
+        self._init_lock: asyncio.Lock = asyncio.Lock()
 
     # ── 初始化 ──────────────────────────────────────────────
 
@@ -56,23 +58,28 @@ class RAGService:
         """加载所有知识数据并构建索引（异步）
 
         P0-05: 重写为真正的 async 初始化，禁止在 async 上下文中调用 asyncio.run()。
+        P0-03: 加 asyncio.Lock 防止并发首请求触发多次构建。
         """
         if self._initialized:
             return
-        # P0-05: 启动时打印规范化路径和语料数量摘要
-        print(f"   RAG DATA_DIR = {DATA_DIR}")
-        print(f"   知识点目录: {KNOWLEDGE_POINTS_DIR} (exists={KNOWLEDGE_POINTS_DIR.exists()})")
-        print(f"   题目目录: {QUESTIONS_DIR} (exists={QUESTIONS_DIR.exists()})")
-        self._load_knowledge_points()
-        self._load_questions()
-        await self._build_embeddings()
-        self._initialized = True
-        print(
-            f"RAG 服务已初始化: {len(self._knowledge_chunks)} 个知识点, "
-            f"{len(self._question_chunks)} 道题目"
-        )
-        if len(self._knowledge_chunks) == 0 and len(self._question_chunks) == 0:
-            print("⚠️  警告: RAG 语料为 0，请检查 DATA_DIR 路径配置")
+        async with self._init_lock:
+            # double-check：拿到锁后再次确认（其他并发任务可能已完成初始化）
+            if self._initialized:
+                return
+            # P0-05: 启动时打印规范化路径和语料数量摘要
+            print(f"   RAG DATA_DIR = {DATA_DIR}")
+            print(f"   知识点目录: {KNOWLEDGE_POINTS_DIR} (exists={KNOWLEDGE_POINTS_DIR.exists()})")
+            print(f"   题目目录: {QUESTIONS_DIR} (exists={QUESTIONS_DIR.exists()})")
+            self._load_knowledge_points()
+            self._load_questions()
+            await self._build_embeddings()
+            self._initialized = True
+            print(
+                f"RAG 服务已初始化: {len(self._knowledge_chunks)} 个知识点, "
+                f"{len(self._question_chunks)} 道题目"
+            )
+            if len(self._knowledge_chunks) == 0 and len(self._question_chunks) == 0:
+                print("⚠️  警告: RAG 语料为 0，请检查 DATA_DIR 路径配置")
 
     def _load_knowledge_points(self) -> None:
         """从 JSON 文件加载知识点，展平为 chunks"""
@@ -292,7 +299,7 @@ class RAGService:
     async def retrieve_context(self, query: str, top_k: int | None = None) -> list[dict[str, Any]]:
         """异步检索与查询最相关的知识点"""
         if not self._initialized:
-            self.initialize()
+            await self.initialize()
         if top_k is None:
             top_k = settings.RAG_TOP_K
 
@@ -315,7 +322,7 @@ class RAGService:
     ) -> list[dict[str, Any]]:
         """异步检索与查询最相似的题目"""
         if not self._initialized:
-            self.initialize()
+            await self.initialize()
         if top_k is None:
             top_k = settings.RAG_TOP_K
 

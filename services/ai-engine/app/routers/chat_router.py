@@ -33,6 +33,8 @@ _ALLOWED_USER_ROLES = {"user", "assistant"}  # 禁止用户提交 system / tool
 
 class ChatMessage(BaseModel):
     """对话消息"""
+    model_config = {"extra": "forbid"}  # P1-07: 禁止未声明字段（防 embedding/tools 注入）
+
     role: str = Field(..., description="角色: user / assistant")
     content: str = Field(..., description="消息内容")
 
@@ -58,6 +60,8 @@ class ChatMessage(BaseModel):
 
 class ChatRequest(BaseModel):
     """对话请求"""
+    model_config = {"extra": "forbid"}  # P1-07: 禁止未声明字段
+
     messages: list[ChatMessage] = Field(..., description="对话历史消息列表")
     context: str = Field(default="", description="可选的附加上下文")
 

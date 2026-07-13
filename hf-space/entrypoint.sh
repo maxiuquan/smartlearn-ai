@@ -12,6 +12,10 @@ echo "================================================"
 
 cd /app
 
+# P0-04: 显式指定 RAG 数据目录，避免 rag_service.py 回退到 parents[n] 猜测路径
+export RAG_DATA_DIR=/app/data
+echo "  RAG_DATA_DIR=$RAG_DATA_DIR"
+
 # ── 1. 注入 AI_ENGINE_API_KEY 到 nginx 配置 ──
 echo "[1/4] 注入 AI_ENGINE_API_KEY..."
 if [ -n "$AI_ENGINE_API_KEY" ]; then

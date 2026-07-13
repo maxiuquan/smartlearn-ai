@@ -54,20 +54,24 @@ def _load_games_config() -> list[dict]:
         return []
 
 
-def _build_game_config(game: dict) -> GameConfigResponse:
+def _build_game_config(game: dict, *, include_internal: bool = False) -> GameConfigResponse:
     """将 JSON 字典转换为 GameConfigResponse 模型。
+
+    P1-06: 默认只返回公开字段；include_internal=True 时返回 GameConfigAdminResponse（含内部字段）。
 
     Args:
         game: 从 JSON 配置中解析出的单个游戏字典。
+        include_internal: 是否包含 tech_notes/business_value/config 等内部字段（仅管理员）。
 
     Returns:
-        GameConfigResponse 实例。
+        GameConfigResponse 或 GameConfigAdminResponse 实例。
     """
     session_raw = game.get("session") or {}
     rewards_raw = game.get("rewards") or {}
     leaderboard_raw = game.get("leaderboard") or {}
 
-    return GameConfigResponse(
+    # P1-06: 公开端点的基础字段
+    common_kwargs = dict(
         game_id=game["game_id"],
         name=game["name"],
         name_en=game.get("name_en"),
@@ -80,7 +84,6 @@ def _build_game_config(game: dict) -> GameConfigResponse:
         subjects=game.get("subjects"),
         learning_goal=game.get("learning_goal"),
         core_mechanisms=game.get("core_mechanisms"),
-        data_sources=game.get("data_sources"),
         difficulty_levels=game.get("difficulty_levels"),
         session=GameSessionConfig(
             time_limit_sec=session_raw.get("time_limit_sec", 0),
@@ -97,11 +100,21 @@ def _build_game_config(game: dict) -> GameConfigResponse:
             enabled=leaderboard_raw.get("enabled", False),
             scopes=leaderboard_raw.get("scopes", []),
         ),
-        stage=game.get("stage"),
-        tech_notes=game.get("tech_notes"),
-        business_value=game.get("business_value"),
-        config=game.get("config"),
     )
+
+    if include_internal:
+        # P1-06: 管理端响应包含内部字段
+        from app.schemas.games import GameConfigAdminResponse
+        return GameConfigAdminResponse(
+            **common_kwargs,
+            data_sources=game.get("data_sources"),
+            stage=game.get("stage"),
+            tech_notes=game.get("tech_notes"),
+            business_value=game.get("business_value"),
+            config=game.get("config"),
+        )
+
+    return GameConfigResponse(**common_kwargs)
 
 
 @router.get(
@@ -169,16 +182,12 @@ async def get_game_detail(
         subjects=base.subjects,
         learning_goal=base.learning_goal,
         core_mechanisms=base.core_mechanisms,
-        data_sources=base.data_sources,
+        # P1-06: data_sources/stage/tech_notes/business_value/config 不再对客户端暴露
         difficulty_levels=base.difficulty_levels,
         session=base.session,
         rewards=base.rewards,
         props=base.props,
         leaderboard=base.leaderboard,
-        stage=base.stage,
-        tech_notes=base.tech_notes,
-        business_value=base.business_value,
-        config=base.config,
         user_best_score=user_best_score,
     )
 

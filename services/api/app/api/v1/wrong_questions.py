@@ -31,6 +31,8 @@ async def list_wrong_questions(
     - 支持按学科筛选
     """
     conditions = [WrongQuestion.user_id == user_id]
+    # P1-03: 软毕业的错题不再展示在错题列表（graduated_at 为空的才显示）
+    conditions.append(WrongQuestion.graduated_at.is_(None))
     if subject:
         conditions.append(Question.subject == subject)
 
@@ -120,43 +122,29 @@ async def mark_wrong_question_reviewed(
 
     # 更新复习状态（独立 review_count，修复原用 wrong_count 做索引的缺陷）
     # 间隔序列：第1次复习3天, 第2次7天, 第3次14天, 第4次30天, 第5次60天
-    # 连续到第5阶段后毕业（从错题本移除）
+    # P1-03: 统一错题状态机：active → scheduled → mastery_candidate → graduated
+    # 答对一次只推进阶段，不直接删除；第 5 阶段后毕业（保留行 + graduated_at 标记）
     intervals = [3, 7, 14, 30, 60]
     max_stage = len(intervals)  # 5
     new_stage = existing.review_stage + 1
 
     if new_stage > max_stage:
-        # 已达最高阶段，标记毕业并从错题本移除
-        await db.execute(
-            text(
-                """
-                DELETE FROM wrong_questions
-                WHERE user_id = :user_id AND question_id = :question_id
-                """
-            ),
-            {"user_id": user_id, "question_id": question_id},
-        )
+        # 已达最高阶段，软毕业：保留行 + graduated_at 时间戳
+        # 这样既能统计"已毕业题数"，也保留历史错题记录供回放审计
+        existing.review_count = existing.review_count + 1
+        existing.review_stage = max_stage
+        existing.graduated_at = datetime.now(timezone.utc).replace(tzinfo=None)
+        existing.next_review_at = None
         await db.commit()
         return
 
     interval_days = intervals[min(new_stage - 1, max_stage - 1)]
 
-    await db.execute(
-        text(
-            """
-            UPDATE wrong_questions SET
-                review_count = review_count + 1,
-                review_stage = :stage,
-                next_review_at = NOW() + (:interval || ' days')::INTERVAL
-            WHERE user_id = :user_id AND question_id = :question_id
-            """
-        ),
-        {
-            "stage": new_stage,
-            "interval": str(interval_days),
-            "user_id": user_id,
-            "question_id": question_id,
-        },
-    )
+    existing.review_count = existing.review_count + 1
+    existing.review_stage = new_stage
+    # P1-03: last_wrong_at 更新为最近复习时间，next_review_at 按 SRS 间隔计算
+    existing.last_wrong_at = datetime.now(timezone.utc).replace(tzinfo=None)
+    next_review = datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(days=interval_days)
+    existing.next_review_at = next_review
 
     await db.commit()
