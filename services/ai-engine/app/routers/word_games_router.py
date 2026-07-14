@@ -28,7 +28,6 @@ word_games_service = WordGamesService()
 
 @router.post("/start", response_model=WordGameResponse)
 async def start_game(
-    request: WordGameRequest,
     auth: dict = Depends(require_auth),
     authorization: Optional[str] = Header(default=None),
 ):
@@ -46,7 +45,6 @@ async def start_game(
 
 @router.post("/submit", response_model=SubmitAnswerResponse)
 async def submit_answer(
-    request: SubmitAnswerRequest,
     auth: dict = Depends(require_auth),
     authorization: Optional[str] = Header(default=None),
 ):
@@ -75,7 +73,7 @@ async def get_game_summary(session_id: str, auth: dict = Depends(require_auth)):
 
 
 @router.post("/leaderboard", response_model=LeaderboardResponse)
-async def get_leaderboard(request: LeaderboardRequest, auth: dict = Depends(require_auth)):
+async def get_leaderboard(auth: dict = Depends(require_auth)):
     """
     获取排行榜（已下线）
 
