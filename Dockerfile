@@ -6,10 +6,13 @@
 # ──────────────────────────────────────────────────────────────
 
 # 强制打破 Docker 缓存(每次构建都重新执行所有层)
-ARG CACHE_BUSTER=v2026-07-14-v27
+ARG CACHE_BUSTER=v2026-07-14-v28
 
 # ========== Stage 1: 构建前端 (student-web + admin) ==========
 # P1-05: 固定基础镜像到具体版本，避免浮动 tag 导致构建不可复现
+# P1-01 (R7): 建议固定 digest 以实现不可变构建
+#   获取 digest: docker pull node:20.18-alpine && docker inspect --format='{{index .RepoDigests 0}}' node:20.18-alpine
+#   使用格式: FROM node:20.18-alpine@sha256:<digest>
 FROM node:20.18-alpine AS frontend
 
 WORKDIR /build

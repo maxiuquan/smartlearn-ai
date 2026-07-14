@@ -282,6 +282,8 @@ class GameAnswerEvent(Base):
     __table_args__ = (
         UniqueConstraint("session_id", "idempotency_key", name="uq_game_answer_idempotency"),
         UniqueConstraint("user_id", "idempotency_key", name="uq_game_answer_user_idempotency"),
+        # P0-01 (R7): 防止同一 session 同一题目重复答题
+        UniqueConstraint("session_id", "question_id", name="uq_game_answer_session_question"),
     )
 
 

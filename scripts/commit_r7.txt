@@ -1,0 +1,17 @@
+fix(R7): 游戏并发事务一致性 + 供应链可复现性
+
+P0-01 (R7): finish 添加 SELECT FOR UPDATE 行锁，防止并发 finish 重复发奖
+  - session 查询使用 .with_for_update() 锁定行
+  - 捕获 IntegrityError (uq_game_rewards_session 冲突)
+  - 冲突时 rollback 并返回首次结算结果，绝不二次发奖
+  - 已结算 session 返回首次 ledger 结果而非 409
+
+P0-01 (R7): GameAnswerEvent 新增 UNIQUE(session_id, question_id) 约束
+  - 防止同一 session 对同一题目重复写入答题事件
+  - Alembic 012 迁移
+
+P1-01 (R7): Dockerfile 添加镜像 digest 固定说明
+  - 所有 Python 依赖已用 == 锁定版本
+  - 添加 digest 获取命令注释
+
+CACHE_BUSTER: v2026-07-14-v28

@@ -640,6 +640,11 @@ async def finish_game_session(
 ) -> GameSessionFinishResponse:
     """P0-02 (R3): 服务端一次性结算 + 反作弊 + 不可变账本。
 
+    P0-01 (R7): 数据库行锁 + IntegrityError 处理
+    - 使用 SELECT FOR UPDATE 锁定 session 行，防止并发 finish
+    - 捕获 IntegrityError（uq_game_rewards_session 唯一约束冲突）
+    - 冲突时 rollback 并返回首次结算结果，绝不二次发奖
+
     - 校验 session
     - 服务端基于 GameAnswerEvent 计算 score / accuracy / xp / coins
     - 反作弊：min 500ms 答题间隔、accuracy > 0.95 且总时长 < 3s 视为异常
@@ -648,11 +653,14 @@ async def finish_game_session(
     - 更新 UserGameProfile（XP / coins 累加）
     - 返回最终结算结果
     """
+    # P0-01 (R7): 使用 SELECT FOR UPDATE 锁定 session 行，防止并发 finish
     session_result = await db.execute(
-        select(GameSession).where(
+        select(GameSession)
+        .where(
             GameSession.id == session_id,
             GameSession.user_id == user_id,
         )
+        .with_for_update()
     )
     session = session_result.scalar_one_or_none()
     if session is None:
@@ -666,9 +674,28 @@ async def finish_game_session(
             detail=f"game_id 不一致: URL={game_id}, session={session.game_id}",
         )
     if session.status == "finished":
+        # P0-01 (R7): 已结算的 session，返回首次结算结果而非 409
+        # 查询既有 ledger 返回首次结果
+        existing_ledger_result = await db.execute(
+            select(GameRewardsLedger).where(
+                GameRewardsLedger.session_id == session_id
+            )
+        )
+        existing_ledger = existing_ledger_result.scalar_one_or_none()
+        if existing_ledger:
+            # 返回首次结算结果
+            return GameSessionFinishResponse(
+                session_id=session_id,
+                score=existing_ledger.score,
+                xp_gained=existing_ledger.xp_gained,
+                coins_gained=existing_ledger.coins_gained,
+                accuracy=existing_ledger.accuracy,
+                correct_count=0,  # 不重新计算，避免侧信道
+                total_questions=0,
+            )
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="会话已结算，请勿重复结算",
+            detail="会话已结算但未找到账本记录",
         )
     now = datetime.now(timezone.utc).replace(tzinfo=None)
     if session.status == "expired" or (
@@ -758,7 +785,10 @@ async def finish_game_session(
         xp_gained = max(1, final_score // 10)
         coins_gained = max(1, final_score // 20)
 
-    # 写入 GameRewardsLedger（不可变，uq_game_rewards_session 兜底）
+    # P0-01 (R7): 写入 GameRewardsLedger + commit 包裹在 try/except IntegrityError 中
+    # 唯一约束 uq_game_rewards_session 冲突时 rollback，返回首次结算结果
+    from sqlalchemy.exc import IntegrityError as SAIntegrityError
+
     db.add(
         GameRewardsLedger(
             session_id=session_id,
@@ -795,7 +825,32 @@ async def finish_game_session(
         {"user_id": user_id, "xp": xp_gained, "coins": coins_gained},
     )
 
-    await db.commit()
+    try:
+        await db.commit()
+    except SAIntegrityError:
+        # P0-01 (R7): 并发 finish 导致唯一约束冲突
+        # rollback 并返回首次结算结果，绝不二次发奖
+        await db.rollback()
+        existing_ledger_result = await db.execute(
+            select(GameRewardsLedger).where(
+                GameRewardsLedger.session_id == session_id
+            )
+        )
+        existing_ledger = existing_ledger_result.scalar_one_or_none()
+        if existing_ledger:
+            return GameSessionFinishResponse(
+                session_id=session_id,
+                score=existing_ledger.score,
+                xp_gained=existing_ledger.xp_gained,
+                coins_gained=existing_ledger.coins_gained,
+                accuracy=existing_ledger.accuracy,
+                correct_count=0,
+                total_questions=0,
+            )
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="并发结算冲突，请重试",
+        )
 
     return GameSessionFinishResponse(
         session_id=session_id,
