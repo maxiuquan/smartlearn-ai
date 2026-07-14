@@ -810,8 +810,7 @@ async def finish_game_session(
 
 @router.post(
     "/{game_id}/sessions",
-    response_model=GameSessionResponse,
-    summary="提交游戏会话（已弃用，请使用 /start + /answers + /finish）",
+    summary="提交游戏会话（已废弃，请使用 /start + /answers + /finish）",
     deprecated=True,
 )
 async def submit_game_session(
@@ -819,100 +818,22 @@ async def submit_game_session(
     body: GameSessionRequest,
     user_id: int = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db),
-) -> GameSessionResponse:
-    """提交完成的游戏会话（已弃用，不发奖励）。
+) -> dict:
+    """提交完成的游戏会话（已废弃）。
 
-    **Deprecated (P0-01 R4)**：此端点已弃用，不再发放任何 XP/金币奖励。
+    **P0-1 (R5): 此端点已废弃，返回 410 Gone。**
+
     客户端必须使用三段式逐题作答流程才能获得奖励：
     1. POST /{game_id}/sessions/start — 服务端生成题目集
     2. POST /{game_id}/sessions/{session_id}/answers — 逐题提交
     3. POST /{game_id}/sessions/{session_id}/finish — 服务端结算
 
-    P0-01 (R4) 安全整改：
-    - 旧接口仅记录会话历史（score=0, xp=0, coins=0），不发放任何奖励
-    - 客户端 accuracy 不再驱动任何奖励计算
-    - 防止用户通过伪造 accuracy 刷 XP/金币/排行榜
+    R4 过渡期仅返回 0 奖励；R5 正式下线，返回 410 Gone 阻止旧客户端继续调用。
+    客户端 accuracy 不再驱动任何奖励计算。
     """
-    # P0-08: 校验 URL game_id 与 body.game_id 一致
-    if body.game_id != game_id:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"game_id 不一致: URL={game_id}, body={body.game_id}",
-        )
-
-    # 服务端校验：加载游戏配置，验证游戏存在
-    games_raw = _load_games_config()
-    game_cfg = next((g for g in games_raw if g["game_id"] == body.game_id), None)
-    if not game_cfg:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"游戏 '{body.game_id}' 不存在",
-        )
-
-    # P0-01 (R4): nonce 去重仍保留，防止重复提交
-    nonce_key = f"game:nonce:{user_id}:{body.game_id}:{body.nonce}"
-    redis_client = None
-    try:
-        from app.core.security import get_redis_client
-        redis_client = await get_redis_client()
-        if redis_client:
-            set_result = await redis_client.set(nonce_key, "1", ex=86400, nx=True)
-            if not set_result:
-                await redis_client.aclose()
-                raise HTTPException(
-                    status_code=status.HTTP_409_CONFLICT,
-                    detail="重复提交被拒绝（nonce 已使用）",
-                )
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.warning("nonce redis failed, fallback to memory: %s", e)
-        if body.nonce in _USED_NONCES:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="重复提交被拒绝（nonce 已使用）",
-            )
-        _USED_NONCES.add(body.nonce)
-        if len(_USED_NONCES) > 10000:
-            _USED_NONCES.clear()
-    finally:
-        if redis_client:
-            try:
-                await redis_client.aclose()
-            except Exception:
-                pass
-
-    # P0-01 (R4): 旧接口不发放任何奖励 — score/xp/coins 全部为 0
-    final_score = 0
-    xp_gained = 0
-    coins_gained = 0
-
-    # DB 列为 TIMESTAMP WITHOUT TIME ZONE, 必须剥离 tzinfo 避免 asyncpg DataError
-    started = body.started_at.replace(tzinfo=None) if body.started_at else datetime.utcnow()
-    finished = body.finished_at or datetime.now(timezone.utc)
-    finished = finished.replace(tzinfo=None) if finished.tzinfo else finished
-
-    # 仅记录会话历史（不发奖励）
-    new_session = GameSession(
-        user_id=user_id,
-        game_id=body.game_id,
-        score=final_score,
-        xp_gained=xp_gained,
-        coins_gained=coins_gained,
-        accuracy=body.accuracy,
-        duration=body.duration,
-        started_at=started,
-        finished_at=finished,
-    )
-    db.add(new_session)
-    await db.commit()
-
-    # P0-01 (R4): 不更新 user_game_profile — 旧接口不发放任何 XP/金币
-
-    return GameSessionResponse(
-        session_id=new_session.id,
-        xp_gained=xp_gained,
-        coins_gained=coins_gained,
+    raise HTTPException(
+        status_code=status.HTTP_410_GONE,
+        detail="此接口已废弃（410 Gone）。请使用三段式接口：POST /{game_id}/sessions/start → /answers → /finish",
     )
 
 

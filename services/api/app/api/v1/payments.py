@@ -405,6 +405,8 @@ async def _handle_callback(
 
     order_no = payload.order_no or payload.out_trade_no
     trade_no = payload.transaction_id or payload.trade_no
+    # P0-02 (R5): 提取支付平台通知 ID（微信通知 ID / 支付宝通知流水）
+    notification_id = getattr(payload, "notification_id", None) or getattr(payload, "notify_id", None) or ""
     amount_cents = (
         payload.amount_cents
         if payload.amount_cents is not None
@@ -421,9 +423,10 @@ async def _handle_callback(
 
     # P0-02 (R4): 脱敏记录回调 — 不得在日志中暴露完整凭证/签名/敏感字段
     logger.info(
-        "payment_callback channel=%s trade_no=%s sanitized=%s",
+        "payment_callback channel=%s trade_no=%s notification_id=%s sanitized=%s",
         channel,
         trade_no,
+        notification_id or "(none)",
         _sanitize_callback_for_log(raw_body, headers or {}),
     )
 
@@ -451,11 +454,10 @@ async def _handle_callback(
         redis_client = None
 
     # P0-02 (R4): DB 级别去重兜底 — Redis 故障时仍可防止重复处理
+    # P0-02 (R5): 同时检查 notification_id（如有），双重去重
+    dedup_conditions = [Order.channel == channel, Order.third_party_trade_no == trade_no]
     existing = await db.execute(
-        select(Order).where(
-            Order.channel == channel,
-            Order.third_party_trade_no == trade_no,
-        )
+        select(Order).where(*dedup_conditions)
     )
     if existing.scalar_one_or_none():
         logger.info(
@@ -463,6 +465,21 @@ async def _handle_callback(
             channel, trade_no,
         )
         return {"code": "SUCCESS", "message": "OK (duplicate, already processed)"}
+
+    # P0-02 (R5): 检查 notification_id 去重（如有 notification_id）
+    if notification_id:
+        existing_notif = await db.execute(
+            select(Order).where(
+                Order.channel == channel,
+                Order.notification_id == notification_id,
+            )
+        )
+        if existing_notif.scalar_one_or_none():
+            logger.info(
+                "payment_callback_notif_duplicate channel=%s notification_id=%s",
+                channel, notification_id,
+            )
+            return {"code": "SUCCESS", "message": "OK (duplicate, already processed)"}
 
     callback_raw = json.dumps(payload.model_dump(), ensure_ascii=False, default=str)
 
@@ -490,6 +507,7 @@ async def _handle_callback(
             callback_raw=callback_raw,
             signature_valid=signature_valid,
             amount_cents=amount_cents,
+            notification_id=notification_id,
         )
     except ValueError as e:
         await db.rollback()

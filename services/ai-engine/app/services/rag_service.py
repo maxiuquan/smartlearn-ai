@@ -723,6 +723,8 @@ class RAGService:
             chunk["similarity"] = round(score, 4)
             # P1-02: 引用可见性字段
             chunk["source_id"] = chunk.get("id", "")
+            # P1-02 (R5): chunk_id 用于精确定位检索片段
+            chunk["chunk_id"] = f"kp_{idx}"
             chunk["data_version"] = self._data_version
             chunk["embedding_model"] = self._embedding_model_name()
             contexts.append(chunk)
@@ -763,6 +765,8 @@ class RAGService:
             chunk["similarity"] = round(score, 4)
             # P1-02: 引用可见性字段
             chunk["source_id"] = chunk.get("id", "")
+            # P1-02 (R5): chunk_id 用于精确定位检索片段
+            chunk["chunk_id"] = f"q_{idx}"
             chunk["data_version"] = self._data_version
             chunk["embedding_model"] = self._embedding_model_name()
             # P1-R3: 默认脱敏 — 移除 answer / solution，防止答案泄露

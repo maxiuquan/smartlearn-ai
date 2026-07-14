@@ -1,0 +1,7 @@
+fix(R5): 全部整改 P0+P1 阻断项
+
+P0-1: 旧游戏结算接口从"返回0奖励"升级为 410 Gone（完全下线，阻止旧客户端调用）
+P0-2: Order 模型新增 notification_id 字段 + UNIQUE(channel, notification_id) 唯一约束
+       回调处理增加 notification_id 提取 + DB 级通知 ID 去重 + Alembic 011 迁移
+P1-2: RAG 输出增加 chunk_id 引用字段（知识点 kp_{idx}，题目 q_{idx}）
+CACHE_BUSTER: v2026-07-14-v27

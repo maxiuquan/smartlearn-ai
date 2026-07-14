@@ -38,9 +38,13 @@ class Order(Base):
     __tablename__ = "orders"
 
     # P0-02 (R4): DB 级唯一约束兜底 — Redis 故障时仍可防止重复回调处理
+    # P0-02 (R5): 增加 (channel, notification_id) 唯一约束，覆盖支付平台通知 ID 去重
     __table_args__ = (
         UniqueConstraint(
             "channel", "third_party_trade_no", name="uq_order_channel_trade_no"
+        ),
+        UniqueConstraint(
+            "channel", "notification_id", name="uq_order_channel_notification_id"
         ),
     )
 
@@ -69,6 +73,10 @@ class Order(Base):
         String(20), server_default="created", nullable=False, index=True
     )  # created/paid/closed/refunded/refund_pending/failed
     third_party_trade_no: Mapped[Optional[str]] = mapped_column(
+        String(128), nullable=True, index=True
+    )
+    # P0-02 (R5): 支付平台通知 ID（微信通知 ID / 支付宝通知流水）
+    notification_id: Mapped[Optional[str]] = mapped_column(
         String(128), nullable=True, index=True
     )
     paid_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)

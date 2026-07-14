@@ -264,6 +264,7 @@ class PaymentService:
         callback_raw: str,
         signature_valid: bool,
         amount_cents: int,
+        notification_id: str = "",
     ) -> Order:
         """处理支付回调: 验签校验 + 幂等 + 状态机 created->paid + 发放权益 + Outbox.
 
@@ -317,6 +318,9 @@ class PaymentService:
         prev = order.status
         order.status = ORDER_STATUS_PAID
         order.third_party_trade_no = third_party_trade_no
+        # P0-02 (R5): 记录支付平台通知 ID
+        if notification_id:
+            order.notification_id = notification_id
         order.callback_raw = callback_raw
         order.signature_valid = signature_valid
         order.paid_at = _utcnow()
