@@ -26,8 +26,10 @@ export default function GameResult() {
 
   // 从 URL query 读取 gameId（由游戏页跳转时附加）
   const gameId = searchParams.get('gameId') || '';
-  // 兼容旧链接的 from 参数；默认回到游戏大厅
-  const returnPath = searchParams.get('from') || '/games';
+  // 兼容旧链接的 from 参数；校验 allowlist 避免开放重定向
+  const _ALLOWED_RETURN_PATHS = ['/games', '/dashboard', '/'];
+  const rawFrom = searchParams.get('from') || '';
+  const returnPath = _ALLOWED_RETURN_PATHS.includes(rawFrom) ? rawFrom : '/games';
 
   const [summary, setSummary] = useState<SummaryData | null>(null);
   const [loading, setLoading] = useState(true);

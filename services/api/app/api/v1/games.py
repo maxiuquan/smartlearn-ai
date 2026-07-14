@@ -442,7 +442,7 @@ def _enrich_for_interaction(
                 **q,
                 "blanks": [{"id": blank_id, "answer": prompt}],
                 "word_bank": word_bank,
-                "prompt_with_blanks": f"{meaning} ____",
+                "prompt_with_blanks": f"{meaning} ______",
                 "correct_answer": _json.dumps(
                     {"blanks": {blank_id: prompt}}, ensure_ascii=False
                 ),

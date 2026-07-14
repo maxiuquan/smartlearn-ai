@@ -397,14 +397,19 @@ function DragSortGame({ sortItems, onAnswer, submitting }: DragSortGameProps) {
 interface WordBankGameProps {
   promptWithBlanks: string;
   wordBank: string[];
+  blankIds: string[];
   onAnswer: (answer: string | undefined, structuredAnswer: Record<string, unknown>) => void;
   submitting: boolean;
 }
 
-function WordBankGame({ promptWithBlanks, wordBank, onAnswer, submitting }: WordBankGameProps) {
+function WordBankGame({ promptWithBlanks, wordBank, blankIds, onAnswer, submitting }: WordBankGameProps) {
   // 按 ______ 分割句子，中间即为空格位置
   const segments = promptWithBlanks.split('______');
   const blankCount = Math.max(segments.length - 1, 0);
+  // 使用后端提供的 blank_id（如 b1, b2）；若不足则回退到 b1, b2...
+  const effectiveBlankIds = blankIds.length >= blankCount
+    ? blankIds.slice(0, blankCount)
+    : Array.from({ length: blankCount }, (_, i) => `b${i + 1}`);
 
   // blankToBank[i] = 第 i 个空格填入的词在 wordBank 中的索引，null 表示未填
   const [blankToBank, setBlankToBank] = useState<(number | null)[]>(() =>
@@ -446,9 +451,13 @@ function WordBankGame({ promptWithBlanks, wordBank, onAnswer, submitting }: Word
   function handleSubmit() {
     if (submitting) return;
     if (!allFilled) return;
-    const blanks: Record<number, string> = {};
+    // 使用后端 blank_id 作为 key，与后端 correct_answer 格式一致
+    const blanks: Record<string, string> = {};
     blankToBank.forEach((b, i) => {
-      if (b !== null) blanks[i] = wordBank[b];
+      if (b !== null) {
+        const blankId = effectiveBlankIds[i] || `b${i + 1}`;
+        blanks[blankId] = wordBank[b];
+      }
     });
     onAnswer(undefined, { blanks });
   }
@@ -694,6 +703,7 @@ export default function QuestionCard({
           key={question.question_id}
           promptWithBlanks={question.prompt_with_blanks || question.prompt}
           wordBank={question.word_bank}
+          blankIds={(question.blanks || []).map((b) => b.id)}
           onAnswer={onAnswer}
           submitting={submitting}
         />
