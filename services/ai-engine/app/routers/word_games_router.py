@@ -1,8 +1,12 @@
 """
 单词游戏路由
+
+R8 审计修复：start/submit/summary/leaderboard 四个业务端点已下线（410 Gone），
+请使用 API Service 的 /api/v1/games/{game_id}/sessions/start → /answers → /finish 三段式接口。
+仅保留 game-types 与 health 两个端点。
 """
 from typing import Optional
-from fastapi import APIRouter, Depends, Header
+from fastapi import APIRouter, Depends, Header, HTTPException, status
 
 from app.models.word_games import (
     WordGameRequest,
@@ -29,17 +33,15 @@ async def start_game(
     authorization: Optional[str] = Header(default=None),
 ):
     """
-    开始单词游戏
+    开始单词游戏（已下线）
 
-    创建新的游戏会话：
-    - 选择游戏类型
-    - 选择单词
-    - 设置时间限制
-
-    6.1②：透传 auth 到 service，JWT sub 优先作 user_id。
-    词汇联动：透传 authorization token，service 用它调 api 获取今日学过的词汇。
+    此接口已下线（410 Gone）。请使用 API Service 的三段式接口：
+    /api/v1/games/{game_id}/sessions/start → /answers → /finish
     """
-    return await word_games_service.start_game(request, auth=auth, auth_token=authorization)
+    raise HTTPException(
+        status_code=status.HTTP_410_GONE,
+        detail="此接口已下线（410 Gone）。请使用 API Service 的 /api/v1/games/{game_id}/sessions/start → /answers → /finish 三段式接口。",
+    )
 
 
 @router.post("/submit", response_model=SubmitAnswerResponse)
@@ -49,46 +51,40 @@ async def submit_answer(
     authorization: Optional[str] = Header(default=None),
 ):
     """
-    提交答案
+    提交答案（已下线）
 
-    提交当前问题的答案：
-    - 判断正误
-    - 计算得分
-    - 获取下一题
-
-    6.1②：透传 auth，校验 session 归属。
-    词汇联动：透传 authorization token，service 用它向 api 提交 word event。
+    此接口已下线（410 Gone）。请使用 API Service 的三段式接口。
     """
-    return await word_games_service.submit_answer(request, auth=auth, auth_token=authorization)
+    raise HTTPException(
+        status_code=status.HTTP_410_GONE,
+        detail="此接口已下线（410 Gone）。请使用 API Service 的 /api/v1/games/{game_id}/sessions/start → /answers → /finish 三段式接口。",
+    )
 
 
 @router.get("/summary/{session_id}", response_model=GameSummary)
 async def get_game_summary(session_id: str, auth: dict = Depends(require_auth)):
     """
-    获取游戏总结
+    获取游戏总结（已下线）
 
-    游戏结束后的总结：
-    - 得分统计
-    - 正确率
-    - 需要加强的单词
-    - 排名和徽章
-
-    6.3：加 require_auth 防 IDOR（只能查自己的 session）。
-    6.1②：透传 auth，service 层校验 session 归属。
+    此接口已下线（410 Gone）。请使用 API Service 的三段式接口。
     """
-    return await word_games_service.get_game_summary(session_id, auth=auth)
+    raise HTTPException(
+        status_code=status.HTTP_410_GONE,
+        detail="此接口已下线（410 Gone）。请使用 API Service 的 /api/v1/games/{game_id}/sessions/start → /answers → /finish 三段式接口。",
+    )
 
 
 @router.post("/leaderboard", response_model=LeaderboardResponse)
 async def get_leaderboard(request: LeaderboardRequest, auth: dict = Depends(require_auth)):
     """
-    获取排行榜
+    获取排行榜（已下线）
 
-    查看游戏排行榜
-
-    6.2⑥：支持按 game_id 分榜。
+    此接口已下线（410 Gone）。请使用 API Service 的三段式接口。
     """
-    return await word_games_service.get_leaderboard(request, auth=auth)
+    raise HTTPException(
+        status_code=status.HTTP_410_GONE,
+        detail="此接口已下线（410 Gone）。请使用 API Service 的 /api/v1/games/{game_id}/sessions/start → /answers → /finish 三段式接口。",
+    )
 
 
 @router.get("/game-types")

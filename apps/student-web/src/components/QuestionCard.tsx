@@ -1,32 +1,11 @@
 import { useState, useEffect, Fragment } from 'react';
-
-interface Question {
-  question_id: string;
-  question_type: string;
-  question_text: string;
-  options: string[] | null;
-  correct_answer: string;
-  hint: string | null;
-  points: number;
-  word?: {
-    word: string;
-    meaning: string;
-    pronunciation?: string;
-    example_sentence?: string;
-  };
-  // tap_match 题型的左右列卡片
-  pairs?: Array<{ left: string; right: string }>;
-  // drag_sort 题型的待排序项
-  sort_items?: string[];
-  // word_bank 题型的候选词库
-  word_bank?: string[];
-}
+import type { GameQuestion } from '../hooks/useGameSession';
 
 interface QuestionCardProps {
-  question: Question;
+  question: GameQuestion;
   questionIndex: number;
   totalQuestions: number;
-  onAnswer: (answer: string) => void;
+  onAnswer: (answer?: string, structuredAnswer?: Record<string, unknown>) => void;
   feedback: { isCorrect: boolean; message: string } | null;
   submitting: boolean;
 }
@@ -76,12 +55,11 @@ interface ShuffledItem {
 
 interface TapMatchGameProps {
   pairs: Array<{ left: string; right: string }>;
-  correctAnswer: string;
-  onAnswer: (answer: string) => void;
+  onAnswer: (answer: string | undefined, structuredAnswer: Record<string, unknown>) => void;
   submitting: boolean;
 }
 
-function TapMatchGame({ pairs, correctAnswer, onAnswer, submitting }: TapMatchGameProps) {
+function TapMatchGame({ pairs, onAnswer, submitting }: TapMatchGameProps) {
   // 打乱左右两列
   const [leftItems, setLeftItems] = useState<ShuffledItem[]>(() =>
     shuffle(pairs.map((p, i) => ({ text: p.left, pairId: i, matched: false })))
@@ -98,13 +76,21 @@ function TapMatchGame({ pairs, correctAnswer, onAnswer, submitting }: TapMatchGa
     leftItems.every((it) => it.matched) &&
     rightItems.every((it) => it.matched);
 
-  // 全部配对完成后自动提交
+  // 全部配对完成后自动提交结构化配对映射
   useEffect(() => {
     if (allMatched && !submitting) {
-      const timer = setTimeout(() => onAnswer(correctAnswer), 600);
+      // 按 leftItems 当前顺序提取 [left, right] 对
+      const matchedPairs: Array<[string, string]> = leftItems.map((it) => {
+        const right = rightItems.find((r) => r.pairId === it.pairId);
+        return [it.text, right ? right.text : ''];
+      });
+      const timer = setTimeout(
+        () => onAnswer(undefined, { pairs: matchedPairs }),
+        600
+      );
       return () => clearTimeout(timer);
     }
-  }, [allMatched, submitting, onAnswer, correctAnswer]);
+  }, [allMatched, submitting, onAnswer, leftItems, rightItems]);
 
   function handleLeftClick(idx: number) {
     if (submitting || wrongPair) return;
@@ -211,7 +197,7 @@ function TapMatchGame({ pairs, correctAnswer, onAnswer, submitting }: TapMatchGa
 // ============================ 听音选词 ============================
 interface ListenSelectGameProps {
   word: string;
-  options: string[] | null;
+  options: string[] | undefined;
   onAnswer: (answer: string) => void;
   submitting: boolean;
 }
@@ -285,7 +271,7 @@ interface SortCard {
 
 interface DragSortGameProps {
   sortItems: string[];
-  onAnswer: (answer: string) => void;
+  onAnswer: (answer: string | undefined, structuredAnswer: Record<string, unknown>) => void;
   submitting: boolean;
 }
 
@@ -343,8 +329,8 @@ function DragSortGame({ sortItems, onAnswer, submitting }: DragSortGameProps) {
 
   function handleSubmit() {
     if (submitting) return;
-    // 按当前顺序用空格连接
-    onAnswer(items.map((it) => it.text).join(' '));
+    // 提交结构化答案：当前顺序的文本数组
+    onAnswer(undefined, { ordered_item_ids: items.map((it) => it.text) });
   }
 
   return (
@@ -409,15 +395,15 @@ function DragSortGame({ sortItems, onAnswer, submitting }: DragSortGameProps) {
 
 // ============================ 词库填空 ============================
 interface WordBankGameProps {
-  questionText: string;
+  promptWithBlanks: string;
   wordBank: string[];
-  onAnswer: (answer: string) => void;
+  onAnswer: (answer: string | undefined, structuredAnswer: Record<string, unknown>) => void;
   submitting: boolean;
 }
 
-function WordBankGame({ questionText, wordBank, onAnswer, submitting }: WordBankGameProps) {
+function WordBankGame({ promptWithBlanks, wordBank, onAnswer, submitting }: WordBankGameProps) {
   // 按 ______ 分割句子，中间即为空格位置
-  const segments = questionText.split('______');
+  const segments = promptWithBlanks.split('______');
   const blankCount = Math.max(segments.length - 1, 0);
 
   // blankToBank[i] = 第 i 个空格填入的词在 wordBank 中的索引，null 表示未填
@@ -460,8 +446,11 @@ function WordBankGame({ questionText, wordBank, onAnswer, submitting }: WordBank
   function handleSubmit() {
     if (submitting) return;
     if (!allFilled) return;
-    const answer = blankToBank.map((b) => (b === null ? '' : wordBank[b])).join(' ');
-    onAnswer(answer);
+    const blanks: Record<number, string> = {};
+    blankToBank.forEach((b, i) => {
+      if (b !== null) blanks[i] = wordBank[b];
+    });
+    onAnswer(undefined, { blanks });
   }
 
   return (
@@ -538,13 +527,13 @@ export default function QuestionCard({
   feedback,
   submitting,
 }: QuestionCardProps) {
-  const isMultipleChoice = question.question_type === 'multiple_choice';
-  const isSpelling = question.question_type === 'spelling';
-  const isFillBlank = question.question_type === 'fill_blank';
-  const isTapMatch = question.question_type === 'tap_match';
-  const isListenSelect = question.question_type === 'listen_select';
-  const isDragSort = question.question_type === 'drag_sort';
-  const isWordBank = question.question_type === 'word_bank';
+  const isMultipleChoice = question.type === 'multiple_choice';
+  const isSpelling = question.type === 'spelling';
+  const isFillBlank = question.type === 'fill_blank';
+  const isTapMatch = question.type === 'tap_match';
+  const isListenSelect = question.type === 'listen_select';
+  const isDragSort = question.type === 'drag_sort';
+  const isWordBank = question.type === 'word_bank';
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -582,28 +571,28 @@ export default function QuestionCard({
           第 {questionIndex + 1} / {totalQuestions} 题
         </span>
         <span className="text-xs bg-blue-50 text-blue-600 px-3 py-1 rounded-full font-medium">
-          {getQuestionTypeLabel(question.question_type)}
+          {getQuestionTypeLabel(question.type)}
         </span>
       </div>
 
       {/* 题目内容（除 word_bank 外的题干） */}
       {showInstructionInMain && (
         <div className="mb-6">
-          <p className="text-xl font-medium text-gray-800 mb-2">{question.question_text}</p>
+          <p className="text-xl font-medium text-gray-800 mb-2">{question.prompt}</p>
 
-          {showPronunciation && question.word?.pronunciation && (
-            <p className="text-sm text-gray-400">/{question.word.pronunciation}/</p>
+          {showPronunciation && question.phonetic && (
+            <p className="text-sm text-gray-400">/{question.phonetic}/</p>
           )}
 
-          {question.hint && (
-            <p className="text-sm text-orange-500 mt-2">💡 提示：{question.hint}</p>
+          {question.meaning && (
+            <p className="text-sm text-gray-500 mt-1">释义：{question.meaning}</p>
           )}
         </div>
       )}
 
-      {/* word_bank 只显示提示，题干含空格由子组件渲染 */}
-      {isWordBank && question.hint && (
-        <p className="text-sm text-orange-500 mb-4">💡 提示：{question.hint}</p>
+      {/* word_bank 题型显示释义提示 */}
+      {isWordBank && question.meaning && (
+        <p className="text-sm text-gray-500 mb-4">💡 释义：{question.meaning}</p>
       )}
 
       {/* 反馈 */}
@@ -673,7 +662,6 @@ export default function QuestionCard({
         <TapMatchGame
           key={question.question_id}
           pairs={question.pairs}
-          correctAnswer={question.correct_answer}
           onAnswer={onAnswer}
           submitting={submitting}
         />
@@ -683,7 +671,7 @@ export default function QuestionCard({
       {isListenSelect && (
         <ListenSelectGame
           key={question.question_id}
-          word={question.word?.word || question.question_text}
+          word={question.prompt}
           options={question.options}
           onAnswer={onAnswer}
           submitting={submitting}
@@ -704,7 +692,7 @@ export default function QuestionCard({
       {isWordBank && question.word_bank && question.word_bank.length > 0 && (
         <WordBankGame
           key={question.question_id}
-          questionText={question.question_text}
+          promptWithBlanks={question.prompt_with_blanks || question.prompt}
           wordBank={question.word_bank}
           onAnswer={onAnswer}
           submitting={submitting}

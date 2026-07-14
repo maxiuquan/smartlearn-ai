@@ -36,6 +36,7 @@ from app.schemas.games import (
     GameSessionResponse,
     GameSessionStartRequest,
     GameSessionStartResponse,
+    GameSessionSummaryResponse,
     LeaderboardEntry,
     LeaderboardResponse,
 )
@@ -242,10 +243,246 @@ def _normalize_answer(value: str) -> str:
     return (value or "").strip().lower()
 
 
+# P0-03 (R8): 交互类型映射（与 games-config.json 的 type 字段保持一致）
+_INTERACTION_TYPE_MAP: dict[str, str] = {
+    # multiple_choice
+    "vocabulary-duel": "multiple_choice",
+    "high-frequency-challenge": "multiple_choice",
+    "wrong-question-boss": "multiple_choice",
+    "daily-quiz-arena": "multiple_choice",
+    "knowledge-combo-streak": "multiple_choice",
+    "memory-maze": "multiple_choice",
+    "study-team-raid": "multiple_choice",
+    "problem-quest-map": "multiple_choice",
+    # tap_match
+    "word-match-blast": "tap_match",
+    "synonym-antonym-match": "tap_match",
+    "picture-word-match": "tap_match",
+    "memory-flip-match": "tap_match",
+    "formula-link": "tap_match",
+    # listen_select
+    "listening-dash": "listen_select",
+    # spelling
+    "spelling-bee": "spelling",
+    "word-bubble-pop": "spelling",
+    "word-chain": "spelling",
+    # drag_sort
+    "sentence-untangle": "drag_sort",
+    "root-affix-tree": "drag_sort",
+    "proof-step-sort": "drag_sort",
+    # word_bank
+    "cloze-sprint": "word_bank",
+    "word-form-master": "word_bank",
+    "crossword-quest": "word_bank",
+    "flashcard-rush": "word_bank",
+    # fill_blank
+    "limit-blitz": "fill_blank",
+}
+
+
+def _get_interaction_type(game_id: str) -> str:
+    """获取游戏的交互类型。优先从 games-config.json 的 type 字段读取，回退到硬编码映射。"""
+    games_raw = _load_games_config()
+    game_cfg = next((g for g in games_raw if g.get("game_id") == game_id), None)
+    if game_cfg and game_cfg.get("type"):
+        return game_cfg["type"]
+    return _INTERACTION_TYPE_MAP.get(game_id, "multiple_choice")
+
+
+def _judge_structured_answer(
+    interaction_type: str,
+    correct_answer: str,
+    body_answer: Optional[str],
+    body_structured: Optional[dict[str, Any]],
+) -> bool:
+    """P0-03 (R8): 判定复杂交互题型的答案。
+
+    - tap_match: 比较 pairs 配对集合
+    - drag_sort: 比较 ordered_item_ids 顺序
+    - word_bank: 比较 blanks 多空选择
+    - 其他: 回退到字符串等值比较
+    """
+    if body_structured is None:
+        # 回退到字符串比较
+        return _normalize_answer(body_answer or "") == _normalize_answer(correct_answer)
+
+    if interaction_type == "tap_match":
+        # correct_answer 格式: JSON {"pairs": [[left, right], ...]}
+        # structured_answer 格式: {"pairs": [[left_id, right_id], ...]}
+        try:
+            import json as _json
+            correct_pairs = _json.loads(correct_answer).get("pairs", [])
+            user_pairs = body_structured.get("pairs", [])
+            # 比较配对集合（忽略顺序）
+            correct_set = {tuple(sorted(p)) for p in correct_pairs}
+            user_set = {tuple(sorted(p)) for p in user_pairs}
+            return correct_set == user_set
+        except (ValueError, TypeError, KeyError):
+            return False
+
+    elif interaction_type == "drag_sort":
+        # correct_answer 格式: JSON {"ordered": [item1, item2, ...]}
+        # structured_answer 格式: {"ordered_item_ids": [id1, id2, ...]}
+        try:
+            import json as _json
+            correct_order = _json.loads(correct_answer).get("ordered", [])
+            user_order = body_structured.get("ordered_item_ids", [])
+            if len(correct_order) != len(user_order):
+                return False
+            return all(
+                _normalize_answer(str(a)) == _normalize_answer(str(b))
+                for a, b in zip(correct_order, user_order)
+            )
+        except (ValueError, TypeError, KeyError):
+            return False
+
+    elif interaction_type == "word_bank":
+        # correct_answer 格式: JSON {"blanks": {"b1": "word1", "b2": "word2"}}
+        # structured_answer 格式: {"blanks": {"b1": "word1", "b2": "word2"}}
+        try:
+            import json as _json
+            correct_blanks = _json.loads(correct_answer).get("blanks", {})
+            user_blanks = body_structured.get("blanks", {})
+            if set(correct_blanks.keys()) != set(user_blanks.keys()):
+                return False
+            return all(
+                _normalize_answer(str(correct_blanks[k])) == _normalize_answer(str(user_blanks.get(k, "")))
+                for k in correct_blanks
+            )
+        except (ValueError, TypeError, KeyError):
+            return False
+
+    # 回退到字符串比较
+    return _normalize_answer(body_answer or "") == _normalize_answer(correct_answer)
+
+
+def _serialize_answer_for_storage(
+    body_answer: Optional[str],
+    body_structured: Optional[dict[str, Any]],
+) -> str:
+    """将答案序列化为字符串用于存储到 GameAnswerEvent.user_answer。"""
+    if body_structured is not None:
+        import json as _json
+        return _json.dumps(body_structured, ensure_ascii=False)
+    return body_answer or ""
+
+
+def _enrich_for_interaction(
+    questions: list[dict[str, Any]], interaction_type: str
+) -> list[dict[str, Any]]:
+    """P0-03 (R8): 根据交互类型为题目添加结构化字段并转换 correct_answer 格式。
+
+    - tap_match: 从词汇题生成配对题，correct_answer 变为 JSON {"pairs": [[l,r]...]}
+    - drag_sort: 生成排序题，correct_answer 变为 JSON {"ordered": [...]}
+    - word_bank: 生成词库填空题，correct_answer 变为 JSON {"blanks": {...}}
+    - 其他: 保持原样
+    """
+    import json as _json
+
+    if not questions:
+        return questions
+
+    if interaction_type == "tap_match":
+        # 每题作为一个配对题：prompt(单词) ↔ meaning(释义)
+        enriched = []
+        for q in questions:
+            prompt = q.get("prompt", "")
+            meaning = q.get("meaning") or q.get("correct_answer", "")
+            # 生成干扰项（从其他题目中抽取）
+            distractors = [
+                other.get("meaning") or other.get("correct_answer", "")
+                for other in questions
+                if other.get("prompt") != prompt
+            ][:3]
+            right_options = [meaning] + distractors
+            random.shuffle(right_options)
+            enriched.append({
+                **q,
+                "pairs": [{"left": prompt, "right": meaning}],
+                "left_items": [prompt],
+                "right_options": right_options,
+                "correct_answer": _json.dumps(
+                    {"pairs": [[prompt, meaning]]}, ensure_ascii=False
+                ),
+            })
+        return enriched
+
+    elif interaction_type == "drag_sort":
+        # 将所有题目合并为一个排序题：按 prompt 顺序排列
+        # 或者每题作为一个排序项
+        if len(questions) >= 2:
+            correct_order = [q.get("prompt", str(i)) for i, q in enumerate(questions)]
+            shuffled = correct_order.copy()
+            random.shuffle(shuffled)
+            return [{
+                "question_id": f"{questions[0].get('question_id', 'drag').rsplit(':', 1)[0]}:drag_sort",
+                "prompt": "请按正确顺序排列以下内容",
+                "sort_items": shuffled,
+                "correct_answer": _json.dumps(
+                    {"ordered": correct_order}, ensure_ascii=False
+                ),
+                "type": "drag_sort",
+                "sequence": 0,
+            }]
+        return questions
+
+    elif interaction_type == "word_bank":
+        # 每题作为一个填空题：prompt 中的释义被挖空，从 word_bank 选词
+        enriched = []
+        all_words = [q.get("prompt", "") for q in questions]
+        for i, q in enumerate(questions):
+            prompt = q.get("prompt", "")
+            meaning = q.get("meaning") or q.get("correct_answer", "")
+            blank_id = f"b{i + 1}"
+            # 生成词库（含正确词 + 3个干扰词）
+            distractors = [w for w in all_words if w != prompt][:3]
+            word_bank = [prompt] + distractors
+            random.shuffle(word_bank)
+            enriched.append({
+                **q,
+                "blanks": [{"id": blank_id, "answer": prompt}],
+                "word_bank": word_bank,
+                "prompt_with_blanks": f"{meaning} ____",
+                "correct_answer": _json.dumps(
+                    {"blanks": {blank_id: prompt}}, ensure_ascii=False
+                ),
+            })
+        return enriched
+
+    elif interaction_type == "listen_select":
+        # 听音选词：从词汇题生成选择题
+        enriched = []
+        for q in questions:
+            prompt = q.get("prompt", "")
+            meaning = q.get("meaning") or q.get("correct_answer", "")
+            distractors = [
+                other.get("meaning") or other.get("correct_answer", "")
+                for other in questions
+                if other.get("prompt") != prompt
+            ][:3]
+            options = [meaning] + distractors
+            random.shuffle(options)
+            enriched.append({
+                **q,
+                "options": options,
+                "correct_answer": meaning,
+            })
+        return enriched
+
+    # 其他交互类型保持原样
+    return questions
+
+
 def _build_questions_for_game(
     game_cfg: dict, difficulty: Optional[str]
 ) -> list[dict[str, Any]]:
     """根据游戏配置生成题目集（含 correct_answer）。
+
+    P0-03 (R8): 根据交互类型（interaction_type）生成结构化题目。
+    - tap_match: 题目含 pairs 字段，correct_answer 是 JSON {"pairs": [[l,r]...]}
+    - drag_sort: 题目含 sort_items 字段，correct_answer 是 JSON {"ordered": [...]}
+    - word_bank: 题目含 word_bank + blanks 字段，correct_answer 是 JSON {"blanks": {...}}
+    - 其他: 保持字符串 correct_answer
 
     优先级：
     1. 词汇类游戏：从 data_sources 中找到的 vocabulary/*.json 抽取单词
@@ -256,6 +493,7 @@ def _build_questions_for_game(
     """
     data_sources = game_cfg.get("data_sources") or []
     game_id = game_cfg.get("game_id", "unknown")
+    interaction_type = _get_interaction_type(game_id)
     target_count = _DEFAULT_QUESTION_COUNT
     questions: list[dict[str, Any]] = []
 
@@ -286,7 +524,7 @@ def _build_questions_for_game(
                         }
                     )
         if questions:
-            return questions
+            return _enrich_for_interaction(questions, interaction_type)
 
     # 2) 题库类数据源（questions/*.json）
     question_source = next(
@@ -315,7 +553,7 @@ def _build_questions_for_game(
                         }
                     )
         if questions:
-            return questions
+            return _enrich_for_interaction(questions, interaction_type)
 
     # 3) 同义词数据源（vocabulary/synonyms.json）
     syn_source = next(
@@ -342,7 +580,7 @@ def _build_questions_for_game(
                         }
                     )
         if questions:
-            return questions
+            return _enrich_for_interaction(questions, interaction_type)
 
     # 4) 兜底：使用游戏 props 合成简易题目
     props = game_cfg.get("props") or []
@@ -356,7 +594,7 @@ def _build_questions_for_game(
                 "correct_answer": str(prop),
             }
         )
-    return questions
+    return _enrich_for_interaction(questions, interaction_type)
 
 
 async def _acquire_answer_idempotency(
@@ -492,6 +730,8 @@ async def start_game_session(
         questions=client_questions,
         expires_at=expires_at,
         time_limit_sec=time_limit_sec,
+        interaction_type=_get_interaction_type(game_id),
+        game_name=game_cfg.get("name", game_id),
     )
 
 
@@ -568,6 +808,13 @@ async def submit_answer(
             detail=f"question_id 不匹配: body={body.question_id}, expected={game_question.question_id}",
         )
 
+    # P0-03 (R8): 校验 answer 和 structured_answer 至少传一个
+    if not body.answer and not body.structured_answer:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="answer 和 structured_answer 至少需要传一个",
+        )
+
     # 幂等性检查：Redis SETNX
     acquired = await _acquire_answer_idempotency(
         user_id, session_id, body.idempotency_key
@@ -578,10 +825,17 @@ async def submit_answer(
             detail="重复提交被拒绝（idempotency_key 已使用）",
         )
 
-    # 服务端判定正误（标准化文本对比）
-    is_correct = _normalize_answer(body.answer) == _normalize_answer(
-        game_question.correct_answer
+    # P0-03 (R8): 根据交互类型判定正误（支持结构化答案）
+    interaction_type = _get_interaction_type(game_id)
+    is_correct = _judge_structured_answer(
+        interaction_type,
+        game_question.correct_answer,
+        body.answer,
+        body.structured_answer,
     )
+
+    # 序列化答案用于存储
+    stored_answer = _serialize_answer_for_storage(body.answer, body.structured_answer)
 
     # 写入 GameAnswerEvent（不可变事件流）
     db.add(
@@ -590,14 +844,14 @@ async def submit_answer(
             user_id=user_id,
             question_id=body.question_id,
             sequence=body.sequence,
-            user_answer=body.answer,
+            user_answer=stored_answer,
             is_correct=is_correct,
             idempotency_key=body.idempotency_key,
         )
     )
 
     # 更新 GameQuestion
-    game_question.user_answer = body.answer
+    game_question.user_answer = stored_answer
     game_question.is_correct = is_correct
     game_question.answered_at = now
 
@@ -860,6 +1114,87 @@ async def finish_game_session(
         accuracy=accuracy,
         correct_count=correct_count,
         total_questions=total_questions,
+    )
+
+
+@router.get(
+    "/{game_id}/sessions/{session_id}/summary",
+    response_model=GameSessionSummaryResponse,
+    summary="获取游戏会话总结",
+)
+async def get_game_session_summary(
+    game_id: str,
+    session_id: int,
+    user_id: int = Depends(get_current_user_id),
+    db: AsyncSession = Depends(get_db),
+) -> GameSessionSummaryResponse:
+    """P0-01 (R8): 获取已结束会话的完整统计。
+
+    前端在 GameResult 页面调用，返回正确/错误题目列表与改进建议。
+    不含 correct_answer（仅在 finish 响应中可选返回）。
+    """
+    session_result = await db.execute(
+        select(GameSession).where(
+            GameSession.id == session_id,
+            GameSession.user_id == user_id,
+        )
+    )
+    session = session_result.scalar_one_or_none()
+    if session is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="游戏会话不存在或不属于当前用户",
+        )
+    if session.game_id != game_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"game_id 不一致: URL={game_id}, session={session.game_id}",
+        )
+
+    # 查询题目与答题事件
+    questions_result = await db.execute(
+        select(GameQuestion).where(GameQuestion.session_id == session_id)
+    )
+    questions = questions_result.scalars().all()
+
+    events_result = await db.execute(
+        select(GameAnswerEvent)
+        .where(GameAnswerEvent.session_id == session_id)
+        .order_by(GameAnswerEvent.created_at.asc())
+    )
+    events = events_result.scalars().all()
+
+    correct_items: list[str] = []
+    wrong_items: list[str] = []
+    for q in questions:
+        prompt = q.question_id.split(":")[-1] if ":" in q.question_id else q.question_id
+        if q.is_correct:
+            correct_items.append(prompt)
+        elif q.answered_at is not None:
+            wrong_items.append(prompt)
+
+    improvement_items = wrong_items[:5]
+
+    # 加载游戏名称
+    games_raw = _load_games_config()
+    game_cfg = next((g for g in games_raw if g["game_id"] == game_id), None)
+    game_name = game_cfg.get("name", game_id) if game_cfg else game_id
+
+    return GameSessionSummaryResponse(
+        session_id=session_id,
+        game_id=game_id,
+        game_name=game_name,
+        score=session.score,
+        xp_gained=session.xp_gained,
+        coins_gained=session.coins_gained,
+        accuracy=session.accuracy or 0.0,
+        correct_count=sum(1 for e in events if e.is_correct),
+        total_questions=len(questions),
+        duration=session.duration,
+        correct_items=correct_items,
+        wrong_items=wrong_items,
+        improvement_items=improvement_items,
+        completed_at=session.finished_at,
     )
 
 

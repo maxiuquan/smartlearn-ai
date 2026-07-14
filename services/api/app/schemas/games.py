@@ -156,6 +156,7 @@ class GameSessionStartResponse(BaseModel):
 
     返回 session_id、server_nonce、题目集（不含答案）、过期时间与限时秒数。
     题目集中 correct_answer 字段由服务端剥离，客户端仅可见 question_id / sequence / 题面。
+    P0-03 (R8): 新增 interaction_type 与 game_name，供前端决定渲染哪种交互组件。
     """
 
     session_id: int
@@ -163,16 +164,26 @@ class GameSessionStartResponse(BaseModel):
     questions: list[dict[str, Any]]
     expires_at: datetime
     time_limit_sec: int
+    interaction_type: str = "multiple_choice"
+    game_name: str = ""
 
 
 class GameAnswerSubmitRequest(BaseModel):
     """提交单题答案请求 — P0-02 (R3).
 
     客户端仅发送题目 ID、答案、序号与幂等键，由服务端判定正误并落库。
+    P0-03 (R8): 新增 structured_answer 字段，支持 tap_match/drag_sort/word_bank 等复杂交互。
+    - answer: 简单题型（multiple_choice/spelling/fill_blank/listen_select）的字符串答案
+    - structured_answer: 复杂题型的结构化答案（pairs/ordered_item_ids/blanks 等）
+    两者二选一，至少传一个。
     """
 
     question_id: str = Field(..., min_length=1)
-    answer: str = Field(...)
+    answer: Optional[str] = None
+    structured_answer: Optional[dict[str, Any]] = Field(
+        None,
+        description="复杂交互题型的结构化答案，如 {pairs: [[l,r]...]} / {ordered_item_ids: [...]} / {blanks: {b1: 'word'}}",
+    )
     sequence: int = Field(..., ge=0)
     idempotency_key: str = Field(..., min_length=8, max_length=128)
     model_config = {"extra": "forbid"}
@@ -213,3 +224,26 @@ class GameSessionFinishResponse(BaseModel):
     accuracy: float
     correct_count: int
     total_questions: int
+
+
+class GameSessionSummaryResponse(BaseModel):
+    """游戏会话总结响应 — P0-01 (R8).
+
+    前端在 GameResult 页面调用，返回完整对局统计。
+    包含正确/错误题目列表与改进建议词，不含 correct_answer（仅在 finish 响应中可选返回）。
+    """
+
+    session_id: int
+    game_id: str
+    game_name: str
+    score: int
+    xp_gained: int
+    coins_gained: int
+    accuracy: float
+    correct_count: int
+    total_questions: int
+    duration: Optional[int] = None
+    correct_items: list[str] = Field(default_factory=list)
+    wrong_items: list[str] = Field(default_factory=list)
+    improvement_items: list[str] = Field(default_factory=list)
+    completed_at: Optional[datetime] = None

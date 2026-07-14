@@ -210,3 +210,120 @@ class LeaderboardResponse(BaseModel):
     entries: List[LeaderboardEntry] = Field(..., description="排行榜条目")
     total_players: int = Field(..., description="总玩家数")
     generated_at: datetime = Field(default_factory=datetime.now, description="生成时间")
+
+
+# ============================================================================
+# 客户端 DTO（R8 审计修复）
+# 拆分内部/公开 DTO：以下 Client 版本不含 correct_answer 字段，
+# 避免正确答案被下发到浏览器。内部模型（WordGameQuestion/Word 等）保留不变，
+# 服务层仍使用完整模型；仅在需要对外响应时通过转换函数剥离 correct_answer。
+# ============================================================================
+
+
+class WordClient(BaseModel):
+    """单词（客户端版本，不含 correct_answer）"""
+    word_id: str
+    word: str
+    meaning: str
+    pronunciation: Optional[str] = None
+    example_sentence: Optional[str] = None
+    part_of_speech: Optional[str] = None
+    difficulty: float = 0.0
+    category: Optional[str] = None
+
+
+class WordGameQuestionClient(BaseModel):
+    """游戏问题（客户端版本，不含 correct_answer 和 word.correct_answer）"""
+    question_id: str
+    word: Optional[WordClient] = None
+    question_type: Any = None  # GameType 枚举
+    question_text: str
+    options: Optional[List[str]] = None
+    hint: Optional[str] = None
+    points: int = 10
+    pairs: Optional[List[Dict[str, str]]] = None
+    sort_items: Optional[List[str]] = None
+    word_bank: Optional[List[str]] = None
+
+
+class WordGameSessionClient(BaseModel):
+    """游戏会话（客户端版本，words 使用 WordClient）"""
+    session_id: str
+    user_id: str
+    game_type: Any = None
+    game_id: str
+    subject: Any = None
+    difficulty: Any = None
+    score: int = 0
+    correct_count: int = 0
+    wrong_count: int = 0
+    current_index: int = 0
+    time_limit_seconds: int = 0
+    started_at: Optional[datetime] = None
+    is_active: bool = True
+
+
+class WordGameResponseClient(BaseModel):
+    """开始游戏响应（客户端版本，不含 correct_answer）"""
+    session: WordGameSessionClient
+    first_question: WordGameQuestionClient
+    total_questions: int
+    instructions: Optional[str] = None
+    generated_at: Optional[datetime] = None
+
+
+class SubmitAnswerResponseClient(BaseModel):
+    """提交答案响应（客户端版本，next_question 不含 correct_answer）"""
+    session_id: str
+    result: Any = None  # WordGameResult（含 correct_answer，合法：用户已提交）
+    next_question: Optional[WordGameQuestionClient] = None
+    current_score: int = 0
+    progress: Optional[Any] = None
+    is_game_over: bool = False
+
+
+def to_client_question(q: WordGameQuestion) -> WordGameQuestionClient:
+    """将内部 Question 转换为客户端版本（剥离 correct_answer）"""
+    word_client = None
+    if q.word:
+        word_client = WordClient(
+            word_id=q.word.word_id,
+            word=q.word.word,
+            meaning=q.word.meaning,
+            pronunciation=q.word.pronunciation,
+            example_sentence=q.word.example_sentence,
+            part_of_speech=q.word.part_of_speech,
+            difficulty=q.word.difficulty,
+            category=q.word.category,
+        )
+    return WordGameQuestionClient(
+        question_id=q.question_id,
+        word=word_client,
+        question_type=q.question_type,
+        question_text=q.question_text,
+        options=q.options,
+        hint=q.hint,
+        points=q.points,
+        pairs=q.pairs,
+        sort_items=q.sort_items,
+        word_bank=q.word_bank,
+    )
+
+
+def to_client_session(s) -> WordGameSessionClient:
+    """将内部 Session 转换为客户端版本（剥离 words 中的 correct_answer）"""
+    return WordGameSessionClient(
+        session_id=s.session_id,
+        user_id=s.user_id,
+        game_type=s.game_type,
+        game_id=s.game_id,
+        subject=s.subject,
+        difficulty=s.difficulty,
+        score=s.score,
+        correct_count=s.correct_count,
+        wrong_count=s.wrong_count,
+        current_index=s.current_index,
+        time_limit_seconds=s.time_limit_seconds,
+        started_at=s.started_at,
+        is_active=s.is_active,
+    )
