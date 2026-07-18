@@ -1,0 +1,47 @@
+name: HF Space 云保活
+
+on:
+  schedule:
+    # 每 20 分钟执行一次 (HF Space 48h 休眠阈值)
+    - cron: '*/20 * * * *'
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Ping HF Space 并检查状态
+        run: |
+          echo "=== HF Space 云保活 $(date -u '+%Y-%m-%d %H:%M UTC') ==="
+          
+          # 尝试 /health (快速检测)
+          HTTP_CODE=$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 https://maxiuquan-xuexi.hf.space/health)
+          echo "/health → HTTP $HTTP_CODE"
+          
+          if [ "$HTTP_CODE" = "200" ]; then
+            echo "✅ HF Space 存活,无需重启"
+          else
+            echo "⚠️ HF Space 响应异常 (HTTP $HTTP_CODE), 触发重启..."
+            
+            # 触发普通重启
+            RESTART_RESP=$(curl -s -w '\n%{http_code}' -X POST \
+              -H "Authorization: Bearer ${{ secrets.HF_TOKEN }}" \
+              -H "Content-Type: application/json" \
+              https://huggingface.co/api/spaces/maxiuquan/xuexi/restart)
+            echo "重启响应: $RESTART_RESP"
+            
+            echo "等待 60 秒后重新检查..."
+            sleep 60
+            
+            HTTP_CODE2=$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 https://maxiuquan-xuexi.hf.space/health)
+            echo "重启后 /health → HTTP $HTTP_CODE2"
+          fi
+          
+      - name: Ping 关键 API 端点
+        run: |
+          echo "=== 关键端点保活 ==="
+          for path in /api/v1/games /keepalive; do
+            CODE=$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 "https://maxiuquan-xuexi.hf.space$path")
+            echo "$path → HTTP $CODE"
+          done
