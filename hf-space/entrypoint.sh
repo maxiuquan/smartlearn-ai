@@ -34,10 +34,10 @@ echo "  nginx 已启动 (PID $NGINX_PID)"
 # ── 3. API 后端崩溃自动重启循环 ──
 _restart_loop() {
     local name=$1; shift
-    local cmd=$@
     while true; do
         echo "  → 启动 $name..."
-        $cmd &
+        # 使用 env 确保环境变量正确传递
+        env "$@" &
         local pid=$!
         wait $pid
         echo "  ⚠️  $name 退出 (pid=$pid, rc=$?), 5秒后重启..."
@@ -46,11 +46,11 @@ _restart_loop() {
 }
 
 # api: uvicorn
-_restart_loop "api" "PYTHONPATH=/app uvicorn app.main:app --host 127.0.0.1 --port 8000 --workers 1 --proxy-headers" &
+_restart_loop "api" "PYTHONPATH=/app" uvicorn app.main:app --host 127.0.0.1 --port 8000 --workers 1 --proxy-headers &
 API_LOOP_PID=$!
 
 # ai-engine: uvicorn
-_restart_loop "ai-engine" "PYTHONPATH=/app/ai-engine uvicorn app.main:app --app-dir /app/ai-engine --host 127.0.0.1 --port 8001 --workers 1 --proxy-headers" &
+_restart_loop "ai-engine" "PYTHONPATH=/app/ai-engine" uvicorn app.main:app --app-dir /app/ai-engine --host 127.0.0.1 --port 8001 --workers 1 --proxy-headers &
 AI_LOOP_PID=$!
 
 # ── 4. 后台异步执行 alembic 迁移 + 初始化数据 ──
