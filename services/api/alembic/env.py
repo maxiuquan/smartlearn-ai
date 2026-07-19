@@ -1,17 +1,26 @@
 """
-Alembic 环境配置 - 异步 PostgreSQL 支持
+Alembic 环境配置 - PostgreSQL 支持
+
+从 settings.database_url 读取连接串（支持 DATABASE_URL 单一连接串或分散字段）。
+使用同步 psycopg2 驱动（与 entrypoint.sh 的 PG 连通性检查一致），避免 asyncpg SSL 问题。
 """
-import asyncio
-import os
 from logging.config import fileConfig
 
 from alembic import context
-from sqlalchemy import pool
-from sqlalchemy.engine import Connection
-from sqlalchemy.ext.asyncio import async_engine_from_config
+from sqlalchemy import engine_from_config, pool
 
 from app.core.config import settings
 from app.models.base import Base
+
+# 导入全部 ORM 模型，使 alembic revision --autogenerate 能检测全部表
+import app.models.business  # noqa: F401
+import app.models.user  # noqa: F401
+import app.models.subscription  # noqa: F401
+import app.models.audit_log  # noqa: F401
+import app.models.auth_session  # noqa: F401  P0-2
+import app.models.content_asset  # noqa: F401  P0-5
+import app.models.order  # noqa: F401  P1-4
+import app.models.rag_index  # noqa: F401  P1-2
 
 # Alembic Config 对象
 config = context.config
@@ -20,29 +29,15 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# 从环境变量构建数据库 URL（覆盖 alembic.ini 中的占位符）
-db_url = (
-    f"postgresql+asyncpg://"
-    f"{settings.DB_USER}:{settings.DB_PASSWORD}@"
-    f"{settings.DB_HOST}:{settings.DB_PORT}/"
-    f"{settings.DB_NAME}"
-)
-config.set_main_option("sqlalchemy.url", db_url)
+# 从 settings 读取同步数据库 URL（psycopg2 驱动）
+config.set_main_option("sqlalchemy.url", settings.database_url_sync)
 
 # 目标元数据 - 用于自动检测模型变更
 target_metadata = Base.metadata
 
 
 def run_migrations_offline() -> None:
-    """Run migrations in 'offline' mode.
-
-    This configures the context with just a URL and not an Engine,
-    though an Engine is acceptable here as well.  By skipping the Engine
-    creation we don't even need a DBAPI to be available.
-
-    Calls to context.execute() here emit the given string to the
-    script output.
-    """
+    """Run migrations in 'offline' mode."""
     url = config.get_main_option("sqlalchemy.url")
     context.configure(
         url=url,
@@ -50,38 +45,27 @@ def run_migrations_offline() -> None:
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
     )
-
     with context.begin_transaction():
         context.run_migrations()
 
 
-def do_run_migrations(connection: Connection) -> None:
+def do_run_migrations(connection) -> None:
     """Run migrations with the given connection."""
     context.configure(connection=connection, target_metadata=target_metadata)
-
     with context.begin_transaction():
         context.run_migrations()
 
 
-async def run_async_migrations() -> None:
-    """In this scenario we need to create an Engine
-    and associate a connection with the context.
-    """
-    connectable = async_engine_from_config(
+def run_migrations_online() -> None:
+    """Run migrations in 'online' mode using sync engine (psycopg2)."""
+    connectable = engine_from_config(
         config.get_section(config.config_ini_section, {}),
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
-
-    async with connectable.connect() as connection:
-        await connection.run_sync(do_run_migrations)
-
-    await connectable.dispose()
-
-
-def run_migrations_online() -> None:
-    """Run migrations in 'online' mode."""
-    asyncio.run(run_async_migrations())
+    with connectable.connect() as connection:
+        do_run_migrations(connection)
+    connectable.dispose()
 
 
 if context.is_offline_mode():

@@ -134,6 +134,23 @@ class ProviderRegistry:
             except Exception as e:
                 print(f"[ProviderRegistry] CogView 初始化失败: {e}")
 
+        # 兜底 OpenAI 兼容供应商 - 当 GLM/DeepSeek 都不可用时启用
+        if "fallback_openai" not in self._providers:
+            try:
+                from .openai_compat import OpenAICompatProvider
+                self.register_provider(
+                    "fallback_openai",
+                    OpenAICompatProvider(
+                        api_key=settings.FALLBACK_OPENAI_API_KEY,
+                        base_url=settings.FALLBACK_OPENAI_BASE_URL,
+                        model_name=settings.FALLBACK_OPENAI_MODEL,
+                        provider_name="fallback_openai",
+                        offline_mode=not bool(settings.FALLBACK_OPENAI_API_KEY),
+                    ),
+                )
+            except Exception as e:
+                print(f"[ProviderRegistry] FallbackOpenAI 初始化失败: {e}")
+
         # Moderation - 内容审核
         if "moderation" not in self._providers:
             try:

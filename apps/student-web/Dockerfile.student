@@ -1,21 +1,42 @@
+# SmartLearn AI - 学生端 Web 构建
+# 构建上下文: 项目根目录
+# 构建命令: docker build -f apps/student-web/Dockerfile.student -t smartlearn-student-web .
 FROM node:20-alpine AS build
 
 WORKDIR /app
 
+# 复制依赖定义文件（已含 package-lock.json，使用 npm ci 可复现构建）
 COPY apps/student-web/package*.json ./
 
 RUN npm ci
 
 COPY apps/student-web .
 
+# 开发期数据由 vite 别名 @data 读取；Docker 构建时 data 被 COPY 到 ./data
 COPY data ./data
+
+# 构建期注入 API baseURL（默认空串 = 同源，由下方 nginx 反代）。
+# 如需显式指定，可在 build 时传入 --build-arg VITE_API_BASE_URL=/api
+ARG VITE_API_BASE_URL=
+ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
 
 RUN npm run build
 
+# ── 生产阶段 ──
 FROM nginx:alpine
 
+# 复制构建产物
 COPY --from=build /app/dist /usr/share/nginx/html
 
+# 复制本地 nginx 配置（SPA fallback + /api /word-games 反向代理）
+COPY apps/student-web/nginx.conf /etc/nginx/conf.d/default.conf
+
+# 复制容器启动注入脚本：nginx:alpine 官方 entrypoint 会在启动前按字母序执行
+# /docker-entrypoint.d/*.sh，将 nginx.conf 中的 __AI_ENGINE_API_KEY__ 占位符替换为真实密钥。
+COPY apps/student-web/docker-entrypoint.d/40-inject-ai-key.sh /docker-entrypoint.d/40-inject-ai-key.sh
+RUN chmod +x /docker-entrypoint.d/40-inject-ai-key.sh
+
+# 健康检查（nginx:alpine 无 curl，使用 wget）
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD wget -q -O- http://localhost/ || exit 1
 

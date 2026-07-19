@@ -7,6 +7,7 @@ from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.deps import get_current_user_id, get_db
+from app.models.business import Question, WrongQuestion
 from app.schemas.questions import QuestionResponse
 
 router = APIRouter()
@@ -29,60 +30,38 @@ async def list_wrong_questions(
     - 按最近错误时间排序
     - 支持按学科筛选
     """
-    from sqlalchemy import Table, Column, Integer, String, Text, DateTime, MetaData, func
-    from sqlalchemy.dialects.postgresql import JSONB
-
-    metadata = MetaData()
-    wq = Table(
-        "wrong_questions",
-        metadata,
-        Column("user_id", Integer),
-        Column("question_id", Integer),
-        Column("wrong_count", Integer),
-        Column("last_wrong_at", DateTime),
-        Column("next_review_at", DateTime),
-    )
-    q = Table(
-        "questions",
-        metadata,
-        Column("id", Integer, primary_key=True),
-        Column("subject", String(50)),
-        Column("knowledge_points", JSONB),
-        Column("type", String(50)),
-        Column("difficulty", Integer),
-        Column("title", String(500)),
-        Column("content", Text),
-        Column("options", JSONB),
-        Column("answer", Text),
-        Column("solution", Text),
-        Column("created_at", DateTime),
-    )
-
-    conditions = [wq.c.user_id == user_id]
+    conditions = [WrongQuestion.user_id == user_id]
+    # P1-03: 软毕业的错题不再展示在错题列表（graduated_at 为空的才显示）
+    conditions.append(WrongQuestion.graduated_at.is_(None))
     if subject:
-        conditions.append(q.c.subject == subject)
+        conditions.append(Question.subject == subject)
 
     offset = (page - 1) * page_size
+    # 注意: ORM 模型类没有 .join() 方法, 必须用 select(...).join() 链式调用
     result = await db.execute(
         select(
-            wq.c.question_id,
-            wq.c.wrong_count,
-            wq.c.last_wrong_at,
-            wq.c.next_review_at,
-            q.c.id,
-            q.c.subject,
-            q.c.type,
-            q.c.difficulty,
-            q.c.title,
-            q.c.content,
-            q.c.options,
-            q.c.answer,
-            q.c.solution,
-            q.c.created_at,
+            WrongQuestion.question_id,
+            WrongQuestion.wrong_count,
+            WrongQuestion.last_wrong_at,
+            WrongQuestion.next_review_at,
+            Question.id,
+            Question.subject,
+            Question.type,
+            Question.difficulty,
+            Question.title,
+            Question.content,
+            Question.options,
+            Question.answer,
+            Question.solution,
+            Question.created_at,
         )
-        .select_from(wq.join(q, wq.c.question_id == q.c.id))
+        .select_from(WrongQuestion)
+        .join(
+            Question,
+            WrongQuestion.question_id == Question.id,
+        )
         .where(*conditions)
-        .order_by(wq.c.last_wrong_at.desc())
+        .order_by(WrongQuestion.last_wrong_at.desc())
         .offset(offset)
         .limit(page_size)
     )
@@ -126,27 +105,14 @@ async def mark_wrong_question_reviewed(
     - 采用间隔重复算法延长复习间隔
     - 复习间隔随复习次数递增
     """
-    from sqlalchemy import Table, Column, Integer, DateTime, MetaData, func
-
-    metadata = MetaData()
-    wq = Table(
-        "wrong_questions",
-        metadata,
-        Column("user_id", Integer),
-        Column("question_id", Integer),
-        Column("wrong_count", Integer),
-        Column("last_wrong_at", DateTime),
-        Column("next_review_at", DateTime),
-    )
-
     # 检查错题是否存在
     result = await db.execute(
-        select(wq).where(
-            wq.c.user_id == user_id,
-            wq.c.question_id == question_id,
+        select(WrongQuestion).where(
+            WrongQuestion.user_id == user_id,
+            WrongQuestion.question_id == question_id,
         )
     )
-    existing = result.first()
+    existing = result.scalars().first()
 
     if not existing:
         raise HTTPException(
@@ -154,25 +120,31 @@ async def mark_wrong_question_reviewed(
             detail=f"错题记录不存在: question_id={question_id}",
         )
 
-    # 更新下次复习时间（间隔递增）
-    # 第1次复习: 3天后, 第2次: 7天后, 第3次: 14天后, 以此类推
+    # 更新复习状态（独立 review_count，修复原用 wrong_count 做索引的缺陷）
+    # 间隔序列：第1次复习3天, 第2次7天, 第3次14天, 第4次30天, 第5次60天
+    # P1-03: 统一错题状态机：active → scheduled → mastery_candidate → graduated
+    # 答对一次只推进阶段，不直接删除；第 5 阶段后毕业（保留行 + graduated_at 标记）
     intervals = [3, 7, 14, 30, 60]
-    review_count = existing.wrong_count
-    interval_days = intervals[min(review_count - 1, len(intervals) - 1)]
+    max_stage = len(intervals)  # 5
+    new_stage = existing.review_stage + 1
 
-    await db.execute(
-        text(
-            """
-            UPDATE wrong_questions SET
-                next_review_at = NOW() + (:interval || ' days')::INTERVAL
-            WHERE user_id = :user_id AND question_id = :question_id
-            """
-        ),
-        {
-            "interval": str(interval_days),
-            "user_id": user_id,
-            "question_id": question_id,
-        },
-    )
+    if new_stage > max_stage:
+        # 已达最高阶段，软毕业：保留行 + graduated_at 时间戳
+        # 这样既能统计"已毕业题数"，也保留历史错题记录供回放审计
+        existing.review_count = existing.review_count + 1
+        existing.review_stage = max_stage
+        existing.graduated_at = datetime.now(timezone.utc).replace(tzinfo=None)
+        existing.next_review_at = None
+        await db.commit()
+        return
+
+    interval_days = intervals[min(new_stage - 1, max_stage - 1)]
+
+    existing.review_count = existing.review_count + 1
+    existing.review_stage = new_stage
+    # P1-03: last_wrong_at 更新为最近复习时间，next_review_at 按 SRS 间隔计算
+    existing.last_wrong_at = datetime.now(timezone.utc).replace(tzinfo=None)
+    next_review = datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(days=interval_days)
+    existing.next_review_at = next_review
 
     await db.commit()

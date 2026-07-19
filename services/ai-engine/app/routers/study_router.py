@@ -40,7 +40,7 @@ async def generate_plan(request: StudyPlanRequest):
     from config import settings
 
     llm = get_llm_service()
-    plan_text = llm.generate_study_plan(
+    plan_text = await llm.generate_study_plan(
         subject=request.subject,
         weak_points=request.weak_points,
     )

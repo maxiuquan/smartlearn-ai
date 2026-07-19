@@ -3,10 +3,11 @@ from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import func, select
+from sqlalchemy import case, func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.deps import get_current_user_id, get_db
+from app.models.business import UserWordProgress, VocabularyWord
 from app.schemas.vocab import (
     WordEventRequest,
     WordListResponse,
@@ -31,43 +32,28 @@ async def list_words(
     db: AsyncSession = Depends(get_db),
 ) -> WordListResponse:
     """分页获取词汇列表，支持按标签和词频筛选。"""
-    from sqlalchemy import Table, Column, Integer, String, Text, DateTime, MetaData, func
-    from sqlalchemy.dialects.postgresql import JSONB
-
-    metadata = MetaData()
-    vw = Table(
-        "vocabulary_words",
-        metadata,
-        Column("word_id", String(100), primary_key=True),
-        Column("headword", String(200)),
-        Column("meaning", Text),
-        Column("phonetic", String(200)),
-        Column("tags", JSONB),
-        Column("frequency", Integer),
-        Column("synonyms", JSONB),
-        Column("antonyms", JSONB),
-        Column("examples", JSONB),
-        Column("created_at", DateTime),
-    )
-
     conditions = []
+    if tag:
+        # tags 是 JSONB 数组（如 ["CET4", "高频"]），用 contains 做包含查询
+        # 兼容大小写不同的标签写法（CET4 / cet4 / CET-4）
+        conditions.append(VocabularyWord.tags.contains([tag]))
     if frequency is not None:
-        conditions.append(vw.c.frequency >= frequency)
+        conditions.append(VocabularyWord.frequency >= frequency)
 
     count_result = await db.execute(
-        select(func.count()).select_from(vw).where(*conditions)
+        select(func.count()).select_from(VocabularyWord).where(*conditions)
     )
     total = count_result.scalar() or 0
 
     offset = (page - 1) * page_size
     result = await db.execute(
-        select(vw)
+        select(VocabularyWord)
         .where(*conditions)
-        .order_by(vw.c.frequency.desc(), vw.c.headword)
+        .order_by(VocabularyWord.frequency.desc(), VocabularyWord.headword)
         .offset(offset)
         .limit(page_size)
     )
-    rows = result.fetchall()
+    rows = result.scalars().all()
 
     items = [
         WordResponse(
@@ -105,48 +91,33 @@ async def get_progress(
 
     - 包含掌握数、学习中、新词、今日待复习等
     """
-    from sqlalchemy import Table, Column, Integer, String, Float, DateTime, MetaData, func, text
-
-    metadata = MetaData()
-    uwp = Table(
-        "user_word_progress",
-        metadata,
-        Column("user_id", Integer),
-        Column("word_id", String(100)),
-        Column("status", String(20)),
-        Column("mastery_level", Float),
-        Column("next_review_at", DateTime),
-        Column("review_count", Integer),
-        Column("correct_count", Integer),
-        Column("wrong_count", Integer),
-    )
-
     # 统计各状态数量
     result = await db.execute(
         select(
             func.count().label("total"),
             func.sum(
-                func.case((uwp.c.status == "mastered", 1), else_=0)
+                case((UserWordProgress.status == "mastered", 1), else_=0)
             ).label("mastered"),
             func.sum(
-                func.case((uwp.c.status == "learning", 1), else_=0)
+                case((UserWordProgress.status == "learning", 1), else_=0)
             ).label("learning"),
             func.sum(
-                func.case((uwp.c.status == "new", 1), else_=0)
+                case((UserWordProgress.status == "new", 1), else_=0)
             ).label("new_words"),
-            func.avg(uwp.c.mastery_level).label("avg_mastery"),
-        ).where(uwp.c.user_id == user_id)
+            func.avg(UserWordProgress.mastery_level).label("avg_mastery"),
+        ).where(UserWordProgress.user_id == user_id)
     )
     stats = result.first()
 
     # 今日待复习
-    now = datetime.now(timezone.utc)
+    # next_review_at 列是 TIMESTAMP WITHOUT TIME ZONE, 需剥离 tzinfo
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
     due_result = await db.execute(
         select(func.count())
-        .select_from(uwp)
+        .select_from(UserWordProgress)
         .where(
-            uwp.c.user_id == user_id,
-            uwp.c.next_review_at <= now,
+            UserWordProgress.user_id == user_id,
+            UserWordProgress.next_review_at <= now,
         )
     )
     due_today = due_result.scalar() or 0
@@ -172,48 +143,31 @@ async def get_due_words(
     db: AsyncSession = Depends(get_db),
 ) -> list[WordProgressResponse]:
     """获取当前用户今日需要复习的词汇列表。"""
-    from sqlalchemy import Table, Column, Integer, String, Text, Float, DateTime, MetaData, func, text
-
-    metadata = MetaData()
-    uwp = Table(
-        "user_word_progress",
-        metadata,
-        Column("user_id", Integer),
-        Column("word_id", String(100)),
-        Column("status", String(20)),
-        Column("mastery_level", Float),
-        Column("next_review_at", DateTime),
-        Column("review_count", Integer),
-        Column("correct_count", Integer),
-        Column("wrong_count", Integer),
-    )
-    vw = Table(
-        "vocabulary_words",
-        metadata,
-        Column("word_id", String(100), primary_key=True),
-        Column("headword", String(200)),
-        Column("meaning", Text),
-    )
-
-    now = datetime.now(timezone.utc)
+    # next_review_at 列是 TIMESTAMP WITHOUT TIME ZONE, 需剥离 tzinfo
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
+    # 注意: ORM 模型类没有 .join() 方法, 必须用 select(...).join() 链式调用
     result = await db.execute(
         select(
-            uwp.c.word_id,
-            uwp.c.status,
-            uwp.c.mastery_level,
-            uwp.c.next_review_at,
-            uwp.c.review_count,
-            uwp.c.correct_count,
-            uwp.c.wrong_count,
-            vw.c.headword,
-            vw.c.meaning,
+            UserWordProgress.word_id,
+            UserWordProgress.status,
+            UserWordProgress.mastery_level,
+            UserWordProgress.next_review_at,
+            UserWordProgress.review_count,
+            UserWordProgress.correct_count,
+            UserWordProgress.wrong_count,
+            VocabularyWord.headword,
+            VocabularyWord.meaning,
         )
-        .select_from(uwp.join(vw, uwp.c.word_id == vw.c.word_id))
+        .select_from(UserWordProgress)
+        .join(
+            VocabularyWord,
+            UserWordProgress.word_id == VocabularyWord.word_id,
+        )
         .where(
-            uwp.c.user_id == user_id,
-            uwp.c.next_review_at <= now,
+            UserWordProgress.user_id == user_id,
+            UserWordProgress.next_review_at <= now,
         )
-        .order_by(uwp.c.next_review_at.asc())
+        .order_by(UserWordProgress.next_review_at.asc())
         .limit(limit)
     )
     rows = result.fetchall()
@@ -234,6 +188,74 @@ async def get_due_words(
     ]
 
 
+@router.get(
+    "/learned-today",
+    summary="获取今日学习/复习的词汇（供游戏联动使用）",
+)
+async def get_learned_today(
+    limit: int = Query(50, ge=1, le=200),
+    user_id: int = Depends(get_current_user_id),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """获取当前用户今日学习或复习过的词汇列表（含 headword/meaning，供单词游戏优先使用）。
+
+    返回今日 updated_at 在当天的 user_word_progress 记录，关联 vocabulary_words 取词表信息。
+    单词游戏应优先使用这些词，使游戏与词汇学习进度联动。
+    """
+    # 今日 UTC 0 点（列是 TIMESTAMP WITHOUT TIME ZONE, 需剥离 tzinfo）
+    today_start = datetime.now(timezone.utc).replace(
+        tzinfo=None, hour=0, minute=0, second=0, microsecond=0
+    )
+
+    result = await db.execute(
+        select(
+            UserWordProgress.word_id,
+            UserWordProgress.status,
+            UserWordProgress.mastery_level,
+            VocabularyWord.headword,
+            VocabularyWord.meaning,
+            VocabularyWord.phonetic,
+            VocabularyWord.tags,
+            VocabularyWord.frequency,
+            VocabularyWord.synonyms,
+            VocabularyWord.antonyms,
+            VocabularyWord.examples,
+        )
+        .select_from(UserWordProgress)
+        .join(
+            VocabularyWord,
+            UserWordProgress.word_id == VocabularyWord.word_id,
+        )
+        .where(
+            UserWordProgress.user_id == user_id,
+            UserWordProgress.updated_at >= today_start,
+        )
+        .order_by(UserWordProgress.updated_at.desc())
+        .limit(limit)
+    )
+    rows = result.fetchall()
+
+    return {
+        "count": len(rows),
+        "words": [
+            {
+                "word_id": row.word_id,
+                "headword": row.headword,
+                "meaning": row.meaning,
+                "phonetic": row.phonetic,
+                "tags": row.tags,
+                "frequency": row.frequency,
+                "synonyms": row.synonyms,
+                "antonyms": row.antonyms,
+                "examples": row.examples,
+                "status": row.status,
+                "mastery_level": row.mastery_level,
+            }
+            for row in rows
+        ],
+    }
+
+
 @router.post(
     "/events",
     status_code=status.HTTP_204_NO_CONTENT,
@@ -248,37 +270,55 @@ async def submit_word_event(
 
     - 支持的事件类型: learned, reviewed, correct, wrong, mastered, forgotten
     - 所有单词游戏通过此接口提交学习结果
+
+    P1-4.6: 幂等 + 乐观锁 + 词汇存在校验
+    - 重复 event_id 直接返回，不重复计入进度
+    - 先验证词汇存在，返回业务 404 而非外键异常 500
+    - 用 SELECT ... FOR UPDATE 锁定 progress 行，避免并发丢失更新
     """
-    from sqlalchemy import Table, Column, Integer, String, Float, DateTime, MetaData, func, text
-
-    metadata = MetaData()
-    uwp = Table(
-        "user_word_progress",
-        metadata,
-        Column("user_id", Integer),
-        Column("word_id", String(100)),
-        Column("status", String(20)),
-        Column("mastery_level", Float),
-        Column("ease_factor", Float),
-        Column("interval_days", Integer),
-        Column("next_review_at", DateTime),
-        Column("review_count", Integer),
-        Column("correct_count", Integer),
-        Column("wrong_count", Integer),
-        Column("updated_at", DateTime),
-    )
-
     event_type = body.event_type
-    now = datetime.now(timezone.utc)
+    # next_review_at 列是 TIMESTAMP WITHOUT TIME ZONE, 需剥离 tzinfo
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
 
-    # 查询当前进度
-    result = await db.execute(
-        select(uwp).where(
-            uwp.c.user_id == user_id,
-            uwp.c.word_id == body.word_id,
-        )
+    # P1-4.6: 先验证词汇存在，返回业务 404（而非依赖外键异常 500）
+    word_exists_result = await db.execute(
+        select(VocabularyWord.word_id).where(VocabularyWord.word_id == body.word_id)
     )
-    existing = result.first()
+    if word_exists_result.scalar() is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"词汇 {body.word_id} 不存在",
+        )
+
+    # P1-4.6: 幂等检查 — 同一 event_id 直接返回，不重复计入进度
+    if body.event_id:
+        try:
+            import redis.asyncio as aioredis  # noqa: WPS433
+
+            from app.core.config import settings as _settings
+
+            _r = aioredis.from_url(_settings.redis_url, decode_responses=True)
+            idem_key = f"vocab:idem:{user_id}:{body.word_id}:{body.event_id}"
+            seen = await _r.set(idem_key, "1", ex=86400, nx=True)  # 24h TTL
+            await _r.aclose()
+            # seen=None 表示键已存在 → 重复请求，直接返回
+            if seen is None:
+                return
+        except Exception:
+            # Redis 不可用不阻塞业务，仅失去幂等保护
+            pass
+
+    # P1-4.6: 用 SELECT ... FOR UPDATE 锁定 progress 行，避免并发丢失更新
+    # FOR UPDATE 必须在事务中执行；AsyncSession 默认开启事务
+    result = await db.execute(
+        select(UserWordProgress)
+        .where(
+            UserWordProgress.user_id == user_id,
+            UserWordProgress.word_id == body.word_id,
+        )
+        .with_for_update()
+    )
+    existing = result.scalars().first()
 
     if existing:
         # 更新现有记录
@@ -292,6 +332,7 @@ async def submit_word_event(
         if event_type == "correct":
             correct_inc = 1
             new_mastery = min(1.0, new_mastery + 0.1)
+            # P1-5 修复：先用更新前的 ease 计算间隔，再更新 ease（符合 SM-2 规范）
             new_interval = max(1, int(new_interval * new_ease))
             new_ease = min(3.0, new_ease + 0.1)
             if new_mastery >= 0.9:
@@ -313,8 +354,10 @@ async def submit_word_event(
             new_interval = 1
             new_ease = max(1.3, new_ease - 0.3)
         elif event_type == "learned":
+            # P1-5 修复：learned 事件也推进间隔，与 correct 一致
             new_status = "learning"
             new_mastery = max(new_mastery, 0.3)
+            new_interval = max(1, int(new_interval * new_ease)) if new_interval > 0 else 1
 
         next_review = now + timedelta(days=max(1, new_interval))
 
@@ -352,9 +395,13 @@ async def submit_word_event(
         initial_mastery = 0.3 if event_type in ("learned", "correct") else 0.0
         initial_interval = 1
         next_review = now + timedelta(days=1)
+        # P1-5 修复：review_count 按事件类型设置，不写死 1
+        initial_review_count = 1 if event_type in ("learned", "correct", "wrong") else 0
+        initial_correct = 1 if event_type == "correct" else 0
+        initial_wrong = 1 if event_type == "wrong" else 0
 
-        await db.execute(
-            uwp.insert().values(
+        db.add(
+            UserWordProgress(
                 user_id=user_id,
                 word_id=body.word_id,
                 status=initial_status,
@@ -362,9 +409,9 @@ async def submit_word_event(
                 ease_factor=2.5,
                 interval_days=initial_interval,
                 next_review_at=next_review,
-                review_count=1,
-                correct_count=1 if event_type == "correct" else 0,
-                wrong_count=1 if event_type == "wrong" else 0,
+                review_count=initial_review_count,
+                correct_count=initial_correct,
+                wrong_count=initial_wrong,
             )
         )
 

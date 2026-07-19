@@ -25,5 +25,5 @@ data/exam-papers/*.json filter=lfs diff=lfs merge=lfs -text
 # 练习册数据 (大型 JSON)
 data/exercise-books/*.json filter=lfs diff=lfs merge=lfs -text
 
-# 游戏配置数据 (大型 JSON)
-data/games/*.json filter=lfs diff=lfs merge=lfs -text
+# 游戏配置数据（小型 JSON，无需 LFS 跟踪）
+# data/games/*.json filter=lfs diff=lfs merge=lfs -text

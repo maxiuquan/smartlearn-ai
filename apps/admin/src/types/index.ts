@@ -1,27 +1,39 @@
 // 用户相关类型
 export interface User {
-  id: string;
-  username: string;
-  email: string;
+  id: number | string;
+  email?: string;
   phone?: string;
   avatar?: string;
   nickname?: string;
   role: UserRole;
   status: UserStatus;
-  createdAt: string;
-  updatedAt: string;
-  lastLoginAt?: string;
+  created_at: string;
+  updated_at?: string;
+  last_login_at?: string;
   profile?: UserProfile;
+  vip_level: number;
+  vip_expire_at?: string;
+  ai_quota_daily_override?: number;
+  wechat_openid?: string;
+  subscription?: UserSubscription;
+  stats?: UserStats;
 }
 
-export type UserRole = 'student' | 'teacher' | 'admin' | 'super_admin';
+export type UserRole = 'user' | 'teacher' | 'admin' | 'super_admin';
 
-export type UserStatus = 'active' | 'inactive' | 'banned';
+export type UserStatus = 'active' | 'banned';
 
 export interface UserProfile {
   grade?: string;
   school?: string;
   subjects?: string[];
+}
+
+export interface UserSubscription {
+  plan: string;
+  status: string;
+  end_at?: string;
+  ai_quota_daily: number;
 }
 
 // 题目相关类型
@@ -154,13 +166,11 @@ export interface DashboardStats {
 }
 
 export interface UserStats {
-  userId: string;
-  studyDays: number;
-  totalStudyTime: number;
-  questionsCompleted: number;
-  accuracy: number;
-  wordsLearned: number;
-  knowledgePoints: KnowledgePointProgress[];
+  question_count: number;
+  word_count: number;
+  game_count: number;
+  ai_conversation_count: number;
+  study_days: number;
 }
 
 export interface KnowledgePointProgress {
@@ -194,6 +204,21 @@ export interface SmsConfig {
   provider: string;
   accessKey: string;
   signName: string;
+}
+
+// 功能状态类型
+export interface FeatureStatus {
+  enabled: boolean;
+  label?: string;
+  description?: string;
+  config_keys?: string[];
+}
+
+// 测试结果类型
+export interface TestResult {
+  success: boolean;
+  message: string;
+  detail?: string;
 }
 
 // API响应类型

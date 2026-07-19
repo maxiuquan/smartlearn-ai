@@ -20,7 +20,7 @@ import {
   CheckCircleOutlined,
 } from '@ant-design/icons';
 import ProTable from '@ant-design/pro-table';
-import type { ColumnsType, ActionType } from '@ant-design/pro-table';
+import type { ProColumns, ActionType } from '@ant-design/pro-table';
 import { useNavigate } from 'react-router-dom';
 import {
   getPastExamList,
@@ -40,7 +40,7 @@ const PastExamList: React.FC = () => {
   const [form] = Form.useForm();
 
   // 表格列定义
-  const columns: ColumnsType<PastExam> = [
+  const columns: ProColumns<PastExam>[] = [
     {
       title: 'ID',
       dataIndex: 'id',
@@ -76,7 +76,7 @@ const PastExamList: React.FC = () => {
       title: '题目数',
       dataIndex: 'questions',
       width: 80,
-      render: (questions: string[]) => questions?.length || 0,
+      renderText: (questions: string[]) => questions?.length || 0,
     },
     {
       title: '总分',
@@ -87,13 +87,13 @@ const PastExamList: React.FC = () => {
       title: '时长',
       dataIndex: 'duration',
       width: 80,
-      render: (duration: number) => `${duration}分钟`,
+      renderText: (duration: number) => `${duration}分钟`,
     },
     {
       title: '难度',
       dataIndex: 'difficulty',
       width: 80,
-      render: (difficulty: number) => (
+      renderText: (difficulty: number) => (
         <Tag color={difficulty <= 2 ? 'green' : difficulty <= 4 ? 'orange' : 'red'}>
           {difficulty}星
         </Tag>
@@ -103,7 +103,7 @@ const PastExamList: React.FC = () => {
       title: '状态',
       dataIndex: 'status',
       width: 80,
-      render: (status: boolean) => (
+      renderText: (status: boolean) => (
         <Tag color={status ? 'green' : 'default'}>
           {status ? '已发布' : '草稿'}
         </Tag>
@@ -169,10 +169,14 @@ const PastExamList: React.FC = () => {
     };
   };
 
-  // 编辑真题
+  // 编辑真题（API 返回 snake_case，表单字段为 camelCase，需做映射）
   const handleEdit = (exam: PastExam) => {
     setCurrentExam(exam);
-    form.setFieldsValue(exam);
+    form.setFieldsValue({
+      ...exam,
+      examType: (exam as any).examType ?? (exam as any).exam_type,
+      totalScore: (exam as any).totalScore ?? (exam as any).total_score,
+    });
     setEditModalVisible(true);
   };
 

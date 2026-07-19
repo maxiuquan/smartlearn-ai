@@ -30,7 +30,6 @@
       "favicon": "./src/assets/favicon.png"
     },
     "plugins": [
-      "expo-router",
       "expo-secure-store",
       "expo-haptics",
       [
@@ -46,8 +45,8 @@
         }
       ]
     ],
-    "experiments": {
-      "typedRoutes": true
+    "extra": {
+      "apiBaseUrl": "http://localhost:8000/api/v1"
     }
   }
 }

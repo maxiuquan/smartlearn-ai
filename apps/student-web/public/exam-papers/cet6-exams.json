@@ -1,0 +1,4384 @@
+{
+  "subject": "大学英语六级",
+  "subject_code": "cet6",
+  "version": "1.0.0",
+  "last_updated": "2026-07-10",
+  "description": "大学英语六级历年真题",
+  "notice": "题目来源于公开的 GitHub 开源仓库，答案仅供参考，请以官方公布为准",
+  "papers": [
+    {
+      "id": "cet6-2023-12-1",
+      "year": "2023",
+      "subject": "CET6",
+      "category": "cet6",
+      "paper_name": "2023年12月CET6真题（第1套）",
+      "questions": [
+        {
+          "id": "cet6-2023-12-1-q1",
+          "number": 1,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第1题（the conversation you have just heard）",
+          "options": {
+            "A": "It is clear that he is expected to enjoy a healthy life.",
+            "B": "There is nothing wrong with his digestive system.",
+            "C": "There is some indication of an issue with his blood circulation.",
+            "D": "He doesn't know he has long been suffering from poor health."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年12月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-1-q2",
+          "number": 2,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第2题（the conversation you have just heard）",
+          "options": {
+            "A": "Mistaking symptoms of illness for stress.",
+            "B": "Complaining they are being overworked.",
+            "C": "Being unaware of the stress they are under.",
+            "D": "Suffering from illness without recognizing it."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年12月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-1-q3",
+          "number": 3,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第3题（the conversation you have just heard）",
+          "options": {
+            "A": "Prescribe some medication for him.",
+            "B": "Give him another physical check-up.",
+            "C": "Explain to him the common consequence of stress.",
+            "D": "Buy some sleeping pills for him from the drugstore."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年12月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-1-q4",
+          "number": 4,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第4题（the conversation you have just heard）",
+          "options": {
+            "A": "It calls for responsible management.",
+            "B": "It proves to be quite profitable.",
+            "C": "It is remarkably promising.",
+            "D": "It is full of competition. **Questions 5 to 8 are based on the conversation you have just heard.**"
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年12月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-1-q5",
+          "number": 5,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第5题（the conversation you have just heard）",
+          "options": {
+            "A": "To avoid being in the limelight.",
+            "B": "To seek medical help for his injury.",
+            "C": "To pursue a less competitive career.",
+            "D": "To stay away from his hostile teammates."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年12月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-1-q6",
+          "number": 6,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第6题（the conversation you have just heard）",
+          "options": {
+            "A": "It has ups and downs.",
+            "B": "It proves rewarding.",
+            "C": "It does not last long.",
+            "D": "It is not so profitable."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年12月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-1-q7",
+          "number": 7,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第7题（the conversation you have just heard）",
+          "options": {
+            "A": "He was a financial advisor.",
+            "B": "He suffered from poor health.",
+            "C": "He became a basketball coach.",
+            "D": "He was back in the news."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年12月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-1-q8",
+          "number": 8,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第8题（the conversation you have just heard）",
+          "options": {
+            "A": "Study issues of public health.",
+            "B": "Alleviate the obesity problem.",
+            "C": "Raise sufficient public funding.",
+            "D": "Train young basketball players. ### Section B **Directions:** _In this section, you will hear two passages. At the end of each passage, you will hear three or four questions. Both the passage and the questions will be spoken only once. After you hear a question, you must choose the best answer from the four choices marked A), B), C), and D). Then mark the corresponding letter on **Answer Sheet 1** with a single line through the centre._ **Questions 9 to 11 are based on the passage you have just heard.**"
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年12月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-1-q9",
+          "number": 9,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第9题（the passage you have just heard）",
+          "options": {
+            "A": "When she started teaching at Edinburgh University in Scotland",
+            "B": "While she was doing her doctoral studies on American Literature.",
+            "C": "After publishing her first novel Behind the Scenes at the Museum.",
+            "D": "After winning the 1986 Woman's Own Short Story Competition"
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年12月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-1-q10",
+          "number": 10,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第10题（the passage you have just heard）",
+          "options": {
+            "A": "The themes of love and loss.",
+            "B": "The code of human behaviour.",
+            "C": "The sins and flaws of eccentrics.",
+            "D": "The manners of fashionable circles."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年12月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-1-q11",
+          "number": 11,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第11题（the passage you have just heard）",
+          "options": {
+            "A": "They are usually ignorant of complex human relations.",
+            "B": "They successfully imitate the manners of celebrities.",
+            "C": "They often get rewarded instead of being punished.",
+            "D": "They are generally looked down upon in society. **Questions 12 to 15 are based on the passage you have just heard.**"
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年12月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-1-q12",
+          "number": 12,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第12题（the passage you have just heard）",
+          "options": {
+            "A": "It is what members use to alleviate tension in a team.",
+            "B": "It is what employers are increasingly seeking after.",
+            "C": "It is conducive to getting over a recession.",
+            "D": "It is necessary for learning a new task."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年12月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-1-q13",
+          "number": 13,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第13题（the passage you have just heard）",
+          "options": {
+            "A": "Make better choices.",
+            "B": "Follow innovative ideas.",
+            "C": "Achieve recognition duly.",
+            "D": "Accumulate work experience."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年12月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-1-q14",
+          "number": 14,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第14题（the passage you have just heard）",
+          "options": {
+            "A": "Workers show more emotional intelligence.",
+            "B": "Workers use brains more than muscles.",
+            "C": "People usually work flexible hours.",
+            "D": "People often work in teams."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年12月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-1-q15",
+          "number": 15,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第15题（the passage you have just heard）",
+          "options": {
+            "A": "Leave the group as soon as possible.",
+            "B": "Anticipate setbacks well in advance.",
+            "C": "Decide on new priorities speedily.",
+            "D": "Stick to original goals confidently. ### Section C **Directions:** _In this section, you will hear three recordings of lectures or talks followed by three or four questions. The recordings will be played only once. After you hear a question, you must choose the best answer from the four choices marked A), B), C), and D). Then mark the corresponding letter on **Answer Sheet 1** with a single line through the centre._ **Questions 16 to 18 are based on the passage you have just heard.** **Questions 16 to 18 are based on the recording you have just heard.**"
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年12月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-1-q16",
+          "number": 16,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第16题（the recording you have just heard）",
+          "options": {
+            "A": "What differentiates people from animals.",
+            "B": "Why philosophers disagree with scientists.",
+            "C": "Where humans' great cognitive capacity originates.",
+            "D": "When being creative becomes a biological mandate."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年12月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-1-q17",
+          "number": 17,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第17题（the recording you have just heard）",
+          "options": {
+            "A": "It is what tells apart two adjacent generations.",
+            "B": "It is what sharpens our appetite for novelty.",
+            "C": "It is something only geniuses can achieve.",
+            "D": "It is something every human being can do."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年12月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-1-q18",
+          "number": 18,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第18题（the recording you have just heard）",
+          "options": {
+            "A": "It seeks inspiration for novel inventions.",
+            "B": "It constantly absorbs new information.",
+            "C": "It uses existing ideas to create new ones.",
+            "D": "It repeats precedent on a regular basis. **Questions 19 to 21 are based on the recording you have just heard.**"
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年12月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-1-q19",
+          "number": 19,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第19题（the recording you have just heard）",
+          "options": {
+            "A": "Dogs know when their owners are not feeling well.",
+            "B": "Dogs have the cognition for telling right from wrong.",
+            "C": "Dogs have an aptitude for developing skills to interact with humans.",
+            "D": "Dogs know when their human companions can no longer stand them."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年12月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-1-q20",
+          "number": 20,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第20题（the recording you have just heard）",
+          "options": {
+            "A": "They can readily detect different ill smells of viruses.",
+            "B": "They can easily tell what bacteria cause odor change.",
+            "C": "They are particularly sensitive to strange smells.",
+            "D": "They have an extremely powerful sense of smell."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年12月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-1-q21",
+          "number": 21,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第21题（the recording you have just heard）",
+          "options": {
+            "A": "It can ensure owners suffer fewer chronic diseases.",
+            "B": "It can benefit owners both physically and mentally.",
+            "C": "It can reduce owners' risk of getting cancer or diabetes.",
+            "D": "It can alert owners to the seriousness of their conditions. **Questions 22 to 25 are based on the recording you have just heard.**"
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年12月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-1-q22",
+          "number": 22,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第22题（the recording you have just heard）",
+          "options": {
+            "A": "Crack down on courses like science, technology, engineering, and math.",
+            "B": "Restrict the ability of creative arts courses to recruit new students.",
+            "C": "Look at how to reform technical and vocational education.",
+            "D": "Ensure creative arts students get better value for money."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年12月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-1-q23",
+          "number": 23,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第23题（the recording you have just heard）",
+          "options": {
+            "A": "Seemingly reasonable.",
+            "B": "Clearly well-grounded.",
+            "C": "Extremely irrational.",
+            "D": "Apparently simplistic."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年12月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-1-q24",
+          "number": 24,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第24题（the recording you have just heard）",
+          "options": {
+            "A": "A high proportion of them haven't tried to save money.",
+            "B": "Most of them never hope to buy a house or to retire.",
+            "C": "Forty percent of them earn less than £25,000 a year.",
+            "D": "The majority of them have fairly well-paying jobs."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年12月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-1-q25",
+          "number": 25,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第25题（the recording you have just heard）",
+          "options": {
+            "A": "The context of a bank balance.",
+            "B": "Britain's economy as a whole.",
+            "C": "The specific degree a student earns.",
+            "D": "Britain's defective educational system."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年12月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-1-q46",
+          "number": 46,
+          "type": "choice",
+          "score": 14.2,
+          "content": "Why does the formula of tax cuts remain popular though ineffective?",
+          "options": {
+            "A": "Its critics' voice has not been heard throughout the country.",
+            "B": "There seem to be no other options available to replace it.",
+            "C": "The cult of tax cuts has been relentlessly propagated by all policymakers.",
+            "D": "There appears to be a misunderstanding of the formula among the public."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年12月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-1-q47",
+          "number": 47,
+          "type": "choice",
+          "score": 14.2,
+          "content": "What does the author think is a more effective measure for driving economic growth in the U.S.?",
+          "options": {
+            "A": "Aiding people left behind by economic growth.",
+            "B": "Prioritizing the growth of the nation's GDP.",
+            "C": "Increasing the compensation for labor.",
+            "D": "Introducing even more extensive tax cuts."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年12月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-1-q48",
+          "number": 48,
+          "type": "choice",
+          "score": 14.2,
+          "content": "What is the logic underlying the author's viewpoint?",
+          "options": {
+            "A": "The growth of workers' paychecks ultimately boosts the nation's economy.",
+            "B": "Paying a premium to maintain a reliable workforce attracts more customers.",
+            "C": "Consumption stimulates the desire for higher wages.",
+            "D": "Familiar arguments for higher wages are outdated."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年12月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-1-q49",
+          "number": 49,
+          "type": "choice",
+          "score": 14.2,
+          "content": "What is the basis for higher wages according to the conventional wisdom?",
+          "options": {
+            "A": "Fairness in distribution.",
+            "B": "Increase in productivity.",
+            "C": "The priority of economic policymakers.",
+            "D": "The unerring judgment of market forces."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年12月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-1-q50",
+          "number": 50,
+          "type": "choice",
+          "score": 14.2,
+          "content": "What do we learn about things in the real world in America for the past 50 years or so?",
+          "options": {
+            "A": "People have failed to see a corresponding increase in wages and in productivity.",
+            "B": "People have been disheartened by the widening gap between the haves and have-nots.",
+            "C": "People have witnessed a tug of war between Republicans and Democrats over tax cuts.",
+            "D": "People have seen the link disappearing between productivity and workers' well-being. #### Passage Two **Questions 51 to 55 are based on the following passage.** Journal editors decide what gets published and what doesn't, affecting the careers of other academics and influencing the direction that a field takes. You'd hope, then, that journals would do everything they can to establish a diverse editorial board, reflecting a variety of voices, experiences, and identities. Unfortunately, a new study in Nature Neuroscience makes for disheartening reading. The team finds that the majority of editors in top psychology and neuroscience journals are male and based in the United States: a situation that may be amplifying existing gender inequalities in the field and influencing the kind of research that gets published. Men were found to account for 60% of the editors of psychology journals. There were significantly more male than female editors at each level of seniority, and men made up the majority of editors in over three quarters of the journals. Crucially, the proportion of female editors was significantly lower than the overall proportion of women psychology researchers. The differences were even starker in the neuroscience journals: 70% of editors were male, and men held the majority of editorial positions in 88% of journals. In this case, the proportion of female editors was not significantly lower than the proportion of female researchers working in neuroscience — a finding that reveals enduring gender disparities in the field more broadly. Based on their results, the team concludes that “the ideas, values, and decision-making biases of men are overrepresented in the editorial positions of the most recognized academic journals in psychology and neuroscience.” Gender inequality in science is often attributed to the fact that senior academics are more likely to be male, because historically science was male-dominated: it's argued that as time goes on and more women rise to senior roles, the field will become more equal. Yet this study showed that even the junior roles in psychology journals tended to be held disproportionately by men, despite the fact that there are actually more female than male junior psychology faculty. This implies that a lack of female academics is not the problem. Instead, there are structural reasons that women are disadvantaged in science. Women receive lower salaries and face greater childcare demands, for instance, which can result in fewer publications and grants — the kinds of things that journals look for when deciding who to appoint. Rather than simply blaming the inequality of editorial boards on tradition, we should be actively breaking down these existing barriers. A lack of diversity among journal editors also likely contributes to psychology's WEIRD problem. If journal editors are largely men from the United States, then they will probably place higher value on papers that are relevant to Western, male populations, whether consciously or not."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年12月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-1-q51",
+          "number": 51,
+          "type": "choice",
+          "score": 14.2,
+          "content": "What would we expect an editorial board of an academic journal to exhibit in view of its important responsibilities?",
+          "options": {
+            "A": "Insight.",
+            "B": "Expertise",
+            "C": "Integrity.",
+            "D": "Diversity."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年12月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-1-q52",
+          "number": 52,
+          "type": "choice",
+          "score": 14.2,
+          "content": "What do we learn from the findings of a new study in Nature Neuroscience?",
+          "options": {
+            "A": "The majority of top psychology and neuroscience journals reflect a variety of voices, experiences, and identities.",
+            "B": "The editorial boards of most psychology and neuroscience journals do influence the direction their field takes.",
+            "C": "The editorial boards of the most important journals in psychology and neuroscience are male-dominated.",
+            "D": "The majority of editors in top psychology and neuroscience journals have relevant backgrounds."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年12月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-1-q53",
+          "number": 53,
+          "type": "choice",
+          "score": 14.2,
+          "content": "What fact does the author highlight concerning the gender differences in editors of psychology journals?",
+          "options": {
+            "A": "There were quite a few female editors who also distinguished themselves as influential psychology researchers.",
+            "B": "The number of female editors was simply disproportionate to that of women engaged in psychology research.",
+            "C": "The proportion of female editors was increasingly lower at senior levels.",
+            "D": "There were few female editors who could move up to senior positions."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年12月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-1-q54",
+          "number": 54,
+          "type": "choice",
+          "score": 14.2,
+          "content": "What can we infer from the conclusion drawn by the team of the new study on the basis of their findings?",
+          "options": {
+            "A": "Women's views are underrepresented in the editorial boards of top psychology and neuroscience journals.",
+            "B": "Male editors of top psychology and neuroscience journals tend to be biased against their female colleagues.",
+            "C": "Male researchers have enough representation in the editorial boards to ensure their publications.",
+            "D": "Female editors have to struggle to get women's research articles published in academic journals."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年12月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-1-q55",
+          "number": 55,
+          "type": "choice",
+          "score": 14.2,
+          "content": "What does the author suggest we do instead of simply blaming the inequality of editorial boards on tradition?",
+          "options": {
+            "A": "Strike a balance between male and female editors.",
+            "B": "Increase women's employment in senior positions.",
+            "C": "Enlarge the body of female academics.",
+            "D": "Implement overall structural reforms."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年12月CET6第1套"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cet6-2023-12-2",
+      "year": "2023",
+      "subject": "CET6",
+      "category": "cet6",
+      "paper_name": "2023年12月CET6真题（第2套）",
+      "questions": [
+        {
+          "id": "cet6-2023-12-2-q1",
+          "number": 1,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第1题（the conversation you have just heard）",
+          "options": {
+            "A": "Renting a car instead of driving their own.",
+            "B": "Surfing online to check out the best deals.",
+            "C": "Exploring more summer holiday resorts",
+            "D": "Spending their holidays in a novel way"
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年12月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-2-q2",
+          "number": 2,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第2题（the conversation you have just heard）",
+          "options": {
+            "A": "He once owned a van.",
+            "B": "He was well travelled.",
+            "C": "He did not find holiday homes appealing.",
+            "D": "He did not like to be locked into one place."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年12月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-2-q3",
+          "number": 3,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第3题（the conversation you have just heard）",
+          "options": {
+            "A": "Ensure the safety of passengers.",
+            "B": "Drive under any weather condition.",
+            "C": "Receive instructions via computers",
+            "D": "Generate their own electricity."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年12月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-2-q4",
+          "number": 4,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第4题（the conversation you have just heard）",
+          "options": {
+            "A": "Having one's basic needs covered while away from home.",
+            "B": "Enjoying the freedom to choose where to go and work.",
+            "C": "Slowing down in one's increasingly hectic life.",
+            "D": "Riding one's mountain bike on vacation. **Questions 5 to 8 are based on the conversation you have just heard.**"
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年12月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-2-q5",
+          "number": 5,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第5题（the conversation you have just heard）",
+          "options": {
+            "A": "She has missed several important appointments lately.",
+            "B": "Her job performance has worsened over the past month.",
+            "C": "She has lagged behind most of her co-workers in output.",
+            "D": "Her physical health has deteriorated these past few weeks."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年12月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-2-q6",
+          "number": 6,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第6题（the conversation you have just heard）",
+          "options": {
+            "A": "Serious health issues.",
+            "B": "Disturbance of her mind.",
+            "C": "Some problems at home.",
+            "D": "Penalty for curtailed output."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年12月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-2-q7",
+          "number": 7,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第7题（the conversation you have just heard）",
+          "options": {
+            "A": "The woman's work proficiency.",
+            "B": "The woman's whole-hearted support.",
+            "C": "His engaging personality.",
+            "D": "His management capability."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年12月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-2-q8",
+          "number": 8,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第8题（the conversation you have just heard）",
+          "options": {
+            "A": "The woman will resume her work in two weeks.",
+            "B": "The man will be back at his 100% in a couple of weeks.",
+            "C": "The woman will be off work on the next two Mondays.",
+            "D": "The man will help the woman get back to her usual self. ### Section B **Directions:** _In this section, you will hear two passages. At the end of each passage, you will hear three or four questions. Both the passage and the questions will be spoken only once. After you hear a question, you must choose the best answer from the four choices marked A), B), C), and D). Then mark the corresponding letter on **Answer Sheet 1** with a single line through the centre._ **Questions 9 to 11 are based on the passage you have just heard.**"
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年12月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-2-q9",
+          "number": 9,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第9题（the passage you have just heard）",
+          "options": {
+            "A": "It can have an impact on our moods and emotions.",
+            "B": "It can enable us to live a healthier and longer life.",
+            "C": "It can improve our financial status significantly.",
+            "D": "It can help us achieve better work performance."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年12月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-2-q10",
+          "number": 10,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第10题（the passage you have just heard）",
+          "options": {
+            "A": "One's health tends to differ before and after marriage.",
+            "B": "One's health status is related to one's social background.",
+            "C": "The wealthier one's spouse is, the healthier one becomes.",
+            "D": "The spouse's level of education can impact one's health."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年12月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-2-q11",
+          "number": 11,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第11题（the passage you have just heard）",
+          "options": {
+            "A": "They benefited a lot from their career achievements.",
+            "B": "They showed interest in their spouse's occupations.",
+            "C": "They had much in common with their spouses.",
+            "D": "They had more education than their spouses. **Questions 12 to 15 are based on the passage you have just heard.**"
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年12月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-2-q12",
+          "number": 12,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第12题（the passage you have just heard）",
+          "options": {
+            "A": "Eliminating their root cause.",
+            "B": "Forecasting flood risks accurately.",
+            "C": "Identifying the cities' geological features.",
+            "D": "Finding out the changing climate patterns."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年12月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-2-q13",
+          "number": 13,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第13题（the passage you have just heard）",
+          "options": {
+            "A": "To validate his hypothesis about the gravity of floods.",
+            "B": "To determine the frequency of high tides causing floods.",
+            "C": "To improve his mathematical flooding model.",
+            "D": "To see the feasibility of his project on flooding."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年12月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-2-q14",
+          "number": 14,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第14题（the passage you have just heard）",
+          "options": {
+            "A": "To study the consequences of high tides on flooded areas.",
+            "B": "To teach local citizens how to collect data of incoming floods.",
+            "C": "To forecast rapid floods in real time.",
+            "D": "To classify the flooding data processed."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年12月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-2-q15",
+          "number": 15,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第15题（the passage you have just heard）",
+          "options": {
+            "A": "They set up Internet-connected water-level sensors.",
+            "B": "They tracked the rising tides with video-cameras.",
+            "C": "They used newly-developed supercomputing facilities.",
+            "D": "They observed the direction of water flow on the spot. ### Section C **Directions:** _In this section, you will hear three recordings of lectures or talks followed by three or four questions. The recordings will be played only once. After you hear a question, you must choose the best answer from the four choices marked A), B), C), and D). Then mark the corresponding letter on **Answer Sheet 1** with a single line through the centre._ **Questions 16 to 18 are based on the passage you have just heard.** **Questions 16 to 18 are based on the recording you have just heard.**"
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年12月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-2-q16",
+          "number": 16,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第16题（the recording you have just heard）",
+          "options": {
+            "A": "To argue about the value of a college degree.",
+            "B": "To debate the validity of current survey data.",
+            "C": "To account for the drastic decline in employment among men.",
+            "D": "To compare men without college degrees with those who have."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年12月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-2-q17",
+          "number": 17,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第17题（the recording you have just heard）",
+          "options": {
+            "A": "The increase in women taking up jobs.",
+            "B": "The issue of changing job requirements.",
+            "C": "The factor of wages.",
+            "D": "The impact of inflation."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年12月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-2-q18",
+          "number": 18,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第18题（the recording you have just heard）",
+          "options": {
+            "A": "Men's unwillingness to accept low wages in times of growing inflation.",
+            "B": "The wage gap between those with college degrees and those without.",
+            "C": "More jobs requiring their holders to have a college degree nowadays.",
+            "D": "The sharp decline in marriage among men with no college degrees. **Questions 19 to 21 are based on the recording you have just heard.**"
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年12月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-2-q19",
+          "number": 19,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第19题（the recording you have just heard）",
+          "options": {
+            "A": "More and more people attach importance to protecting endangered animals",
+            "B": "More and more people prioritize animal welfare when buying things to wear",
+            "C": "An increasing number of people demand to free animals being kept in cages",
+            "D": "An increasing number of people follow the latest trend of becoming vegetarians."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年12月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-2-q20",
+          "number": 20,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第20题（the recording you have just heard）",
+          "options": {
+            "A": "Avoided the use of leather and fur.",
+            "B": "Labelled all their products as vegan.",
+            "C": "Refrained from using chemicals in their products.",
+            "D": "Utilized a silk substitute made from mushrooms."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年12月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-2-q21",
+          "number": 21,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第21题（the recording you have just heard）",
+          "options": {
+            "A": "Whether they actually signify a substantial change.",
+            "B": "Whether they effectively protect animals at large.",
+            "C": "Whether they can be considered sustainable.",
+            "D": "Whether they can be regarded as ethical. **Questions 22 to 25 are based on the recording you have just heard.**"
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年12月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-2-q22",
+          "number": 22,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第22题（the recording you have just heard）",
+          "options": {
+            "A": "The era we live in is the most peaceful in history.",
+            "B": "The world has seen more violence in recent years.",
+            "C": "The environmental welfare has worsened in the world.",
+            "D": "The belief is less prevalent that the world is going to hell."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年12月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-2-q23",
+          "number": 23,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第23题（the recording you have just heard）",
+          "options": {
+            "A": "They were actually not in their right mind.",
+            "B": "They believed the world was deteriorating.",
+            "C": "They did not wish to live in the previous century.",
+            "D": "They were convinced by the statistics presented to them."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年12月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-2-q24",
+          "number": 24,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第24题（the recording you have just heard）",
+          "options": {
+            "A": "The subjectivity of mass media.",
+            "B": "The current state of affairs.",
+            "C": "Our psychological biases.",
+            "D": "Our ancestors' influence."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年12月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-2-q25",
+          "number": 25,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第25题（the recording you have just heard）",
+          "options": {
+            "A": "Spreading exciting news around us far and wide.",
+            "B": "Vacuuming up depressing or enraging stories.",
+            "C": "Calculating dangerous risks to our survival.",
+            "D": "Paying attention to negative information."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年12月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-2-q46",
+          "number": 46,
+          "type": "choice",
+          "score": 14.2,
+          "content": "What do we learn about singer and actress Selena Gomez in the past four and a half years?",
+          "options": {
+            "A": "She has had worsening mental problems.",
+            "B": "She has won Instagram's most followers.",
+            "C": "She has refrained from using social media.",
+            "D": "She has succeeded in a bid on the internet"
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年12月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-2-q47",
+          "number": 47,
+          "type": "choice",
+          "score": 14.2,
+          "content": "Why does actively opting out of using the internet become a matter of privilege?",
+          "options": {
+            "A": "Most people find it subtle and complicated to give up using the internet.",
+            "B": "Most people can hardly ditch the web while avoiding hate and comparisons.",
+            "C": "Most people can hardly get by without the internet due to growing digitisation.",
+            "D": "Most people have been seriously addicted to the web without being aware of it."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年12月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-2-q48",
+          "number": 48,
+          "type": "choice",
+          "score": 14.2,
+          "content": "Why does the author say “witnessing companies...feels particularly irritating” (Lines 2-4, Para. 6)?",
+          "options": {
+            "A": "The UK digital divide would further worsen due to the metaverse.",
+            "B": "The concept of the metaverse is believed to be still quite illusory.",
+            "C": "School children would be drawn farther away from the real world.",
+            "D": "Most families in the UK do not have stable broadband connections."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年12月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-2-q49",
+          "number": 49,
+          "type": "choice",
+          "score": 14.2,
+          "content": "What is worth bearing in mind concerning social media platforms?",
+          "options": {
+            "A": "They are conducive to promoting societal equality.",
+            "B": "They help many people feel connected with others.",
+            "C": "They provide a necessary device for a digital detox.",
+            "D": "They create a virtual community on the internet."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年12月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-2-q50",
+          "number": 50,
+          "type": "choice",
+          "score": 14.2,
+          "content": "What does the author think is really important for those living in digital exclusion?",
+          "options": {
+            "A": "Having access to the internet.",
+            "B": "Edging further towards web 3.0.",
+            "C": "Getting more educational resources.",
+            "D": "Opening more social media accounts. #### Passage Two **Questions 51 to 55 are based on the following passage.** Psychologists have long been in disagreement as to whether competition is a learned or a genetic component of human behavior. Whatever it is, you cannot but recognize the effect competition is exerting in academics and many other areas of contemporary life. Psychologically speaking, competition has been seen as an inevitable consequence of human drives. According to Sigmund Freud, humans are born screaming for attention and full of organic drives for fulfillment in various areas. Initially, we compete for the attention of our parents. Thereafter, we are at the mercy of a battle between our base impulses for self-fulfillment and social and cultural norms which prohibit pure indulgence. Current work in _anthropology_ (人类学) has suggested, however, that this view of the role of competition in human behavior may be incorrect. Thomas Hobbes, one of the great philosophers of the seventeenth century, is perhaps best remembered for his characterization of the “natural world,” that is, the world before the imposition of the will of humanity, as being “nasty, brutish, and short.” This image of the pre-rational world is still widely held, reinforced by Charles Darwin's highly influential work, _The Origin of Species_, which established the doctrine of natural selection. This doctrine, which takes for granted that those species best able to adapt to and master the natural environment in which they live will survive, has suggested that the struggle for survival is an inherent human trait which determines a person's success. Darwin's theory has even been summarized as “survival of the fittest” — a phrase Darwin himself never used — further highlighting competition's role in success. As it has often been pointed out, however, there is nothing in the concept of natural selection that suggests that competition is the most successful strategy for survival of the fittest. Darwin asserted in _The Origin of Species_ that the struggles he was describing should be viewed as metaphors and could easily include dependence and cooperation. Many studies have been conducted to test the importance placed on competition as opposed to other values, such as cooperation — by various cultures, and generally conclude that Americans uniquely praise competition as natural, inevitable, and desirable. In 1937, the world-renowned anthropologist Margaret Mead published _Cooperation and Competition among Primitive Peoples_, based on her studies of several societies that did not prize competition, and, in fact, seemed at times to place a negative value on it. One such society was the Zuni Indians of Arizona, and they, Mead found, valued cooperation far more than competition. After studying dozens of such cultures, Mead's final conclusion was that competitiveness is a culturally created aspect of human behavior, and that its prevalence in a particular society is relative to how that society values it."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年12月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-2-q51",
+          "number": 51,
+          "type": "choice",
+          "score": 14.2,
+          "content": "What does the author think is easy to see in many areas of contemporary life?",
+          "options": {
+            "A": "The disagreement on the inevitability of competition.",
+            "B": "The consequence of psychological investigation.",
+            "C": "The effect of human drives.",
+            "D": "The impact of competition."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年12月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-2-q52",
+          "number": 52,
+          "type": "choice",
+          "score": 14.2,
+          "content": "According to psychology, what do people strive to do following the initial stage of their life?",
+          "options": {
+            "A": "Fulfill individual needs without incurring adverse effects of human drives.",
+            "B": "Indulge in cultural pursuits while keeping their base impulses at bay.",
+            "C": "Gain extensive recognition without exposing pure indulgence.",
+            "D": "Satisfy their own desires while observing social conventions."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年12月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-2-q53",
+          "number": 53,
+          "type": "choice",
+          "score": 14.2,
+          "content": "What do we learn about the “natural world” characterized by Thomas Hobbes?",
+          "options": {
+            "A": "It gets misrepresented by philosophers and anthropologists.",
+            "B": "It gets distorted in Darwin's _The Origin of Species_.",
+            "C": "It is free from the rational intervention of humans.",
+            "D": "It is the pre-rational world rarely appreciated nowadays."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年12月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-2-q54",
+          "number": 54,
+          "type": "choice",
+          "score": 14.2,
+          "content": "What can we conclude from Darwin's assertion in _The Origin of Species_?",
+          "options": {
+            "A": "All species inherently depend on others for survival.",
+            "B": "Struggles for survival do not exclude mutual support.",
+            "C": "Competition weighs as much as cooperation as a survival strategy.",
+            "D": "The strongest species proves to be the fittest in natural selection."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年12月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-2-q55",
+          "number": 55,
+          "type": "choice",
+          "score": 14.2,
+          "content": "What conclusion did Margaret Mead reach after studying dozens of different cultures?",
+          "options": {
+            "A": "It is characteristic of humans to be competitive.",
+            "B": "Americans are uniquely opposed to cooperation.",
+            "C": "Competition is relatively more prevalent in Western societies.",
+            "D": "People's attitude towards competition is actually culture-bound."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年12月CET6第2套"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cet6-2023-12-3",
+      "year": "2023",
+      "subject": "CET6",
+      "category": "cet6",
+      "paper_name": "2023年12月CET6真题（第3套）",
+      "questions": [
+        {
+          "id": "cet6-2023-12-3-q26",
+          "number": 26,
+          "type": "choice",
+          "score": 3.55,
+          "content": "选词填空第26空：for more efficient living. Now it is clear that these improvements provide great benefits but also _____ health costs. Recent studies show that urban 27 encourages more driving and is associated with heav",
+          "options": {
+            "A": "correlation",
+            "B": "longevity",
+            "C": "dense",
+            "D": "navigate"
+          },
+          "answer": "A",
+          "solution": "选词填空题，答案待核实，请以官方公布为准。",
+          "analysis": "选词填空，词义辨析与语境理解",
+          "knowledge_points": [
+            "cloze-vocab"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选词填空",
+            "2023年12月CET6第3套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-3-q27",
+          "number": 27,
+          "type": "choice",
+          "score": 3.55,
+          "content": "选词填空第27空：these improvements provide great benefits but also 26 health costs. Recent studies show that urban _____ encourages more driving and is associated with heavier weight. This 28 suggests that the layout and",
+          "options": {
+            "A": "deter",
+            "B": "recreational",
+            "C": "equity",
+            "D": "rotten"
+          },
+          "answer": "A",
+          "solution": "选词填空题，答案待核实，请以官方公布为准。",
+          "analysis": "选词填空，词义辨析与语境理解",
+          "knowledge_points": [
+            "cloze-vocab"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选词填空",
+            "2023年12月CET6第3套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-3-q28",
+          "number": 28,
+          "type": "choice",
+          "score": 3.55,
+          "content": "选词填空第28空：cent studies show that urban 27 encourages more driving and is associated with heavier weight. This _____ suggests that the layout and design of cities can hinder or promote healthier lifestyle choices and",
+          "options": {
+            "A": "foster",
+            "B": "sprawl",
+            "C": "imperative",
+            "D": "vibrate"
+          },
+          "answer": "A",
+          "solution": "选词填空题，答案待核实，请以官方公布为准。",
+          "analysis": "选词填空，词义辨析与语境理解",
+          "knowledge_points": [
+            "cloze-vocab"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选词填空",
+            "2023年12月CET6第3套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-3-q29",
+          "number": 29,
+          "type": "choice",
+          "score": 3.55,
+          "content": "选词填空第29空：ts that the layout and design of cities can hinder or promote healthier lifestyle choices and it is _____ that urban planners bear this in mind. Unfortunately, urban planning still centers in large part o",
+          "options": {
+            "A": "impose",
+            "B": "vicinity",
+            "C": "irrespective",
+            "D": "correlation"
+          },
+          "answer": "A",
+          "solution": "选词填空题，答案待核实，请以官方公布为准。",
+          "analysis": "选词填空，词义辨析与语境理解",
+          "knowledge_points": [
+            "cloze-vocab"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选词填空",
+            "2023年12月CET6第3套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-3-q30",
+          "number": 30,
+          "type": "choice",
+          "score": 3.55,
+          "content": "选词填空第30空：ing still centers in large part on solving the problems of the past. Of course cities still need to _____ standard public health practices, such as separating toxic facilities from homes and restricting he",
+          "options": {
+            "A": "longevity",
+            "B": "dense",
+            "C": "navigate",
+            "D": "deter"
+          },
+          "answer": "A",
+          "solution": "选词填空题，答案待核实，请以官方公布为准。",
+          "analysis": "选词填空，词义辨析与语境理解",
+          "knowledge_points": [
+            "cloze-vocab"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选词填空",
+            "2023年12月CET6第3套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-3-q31",
+          "number": 31,
+          "type": "choice",
+          "score": 3.55,
+          "content": "选词填空第31空：actices, such as separating toxic facilities from homes and restricting heavy truck traffic through _____ residential areas. But it's also important to create healthier cities - and the discussion is alrea",
+          "options": {
+            "A": "recreational",
+            "B": "equity",
+            "C": "rotten",
+            "D": "foster"
+          },
+          "answer": "A",
+          "solution": "选词填空题，答案待核实，请以官方公布为准。",
+          "analysis": "选词填空，词义辨析与语境理解",
+          "knowledge_points": [
+            "cloze-vocab"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选词填空",
+            "2023年12月CET6第3套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-3-q32",
+          "number": 32,
+          "type": "choice",
+          "score": 3.55,
+          "content": "选词填空第32空：asier and safer for people to recreate, walk, bike, and take public transportation. Many studies of _____ show that people live the longest in environments where physical activity is part of everyday life.",
+          "options": {
+            "A": "sprawl",
+            "B": "imperative",
+            "C": "vibrate",
+            "D": "impose"
+          },
+          "answer": "A",
+          "solution": "选词填空题，答案待核实，请以官方公布为准。",
+          "analysis": "选词填空，词义辨析与语境理解",
+          "knowledge_points": [
+            "cloze-vocab"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选词填空",
+            "2023年12月CET6第3套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-3-q33",
+          "number": 33,
+          "type": "choice",
+          "score": 3.55,
+          "content": "选词填空第33空：ty is part of everyday life. Providing more walkable spaces, better protected bike lanes, and more _____ spaces are important steps. But even smaller changes can be effective. Cities can close off streets",
+          "options": {
+            "A": "vicinity",
+            "B": "irrespective",
+            "C": "correlation",
+            "D": "longevity"
+          },
+          "answer": "A",
+          "solution": "选词填空题，答案待核实，请以官方公布为准。",
+          "analysis": "选词填空，词义辨析与语境理解",
+          "knowledge_points": [
+            "cloze-vocab"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选词填空",
+            "2023年12月CET6第3套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-3-q34",
+          "number": 34,
+          "type": "choice",
+          "score": 3.55,
+          "content": "选词填空第34空：t during their journeys. Using public spaces in cities as places where people can exercise promotes _____, rather than allowing physical activity to become restricted to private gyms with often-expensive m",
+          "options": {
+            "A": "dense",
+            "B": "navigate",
+            "C": "deter",
+            "D": "recreational"
+          },
+          "answer": "A",
+          "solution": "选词填空题，答案待核实，请以官方公布为准。",
+          "analysis": "选词填空，词义辨析与语境理解",
+          "knowledge_points": [
+            "cloze-vocab"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选词填空",
+            "2023年12月CET6第3套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-3-q35",
+          "number": 35,
+          "type": "choice",
+          "score": 3.55,
+          "content": "选词填空第35空：owing physical activity to become restricted to private gyms with often-expensive monthly fees that _____ less wealthy people from joining.",
+          "options": {
+            "A": "equity",
+            "B": "rotten",
+            "C": "foster",
+            "D": "sprawl"
+          },
+          "answer": "A",
+          "solution": "选词填空题，答案待核实，请以官方公布为准。",
+          "analysis": "选词填空，词义辨析与语境理解",
+          "knowledge_points": [
+            "cloze-vocab"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选词填空",
+            "2023年12月CET6第3套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-3-q46",
+          "number": 46,
+          "type": "choice",
+          "score": 14.2,
+          "content": "How can research serve its full purpose according to the author?",
+          "options": {
+            "A": "With researchers being aware of public interests.",
+            "B": "With its findings published in prominent journals.",
+            "C": "With researchers creating products that enhance social development.",
+            "D": "With its findings properly communicated beyond the academic circle."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年12月CET6第3套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-3-q47",
+          "number": 47,
+          "type": "choice",
+          "score": 14.2,
+          "content": "Why do ordinary readers find it difficult to access the results of researchers' studies?",
+          "options": {
+            "A": "They cannot understand the academic language used for reporting these results.",
+            "B": "They feel intimidated by the jargon researchers use to describe their findings.",
+            "C": "They do not attend conferences where these results are freely available.",
+            "D": "They have few chances to locate the journals that publish these findings."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年12月CET6第3套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-3-q48",
+          "number": 48,
+          "type": "choice",
+          "score": 14.2,
+          "content": "What is one of the reasons some researchers won't prioritize communicating their findings to the public?",
+          "options": {
+            "A": "They can thrive on the papers published.",
+            "B": "Their top consideration is to win tenure.",
+            "C": "Their main goal is gaining recognition in their field.",
+            "D": "They have to struggle to reach out to the community."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年12月CET6第3套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-3-q49",
+          "number": 49,
+          "type": "choice",
+          "score": 14.2,
+          "content": "How can sharing findings benefit researchers themselves?",
+          "options": {
+            "A": "By helping them to identify new research directions.",
+            "B": "By enabling them to understand crises plaguing society.",
+            "C": "By enabling them to effectively address social discrepancies.",
+            "D": "By helping them to forge ties with government agencies."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年12月CET6第3套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-3-q50",
+          "number": 50,
+          "type": "choice",
+          "score": 14.2,
+          "content": "Why are researchers advised to engage the services of professional writers or communication officers?",
+          "options": {
+            "A": "To satisfy ethics committees' mandatory requirements of researchers.",
+            "B": "To translate their study into languages accessible to readers overseas.",
+            "C": "To make their publications correctly understood by the public.",
+            "D": "To render their findings acceptable by prominent journals. #### Passage Two **Questions 51 to 55 are based on the following passage.** Spiders make their presence felt in late August and through early autumn. This is the mating season of some of the most common varieties, when male house spiders come out of hidden corners to look for females, and garden spiders reach adult size and spin their most dazzling webs. Yet while the spider is a familiar fixture of nursery poems or songs and Halloween decorations, its relationship with humans is complicated. Fear of spiders is common and has serious impacts on the lives of sufferers. Its prevalence appears unrelated to any rational assessment of risk. Spiders in the UK are almost all harmless. Farmland species perform valuable ecosystem services, by preying on insects that are our competitors for crops. But they are a constant source of human anxieties — with a cultural association with witches and wickedness dating back to the middle ages. Does this perhaps explain, in part, the lack of data about how spiders are faring in our age of ecological crisis? British butterflies are the most studied group of insects in the world, due to the long tradition of collecting and observing them. But spider conservationists point out that it was only in the 1980s that the classification of house spiders was properly sorted out. And while information about insect populations is gathered by experiments that measure the numbers hitting windscreens or traps, there have been few attempts to count spiders. The huge reductions in the numbers of flying insects can only mean a reduction in spiders' food supply. A recent landmark study identified a 75% fall in insect populations between 1989 and 2016, with pesticide use thought to be to blame along with the destruction of wild areas for development. This means the overall picture for spiders is worrying, as it is for most creatures. But conservationists are most concerned about those varieties that are threatened due to habitat loss and fragmentation, which makes it impossible for them to migrate. Of around 650 spider species regularly recorded in the UK, the majority thrive in marshes and wasteland. Conservation efforts, often led by determined individuals, have helped some species to recover by reintroducing them to new areas. With rewilding now firmly on the environmental policy agenda, the hope is that in future, spiders will be enabled to migrate by themselves, adapting to climate change by moving along wildlife corridors. It seems unlikely that spiders will ever attract the same level of human enthusiasm as bees, birds, or butterflies, in spite of their unique status as nature's spinners. But as they reveal themselves in all their splendour this autumn, it would be a good thing if more animal lovers recognised the ways in which spiders are simply terrific."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年12月CET6第3套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-3-q51",
+          "number": 51,
+          "type": "choice",
+          "score": 14.2,
+          "content": "What do we learn about spiders in the UK since the middle ages?",
+          "options": {
+            "A": "They have been generally misconceived.",
+            "B": "They have adversely impacted crop growth.",
+            "C": "They have been a constant reminder of bad luck.",
+            "D": "They have made their presence felt when spinning webs."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年12月CET6第3套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-3-q52",
+          "number": 52,
+          "type": "choice",
+          "score": 14.2,
+          "content": "What have spiders been associated with in the UK for centuries?",
+          "options": {
+            "A": "Harm.",
+            "B": "Evil.",
+            "C": "Suffering.",
+            "D": "Aggression."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年12月CET6第3套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-3-q53",
+          "number": 53,
+          "type": "choice",
+          "score": 14.2,
+          "content": "What partly accounts for the reduction in spiders' food supply?",
+          "options": {
+            "A": "The long tradition of collecting insects.",
+            "B": "Fast reproduction of their competitors.",
+            "C": "Chemicals used for killing insects.",
+            "D": "The extinction of a lot of wildlife."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年12月CET6第3套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-3-q54",
+          "number": 54,
+          "type": "choice",
+          "score": 14.2,
+          "content": "What does the passage say is conservationists' biggest worry?",
+          "options": {
+            "A": "A variety of spiders are threatened due to pollution of marshes and wasteland.",
+            "B": "Certain species of spiders are endangered due to loss of their natural homes.",
+            "C": "An increasing number of spiders are being killed by deadly pesticides.",
+            "D": "More and more spider species are found losing their ability to migrate."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年12月CET6第3套"
+          ]
+        },
+        {
+          "id": "cet6-2023-12-3-q55",
+          "number": 55,
+          "type": "choice",
+          "score": 14.2,
+          "content": "What wish does the author express close to the end of the passage?",
+          "options": {
+            "A": "More people would recognise spiders' unique status in the ecosystem.",
+            "B": "People would show greater enthusiasm for spiders than for butterflies.",
+            "C": "There would be sufficient corridors for spiders to move along.",
+            "D": "There would be more people appreciating spiders' splendour."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年12月CET6第3套"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cet6-2023-06-1",
+      "year": "2023",
+      "subject": "CET6",
+      "category": "cet6",
+      "paper_name": "2023年6月CET6真题（第1套）",
+      "questions": [
+        {
+          "id": "cet6-2023-06-1-q1",
+          "number": 1,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第1题（the conversation you have just heard）",
+          "options": {
+            "A": "It was spacious and tranquil.",
+            "B": "It was warm and comfortable.",
+            "C": "It was shabby and solitary.",
+            "D": "It was tiny and noisy."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年06月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-1-q2",
+          "number": 2,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第2题（the conversation you have just heard）",
+          "options": {
+            "A": "She no longer hates people talking loudly in the dorm.",
+            "B": "She misses her roommates she used to complain about.",
+            "C": "She begins to enjoy the movies she once found irritating.",
+            "D": "She finds the crowded dorm as cozy as her new apartment."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年06月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-1-q3",
+          "number": 3,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第3题（the conversation you have just heard）",
+          "options": {
+            "A": "He found the apartment perfectly furnished.",
+            "B": "He had a feeling of despair and frustration.",
+            "C": "He had a similar feeling to the woman's.",
+            "D": "He felt the new place was like paradise."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年06月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-1-q4",
+          "number": 4,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第4题（the conversation you have just heard）",
+          "options": {
+            "A": "Go to see the woman's apartment.",
+            "B": "Make a phone call to his parents.",
+            "C": "Buy some furniture for the woman.",
+            "D": "Decorate the woman's apartment. **Questions 5 to 8 are based on the conversation you have just heard.**"
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年06月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-1-q5",
+          "number": 5,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第5题（the conversation you have just heard）",
+          "options": {
+            "A": "He works as a literary critic.",
+            "B": "He hosts an educational program.",
+            "C": "He has initiated a university reform.",
+            "D": "He has published a book recently."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年06月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-1-q6",
+          "number": 6,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第6题（the conversation you have just heard）",
+          "options": {
+            "A": "It fails to keep up with the radical changes of society.",
+            "B": "It fails to ensure universities get sufficient resources.",
+            "C": "It has not prepared young people for the job market.",
+            "D": "It has not fostered the growth of the arts disciplines."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年06月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-1-q7",
+          "number": 7,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第7题（the conversation you have just heard）",
+          "options": {
+            "A": "More of the budget should go to science and technology.",
+            "B": "The underfunded music discipline should be prioritized.",
+            "C": "Subdisciplines like sculpture should get more funding.",
+            "D": "Literature should get as much funding as engineering."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年06月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-1-q8",
+          "number": 8,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第8题（the conversation you have just heard）",
+          "options": {
+            "A": "Build a prosperous nation.",
+            "B": "Make skilled professionals.",
+            "C": "Create ingenious artists.",
+            "D": "Cultivate better citizens. ### Section B **Directions:** _In this section, you will hear two passages. At the end of each passage, you will hear three or four questions. Both the passage and the questions will be spoken only once. After you hear a question, you must choose the best answer from the four choices marked A), B), C), and D). Then mark the corresponding letter on **Answer Sheet 1** with a single line through the centre._ **Questions 9 to 11 are based on the passage you have just heard.**"
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年06月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-1-q9",
+          "number": 9,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第9题（the passage you have just heard）",
+          "options": {
+            "A": "It is quite common.",
+            "B": "It is rarely noticed.",
+            "C": "It seldom annoys people.",
+            "D": "It occurs when one is alone."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年06月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-1-q10",
+          "number": 10,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第10题（the passage you have just heard）",
+          "options": {
+            "A": "Seeing things in black and white.",
+            "B": "Engaging in regular contemplation.",
+            "C": "Having a special understanding of creativity.",
+            "D": "Knowing how to make their mental batteries work."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年06月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-1-q11",
+          "number": 11,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第11题（the passage you have just heard）",
+          "options": {
+            "A": "Engaging in intense activity.",
+            "B": "Fantasizing in one's down time.",
+            "C": "Working on a particular project.",
+            "D": "Reflecting during one's relaxation. **Questions 12 to 15 are based on the passage you have just heard.**"
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年06月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-1-q12",
+          "number": 12,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第12题（the passage you have just heard）",
+          "options": {
+            "A": "Farmers helped Native Americans grow crops.",
+            "B": "There were expansive university campuses.",
+            "C": "There existed post offices.",
+            "D": "Migrants found gold there."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年06月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-1-q13",
+          "number": 13,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第13题（the passage you have just heard）",
+          "options": {
+            "A": "It helped to boost the economy in the American West.",
+            "B": "It provided job opportunities for many gold seekers.",
+            "C": "It extended the influence of the federal government.",
+            "D": "It kept people in the deserts and plains connected."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年06月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-1-q14",
+          "number": 14,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第14题（the passage you have just heard）",
+          "options": {
+            "A": "It employed Native Americans to work as postmen.",
+            "B": "It commissioned private wagons to carry the mail.",
+            "C": "It subsidized the locals who acted as postmasters.",
+            "D": "It centralized postal services in its remote areas."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年06月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-1-q15",
+          "number": 15,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第15题（the passage you have just heard）",
+          "options": {
+            "A": "He analyzed interactive maps of mail routes.",
+            "B": "He read a large collection of books on the topic.",
+            "C": "He examined its historical trends with data science.",
+            "D": "He collected data about its impact on local business. ### Section C **Directions:** _In this section, you will hear three recordings of lectures or talks followed by three or four questions. The recordings will be played only once. After you hear a question, you must choose the best answer from the four choices marked A), B), C), and D). Then mark the corresponding letter on **Answer Sheet 1** with a single line through the centre._ **Questions 16 to 18 are based on the recording you have just heard.**"
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年06月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-1-q16",
+          "number": 16,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第16题（the recording you have just heard）",
+          "options": {
+            "A": "Higher levels of anxiety may improve people's memory.",
+            "B": "Some experiences are easier to remember than others.",
+            "C": "Most people tend to remember things selectively.",
+            "D": "Simple things may leave a deep impression on one's memory."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年06月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-1-q17",
+          "number": 17,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第17题（the recording you have just heard）",
+          "options": {
+            "A": "They classified the participants'mindset.",
+            "B": "They showed some photos to the participants.",
+            "C": "They measured the participants'anxiety levels.",
+            "D": "They tested the size of the participants'vocabulary."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年06月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-1-q18",
+          "number": 18,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第18题（the recording you have just heard）",
+          "options": {
+            "A": "Anxiety has become a serious problem for an increasing number of people.",
+            "B": "Extreme levels of anxiety can adversely affect cognitive performance.",
+            "C": "People diagnosed with anxicty disorder may forget things selectively.",
+            "D": "There is no direct correlation between memory and levels of anxiety. **Questions 19 to 21 are based on the recording you have just heard.**"
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年06月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-1-q19",
+          "number": 19,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第19题（the recording you have just heard）",
+          "options": {
+            "A": "They compare products from different companies before making a choice.",
+            "B": "They get information from other consumers'postings and comments.",
+            "C": "They lose patience when their phone call is no promptly answered.",
+            "D": "They expect to get instantaneous responses to their inquiry."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年06月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-1-q20",
+          "number": 20,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第20题（the recording you have just heard）",
+          "options": {
+            "A": "Giving them rewards on the spot.",
+            "B": "Broadening their scope of interest.",
+            "C": "Speaking directly to their emotions.",
+            "D": "Focusing on the details of the product."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年06月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-1-q21",
+          "number": 21,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第21题（the recording you have just heard）",
+          "options": {
+            "A": "Change the rules of the game in the market every year.",
+            "B": "Keep up with the latest technological developments.",
+            "C": "Learn from technological innovators to do business.",
+            "D": "Make greater efforts to build up consumers'confidence. **Questions 22 to 25 are based on the recording you have just heard.**"
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年06月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-1-q22",
+          "number": 22,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第22题（the recording you have just heard）",
+          "options": {
+            "A": "People have only one social engagement per week.",
+            "B": "Working together enhances friendship.",
+            "C": "Few people have devoted friends.",
+            "D": "Friendships benefit work."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年06月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-1-q23",
+          "number": 23,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第23题（the recording you have just heard）",
+          "options": {
+            "A": "The impact of friends on people's self-esteem.",
+            "B": "How supportive friends can be in the workplace.",
+            "C": "How to boost one's sense of value and worthiness.",
+            "D": "The role of family ties in people's mental well-being."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年06月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-1-q24",
+          "number": 24,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第24题（the recording you have just heard）",
+          "options": {
+            "A": "They show little interest in their friends'work.",
+            "B": "They tend to be much more difficult to make.",
+            "C": "They are more trustworthy and reliable.",
+            "D": "They increase people's job satisfaction."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年06月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-1-q25",
+          "number": 25,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第25题（the recording you have just heard）",
+          "options": {
+            "A": "Allow employees to have a flexible work schedule.",
+            "B": "Encourage employees to be friends with colleagues.",
+            "C": "Help employees balance work and family responsibilities.",
+            "D": "Organize activities to nourish friendships outside of work."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年06月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-1-q46",
+          "number": 46,
+          "type": "choice",
+          "score": 14.2,
+          "content": "What do we learn about the deeper implications of AI?",
+          "options": {
+            "A": "It is causing catastrophic levels of unemployment.",
+            "B": "It is doing physical harm to human operators.",
+            "C": "It is altering moral judgments.",
+            "D": "It is reshaping humanity."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年06月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-1-q47",
+          "number": 47,
+          "type": "choice",
+          "score": 14.2,
+          "content": "What is the consequence of algorithmic prescription replacing human judgment?",
+          "options": {
+            "A": "People lose the chance to cultivate the ability to make practical judgments.",
+            "B": "People are prevented from participating in making major decisions in the workplace.",
+            "C": "Managers no longer have the chance to decide which loan to approve.",
+            "D": "Managers do not need to take the trouble to determine who to hire or fire."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年06月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-1-q48",
+          "number": 48,
+          "type": "choice",
+          "score": 14.2,
+          "content": "What may result from increasing application of recommendation engines in our consumption of culture?",
+          "options": {
+            "A": "Consumers will have much limited choice.",
+            "B": "Consumers will actually enjoy better luck.",
+            "C": "It will be easier to decide on what to enjoy.",
+            "D": "Humans will develop tastes similar to machines'."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年06月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-1-q49",
+          "number": 49,
+          "type": "choice",
+          "score": 14.2,
+          "content": "What is likely to happen to larger parts of our daily life as machine learning algorithms improve?",
+          "options": {
+            "A": "They will turn out to be more pleasant.",
+            "B": "They will repeat our past experience.",
+            "C": "They can be completely anticipated.",
+            "D": "They may become better and better."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年06月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-1-q50",
+          "number": 50,
+          "type": "choice",
+          "score": 14.2,
+          "content": "Why does the author say the creatures living in the more and more AI-mediated world will become increasingly unlike us?",
+          "options": {
+            "A": "They will have lost the most significant human element of being intelligent.",
+            "B": "They will no longer possess the human characteristic of being unpredictable.",
+            "C": "They will not be able to understand themselves as we can do today.",
+            "D": "They will be deprived of what their predecessors were proud of about themselves. #### Passage Two **Questions 51 to 55 are based on the following passage.** Phonics, which involves sounding out words _syllable_ (音节) by syllable, is the best way to teach children to read.But in many classrooms, this can be a dirty word. So much so that some teachers have had to sneak phonics teaching materials into the classroom. Most American children are taught to read in a way that study after study has found to be wrong. The consequences of this are striking. Less than half of all American adults were proficient readers in 2017. American fourth graders rank 15th on the Progress in International Literacy Study, an international exam. America is stuck in a debate about teaching children to read that has been going on for decades. Some advocate teaching symbol-sound relationships (the sound k can be spelled as c, k, ck, or ch), known as phonics. Others support an immersive approach (using pictures of a cat to learn the word cat), known as “whole language . Most teachers today, almost three out of four according to a survey by the EdWeek Research Centre in 2019, use a mix called \"balanced literacy\". This combination of methods is ineffective. \"You can't sprinkle in a little phonics, says Tenette Smith, executive director of elementary education and reading at Mississippi's education department. “It has to be systematic and explicitly taught.\" Mississippi, often behind in social policy, has set an example here. In a state once notorious for its low reading scores, the Mississippi state legislature passed new literacy standards in 2013. Since then Mississippi has seen remarkable gains. Its fourth graders have moved from 49th (out of 50 states) to 29th on the National Assessment of Educational Progress, a nationwide exam. In 2019 it was the only state to improve its scores. For the first time since measurement began, Mississippi's pupils are now average readers, a remarkable achievement in such a poor state. Mississippi's success is attributed to implementing reading methods supported by a body of research known as the science of reading. In 1997 Congress requested the National Institute of Child Health and Human Development and the Department of Education to convene a National Reading Panel to end the “reading wars and synthesize the evidence. The panel found that phonics, along with explicit instruction in _phonemic_ (音位的) awareness, fluency and comprehension, worked best. Yet over two decades on, “balanced literacy” is still being taught in classrooms. But advances in statistics and brain imaging have disproved the whole-language method. To the teacher who is a proficient reader, literacy seems like a natural process that requires educated guessing, rather than the deliberate process emphasized by phonics. Teachers can imagine that they learned to read through _osmosis_ (潜移默化) when they were children. Without proper training, they bring this to classrooms."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年06月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-1-q51",
+          "number": 51,
+          "type": "choice",
+          "score": 14.2,
+          "content": "What do we learn about phonics in many American classrooms?",
+          "options": {
+            "A": "It is ill reputed.",
+            "B": "It is mostly misapplied.",
+            "C": "It is arbitrarily excluded.",
+            "D": "It is misrepresented."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年06月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-1-q52",
+          "number": 52,
+          "type": "choice",
+          "score": 14.2,
+          "content": "What has America been witnessing for decades?",
+          "options": {
+            "A": "An obsession with innovating teaching methodologies of reading.",
+            "B": "An enduring debate over the approach to teaching children to read.",
+            "C": "An increasing concern with many children's inadequacy in literacy.",
+            "D": "An ever-forceful advocacy of a combined method for teaching reading."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年06月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-1-q53",
+          "number": 53,
+          "type": "choice",
+          "score": 14.2,
+          "content": "Why does Tenette Smith think a combination of teaching methods is ineffective?",
+          "options": {
+            "A": "Elementary school children will be frustrated when taught with several methods combined.",
+            "B": "Phonics has to be systematically applied and clearly taught to achieve the desired effect.",
+            "C": "Sprinkling in a little phonics deters the progress of even adequately motivated children.",
+            "D": "Balanced literacy fails to sustain children's interest in developing a good reading habit."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年06月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-1-q54",
+          "number": 54,
+          "type": "choice",
+          "score": 14.2,
+          "content": "What does the author say Mississippi's success is attributed to?",
+          "options": {
+            "A": "Convening a National Reading Panel to synthesize research evidence.",
+            "B": "Placing sufficient emphasis upon both fluency and comprehension.",
+            "C": "Adopting scientifically grounded approaches to teaching reading.",
+            "D": "Obtaining support from Congress to upgrade teaching methods."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年06月CET6第1套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-1-q55",
+          "number": 55,
+          "type": "choice",
+          "score": 14.2,
+          "content": "What have advances in statistics and brain imaging proved ineffective?",
+          "options": {
+            "A": "The teaching of symbol-sound relationships.",
+            "B": "Explicit instruction in phonemic awareness.",
+            "C": "Efforts to end the reading wars.",
+            "D": "The immersive approach."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年06月CET6第1套"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cet6-2023-06-2",
+      "year": "2023",
+      "subject": "CET6",
+      "category": "cet6",
+      "paper_name": "2023年6月CET6真题（第2套）",
+      "questions": [
+        {
+          "id": "cet6-2023-06-2-q1",
+          "number": 1,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第1题（the conversation you have just heard）",
+          "options": {
+            "A": "She is attracted to the beauty of modern buildings.",
+            "B": "She is preoccupied with her dream to be an architect.",
+            "C": "She is influenced by her father who teaches architecture.",
+            "D": "She is drawn to its integration of design and engineering."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年06月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-2-q2",
+          "number": 2,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第2题（the conversation you have just heard）",
+          "options": {
+            "A": "Through hard work.",
+            "B": "With the professor's help.",
+            "C": "By studying the subject online.",
+            "D": "By taking prerequisite courses."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年06月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-2-q3",
+          "number": 3,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第3题（the conversation you have just heard）",
+          "options": {
+            "A": "It is groundbreaking.",
+            "B": "It is long-lasting",
+            "C": "It is immaterial.",
+            "D": "It is immortal."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年06月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-2-q4",
+          "number": 4,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第4题（the conversation you have just heard）",
+          "options": {
+            "A": "Economics",
+            "B": "Philosophy",
+            "C": "Computer science.",
+            "D": "Western art. **Questions 5 to 8 are based on the conversation you have just heard.**"
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年06月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-2-q5",
+          "number": 5,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第5题（the conversation you have just heard）",
+          "options": {
+            "A": "He has occasionally been harassed by his fans.",
+            "B": "He has been guarded by a discreet assistant.",
+            "C": "He is well known to the public.",
+            "D": "He is a famous football coach."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年06月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-2-q6",
+          "number": 6,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第6题（the conversation you have just heard）",
+          "options": {
+            "A": "Serve as a personal assistant.",
+            "B": "Play a key role in Real Madrid.",
+            "C": "Run common daily chores for the woman.",
+            "D": "Help promote Mr.Sanchez's public profile."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年06月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-2-q7",
+          "number": 7,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第7题（the conversation you have just heard）",
+          "options": {
+            "A": "He is honest and always tells the truth.",
+            "B": "He once worked part-time in university.",
+            "C": "He cares little about his working hours.",
+            "D": "He has little previous work experience."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年06月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-2-q8",
+          "number": 8,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第8题（the conversation you have just heard）",
+          "options": {
+            "A": "He has a strong ability to connect with people.",
+            "B": "He has a high proficiency in several languages.",
+            "C": "He has a sound knowledge of sports consultancy.",
+            "D": "He has a natural capacity to cooperate with others. ### Section B **Directions:** _In this section, you will hear two passages. At the end of each passage, you will hear three or four questions. Both the passage and the questions will be spoken only once. After you hear a question, you must choose the best answer from the four choices marked A), B), C), and D). Then mark the corresponding letter on **Answer Sheet 1** with a single line through the centre._ **Questions 9 to 11 are based on the passage you have just heard.**"
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年06月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-2-q9",
+          "number": 9,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第9题（the passage you have just heard）",
+          "options": {
+            "A": "They bring more benefits to young people.",
+            "B": "They require less supervision and training.",
+            "C": "They are more suitable to young people.",
+            "D": "They have fewer rules and pressures."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年06月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-2-q10",
+          "number": 10,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第10题（the passage you have just heard）",
+          "options": {
+            "A": "They prevent kids from enjoying adventure sports.",
+            "B": "They help kids guard against any possible injuries.",
+            "C": "They rob kids of the chance to cultivate their courage.",
+            "D": "They deprive kids of the opportunity to develop team spirit."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年06月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-2-q11",
+          "number": 11,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第11题（the passage you have just heard）",
+          "options": {
+            "A": "Help them take up these sports when they are more mature.",
+            "B": "Let them participate in some less risky outdoor activities.",
+            "C": "Ask them to try some forms of indoor sports.",
+            "D": "Introduce them to these sports step by step. **Questions 12 to 15 are based on the passage you have just heard.**"
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年06月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-2-q12",
+          "number": 12,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第12题（the passage you have just heard）",
+          "options": {
+            "A": "Consumers often have a craving for the latest model.",
+            "B": "Such products tend to comprise parts that are irreplaceable.",
+            "C": "Tech firms intentionally design products to have short lifespans.",
+            "D": "Manufacturers use effective strategies to promote fancier products."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年06月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-2-q13",
+          "number": 13,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第13题（the passage you have just heard）",
+          "options": {
+            "A": "Indicate the competitiveness of their products.",
+            "B": "List a repairability score of their products.",
+            "C": "Specify the major parts of their products.",
+            "D": "Detail the life cycle of their products."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年06月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-2-q14",
+          "number": 14,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第14题（the passage you have just heard）",
+          "options": {
+            "A": "Take the initiative to reduce electronic waste.",
+            "B": "Take due caution in upgrading their products.",
+            "C": "Invest in constructing more recycling facilities.",
+            "D": "Substitute all toxic substances with non-toxic ones."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年06月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-2-q15",
+          "number": 15,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第15题（the passage you have just heard）",
+          "options": {
+            "A": "It can be solved.",
+            "B": "It is certain to worsen.",
+            "C": "It will be fixed by tech companies.",
+            "D": "It is unavoidable in the long run. ### Section C **Directions:** _In this section, you will hear three recordings of lectures or talks followed by three or four questions. The recordings will be played only once. After you hear a question, you must choose the best answer from the four choices marked A), B), C), and D). Then mark the corresponding letter on **Answer Sheet 1** with a single line through the centre._ **Questions 16 to 18 are based on the recording you have just heard.**"
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年06月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-2-q16",
+          "number": 16,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第16题（the recording you have just heard）",
+          "options": {
+            "A": "How internet monitoring can be implemented.",
+            "B": "How to encourage productive internet surfing.",
+            "C": "How cyberloafing affects overall productivity.",
+            "D": "How to prevent employees from cyberloafing."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年06月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-2-q17",
+          "number": 17,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第17题（the recording you have just heard）",
+          "options": {
+            "A": "Cyberloafing is a sign of workers'laziness.",
+            "B": "Cyberloafing may relieve employees of stress.",
+            "C": "Employee engagement is closely related to job satisfaction.",
+            "D": "Overuse of social media may lead to decline in productivity."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年06月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-2-q18",
+          "number": 18,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第18题（the recording you have just heard）",
+          "options": {
+            "A": "Taking mini-breaks means better job performance.",
+            "B": "Cyberloafing generally does more harm than good.",
+            "C": "Worker turnover is linked to the time allowed for cyberloafing.",
+            "D": "Employees who indulge in internet surfing are most likely to quit. **Questions 19 to 21 are based on the recording you have just heard.**"
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年06月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-2-q19",
+          "number": 19,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第19题（the recording you have just heard）",
+          "options": {
+            "A": "There were no wooden buildings.",
+            "B": "There were environmental problems.",
+            "C": "There were no trees.",
+            "D": "There were few settlers."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年06月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-2-q20",
+          "number": 20,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第20题（the recording you have just heard）",
+          "options": {
+            "A": "He served as chairman of the Nebraska State Board of Agriculture.",
+            "B": "He urged the state to start the Nebraska State Gardening Society.",
+            "C": "He engaged himself in a large number of aesthetic projects.",
+            "D": "He founded a newspaper and used it to promote his ideas."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年06月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-2-q21",
+          "number": 21,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第21题（the recording you have just heard）",
+          "options": {
+            "A": "A special prize was awarded to Julius Morton.",
+            "B": "One million trees were planted throughout Nebraska.",
+            "C": "The state government declared it the official Arbor Day.",
+            "D": "Nebraska earned the nickname\"the Tree Planters State\". **Questions 22 to 25 are based on the recording you have just heard.**"
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年06月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-2-q22",
+          "number": 22,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第22题（the recording you have just heard）",
+          "options": {
+            "A": "They spread across Europe and Asia in a few decades.",
+            "B": "They lived mostly in Africa for about 200,000 years.",
+            "C": "They preferred to live in Europe rather than in Asia.",
+            "D": "They moved out of Africa about 60,000 years ago."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年06月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-2-q23",
+          "number": 23,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第23题（the recording you have just heard）",
+          "options": {
+            "A": "The discovery of two modern human teeth in China.",
+            "B": "The traces of human migration out of Africa to Asia.",
+            "C": "The human fossils discovered most recently in Africa.",
+            "D": "The Luna cave in Guangxi Zhuang Autonomous Region."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年06月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-2-q24",
+          "number": 24,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第24题（the recording you have just heard）",
+          "options": {
+            "A": "There must have been some reason for human migration.",
+            "B": "There have been changes in animals'living conditions.",
+            "C": "Humans adapted themselves to the environment there.",
+            "D": "Humans had access to abundant food sources there."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年06月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-2-q25",
+          "number": 25,
+          "type": "choice",
+          "score": 7.1,
+          "content": "听力理解第25题（the recording you have just heard）",
+          "options": {
+            "A": "How humans settled down on the Arabian Peninsula.",
+            "B": "When modern humans started to disperse out of Africa.",
+            "C": "What path modern humans took to migrate out of Africa.",
+            "D": "Why fresh water is so important for human survival."
+          },
+          "answer": "A",
+          "solution": "听力理解题，答案待核实，请以官方公布为准。",
+          "analysis": "听力理解，需结合音频材料作答",
+          "knowledge_points": [
+            "listening-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "听力理解",
+            "2023年06月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-2-q46",
+          "number": 46,
+          "type": "choice",
+          "score": 14.2,
+          "content": "Which group of people does the author say has almost unrestricted access to children?",
+          "options": {
+            "A": "Advertisers.",
+            "B": "Carers.",
+            "C": "Teachers.",
+            "D": "Doctors."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年06月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-2-q47",
+          "number": 47,
+          "type": "choice",
+          "score": 14.2,
+          "content": "What kind of people should we enable children to become according to the author?",
+          "options": {
+            "A": "Those who look to fame and wealth for external and ultimate validation.",
+            "B": "Those who value themselves because of their contribution to society.",
+            "C": "Those who associate self-worth with the ability to handle money.",
+            "D": "Those who have developed a proper sense of their own identity."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年06月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-2-q48",
+          "number": 48,
+          "type": "choice",
+          "score": 14.2,
+          "content": "Many child development experts and educators call attention to research that suggests",
+          "options": {
+            "A": "life-long consumerism is causing more and more cases of psychological problems.",
+            "B": "increasing commercialization of education is eroding many children's self-esteem.",
+            "C": "the growing desire for wealth is contributing to a rising rate of depression.",
+            "D": "the craving for purchasing material things is nurtured throughout one's life."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年06月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-2-q49",
+          "number": 49,
+          "type": "choice",
+          "score": 14.2,
+          "content": "What does the author imply about the impact of advertising?",
+          "options": {
+            "A": "It is actually infectious to many rather than a few.",
+            "B": "It is rooted in our desire for material possessions.",
+            "C": "It is comparable to that of virus.",
+            "D": "It is literally limited to children."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年06月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-2-q50",
+          "number": 50,
+          "type": "choice",
+          "score": 14.2,
+          "content": "What is the opponents'argument against a complete ban on advertising to young children?",
+          "options": {
+            "A": "It would deprive them of the chance to learn about products.",
+            "B": "It would render them unable to carve out unique identities.",
+            "C": "It would breach their freedom as would-be consumers.",
+            "D": "It would violate the rights endowed upon advertisers. #### Passage Two **Questions 51 to 55 are based on the following passage.** Many oppose workplace surveillance, because of the inherent dehumanizing effect it has and the relentless pressure it brings. But it's on the rise around the world as firms look to become more efficient by squeezing more productivity from their workers. More than half of companies with over $750m in annual revenue used “non-traditional”monitoring techniques on staff last year. Monitoring employee performance gives firms the ability to assess how their staff are performing and interacting, which can be good for both the firm and employees themselves. A growing number of analytics companies offer this service. They gather“data exhaust”left by employees'email and instant messaging apps, and use name badges equipped with radio-frequency identification devices and microphones. These can check how much time you spend talking, your volume and tone of voice, even if you do not dominate conversations. While this may sound intrusive, exponents argue that it can also protect employees against bullying and sexual harassment. Some of this data analysis can produce unexpected results. For example, it was found that people who sat at 12-person lunch tables tended to interact, share ideas more and outperform those who regularly sat at four-person tables, a fact that would probably have gone undetected without such data analysis. Over the last few years a Stockholm co-working space called Epicenter has gone much further and holds popular“chipping parties”, where people can have microchips implanted in their hands. They can use the implants to access electronically-controlled doors, or monitor how typing speed correlates with heart rate. Implanted chips may seem extreme, but it is a relatively small step from ID cards and biometrics to such devices. As long as such schemes are voluntary, there will probably be a growing number of convenience-oriented uses so that a substantial number of workers would opt to have a chip inserted. But if implanted chips are used to reduce slack time or rest breaks, that could prove to be detrimental. And if surveillance tools take away autonomy, that's when they prove most unpopular. A lot depends on how such monitoring initiatives are communicated and this could prevent possible revolts being staged. If bosses don't communicate effectively, employees assume the worst. But if they're open about the information they're collecting and what they're doing with it, research suggests 46%of employees are generally okay with it. Although many such monitoring schemes use anonymised data and participation is voluntary, many staffers remain skeptical and fear an erosion of their civil liberties. So workplace surveillance could be empowering for staff and useful for companies looking to become more efficient and profitable. But implemented in the wrong way, it could also become an unpopular tool of oppression that proves counterproductive."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年06月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-2-q51",
+          "number": 51,
+          "type": "choice",
+          "score": 14.2,
+          "content": "Why are many people opposed to monitoring employee performance?",
+          "options": {
+            "A": "It puts workers under constant pressure.",
+            "B": "It is universally deemed anti-human by nature.",
+            "C": "It does both mental and physical harm to employees monitored.",
+            "D": "It enables firms to squeeze maximal productivity from employees."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年06月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-2-q52",
+          "number": 52,
+          "type": "choice",
+          "score": 14.2,
+          "content": "What is the supporters'argument for workplace surveillance?",
+          "options": {
+            "A": "It enables employees to refrain from dominating conversations.",
+            "B": "It enhances employees'identification with firms they work in.",
+            "C": "It can alert employees to intrusion into their privacy.",
+            "D": "It can protect employees against aggressive behavior."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年06月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-2-q53",
+          "number": 53,
+          "type": "choice",
+          "score": 14.2,
+          "content": "What does the author want to show by the example of different numbers of people interacting at lunch tables?",
+          "options": {
+            "A": "Data analysis is key to the successful implementation of workplace surveillance.",
+            "B": "Analyzing data gathered from workers can yield something unexpected.",
+            "C": "More workmates sitting at a lunch table tend to facilitate interaction and idea sharing.",
+            "D": "It is hard to decide on how many people to sit at a lunch table without data analysis."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年06月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-2-q54",
+          "number": 54,
+          "type": "choice",
+          "score": 14.2,
+          "content": "What does much of the positive effect of monitoring initiatives depend on?",
+          "options": {
+            "A": "How frequently employees are to be monitored.",
+            "B": "What specific personal information is being excluded.",
+            "C": "What steps are taken to minimize their detrimental impact.",
+            "D": "How well bosses make known their purpose of monitoring."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年06月CET6第2套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-2-q55",
+          "number": 55,
+          "type": "choice",
+          "score": 14.2,
+          "content": "What concern do monitoring initiatives cause among many staffers?",
+          "options": {
+            "A": "They may empower employers excessively.",
+            "B": "They may erode the workplace environment.",
+            "C": "They may infringe upon staffers'entitled freedom.",
+            "D": "They may become counterproductive in the long run."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年06月CET6第2套"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cet6-2023-06-3",
+      "year": "2023",
+      "subject": "CET6",
+      "category": "cet6",
+      "paper_name": "2023年6月CET6真题（第3套）",
+      "questions": [
+        {
+          "id": "cet6-2023-06-3-q26",
+          "number": 26,
+          "type": "choice",
+          "score": 3.55,
+          "content": "选词填空第26空：than once._ You might not know yourself as well as you think. According to a new study, people are _____ accurate judges of only some of their behaviors. While most previous studies on how well people kno",
+          "options": {
+            "A": "activated",
+            "B": "probes",
+            "C": "articulates",
+            "D": "random"
+          },
+          "answer": "A",
+          "solution": "选词填空题，答案待核实，请以官方公布为准。",
+          "analysis": "选词填空，词义辨析与语境理解",
+          "knowledge_points": [
+            "cloze-vocab"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选词填空",
+            "2023年06月CET6第3套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-3-q27",
+          "number": 27,
+          "type": "choice",
+          "score": 3.55,
+          "content": "选词填空第27空：s on how well people know themselves have been done on long-term personality traits, this new study _____ how well people understand how they are acting from one moment to the next. Researchers asked parti",
+          "options": {
+            "A": "assessment",
+            "B": "recall",
+            "C": "consecutive",
+            "D": "relatively"
+          },
+          "answer": "A",
+          "solution": "选词填空题，答案待核实，请以官方公布为准。",
+          "analysis": "选词填空，词义辨析与语境理解",
+          "knowledge_points": [
+            "cloze-vocab"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选词填空",
+            "2023年06月CET6第3套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-3-q28",
+          "number": 28,
+          "type": "choice",
+          "score": 3.55,
+          "content": "选词填空第28空：m one moment to the next. Researchers asked participants to wear audio recorders that automatically _____ every 9.5 minutes between 7 a.m. and 2 a.m. to record 30 seconds of audio. These participants were",
+          "options": {
+            "A": "cues",
+            "B": "saturated",
+            "C": "deny",
+            "D": "symptoms"
+          },
+          "answer": "A",
+          "solution": "选词填空题，答案待核实，请以官方公布为准。",
+          "analysis": "选词填空，词义辨析与语境理解",
+          "knowledge_points": [
+            "cloze-vocab"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选词填空",
+            "2023年06月CET6第3套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-3-q29",
+          "number": 29,
+          "type": "choice",
+          "score": 3.55,
+          "content": "选词填空第29空：d 30 seconds of audio. These participants were then emailed surveys four times a day asking them to _____ how outgoing, agreeable, or conscientious they were during a particular hour of the day. The study",
+          "options": {
+            "A": "probes",
+            "B": "articulates",
+            "C": "random",
+            "D": "assessment"
+          },
+          "answer": "A",
+          "solution": "选词填空题，答案待核实，请以官方公布为准。",
+          "analysis": "选词填空，词义辨析与语境理解",
+          "knowledge_points": [
+            "cloze-vocab"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选词填空",
+            "2023年06月CET6第3套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-3-q30",
+          "number": 30,
+          "type": "choice",
+          "score": 3.55,
+          "content": "选词填空第30空：to wear audio recorders that automatically 28 every 9.5 minutes between 7 a.m. and 2 a.m. to record _____ seconds of audio. These participants were then emailed surveys four times a day asking them to 29 h",
+          "options": {
+            "A": "discrepancy",
+            "B": "terminate",
+            "C": "probably",
+            "D": "activated"
+          },
+          "answer": "A",
+          "solution": "选词填空题，答案待核实，请以官方公布为准。",
+          "analysis": "选词填空，词义辨析与语境理解",
+          "knowledge_points": [
+            "cloze-vocab"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选词填空",
+            "2023年06月CET6第3套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-3-q31",
+          "number": 31,
+          "type": "choice",
+          "score": 3.55,
+          "content": "选词填空第31空：ssistants rated each participant's audio clips to see how their observations compared with people's _____ of themselves. The six assistants were generally in agreement with one another about how the people",
+          "options": {
+            "A": "recall",
+            "B": "consecutive",
+            "C": "relatively",
+            "D": "cues"
+          },
+          "answer": "A",
+          "solution": "选词填空题，答案待核实，请以官方公布为准。",
+          "analysis": "选词填空，词义辨析与语境理解",
+          "knowledge_points": [
+            "cloze-vocab"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选词填空",
+            "2023年06月CET6第3套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-3-q32",
+          "number": 32,
+          "type": "choice",
+          "score": 3.55,
+          "content": "选词填空第32空：reement between participants and outside observers was much smaller for agreeableness. Some of this _____ could be because the observers used only audio clips, and thus could not read 33 like body language",
+          "options": {
+            "A": "saturated",
+            "B": "deny",
+            "C": "symptoms",
+            "D": "discrepancy"
+          },
+          "answer": "A",
+          "solution": "选词填空题，答案待核实，请以官方公布为准。",
+          "analysis": "选词填空，词义辨析与语境理解",
+          "knowledge_points": [
+            "cloze-vocab"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选词填空",
+            "2023年06月CET6第3套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-3-q33",
+          "number": 33,
+          "type": "choice",
+          "score": 3.55,
+          "content": "选词填空第33空：ness. Some of this 32 could be because the observers used only audio clips, and thus could not read _____ like body language, but there are 34 other explanations, as people should be able to hear when a pa",
+          "options": {
+            "A": "terminate",
+            "B": "probably",
+            "C": "activated",
+            "D": "probes"
+          },
+          "answer": "A",
+          "solution": "选词填空题，答案待核实，请以官方公布为准。",
+          "analysis": "选词填空，词义辨析与语境理解",
+          "knowledge_points": [
+            "cloze-vocab"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选词填空",
+            "2023年06月CET6第3套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-3-q34",
+          "number": 34,
+          "type": "choice",
+          "score": 3.55,
+          "content": "选词填空第34空：e the observers used only audio clips, and thus could not read 33 like body language, but there are _____ other explanations, as people should be able to hear when a participant is being kind versus being",
+          "options": {
+            "A": "articulates",
+            "B": "random",
+            "C": "assessment",
+            "D": "recall"
+          },
+          "answer": "A",
+          "solution": "选词填空题，答案待核实，请以官方公布为准。",
+          "analysis": "选词填空，词义辨析与语境理解",
+          "knowledge_points": [
+            "cloze-vocab"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选词填空",
+            "2023年06月CET6第3套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-3-q35",
+          "number": 35,
+          "type": "choice",
+          "score": 3.55,
+          "content": "选词填空第35空：participants thought they were acting and what observers heard could be because people would rather _____ rude behavior.",
+          "options": {
+            "A": "consecutive",
+            "B": "relatively",
+            "C": "cues",
+            "D": "saturated"
+          },
+          "answer": "A",
+          "solution": "选词填空题，答案待核实，请以官方公布为准。",
+          "analysis": "选词填空，词义辨析与语境理解",
+          "knowledge_points": [
+            "cloze-vocab"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "选词填空",
+            "2023年06月CET6第3套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-3-q46",
+          "number": 46,
+          "type": "choice",
+          "score": 14.2,
+          "content": "In what way does Michael Moss think processed food is comparable to alcohol and cigarettes?",
+          "options": {
+            "A": "They are all addictive.",
+            "B": "They are all necessary evils.",
+            "C": "They are all engineered to be enjoyed.",
+            "D": "They are all in increasingly great demand."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年06月CET6第3套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-3-q47",
+          "number": 47,
+          "type": "choice",
+          "score": 14.2,
+          "content": "What does the author say plays a key role in the foods we crave?",
+          "options": {
+            "A": "The food environment.",
+            "B": "Aggressive marketing.",
+            "C": "Convenience.",
+            "D": "Memory."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年06月CET6第3套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-3-q48",
+          "number": 48,
+          "type": "choice",
+          "score": 14.2,
+          "content": "What do food companies do to capitalize on consumers'association with their food products?",
+          "options": {
+            "A": "They strive to influence how consumers remember their products.",
+            "B": "They attempt to use consumers'long-term memories to promote addiction.",
+            "C": "They try to exploit consumers'memories for their products as early as possible.",
+            "D": "They endeavor to find what consumers remember about their products."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年06月CET6第3套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-3-q49",
+          "number": 49,
+          "type": "choice",
+          "score": 14.2,
+          "content": "How does the food industry operate from manufacturing to packaging, according to Moss?",
+          "options": {
+            "A": "Placing the idea of fast food in an entirely new light.",
+            "B": "Setting no limit to the number of fast food chains.",
+            "C": "Focusing on how quickly the work is done.",
+            "D": "Prioritizing the quality of their products."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年06月CET6第3套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-3-q50",
+          "number": 50,
+          "type": "choice",
+          "score": 14.2,
+          "content": "Why are companies finding it difficult to satisfy consumers'demand for healthier food products?",
+          "options": {
+            "A": "They think speed of production outweighs consumers'health.",
+            "B": "They believe their industry would perish without fast foods.",
+            "C": "They have to strike a balance between taste and nutrition.",
+            "D": "They are hooked on manufacturing convenience foods. #### Passage Two **Questions 51 to 55 are based on the following passage.** _Chimpanzees_ (黑猩猩), human beings'closest animal relatives, share up to 98% of our genes. Yet humans and chimpanzees lead very different lives. Fewer than 300, 000 wild chimpanzees live in a few forested corners of Africa today, while humans have colonized every corner of the globe. At more than 7 billion, human population dwarfs that of nearly all other mammals — despite our physical weaknesses. What could account for our species'incredible evolutionary successes? One obvious answer is our big brains. It could be that our raw intelligence gave us an unprecedented ability to think outside the box, innovating solutions to thorny problems as people migrated across the globe. But a growing number of cognitive scientists and _anthropologists_ (人类学家) are rejecting that explanation. They think that, rather than making our living as innovators, we survive and thrive precisely because we don't think for ourselves. Instead, people cope with challenging climates and ecological contexts by carefully copying others. In a famous study, psychologists Victoria Horner and Andrew Whiten showed two groups of test subjects- children and chimpanzees — a mechanical box with a treat inside. In one condition, the box was opaque, while in the other it was transparent. The experimenters demonstrated how to open the box to retrieve the treat, but they also included the irrelevant step of tapping on the box with a stick. Oddly, the children carefully copied all the steps to open the box, even when they could see that the stick had no practical effect. That is, they copied irrationally:Instead of doing only what was necessary to get their reward, children slavishly imitated every action they'd witnessed. Of course, that study only included three-and four-year-olds. But additional research has shown that older children and adults are even more likely to mindlessly copy others'actions, and infants are less likely to over- imitate — that is, to precisely copy even impractical actions. By contrast, chimpanzees in the study only over-imitated in the opaque condition. In the transparent condition — where they saw that the stick was mechanically useless — they ignored that step entirely. Other research has since supported these findings. When it comes to copying, chimpanzees are more rational than human children or adults. Where does the seemingly irrational human preference for over-imitation come from?Anthropologist Joseph Henrich points out that people around the world rely on technologies that are often so complex that no one can learn them rationally. Instead, people must learn them step by step, trusting in the wisdom of more experienced elders and peers. So the next time you hear someone arguing passionately that everyone should embrace nonconformity and avoid imitating others, you might laugh a little bit. We're not chimpanzees, after all."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年06月CET6第3套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-3-q51",
+          "number": 51,
+          "type": "choice",
+          "score": 14.2,
+          "content": "What might explain humans'having the largest population of almost all mammals?",
+          "options": {
+            "A": "They are equipped with raw strength for solving the most challenging problems.",
+            "B": "They cope with the outside world more effectively than their animal relatives.",
+            "C": "They possess the most outstanding ability to think.",
+            "D": "They know how to survive everywhere on earth."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年06月CET6第3套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-3-q52",
+          "number": 52,
+          "type": "choice",
+          "score": 14.2,
+          "content": "What accounts for humans'evolutionary successes according to a growing number of cognitive scientists and anthropologists?",
+          "options": {
+            "A": "They are better at innovating solutions.",
+            "B": "They thrive through creative strategies.",
+            "C": "They are naturally adaptive to ecological contexts.",
+            "D": "They meet challenges by imitating others carefully."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年06月CET6第3套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-3-q53",
+          "number": 53,
+          "type": "choice",
+          "score": 14.2,
+          "content": "What does the author think is odd about the findings of the study by Victoria Horner and Andrew Whiten?",
+          "options": {
+            "A": "Children irrationally imitated every action of the experimenters.",
+            "B": "Chimpanzees could tell the transparent box from the opaque one.",
+            "C": "Chimpanzees could retrieve the treat more quickly than children did.",
+            "D": "Children omitted the step of tapping on the box with a stick to open it."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年06月CET6第3套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-3-q54",
+          "number": 54,
+          "type": "choice",
+          "score": 14.2,
+          "content": "What is anthropologist Joseph Henrich's explanation for the human preference for copying?",
+          "options": {
+            "A": "It originates in the rationality of people around the world.",
+            "B": "It stems from the way people learn complex technologies.",
+            "C": "It results from people distrusting their own wisdom.",
+            "D": "It derives from the desire to acquire knowledge step by step."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年06月CET6第3套"
+          ]
+        },
+        {
+          "id": "cet6-2023-06-3-q55",
+          "number": 55,
+          "type": "choice",
+          "score": 14.2,
+          "content": "What point does the author want to emphasize when he says “We're not chimpanzees”?",
+          "options": {
+            "A": "It is arguable whether everyone should avoid imitation.",
+            "B": "It is characteristic of human beings to copy others.",
+            "C": "It is desirable to trust in more knowledgeable peers.",
+            "D": "It is naive to laugh at someone embracing nonconformity."
+          },
+          "answer": "A",
+          "solution": "阅读理解题，答案待核实，请以官方公布为准。",
+          "analysis": "仔细阅读，细节/推断/主旨题",
+          "knowledge_points": [
+            "reading-comprehension"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "仔细阅读",
+            "2023年06月CET6第3套"
+          ]
+        }
+      ]
+    }
+  ]
+}

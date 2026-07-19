@@ -1,0 +1,92 @@
+[
+  {
+    "id": "math_001",
+    "subject": "math",
+    "question": "求解方程 2x + 5 = 13",
+    "expected_answer": "x = 4",
+    "expected_value": 4,
+    "knowledge_points": ["一元一次方程"],
+    "difficulty": "easy"
+  },
+  {
+    "id": "math_002",
+    "subject": "math",
+    "question": "求解二元一次方程组：x + y = 5，x - y = 1",
+    "expected_answer": "x = 3, y = 2",
+    "expected_value": {"x": 3, "y": 2},
+    "knowledge_points": ["二元一次方程组"],
+    "difficulty": "easy"
+  },
+  {
+    "id": "math_003",
+    "subject": "math",
+    "question": "求解一元二次方程 x^2 - 5x + 6 = 0",
+    "expected_answer": "x = 2 或 x = 3",
+    "expected_value": [2, 3],
+    "knowledge_points": ["一元二次方程", "韦达定理"],
+    "difficulty": "medium"
+  },
+  {
+    "id": "math_004",
+    "subject": "math",
+    "question": "因式分解 x^2 - 9",
+    "expected_answer": "(x + 3)(x - 3)",
+    "expected_value": "(x+3)*(x-3)",
+    "knowledge_points": ["因式分解", "平方差公式"],
+    "difficulty": "easy"
+  },
+  {
+    "id": "math_005",
+    "subject": "math",
+    "question": "化简分式 (x^2 - 1) / (x - 1)，其中 x ≠ 1",
+    "expected_answer": "x + 1",
+    "expected_value": "x + 1",
+    "knowledge_points": ["分式化简", "因式分解"],
+    "difficulty": "medium"
+  },
+  {
+    "id": "math_006",
+    "subject": "math",
+    "question": "求解不等式 3x - 2 < 7，并在数轴上表示解集",
+    "expected_answer": "x < 3",
+    "expected_value": "x < 3",
+    "knowledge_points": ["一元一次不等式"],
+    "difficulty": "easy"
+  },
+  {
+    "id": "math_007",
+    "subject": "math",
+    "question": "一个矩形的长为 8，宽为 5，求其面积",
+    "expected_answer": "40",
+    "expected_value": 40,
+    "knowledge_points": ["几何面积", "矩形"],
+    "difficulty": "easy"
+  },
+  {
+    "id": "math_008",
+    "subject": "math",
+    "question": "已知函数 f(x) = 2x^2 + 3x - 1，求 f(2) 的值",
+    "expected_answer": "13",
+    "expected_value": 13,
+    "knowledge_points": ["函数求值", "二次函数"],
+    "difficulty": "medium"
+  },
+  {
+    "id": "math_009",
+    "subject": "math",
+    "question": "求解方程 3(x - 2) = 2x + 1",
+    "expected_answer": "x = 7",
+    "expected_value": 7,
+    "knowledge_points": ["一元一次方程", "去括号"],
+    "difficulty": "easy"
+  },
+  {
+    "id": "math_010",
+    "subject": "math",
+    "question": "已知直角三角形的两条直角边分别为 3 和 4，求斜边长度（勾股定理）",
+    "expected_answer": "5",
+    "expected_value": 5,
+    "knowledge_points": ["勾股定理", "几何"],
+    "difficulty": "medium"
+  }
+]

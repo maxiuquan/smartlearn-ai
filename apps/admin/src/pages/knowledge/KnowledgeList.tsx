@@ -7,6 +7,7 @@ import {
   Modal,
   Form,
   Input,
+  InputNumber,
   Select,
   message,
   Popconfirm,
@@ -22,7 +23,7 @@ import {
   BranchesOutlined,
 } from '@ant-design/icons';
 import ProTable from '@ant-design/pro-table';
-import type { ColumnsType, ActionType } from '@ant-design/pro-table';
+import type { ProColumns, ActionType } from '@ant-design/pro-table';
 import type { TreeProps } from 'antd';
 import {
   getKnowledgeList,
@@ -58,7 +59,7 @@ const KnowledgeList: React.FC = () => {
   };
 
   // 表格列定义
-  const columns: ColumnsType<KnowledgePoint> = [
+  const columns: ProColumns<KnowledgePoint>[] = [
     {
       title: 'ID',
       dataIndex: 'id',
@@ -91,7 +92,7 @@ const KnowledgeList: React.FC = () => {
     {
       title: '创建时间',
       dataIndex: 'createdAt',
-      render: (date: string) => dayjs(date).format('YYYY-MM-DD HH:mm'),
+      renderText: (date: string) => dayjs(date).format('YYYY-MM-DD HH:mm'),
     },
     {
       title: '操作',

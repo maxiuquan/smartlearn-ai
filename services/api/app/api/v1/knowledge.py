@@ -6,6 +6,7 @@ from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.deps import get_db, get_optional_user_id
+from app.models.business import KnowledgePoint
 from app.schemas.knowledge import (
     KnowledgePointDetailResponse,
     KnowledgePointResponse,
@@ -14,6 +15,37 @@ from app.schemas.knowledge import (
 )
 
 router = APIRouter()
+
+
+@router.get(
+    "/tree",
+    response_model=list[KnowledgePointResponse],
+    summary="获取全部知识点（扁平列表）",
+)
+async def get_all_knowledge_tree(
+    db: AsyncSession = Depends(get_db),
+) -> list[KnowledgePointResponse]:
+    """返回全部知识点的扁平列表，供前端知识点选择器使用。"""
+    result = await db.execute(
+        select(KnowledgePoint).order_by(KnowledgePoint.subject, KnowledgePoint.id)
+    )
+    rows = result.scalars().all()
+    return [
+        KnowledgePointResponse(
+            id=row.id,
+            subject=row.subject,
+            chapter=row.chapter,
+            section=row.section,
+            name=row.name,
+            description=row.description,
+            difficulty=row.difficulty,
+            importance=row.importance,
+            prerequisites=row.prerequisites,
+            keywords=row.keywords,
+            created_at=row.created_at,
+        )
+        for row in rows
+    ]
 
 
 @router.get(
@@ -32,41 +64,24 @@ async def search_knowledge_points(
     - 支持按名称和描述模糊搜索
     - 可限制学科范围
     """
-    from sqlalchemy import Table, Column, Integer, String, Text, DateTime, MetaData, func
-    from sqlalchemy.dialects.postgresql import JSONB
-
-    metadata = MetaData()
-    kp = Table(
-        "knowledge_points",
-        metadata,
-        Column("id", Integer, primary_key=True),
-        Column("subject", String(50)),
-        Column("chapter", String(200)),
-        Column("section", String(200)),
-        Column("name", String(500)),
-        Column("description", Text),
-        Column("difficulty", Integer),
-        Column("importance", Integer),
-        Column("prerequisites", JSONB),
-        Column("keywords", JSONB),
-        Column("created_at", DateTime),
-    )
-
-    conditions = [kp.c.name.ilike(f"%{q}%")]
+    conditions = [KnowledgePoint.name.ilike(f"%{q}%")]
     if subject:
-        conditions.append(kp.c.subject == subject)
+        conditions.append(KnowledgePoint.subject == subject)
 
     # 计数
     count_result = await db.execute(
-        select(func.count()).select_from(kp).where(*conditions)
+        select(func.count()).select_from(KnowledgePoint).where(*conditions)
     )
     total = count_result.scalar() or 0
 
     # 查询
     result = await db.execute(
-        select(kp).where(*conditions).order_by(kp.c.importance.desc()).limit(limit)
+        select(KnowledgePoint)
+        .where(*conditions)
+        .order_by(KnowledgePoint.importance.desc())
+        .limit(limit)
     )
-    rows = result.fetchall()
+    rows = result.scalars().all()
 
     results = [
         KnowledgePointResponse(
@@ -105,27 +120,12 @@ async def get_knowledge_tree(
 
     - 支持的 subject: math, english, linear-algebra, probability 等
     """
-    from sqlalchemy import Table, Column, Integer, String, Text, DateTime, MetaData, func
-
-    metadata = MetaData()
-    kp = Table(
-        "knowledge_points",
-        metadata,
-        Column("id", Integer, primary_key=True),
-        Column("subject", String(50)),
-        Column("chapter", String(200)),
-        Column("section", String(200)),
-        Column("name", String(500)),
-        Column("description", Text),
-        Column("difficulty", Integer),
-        Column("importance", Integer),
-        Column("created_at", DateTime),
-    )
-
     result = await db.execute(
-        select(kp).where(kp.c.subject == subject).order_by(kp.c.chapter, kp.c.section, kp.c.id)
+        select(KnowledgePoint)
+        .where(KnowledgePoint.subject == subject)
+        .order_by(KnowledgePoint.chapter, KnowledgePoint.section, KnowledgePoint.id)
     )
-    rows = result.fetchall()
+    rows = result.scalars().all()
 
     if not rows:
         raise HTTPException(
@@ -175,28 +175,10 @@ async def get_knowledge_point(
     Args:
         kp_id: 知识点 ID
     """
-    from sqlalchemy import Table, Column, Integer, String, Text, DateTime, MetaData, func
-    from sqlalchemy.dialects.postgresql import JSONB
-
-    metadata = MetaData()
-    kp = Table(
-        "knowledge_points",
-        metadata,
-        Column("id", Integer, primary_key=True),
-        Column("subject", String(50)),
-        Column("chapter", String(200)),
-        Column("section", String(200)),
-        Column("name", String(500)),
-        Column("description", Text),
-        Column("difficulty", Integer),
-        Column("importance", Integer),
-        Column("prerequisites", JSONB),
-        Column("keywords", JSONB),
-        Column("created_at", DateTime),
+    result = await db.execute(
+        select(KnowledgePoint).where(KnowledgePoint.id == kp_id)
     )
-
-    result = await db.execute(select(kp).where(kp.c.id == kp_id))
-    row = result.first()
+    row = result.scalars().first()
 
     if not row:
         raise HTTPException(
@@ -212,9 +194,9 @@ async def get_knowledge_point(
         ]
         if prereq_ids:
             prereq_result = await db.execute(
-                select(kp).where(kp.c.id.in_(prereq_ids))
+                select(KnowledgePoint).where(KnowledgePoint.id.in_(prereq_ids))
             )
-            for pr in prereq_result.fetchall():
+            for pr in prereq_result.scalars().all():
                 prerequisite_details.append(
                     KnowledgePointResponse(
                         id=pr.id,

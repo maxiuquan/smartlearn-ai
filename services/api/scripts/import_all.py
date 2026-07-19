@@ -1,6 +1,9 @@
 """
 导入所有数据（知识点 + 题目 + 词汇 + 初始数据）
+
 用法: python scripts/import_all.py
+说明: 各子脚本均自带 sys.path 注入与 ORM 写入逻辑，本脚本仅按顺序串联执行。
+      兼容本地（脚本同级目录）与容器内（/app/scripts/）两种运行路径。
 """
 import subprocess
 import sys
@@ -12,11 +15,15 @@ logger = logging.getLogger(__name__)
 
 
 def run_script(script_name: str) -> bool:
-    """运行单个导入脚本"""
-    script_path = os.path.join(os.path.dirname(__file__), script_name)
-    logger.info(f"{'='*60}")
-    logger.info(f"[运行] {script_name}")
-    logger.info(f"{'='*60}")
+    """运行单个导入脚本（兼容本地与容器内 /app/scripts 路径）。"""
+    candidates = [
+        os.path.join(os.path.dirname(__file__), script_name),
+        os.path.join("/app", "scripts", script_name),
+    ]
+    script_path = next((p for p in candidates if os.path.exists(p)), candidates[0])
+    logger.info(f"{'=' * 60}")
+    logger.info(f"[运行] {script_name} -> {script_path}")
+    logger.info(f"{'=' * 60}")
     result = subprocess.run([sys.executable, script_path], capture_output=False)
     if result.returncode != 0:
         logger.error(f"[错误] {script_name} 执行失败 (exit code: {result.returncode})")
@@ -41,9 +48,9 @@ def main() -> None:
         else:
             failed += 1
 
-    logger.info(f"{'='*60}")
+    logger.info(f"{'=' * 60}")
     logger.info(f"[完成] 成功: {success}, 失败: {failed}")
-    logger.info(f"{'='*60}")
+    logger.info(f"{'=' * 60}")
 
 
 if __name__ == "__main__":

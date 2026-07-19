@@ -16,7 +16,9 @@ class WordResponse(BaseModel):
     frequency: int = 0
     synonyms: Optional[list[str]] = None
     antonyms: Optional[list[str]] = None
-    examples: Optional[list[dict[str, str]]] = None
+    # 数据源 JSON 中 examples 可能是 list[str] 或 list[dict]
+    # 用 list[Any] 兼容两种结构
+    examples: Optional[list[Any]] = None
 
     model_config = {"from_attributes": True}
 
@@ -68,5 +70,11 @@ class WordEventRequest(BaseModel):
     game_id: Optional[str] = None
     duration_ms: Optional[int] = Field(None, ge=0)
     metadata: Optional[dict[str, Any]] = None
+    # P1-4.6: 幂等键 — 同一 event_id 的重试不重复计入进度
+    event_id: Optional[str] = Field(
+        None,
+        max_length=128,
+        description="幂等键（UUID），同一 event_id 重试返回首次结果",
+    )
 
     model_config = {"extra": "forbid"}

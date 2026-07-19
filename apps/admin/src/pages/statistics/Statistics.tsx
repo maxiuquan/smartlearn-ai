@@ -36,14 +36,8 @@ const Statistics: React.FC = () => {
     setLoading(true);
     try {
       const days = dateRange[1].diff(dateRange[0], 'day');
-      const [
-        statsRes,
-        activityRes,
-        questionRes,
-        subjectRes,
-        knowledgeRes,
-        rankingRes,
-      ] = await Promise.all([
+      // 使用 allSettled: 单个 API 失败不影响其他请求
+      const results = await Promise.allSettled([
         getDashboardStats(),
         getUserActivityTrend(days),
         getQuestionCompletionTrend(days),
@@ -52,12 +46,12 @@ const Statistics: React.FC = () => {
         getUserRanking('study_time', 10),
       ]);
 
-      setStats(statsRes);
-      setActivityData(activityRes);
-      setQuestionData(questionRes);
-      setSubjectData(subjectRes);
-      setKnowledgeData(knowledgeRes);
-      setRankingData(rankingRes);
+      if (results[0].status === 'fulfilled') setStats(results[0].value);
+      if (results[1].status === 'fulfilled') setActivityData(results[1].value);
+      if (results[2].status === 'fulfilled') setQuestionData(results[2].value);
+      if (results[3].status === 'fulfilled') setSubjectData(results[3].value);
+      if (results[4].status === 'fulfilled') setKnowledgeData(results[4].value);
+      if (results[5].status === 'fulfilled') setRankingData(results[5].value);
     } catch (error) {
       console.error('Failed to fetch statistics:', error);
     } finally {

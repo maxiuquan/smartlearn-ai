@@ -1,0 +1,218 @@
+{
+  "subject": "考研英语",
+  "subject_code": "english",
+  "version": "1.0.0",
+  "last_updated": "2026-07-08",
+  "description": "考研英语历年真题样例（代表性样例，真实大规模真题由版权方后续提供）",
+  "notice": "本文件为样例数据：papers 含英语一/二各 1 份代表性样例题（每卷 4 题），仅用于 schema 演示与前端展示，不进入 make import-* 流程。真实历年真题规模数据后续由版权方提供。",
+  "schema_reference": "参见 data/exam-papers/schema.json 的 paper_schema",
+  "papers": [
+    {
+      "id": "english1-2023-sample",
+      "year": "2023",
+      "subject": "英语一",
+      "category": "english1",
+      "paper_name": "2023年考研英语一（样例题）",
+      "questions": [
+        {
+          "id": "english1-2023-sample-q1",
+          "number": 1,
+          "type": "choice",
+          "score": 2,
+          "content": "Studies show that a balanced diet can significantly _____ a person's overall health.",
+          "options": {
+            "A": "improve",
+            "B": "worsen",
+            "C": "ignore",
+            "D": "delay"
+          },
+          "answer": "A",
+          "solution": "句意：研究表明均衡饮食能显著改善人的整体健康。improve 意为“改善”，符合语境。",
+          "analysis": "根据主谓逻辑选择与 health 搭配的动词。",
+          "knowledge_points": [
+            "grammar-tense"
+          ],
+          "difficulty": 1,
+          "tags": [
+            "词汇",
+            "完形"
+          ]
+        },
+        {
+          "id": "english1-2023-sample-q2",
+          "number": 2,
+          "type": "choice",
+          "score": 2,
+          "content": "He was _____ by the complexity of the problem and asked a colleague for help.",
+          "options": {
+            "A": "confused",
+            "B": "confusing",
+            "C": "confuse",
+            "D": "confuses"
+          },
+          "answer": "A",
+          "solution": "此处作表语描述人的感受，用过去分词 confused（感到困惑的）。",
+          "analysis": "-ed 形容词修饰人，-ing 形容词修饰物。",
+          "knowledge_points": [
+            "grammar-voice"
+          ],
+          "difficulty": 2,
+          "tags": [
+            "词汇",
+            "非谓语"
+          ]
+        },
+        {
+          "id": "english1-2023-sample-q3",
+          "number": 3,
+          "type": "choice",
+          "score": 2,
+          "content": "Many animals hibernate in winter to conserve energy. Bears, for example, sleep through the cold months. — Why do some animals hibernate?",
+          "options": {
+            "A": "To conserve energy",
+            "B": "To find food",
+            "C": "To migrate",
+            "D": "To reproduce"
+          },
+          "answer": "A",
+          "solution": "原文明确说 hibernate to conserve energy（为保存能量）。",
+          "analysis": "细节题，定位原文同义表述。",
+          "knowledge_points": [
+            "grammar-tense"
+          ],
+          "difficulty": 1,
+          "tags": [
+            "阅读理解"
+          ]
+        },
+        {
+          "id": "english1-2023-sample-q4",
+          "number": 4,
+          "type": "choice",
+          "score": 2,
+          "content": "The Internet has changed how we access information. People now read news online instead of in newspapers. — According to the text, people read news _____.",
+          "options": {
+            "A": "only in newspapers",
+            "B": "online",
+            "C": "only on TV",
+            "D": "never"
+          },
+          "answer": "B",
+          "solution": "原文说 people now read news online。",
+          "analysis": "细节题。",
+          "knowledge_points": [
+            "grammar-tense"
+          ],
+          "difficulty": 1,
+          "tags": [
+            "阅读理解"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "english2-2023-sample",
+      "year": "2023",
+      "subject": "英语二",
+      "category": "english2",
+      "paper_name": "2023年考研英语二（样例题）",
+      "questions": [
+        {
+          "id": "english2-2023-sample-q1",
+          "number": 1,
+          "type": "choice",
+          "score": 2,
+          "content": "Regular physical activity helps to _____ the risk of chronic disease.",
+          "options": {
+            "A": "reduce",
+            "B": "increase",
+            "C": "avoid",
+            "D": "hide"
+          },
+          "answer": "A",
+          "solution": "reduce the risk 为固定搭配，意为“降低风险”。",
+          "analysis": "动宾搭配。",
+          "knowledge_points": [
+            "grammar-tense"
+          ],
+          "difficulty": 1,
+          "tags": [
+            "词汇",
+            "完形"
+          ]
+        },
+        {
+          "id": "english2-2023-sample-q2",
+          "number": 2,
+          "type": "choice",
+          "score": 2,
+          "content": "The report _____ that the new policy has improved student performance.",
+          "options": {
+            "A": "suggests",
+            "B": "suggesting",
+            "C": "suggest",
+            "D": "to suggest"
+          },
+          "answer": "A",
+          "solution": "主语 report 为单数，谓语用 suggests（一般现在时）。",
+          "analysis": "主谓一致与时态。",
+          "knowledge_points": [
+            "grammar-tense"
+          ],
+          "difficulty": 2,
+          "tags": [
+            "语法",
+            "主谓一致"
+          ]
+        },
+        {
+          "id": "english2-2023-sample-q3",
+          "number": 3,
+          "type": "choice",
+          "score": 2,
+          "content": "Renewable energy, such as solar and wind power, is becoming increasingly important. — What is the passage mainly about?",
+          "options": {
+            "A": "The cost of oil",
+            "B": "The rise of renewable energy",
+            "C": "Air pollution only",
+            "D": "Nuclear accidents"
+          },
+          "answer": "B",
+          "solution": "段落主题为可再生能源日益重要。",
+          "analysis": "主旨题。",
+          "knowledge_points": [
+            "grammar-tense"
+          ],
+          "difficulty": 1,
+          "tags": [
+            "阅读理解"
+          ]
+        },
+        {
+          "id": "english2-2023-sample-q4",
+          "number": 4,
+          "type": "choice",
+          "score": 2,
+          "content": "If I _____ richer, I would travel around the world.",
+          "options": {
+            "A": "am",
+            "B": "was",
+            "C": "were",
+            "D": "be"
+          },
+          "answer": "C",
+          "solution": "与现在事实相反的虚拟语气，be 动词用 were。",
+          "analysis": "虚拟语气结构。",
+          "knowledge_points": [
+            "grammar-subjunctive"
+          ],
+          "difficulty": 3,
+          "tags": [
+            "语法",
+            "虚拟语气"
+          ]
+        }
+      ]
+    }
+  ]
+}

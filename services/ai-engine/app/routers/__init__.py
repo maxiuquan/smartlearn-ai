@@ -6,6 +6,7 @@ from app.routers.media_router import router as media_router
 from app.routers.moderation_router import router as moderation_router
 from app.routers.prompt_router import router as prompt_router
 from app.routers.word_games_router import router as word_games_router
+from app.routers.handwriting_router import router as handwriting_router
 
 __all__ = [
     "chat_router",
@@ -15,4 +16,5 @@ __all__ = [
     "moderation_router",
     "prompt_router",
     "word_games_router",
+    "handwriting_router",
 ]

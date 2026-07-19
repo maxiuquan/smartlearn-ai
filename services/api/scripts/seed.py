@@ -1,77 +1,78 @@
 """
-填充初始数据（成就、学习计划模板等）
+填充初始数据（默认超级管理员账号等）
+
 用法: python scripts/seed.py
+前置条件: 已执行 `alembic upgrade head` 创建表结构。
+
+设计依据: 整改设计-2026-07-08 B2（P0-6）
+- 删除原 achievements 裸建表（CREATE TABLE）与 psycopg2 直接写库
+- 改为经 ORM 模型（User）写入与现有 schema 一致的初始数据
+- 角色由 users.role 字符串字段承载（user/teacher/admin/super_admin），
+  无独立角色表，故仅创建管理员账号，不创建角色记录
+- 幂等：账号已存在则跳过
 """
-import json
 import os
+import sys
 import logging
 
-import psycopg2
+# 将 services/api 加入 sys.path，以便 `import app`
+API_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if API_ROOT not in sys.path:
+    sys.path.insert(0, API_ROOT)
+
+from sqlalchemy import select
+
+from app.core.config import settings
+from app.core.security import hash_password
+from app.db.session import SessionLocal
+from app.models import User
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
 
-DB_URL = os.environ.get(
-    "DATABASE_URL",
-    f"postgresql://{os.environ.get('POSTGRES_USER', 'postgres')}:{os.environ.get('POSTGRES_PASSWORD', 'postgres')}@{os.environ.get('POSTGRES_SERVER', 'localhost')}:{os.environ.get('POSTGRES_PORT', '5432')}/{os.environ.get('POSTGRES_DB', 'smartlearn')}",
-)
-
-DEFAULT_ACHIEVEMENTS = [
-    {"key": "first-login", "name": "初次登录", "description": "首次登录平台", "icon": "login", "category": "milestone", "threshold": 1},
-    {"key": "streak-3", "name": "连续学习3天", "description": "连续打卡3天", "icon": "fire", "category": "streak", "threshold": 3},
-    {"key": "streak-7", "name": "坚持不懈", "description": "连续打卡7天", "icon": "fire", "category": "streak", "threshold": 7},
-    {"key": "streak-30", "name": "月度之星", "description": "连续打卡30天", "icon": "star", "category": "streak", "threshold": 30},
-    {"key": "questions-10", "name": "初出茅庐", "description": "完成10道题目", "icon": "book", "category": "practice", "threshold": 10},
-    {"key": "questions-100", "name": "百题斩", "description": "完成100道题目", "icon": "sword", "category": "practice", "threshold": 100},
-    {"key": "questions-1000", "name": "题海无涯", "description": "完成1000道题目", "icon": "ocean", "category": "practice", "threshold": 1000},
-    {"key": "words-50", "name": "词汇入门", "description": "掌握50个单词", "icon": "word", "category": "vocabulary", "threshold": 50},
-    {"key": "words-500", "name": "词汇达人", "description": "掌握500个单词", "icon": "dictionary", "category": "vocabulary", "threshold": 500},
-    {"key": "accuracy-80", "name": "精准射手", "description": "正确率达到80%以上", "icon": "target", "category": "skill", "threshold": 80},
-    {"key": "accuracy-90", "name": "学霸降临", "description": "正确率达到90%以上", "icon": "crown", "category": "skill", "threshold": 90},
-    {"key": "math-chapter-1", "name": "极限挑战", "description": "完成函数极限章节", "icon": "function", "category": "chapter", "threshold": 1},
-    {"key": "math-chapter-2", "name": "微分大师", "description": "完成微分学章节", "icon": "derivative", "category": "chapter", "threshold": 1},
-    {"key": "math-chapter-3", "name": "积分达人", "description": "完成积分学章节", "icon": "integral", "category": "chapter", "threshold": 1},
-    {"key": "all-math", "name": "数学全通", "description": "完成所有数学章节", "icon": "trophy", "category": "milestone", "threshold": 1},
-]
+# 初始管理员账号（密码可通过环境变量覆盖；默认仅用于本地/演示初始化）
+# 注意: 默认邮箱使用 .io TLD（避免 Pydantic EmailStr 拒绝 .local 等保留 TLD）
+ADMIN_EMAIL = os.environ.get("SEED_ADMIN_EMAIL", "admin@smartlearn.io")
+ADMIN_PASSWORD = os.environ.get("SEED_ADMIN_PASSWORD", "Admin@12345678")
+ADMIN_NICKNAME = os.environ.get("SEED_ADMIN_NICKNAME", "系统管理员")
 
 
 def main() -> None:
-    conn = psycopg2.connect(DB_URL)
-    cur = conn.cursor()
+    with SessionLocal() as db:
+        existing = db.execute(
+            select(User).where(User.email == ADMIN_EMAIL)
+        ).scalar_one_or_none()
+        if existing is not None:
+            # 账号已存在: 同步密码(支持通过 SEED_ADMIN_PASSWORD 环境变量重置密码)
+            new_hash = hash_password(ADMIN_PASSWORD)
+            if existing.password_hash != new_hash:
+                existing.password_hash = new_hash
+                existing.role = "super_admin"
+                existing.status = "active"
+                if ADMIN_NICKNAME:
+                    existing.nickname = ADMIN_NICKNAME
+                db.commit()
+                logger.info("[UPDATE] 管理员账号 %s 密码已同步", ADMIN_EMAIL)
+            else:
+                logger.info("[SKIP] 管理员账号 %s 已存在，密码未变", ADMIN_EMAIL)
+            return
 
-    cur.execute(
-        """
-        CREATE TABLE IF NOT EXISTS achievements (
-            id SERIAL PRIMARY KEY,
-            key VARCHAR(100) UNIQUE NOT NULL,
-            name VARCHAR(200) NOT NULL,
-            description TEXT,
-            icon VARCHAR(100),
-            category VARCHAR(100),
-            threshold INTEGER DEFAULT 1,
-            created_at TIMESTAMP DEFAULT NOW()
-        );
-    """
-    )
-
-    count = 0
-    for ach in DEFAULT_ACHIEVEMENTS:
-        cur.execute(
-            """
-            INSERT INTO achievements (key, name, description, icon, category, threshold)
-            VALUES (%s, %s, %s, %s, %s, %s)
-            ON CONFLICT (key) DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description
-        """,
-            (ach["key"], ach["name"], ach["description"], ach["icon"], ach["category"], ach["threshold"]),
+        admin = User(
+            email=ADMIN_EMAIL,
+            nickname=ADMIN_NICKNAME,
+            password_hash=hash_password(ADMIN_PASSWORD),
+            role="super_admin",
+            status="active",
         )
-        count += 1
+        db.add(admin)
+        db.commit()
+        logger.info("[OK] 已创建初始超级管理员账号: %s (role=super_admin)", ADMIN_EMAIL)
 
-    logger.info(f"[OK] 插入 {count} 个成就")
-
-    conn.commit()
-    cur.close()
-    conn.close()
-    logger.info(f"\n[完成] 初始数据填充完成")
+        if ADMIN_PASSWORD == "Admin@12345678":
+            logger.warning(
+                "⚠️  使用了默认初始管理员密码，请尽快通过管理后台修改，"
+                "或设置环境变量 SEED_ADMIN_PASSWORD 自定义强密码。"
+            )
 
 
 if __name__ == "__main__":

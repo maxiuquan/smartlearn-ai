@@ -20,7 +20,7 @@ from .base import (
 )
 from .openai_compat import OpenAICompatProvider
 from .registry import ProviderRegistry, get_registry
-from .router import AIRouter, get_router, ROUTE_CONFIG
+from .router import AIRouter, get_router, ROUTE_CONFIG, ProviderUnavailableError
 
 __all__ = [
     # 基类
@@ -40,4 +40,5 @@ __all__ = [
     "AIRouter",
     "get_router",
     "ROUTE_CONFIG",
+    "ProviderUnavailableError",
 ]

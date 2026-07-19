@@ -147,7 +147,6 @@ const BasicLayout: React.FC = () => {
       layout="mix"
       collapsed={collapsed}
       onCollapse={setCollapsed}
-      pathname={pathname}
       menu={{ locale: false }}
       route={{ path: '/', routes: menuData }}
       menuItemRender={(item, dom) => (
@@ -167,7 +166,7 @@ const BasicLayout: React.FC = () => {
               icon={!user?.avatar && <UserOutlined />}
               size="small"
             />
-            <span>{user?.nickname || user?.username || '管理员'}</span>
+            <span>{user?.nickname || user?.email || '管理员'}</span>
           </Space>
         </Dropdown>,
       ]}

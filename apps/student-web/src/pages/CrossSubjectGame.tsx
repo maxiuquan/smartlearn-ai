@@ -1,24 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { startGame, submitAnswer, type SubmitAnswerParams } from '../api/client';
+import { useGameSession } from '../hooks/useGameSession';
 import QuestionCard from '../components/QuestionCard';
 import ScoreBoard from '../components/ScoreBoard';
 import ProgressBar from '../components/ProgressBar';
-
-interface Question {
-  question_id: string;
-  question_type: string;
-  question_text: string;
-  options: string[] | null;
-  correct_answer: string;
-  hint: string | null;
-  points: number;
-  word?: {
-    word: string;
-    meaning: string;
-    pronunciation?: string;
-  };
-}
 
 interface Feedback {
   isCorrect: boolean;
@@ -29,120 +14,69 @@ export default function CrossSubjectGame() {
   const { gameId } = useParams<{ gameId: string }>();
   const navigate = useNavigate();
 
-  const [sessionId, setSessionId] = useState('');
-  const [question, setQuestion] = useState<Question | null>(null);
-  const [totalQuestions, setTotalQuestions] = useState(0);
-  const [questionIndex, setQuestionIndex] = useState(0);
-  const [score, setScore] = useState(0);
-  const [correctCount, setCorrectCount] = useState(0);
-  const [wrongCount, setWrongCount] = useState(0);
-  const [combo, setCombo] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(0);
+  const {
+    sessionId,
+    questions,
+    currentQuestion,
+    currentIndex,
+    isGameOver,
+    loading,
+    error,
+    timeLeft,
+    correctCount,
+    wrongCount,
+    lastResult,
+    startSession,
+    submitCurrentAnswer,
+    finishSession,
+  } = useGameSession();
+
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-
-  const questionStartTime = useRef(Date.now());
-  const timerRef = useRef<ReturnType<typeof setInterval>>();
+  const feedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const navigatedRef = useRef(false);
 
   // 开始游戏
   useEffect(() => {
     if (!gameId) return;
+    startSession(gameId);
+  }, [gameId, startSession]);
 
-    (async () => {
-      try {
-        setLoading(true);
-        setError('');
-        const data = await startGame({ gameId });
-
-        setSessionId(data.session.session_id);
-        setQuestion(data.first_question);
-        setTotalQuestions(data.total_questions);
-        setTimeLeft(data.session.time_limit_seconds);
-        questionStartTime.current = Date.now();
-      } catch (err: any) {
-        setError(err?.response?.data?.detail || err?.message || '无法连接游戏服务，请确认 AI 引擎已启动');
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, [gameId]);
-
-  // 倒计时
+  // 游戏结束后跳转结果页
   useEffect(() => {
-    if (timeLeft <= 0 || loading) return;
-
-    timerRef.current = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          clearInterval(timerRef.current);
-          navigate(`/result/${sessionId}`, { replace: true });
-          return 0;
-        }
-        return prev - 1;
+    if (isGameOver && sessionId && gameId && !navigatedRef.current) {
+      navigatedRef.current = true;
+      finishSession().then(() => {
+        navigate(`/result/${sessionId}?gameId=${gameId}`, { replace: true });
       });
-    }, 1000);
+    }
+  }, [isGameOver, sessionId, gameId, navigate, finishSession]);
 
-    return () => clearInterval(timerRef.current);
-  }, [timeLeft, loading, sessionId, navigate]);
+  // 显示反馈后清空
+  useEffect(() => {
+    if (!lastResult) return;
+    setFeedback({
+      isCorrect: lastResult.is_correct,
+      message: lastResult.is_correct ? '✓ 回答正确！' : '✗ 答错了，继续加油！',
+    });
+    if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
+    feedbackTimerRef.current = setTimeout(() => setFeedback(null), 1000);
+    return () => {
+      if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
+    };
+  }, [lastResult]);
 
-  // 提交答案
   const handleAnswer = useCallback(
-    async (answer: string) => {
-      if (submitting || !question) return;
-
+    async (answer?: string, structuredAnswer?: Record<string, unknown>) => {
+      if (submitting) return;
       setSubmitting(true);
-      const timeSpent = Math.round((Date.now() - questionStartTime.current) / 1000);
-
       try {
-        const params: SubmitAnswerParams = {
-          sessionId,
-          questionId: question.question_id,
-          userAnswer: answer,
-          timeSpentSeconds: timeSpent,
-        };
-
-        const data = await submitAnswer(params);
-
-        setScore(data.current_score);
-        if (data.result.is_correct) {
-          setCorrectCount((c) => c + 1);
-          setCombo((c) => c + 1);
-        } else {
-          setWrongCount((c) => c + 1);
-          setCombo(0);
-        }
-
-        setFeedback({
-          isCorrect: data.result.is_correct,
-          message: data.result.feedback,
-        });
-
-        setTimeout(() => {
-          setFeedback(null);
-
-          if (data.is_game_over) {
-            clearInterval(timerRef.current);
-            setTimeout(() => {
-              navigate(`/result/${sessionId}`, { replace: true });
-            }, 500);
-          } else if (data.next_question) {
-            setQuestion(data.next_question);
-            setQuestionIndex((i) => i + 1);
-            questionStartTime.current = Date.now();
-          }
-          setSubmitting(false);
-        }, 1200);
-      } catch (err: any) {
-        setFeedback({
-          isCorrect: false,
-          message: '提交失败，请重试',
-        });
-        setSubmitting(false);
+        await submitCurrentAnswer(answer, structuredAnswer);
+      } finally {
+        setTimeout(() => setSubmitting(false), 1200);
       }
     },
-    [submitting, question, sessionId, navigate]
+    [submitting, submitCurrentAnswer]
   );
 
   if (loading) {
@@ -160,7 +94,7 @@ export default function CrossSubjectGame() {
         <p className="text-5xl mb-4">😵</p>
         <p className="text-red-500 text-lg mb-4">{error}</p>
         <button
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/games')}
           className="px-6 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors"
         >
           返回游戏大厅
@@ -169,7 +103,7 @@ export default function CrossSubjectGame() {
     );
   }
 
-  if (!question) return null;
+  if (!currentQuestion) return null;
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -180,27 +114,27 @@ export default function CrossSubjectGame() {
 
       {/* 评分面板 */}
       <ScoreBoard
-        score={score}
+        score={0}
         correctCount={correctCount}
         wrongCount={wrongCount}
-        combo={combo}
+        combo={0}
         timeLeft={timeLeft}
       />
 
       {/* 进度条 */}
       <div className="mt-4 mb-6">
         <ProgressBar
-          current={questionIndex + 1}
-          total={totalQuestions}
+          current={currentIndex + 1}
+          total={questions.length}
           label="游戏进度"
         />
       </div>
 
-      {/* 题目卡片 */}
+      {/* 题目卡片 — 统一使用 QuestionCard 渲染所有题型 */}
       <QuestionCard
-        question={question}
-        questionIndex={questionIndex}
-        totalQuestions={totalQuestions}
+        question={currentQuestion}
+        questionIndex={currentIndex}
+        totalQuestions={questions.length}
         onAnswer={handleAnswer}
         feedback={feedback}
         submitting={submitting}

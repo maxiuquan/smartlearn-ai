@@ -18,7 +18,7 @@ import {
   EyeOutlined,
 } from '@ant-design/icons';
 import ProTable from '@ant-design/pro-table';
-import type { ColumnsType, ActionType } from '@ant-design/pro-table';
+import type { ProColumns, ActionType } from '@ant-design/pro-table';
 import { useNavigate } from 'react-router-dom';
 import {
   getQuestionList,
@@ -73,7 +73,7 @@ const QuestionList: React.FC = () => {
   };
 
   // 表格列定义
-  const columns: ColumnsType<Question> = [
+  const columns: ProColumns<Question>[] = [
     {
       title: 'ID',
       dataIndex: 'id',
@@ -84,7 +84,7 @@ const QuestionList: React.FC = () => {
       title: '题型',
       dataIndex: 'type',
       width: 100,
-      render: (type: QuestionType) => (
+      renderText: (type: QuestionType) => (
         <Tag color={typeColorMap[type]}>{typeTextMap[type]}</Tag>
       ),
     },
@@ -103,35 +103,35 @@ const QuestionList: React.FC = () => {
       title: '难度',
       dataIndex: 'difficulty',
       width: 80,
-      render: (difficulty: number) => (
+      renderText: (difficulty: number) => (
         <Tag color={difficultyColorMap[difficulty]}>{difficulty}星</Tag>
       ),
     },
     {
       title: '知识点',
-      dataIndex: 'knowledgePoints',
+      dataIndex: 'knowledge_points',
       width: 200,
-      render: (points: string[]) => <TagList tags={points} max={2} />,
+      renderText: (points: string[]) => <TagList tags={points} max={2} />,
     },
     {
       title: '标签',
       dataIndex: 'tags',
       width: 150,
-      render: (tags: string[]) => <TagList tags={tags} max={2} />,
+      renderText: (tags: string[]) => <TagList tags={tags} max={2} />,
     },
     {
       title: '状态',
       dataIndex: 'status',
       width: 80,
-      render: (status: QuestionStatus) => (
+      renderText: (status: QuestionStatus) => (
         <Tag color={statusColorMap[status]}>{statusTextMap[status]}</Tag>
       ),
     },
     {
       title: '创建时间',
-      dataIndex: 'createdAt',
+      dataIndex: 'created_at',
       width: 150,
-      render: (date: string) => dayjs(date).format('YYYY-MM-DD HH:mm'),
+      renderText: (date: string) => dayjs(date).format('YYYY-MM-DD HH:mm'),
       sorter: true,
     },
     {

@@ -16,7 +16,9 @@ class KnowledgePointResponse(BaseModel):
     description: Optional[str] = None
     difficulty: int = 1
     importance: int = 1
-    prerequisites: Optional[list[dict[str, Any]]] = None
+    # 数据源 JSON 中 prerequisites 可能是 list[str] 或 list[dict]
+    # 用 list[Any] 兼容两种结构
+    prerequisites: Optional[list[Any]] = None
     keywords: Optional[list[str]] = None
     created_at: datetime
 

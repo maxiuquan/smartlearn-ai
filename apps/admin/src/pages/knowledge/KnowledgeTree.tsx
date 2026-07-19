@@ -124,7 +124,7 @@ const KnowledgeTree: React.FC = () => {
           </Dropdown>
         </div>
       ),
-      icon: ({ expanded }: { expanded: boolean }) =>
+      icon: ({ expanded }: { expanded?: boolean }) =>
         expanded ? <FolderOpenOutlined /> : <FolderOutlined />,
       children: item.children ? convertToTreeData(item.children) : undefined,
     }));

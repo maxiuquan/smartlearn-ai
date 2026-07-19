@@ -1,5 +1,4 @@
 import { useNavigate } from 'react-router-dom';
-import { getGameDisplayName } from '../api/client';
 
 interface Game {
   game_id: string;
@@ -50,7 +49,6 @@ function getGameRoute(game: Game): string {
 
 export default function GameCard({ game }: GameCardProps) {
   const navigate = useNavigate();
-  const gameType = getGameDisplayName(game.game_id);
 
   return (
     <div
@@ -71,7 +69,7 @@ export default function GameCard({ game }: GameCardProps) {
             <h3 className="font-bold text-lg text-gray-800">{game.name}</h3>
           </div>
           <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded">
-            {gameType}
+            {game.name_en}
           </span>
         </div>
 

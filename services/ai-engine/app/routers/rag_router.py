@@ -1,9 +1,13 @@
 """
 RAG 知识检索路由
+
+P1-4.4: 所有路由显式声明 require_auth，不允许"靠 Nginx 没转发"保护。
+/similar 接口不再返回完整 answer/solution，按题库授权策略脱敏。
 """
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, Field
 
+from app.auth import require_auth
 from app.services.rag_service import get_rag_service
 from app.services.llm_service import get_llm_service
 
@@ -60,14 +64,18 @@ class SimilarQuestionsRequest(BaseModel):
 
 
 class SimilarQuestionItem(BaseModel):
-    """相似题目项"""
+    """相似题目项
+
+    P1-4.4: 答案脱敏 — 默认不返回 answer/solution；
+    仅有权用户（如已作答过的本人）可在调用方传入 reveal=true 时获取。
+    """
     id: str
     type: str
     difficulty: int
     title: str
     content: str
-    answer: str
-    solution: str
+    answer: str | None = None  # 默认 None，仅授权时返回
+    solution: str | None = None
     tags: list[str]
     subject: str
     similarity: float
@@ -83,15 +91,20 @@ class SimilarQuestionsResponse(BaseModel):
 # ─── 路由 ───────────────────────────────────────────────────
 
 @router.post("/query", response_model=RAGQueryResponse)
-async def query_knowledge(request: RAGQueryRequest):
+async def query_knowledge(
+    request: RAGQueryRequest,
+    creds: dict = Depends(require_auth),
+):
     """
     知识检索
 
     根据查询文本检索相关知识内容。
     可用于学习时查找相关知识点。
+
+    P1-4.4: 所有 RAG 路由显式 require_auth，不允许匿名访问。
     """
     rag = get_rag_service()
-    contexts = rag.retrieve_context(request.query, top_k=request.top_k)
+    contexts = await rag.retrieve_context(request.query, top_k=request.top_k)
 
     results = [
         KnowledgePointItem(
@@ -117,16 +130,21 @@ async def query_knowledge(request: RAGQueryRequest):
 
 
 @router.post("/explain", response_model=ExplainResponse)
-async def explain_question(request: ExplainRequest):
+async def explain_question(
+    request: ExplainRequest,
+    creds: dict = Depends(require_auth),
+):
     """
     题目解析
 
     对指定题目进行 AI 驱动的详细解析，结合相关知识库内容。
+
+    P1-4.4: 显式 require_auth。
     """
     from config import settings
 
     llm = get_llm_service()
-    explanation = llm.generate_explanation(
+    explanation = await llm.generate_explanation(
         question=request.question,
         answer=request.answer,
         context=request.context,
@@ -140,14 +158,21 @@ async def explain_question(request: ExplainRequest):
 
 
 @router.post("/similar", response_model=SimilarQuestionsResponse)
-async def similar_questions(request: SimilarQuestionsRequest):
+async def similar_questions(
+    request: SimilarQuestionsRequest,
+    creds: dict = Depends(require_auth),
+):
     """
     相似题目检索
 
     根据查询文本检索相似的题目。
+
+    P1-4.4: 答案脱敏 — 默认不返回 answer/solution 字段（设为 None），
+    防止通过 RAG 检索接口批量爬取题库答案。
+    题库答案仅通过 `/api/v1/questions/{id}` 已作答后返回。
     """
     rag = get_rag_service()
-    questions = rag.search_similar_questions(request.query, top_k=request.top_k)
+    questions = await rag.search_similar_questions(request.query, top_k=request.top_k)
 
     results = [
         SimilarQuestionItem(
@@ -156,8 +181,9 @@ async def similar_questions(request: SimilarQuestionsRequest):
             difficulty=q.get("difficulty", 1),
             title=q.get("title", ""),
             content=q.get("content", ""),
-            answer=q.get("answer", ""),
-            solution=q.get("solution", ""),
+            # P1-4.4: 不返回完整答案/解析，按题库授权策略脱敏
+            answer=None,
+            solution=None,
             tags=q.get("tags", []),
             subject=q.get("subject", ""),
             similarity=q.get("similarity", 0.0),
@@ -174,7 +200,7 @@ async def similar_questions(request: SimilarQuestionsRequest):
 
 @router.get("/health")
 async def health_check():
-    """健康检查"""
+    """健康检查（不需要鉴权，用于内部 readiness 探针）"""
     rag = get_rag_service()
     return {
         "status": "ok",

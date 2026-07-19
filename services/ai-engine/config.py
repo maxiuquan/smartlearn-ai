@@ -1,6 +1,7 @@
 """
 AI Engine Service Configuration
 """
+from pydantic import field_validator
 from pydantic_settings import BaseSettings
 from typing import List
 from functools import lru_cache
@@ -8,12 +9,17 @@ from functools import lru_cache
 
 class Settings(BaseSettings):
     """Application Settings"""
-    
+
     # Service Info
     APP_NAME: str = "SmartLearn AI Engine"
     APP_VERSION: str = "1.0.0"
+    ENVIRONMENT: str = "development"
     DEBUG: bool = False
-    
+
+    @property
+    def is_production(self) -> bool:
+        return self.ENVIRONMENT.lower() == "production"
+
     # Server Config
     HOST: str = "0.0.0.0"
     PORT: int = 8001
@@ -41,10 +47,68 @@ class Settings(BaseSettings):
     # Word Games
     WORD_GAME_TIME_LIMIT: int = 60  # 单词游戏时间限制(秒)
     WORD_GAME_BATCH_SIZE: int = 10  # 单词游戏批次大小
+
+    # API 服务地址（用于词汇进度联动：获取今日学过词汇、提交答题事件）
+    API_BASE_URL: str = "http://127.0.0.1:8000"
     
-    # CORS
-    CORS_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:3001", "http://localhost:5173"]
-    
+    # CORS (逗号分隔的字符串,兼容环境变量直接设置)
+    CORS_ORIGINS: str = "http://localhost:3000,http://localhost:3001,http://localhost:5173"
+
+    @property
+    def cors_origins_list(self) -> List[str]:
+        """将逗号分隔的 CORS_ORIGINS 解析为列表。"""
+        return [origin.strip() for origin in self.CORS_ORIGINS.split(",") if origin.strip()]
+
+    # ============================================================
+    # 数据库（共享 PostgreSQL，与 api 服务同一实例）
+    # ============================================================
+    # asyncpg 连接串，格式: postgresql://user:pass@host:5432/dbname
+    # 留空时 DB 持久化功能不可用（word_games 回退到 JSON 文件取词）
+    DATABASE_URL: str = ""
+
+    # ============================================================
+    # 鉴权与安全防护
+    # ============================================================
+    # 全局鉴权开关（默认开启；生产环境必须开启）
+    AI_ENGINE_AUTH_ENABLED: bool = True
+
+    @field_validator("AI_ENGINE_AUTH_ENABLED", mode="before")
+    @classmethod
+    def parse_auth_enabled(cls, v):
+        """容错解析布尔值: 非标准值（如误填的 HS256）默认为 True（开启鉴权）"""
+        if isinstance(v, bool):
+            return v
+        if isinstance(v, str):
+            low = v.strip().lower()
+            if low in ("true", "1", "yes", "on"):
+                return True
+            if low in ("false", "0", "no", "off"):
+                return False
+            # 非标准值（如误填的 HS256）-> 默认开启鉴权（安全优先）
+            return True
+        return bool(v)
+    # 服务间 / 网关凭证：请求头 X-Api-Key 等于此值即通过鉴权
+    AI_ENGINE_API_KEY: str = ""
+    # 复用 api 服务的 JWT 签名密钥（同一密钥，由 compose 注入相同值）
+    JWT_SECRET: str = ""
+    JWT_ALGORITHM: str = "HS256"
+    # P0-02: JWT iss/aud 校验（与 API 服务保持一致）
+    JWT_ISSUER: str = "smartlearn-ai"
+    JWT_AUDIENCE: str = "smartlearn-users"
+    # SSRF 防护：允许服务端出网抓取的域名白名单（逗号分隔）
+    AI_ENGINE_SSRF_ALLOWLIST: str = ""
+
+    @property
+    def ssrf_allowlist_list(self) -> List[str]:
+        """将逗号分隔的 SSRF 白名单解析为列表。"""
+        if not self.AI_ENGINE_SSRF_ALLOWLIST:
+            return []
+        return [
+            item.strip()
+            for item in self.AI_ENGINE_SSRF_ALLOWLIST.split(",")
+            if item.strip()
+        ]
+
     # ============================================================
     # LLM / OpenAI 配置 (兼容旧版)
     # ============================================================
@@ -82,6 +146,12 @@ class Settings(BaseSettings):
     COGVIEW_API_KEY: str = ""
     COGVIEW_BASE_URL: str = "https://open.bigmodel.cn/api/paas/v4/"
     COGVIEW_MODEL: str = "cogview-3-flash"
+
+    # --- 兜底 OpenAI 兼容供应商 - 当 GLM/DeepSeek 都不可用时启用 ---
+    # 可填任意 OpenAI 兼容服务（如 OpenAI、SiliconFlow 聊天模型、Kimi、通义等）
+    FALLBACK_OPENAI_API_KEY: str = ""
+    FALLBACK_OPENAI_BASE_URL: str = "https://api.openai.com/v1"
+    FALLBACK_OPENAI_MODEL: str = "gpt-4o-mini"
     
     # ============================================================
     # 向量存储配置
@@ -115,8 +185,9 @@ class Settings(BaseSettings):
             or self.DEEPSEEK_API_KEY
             or self.SILICONFLOW_API_KEY
             or self.COGVIEW_API_KEY
+            or self.FALLBACK_OPENAI_API_KEY
         )
-    
+
     @property
     def active_providers(self) -> list[str]:
         """列出当前已配置的活跃供应商"""
@@ -131,6 +202,8 @@ class Settings(BaseSettings):
             providers.append("siliconflow")
         if self.COGVIEW_API_KEY:
             providers.append("cogview")
+        if self.FALLBACK_OPENAI_API_KEY:
+            providers.append("fallback_openai")
         return providers
     
     class Config:

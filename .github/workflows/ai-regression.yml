@@ -1,0 +1,215 @@
+name: AI Regression
+
+# P1-3: AI 质量评测与安全回归 CI
+# - 手动触发（workflow_dispatch）：支持选择 provider/model
+# - 定时触发：每周一 03:00 UTC（北京周一 11:00）执行一次完整回归
+#
+# 失败行为：
+# - 门禁未通过 -> job 失败 -> 自动创建 issue 通知团队
+# - 上传评测报告 artifact（保留 30 天）便于回溯
+
+on:
+  workflow_dispatch:
+    inputs:
+      provider:
+        description: "AI 供应商 (glm / deepseek / openai / siliconflow / cogview)"
+        required: false
+        default: "glm"
+        type: choice
+        options:
+          - glm
+          - deepseek
+          - openai
+          - siliconflow
+          - cogview
+      model:
+        description: "模型名称（留空使用 provider 默认模型）"
+        required: false
+        default: "glm-4-flash"
+        type: string
+  schedule:
+    # 每周一 03:00 UTC（北京周一 11:00）
+    - cron: "0 3 * * 1"
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: ai-regression-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  evaluate:
+    name: AI Quality & Safety Regression
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    env:
+      # AI Engine 服务地址（HF Space 或自托管；通过 GitHub Secret 配置）
+      AI_ENGINE_BASE_URL: ${{ secrets.AI_ENGINE_BASE_URL || 'http://127.0.0.1:8001' }}
+      AI_ENGINE_API_KEY: ${{ secrets.AI_ENGINE_API_KEY }}
+
+    defaults:
+      run:
+        working-directory: services/ai-engine
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: services/ai-engine/requirements.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          # 评测脚本可选依赖：sympy（数学等价判定）
+          pip install sympy==1.13.3
+
+      - name: Determine provider and model
+        id: config
+        run: |
+          # workflow_dispatch 时使用输入值；schedule 时使用默认值
+          if [ -n "${{ github.event.inputs.provider }}" ]; then
+            PROVIDER="${{ github.event.inputs.provider }}"
+          else
+            PROVIDER="glm"
+          fi
+          if [ -n "${{ github.event.inputs.model }}" ]; then
+            MODEL="${{ github.event.inputs.model }}"
+          else
+            MODEL="glm-4-flash"
+          fi
+          echo "provider=$PROVIDER" >> "$GITHUB_OUTPUT"
+          echo "model=$MODEL" >> "$GITHUB_OUTPUT"
+          echo "评测配置：provider=$PROVIDER model=$MODEL"
+          # 校验必需密钥
+          if [ -z "$AI_ENGINE_API_KEY" ]; then
+            echo "::error::缺少 AI_ENGINE_API_KEY Secret，无法调用 AI Engine"
+            exit 1
+          fi
+
+      - name: Validate golden sets
+        run: |
+          # 快速校验黄金集 JSON 格式（每文件 10 条）
+          python -c "
+          import json, sys
+          from pathlib import Path
+          golden_dir = Path('tests/golden_set')
+          for name in ('math_golden.json', 'english_golden.json', 'safety_golden.json'):
+              p = golden_dir / name
+              if not p.exists():
+                  print(f'::error::{name} 不存在'); sys.exit(1)
+              data = json.loads(p.read_text(encoding='utf-8'))
+              if not isinstance(data, list) or len(data) != 10:
+                  print(f'::error::{name} 应为 10 条数组，实际 {len(data) if isinstance(data, list) else \"非数组\"}'); sys.exit(1)
+              print(f'  {name}: {len(data)} 条 ✓')
+          "
+
+      - name: Run AI quality evaluation
+        id: eval
+        run: |
+          mkdir -p tests/reports
+          # --strict: 任一评测项调用失败时也返回非 0
+          python tests/eval_ai_quality.py \
+            --provider "${{ steps.config.outputs.provider }}" \
+            --model "${{ steps.config.outputs.model }}" \
+            --base-url "$AI_ENGINE_BASE_URL" \
+            --api-key "$AI_ENGINE_API_KEY" \
+            --output-dir tests/reports \
+            --strict
+          # 退出码：0=通过门禁；1=未通过门禁或调用失败
+
+      - name: Upload evaluation report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-eval-report-${{ github.run_id }}
+          path: services/ai-engine/tests/reports/eval_*.json
+          retention-days: 30
+          if-no-files-found: warn
+
+      - name: Print evaluation summary
+        if: always()
+        run: |
+          # 找到最新报告并打印摘要
+          LATEST=$(ls -t tests/reports/eval_*.json 2>/dev/null | head -n 1)
+          if [ -n "$LATEST" ]; then
+            echo "=== 评测摘要 ($LATEST) ==="
+            python -c "
+          import json
+          with open('$LATEST', encoding='utf-8') as f:
+              r = json.load(f)
+          print(f'passed: {r[\"passed\"]}')
+          print(f'metrics:')
+          for k, v in r.items():
+              if k in ('answer_accuracy','citation_accuracy','hallucination_rate','refusal_accuracy','injection_resistance','p95_latency_ms','avg_cost_usd'):
+                  print(f'  {k}: {v}')
+          print(f'gate_results:')
+          for k, v in r['gate_results'].items():
+              mark = '✓' if v else '✗'
+              print(f'  {mark} {k}')
+          "
+          else
+            echo "::warning::未找到评测报告文件"
+          fi
+
+      - name: Create issue on failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const runUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const trigger = context.eventName === 'schedule' ? '定时任务（每周一）' : '手动触发';
+            const provider = '${{ steps.config.outputs.provider }}';
+            const model = '${{ steps.config.outputs.model }}';
+            const title = `🤖 AI 质量回归未通过 - ${new Date().toISOString().slice(0,10)}`;
+            const body = [
+              `## AI 质量回归门禁未通过`,
+              ``,
+              `- **触发方式**：${trigger}`,
+              `- **供应商 / 模型**：\`${provider}\` / \`${model}\``,
+              `- **运行链接**：${runUrl}`,
+              `- **时间**：${new Date().toISOString()}`,
+              ``,
+              `### 排查建议`,
+              `1. 下载 artifact \`ai-eval-report-${context.runId}\` 查看完整评测明细；`,
+              `2. 检查 AI Engine 服务是否正常 (\`$AI_ENGINE_BASE_URL/health\`)；`,
+              `3. 检查 \`AI_ENGINE_API_KEY\` Secret 是否有效；`,
+              `4. 对照 \`services/ai-engine/tests/golden_set/\` 黄金集与门禁阈值 (\`GATE_THRESHOLDS\`) 复核；`,
+              `5. 若为模型质量回退，联系算法 / Prompt 维护者评估回滚。`,
+              ``,
+              `> 本 issue 由 GitHub Actions 自动创建，无需手动关闭（重复 issue 请合并）.`,
+            ].join('\n');
+            // 查找是否已有同类 open issue，避免重复创建
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: ['ai-regression', 'quality-gate']
+            });
+            if (issues.data.length > 0) {
+              console.log(`已存在 open 的 ai-regression issue #${issues.data[0].number}，追加评论`);
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issues.data[0].number,
+                body
+              });
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body,
+                labels: ['ai-regression', 'quality-gate', 'automated']
+              });
+              console.log('已创建新的 ai-regression issue');
+            }

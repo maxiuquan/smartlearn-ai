@@ -3,8 +3,10 @@ CogView 图像生成供应商
 
 智谱 AI CogView-3 Flash 模型，用于图像生成。
 通过智谱 API 调用（非 OpenAI 兼容接口）。
+使用 async httpx，不阻塞事件循环。
 """
 
+import logging
 import sys
 import time
 from pathlib import Path
@@ -14,6 +16,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
 from config import settings
 from .base import BaseImageProvider, BaseProvider
+
+logger = logging.getLogger("ai_engine.providers.cogview")
 
 
 class CogViewProvider(BaseImageProvider):
@@ -51,14 +55,14 @@ class CogViewProvider(BaseImageProvider):
 
     # ── BaseImageProvider 实现 ───────────────────────────────
 
-    def generate_image(
+    async def generate_image(
         self,
         prompt: str,
         size: str = "1024x1024",
         n: int = 1,
         **kwargs: Any,
     ) -> list[str]:
-        """生成图像"""
+        """异步生成图像"""
         if self._offline_mode:
             return self._mock_image(prompt)
 
@@ -77,17 +81,23 @@ class CogViewProvider(BaseImageProvider):
                 "n": n,
                 **kwargs,
             }
-            resp = httpx.post(
-                f"{self._base_url}/images/generations",
-                json=payload,
-                headers=headers,
-                timeout=120.0,
-            )
-            resp.raise_for_status()
+            async with httpx.AsyncClient(timeout=120.0) as client:
+                resp = await client.post(
+                    f"{self._base_url}/images/generations",
+                    json=payload,
+                    headers=headers,
+                )
+                resp.raise_for_status()
             elapsed = time.time() - start_time
 
             data = resp.json()
             urls = [img.get("url", "") for img in data.get("data", [])]
+            if not any(urls):
+                # 在线模式返回不合法（无有效图片 URL）时，明确抛出而非静默占位
+                raise RuntimeError(
+                    f"[cogview] 图像生成返回不合法：响应中未包含有效图片 URL，"
+                    f"model={self._model_name}"
+                )
             print(
                 f"[cogview] image_generation | "
                 f"model={self._model_name} | "
@@ -98,8 +108,15 @@ class CogViewProvider(BaseImageProvider):
 
         except Exception as e:
             elapsed = time.time() - start_time
-            print(f"[cogview] image_generation 失败 (耗时 {elapsed:.2f}s): {e}")
-            return self._mock_image(prompt)
+            logger.error(
+                "[cogview] image_generation 在线调用失败 (耗时 %.2fs): %s",
+                elapsed,
+                e,
+            )
+            # 在线模式：异常时不再静默返回占位 SVG，直接抛出清晰异常
+            raise RuntimeError(
+                f"[cogview] 图像生成在线调用失败: {e}"
+            ) from e
 
     def _mock_image(self, prompt: str) -> list[str]:
         """离线模式：返回占位图"""
@@ -124,31 +141,13 @@ class CogViewProvider(BaseImageProvider):
                 "supports": ["image"],
             }
 
-        try:
-            import httpx
-
-            headers = {"Authorization": f"Bearer {self._api_key}"}
-            resp = httpx.get(
-                f"{self._base_url}/models",
-                headers=headers,
-                timeout=10.0,
-            )
-            return {
-                "status": "ok" if resp.status_code == 200 else "error",
-                "provider": self._provider_name,
-                "model": self._model_name,
-                "offline": False,
-                "supports": ["image"],
-            }
-        except Exception as e:
-            return {
-                "status": "error",
-                "provider": self._provider_name,
-                "model": self._model_name,
-                "offline": False,
-                "supports": ["image"],
-                "error": str(e),
-            }
+        return {
+            "status": "ok",
+            "provider": self._provider_name,
+            "model": self._model_name,
+            "offline": False,
+            "supports": ["image"],
+        }
 
 
 def create_cogview_provider() -> CogViewProvider:

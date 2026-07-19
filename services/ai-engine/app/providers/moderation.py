@@ -2,8 +2,11 @@
 内容审核供应商
 
 使用 GLM 模型进行内容安全审核。
+使用 AsyncOpenAI，不阻塞事件循环。
 """
 
+import json
+import logging
 import sys
 import time
 from pathlib import Path
@@ -14,11 +17,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 from config import settings
 from .base import BaseModerationProvider
 
+logger = logging.getLogger("ai_engine.providers.moderation")
+
 
 class ModerationProvider(BaseModerationProvider):
     """内容审核供应商
 
     使用 LLM 进行内容安全审核，检测违规内容。
+    使用 AsyncOpenAI 客户端。
     """
 
     MODERATION_PROMPT = """你是一个内容安全审核助手。请审核以下文本，判断是否包含以下违规内容：
@@ -53,6 +59,7 @@ class ModerationProvider(BaseModerationProvider):
         self._model_name = model_name or settings.GLM_MODEL
         self._provider_name = "moderation"
         self._offline_mode = not self._api_key
+        self._client: Any = None
 
     # ── 属性 ─────────────────────────────────────────────────
 
@@ -68,28 +75,37 @@ class ModerationProvider(BaseModerationProvider):
     def is_offline(self) -> bool:
         return self._offline_mode
 
+    def _get_client(self) -> Any:
+        """获取或创建 AsyncOpenAI 客户端"""
+        if self._client is None and not self._offline_mode:
+            from openai import AsyncOpenAI
+
+            self._client = AsyncOpenAI(
+                api_key=self._api_key,
+                base_url=self._base_url,
+            )
+        return self._client
+
     # ── BaseModerationProvider 实现 ──────────────────────────
 
-    def moderate(
+    async def moderate(
         self,
         text: str,
         **kwargs: Any,
     ) -> dict[str, Any]:
-        """审核文本内容"""
+        """异步审核文本内容"""
         if self._offline_mode:
             return self._mock_moderate(text)
 
         start_time = time.time()
         try:
-            from openai import OpenAI
+            client = self._get_client()
+            if client is None:
+                return self._mock_moderate(text)
 
-            client = OpenAI(
-                api_key=self._api_key,
-                base_url=self._base_url,
-            )
             prompt = self.MODERATION_PROMPT.format(text=text)
 
-            response = client.chat.completions.create(
+            response = await client.chat.completions.create(
                 model=self._model_name,
                 messages=[
                     {"role": "system", "content": "你是一个内容安全审核助手。请始终以 JSON 格式返回审核结果。"},
@@ -101,19 +117,23 @@ class ModerationProvider(BaseModerationProvider):
             elapsed = time.time() - start_time
 
             content = response.choices[0].message.content or "{}"
-            usage = response.usage
 
             # 尝试解析 JSON
-            import json
             try:
                 result = json.loads(content)
             except json.JSONDecodeError:
-                # 如果返回的不是有效 JSON，构造一个默认结果
+                # fail-closed：解析失败视为风险内容，标记为 flagged=True 而非放行
+                logger.warning(
+                    "[moderation] 审核结果解析失败（fail-closed），"
+                    "视为风险内容, model=%s, content=%s",
+                    self._model_name,
+                    content[:200],
+                )
                 result = {
-                    "flagged": False,
-                    "categories": [],
-                    "reason": "无法解析审核结果",
-                    "confidence": 0.0,
+                    "flagged": True,
+                    "categories": ["parse_error"],
+                    "reason": "无法解析审核结果（fail-closed）",
+                    "confidence": 1.0,
                 }
 
             print(
@@ -126,8 +146,13 @@ class ModerationProvider(BaseModerationProvider):
 
         except Exception as e:
             elapsed = time.time() - start_time
-            print(f"[moderation] moderate 失败 (耗时 {elapsed:.2f}s): {e}")
-            return self._mock_moderate(text)
+            # 在线调用异常：向上抛出，由 AIRouter 统一 fail-closed（flagged=True）
+            logger.error(
+                "[moderation] moderate 在线调用失败 (耗时 %.2fs): %s",
+                elapsed,
+                e,
+            )
+            raise
 
     def _mock_moderate(self, text: str) -> dict[str, Any]:
         """离线模式：始终放行"""
@@ -152,30 +177,13 @@ class ModerationProvider(BaseModerationProvider):
                 "supports": ["moderation"],
             }
 
-        try:
-            from openai import OpenAI
-
-            client = OpenAI(
-                api_key=self._api_key,
-                base_url=self._base_url,
-            )
-            client.models.list()
-            return {
-                "status": "ok",
-                "provider": self._provider_name,
-                "model": self._model_name,
-                "offline": False,
-                "supports": ["moderation"],
-            }
-        except Exception as e:
-            return {
-                "status": "error",
-                "provider": self._provider_name,
-                "model": self._model_name,
-                "offline": False,
-                "supports": ["moderation"],
-                "error": str(e),
-            }
+        return {
+            "status": "ok",
+            "provider": self._provider_name,
+            "model": self._model_name,
+            "offline": False,
+            "supports": ["moderation"],
+        }
 
 
 def create_moderation_provider() -> ModerationProvider:

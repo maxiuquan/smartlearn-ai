@@ -1,8 +1,17 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
 import * as SecureStore from 'expo-secure-store';
+import Constants from 'expo-constants';
 import { ApiResponse } from '../types';
 
-const BASE_URL = 'https://api.smartlearn.ai/v1';
+/**
+ * Base URL for the SmartLearn API.
+ * Reads from Expo's extra config (app.json → expo.extra.apiBaseUrl),
+ * allowing different URLs per environment (dev/staging/prod) without
+ * code changes. Falls back to localhost for development.
+ */
+const BASE_URL: string =
+  Constants.expoConfig?.extra?.apiBaseUrl ||
+  'http://localhost:8000/api/v1';
 
 class ApiClient {
   private client: AxiosInstance;

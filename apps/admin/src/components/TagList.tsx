@@ -16,7 +16,7 @@ const TagList: React.FC<TagListProps> = ({
   closable = false,
   onClose,
 }) => {
-  if (!tags || tags.length === 0) {
+  if (!tags || !Array.isArray(tags) || tags.length === 0) {
     return <span style={{ color: '#999' }}>无</span>;
   }
 

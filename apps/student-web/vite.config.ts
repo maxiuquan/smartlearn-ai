@@ -18,7 +18,18 @@ export default defineConfig({
   server: {
     port: 3002,
     proxy: {
+      // api 后端 (FastAPI, port 8000)
+      '/api': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
+      // ai-engine 游戏接口 (FastAPI, port 8001)
       '/word-games': {
+        target: 'http://localhost:8001',
+        changeOrigin: true,
+      },
+      // ai-engine 对话接口 (FastAPI, port 8001)
+      '/chat': {
         target: 'http://localhost:8001',
         changeOrigin: true,
       },

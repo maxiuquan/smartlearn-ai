@@ -10,12 +10,14 @@ class QuestionResponse(BaseModel):
 
     id: int
     subject: str
-    knowledge_points: Optional[list[dict[str, Any]]] = None
+    # 数据源 JSON 中 knowledge_points/options 可能是 list[str] 或 list[dict]
+    # 用 list[Any] 兼容两种结构, 避免数据导入后 schema 校验失败
+    knowledge_points: Optional[list[Any]] = None
     type: str
     difficulty: int
     title: Optional[str] = None
     content: str
-    options: Optional[list[dict[str, Any]]] = None
+    options: Optional[list[Any]] = None
     answer: Optional[str] = None  # 列表或详情页隐藏，练习页不返回
     solution: Optional[str] = None
     created_at: datetime
@@ -37,6 +39,13 @@ class QuestionAttemptRequest(BaseModel):
 
     user_answer: str = Field(..., min_length=1)
     duration_ms: Optional[int] = Field(None, ge=0, description="作答耗时（毫秒）")
+    # P1-4.5: 幂等键，防止网络重试导致重复作答
+    # 同一 attempt_id 的重复请求返回首次结果，不重复计入错题/作答历史
+    attempt_id: Optional[str] = Field(
+        None,
+        max_length=128,
+        description="幂等键（UUID），同一 attempt_id 的重试返回首次结果",
+    )
 
     model_config = {"extra": "forbid"}
 

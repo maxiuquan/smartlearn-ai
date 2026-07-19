@@ -1,0 +1,361 @@
+"""业务表 ORM 模型 — 题目/知识点/词汇/游戏相关.
+
+供 admin 管理端点使用（创建/更新/删除/统计）。
+"""
+from datetime import datetime
+from typing import Any, Optional
+
+from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, Text, Boolean, UniqueConstraint, func
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.orm import Mapped, mapped_column
+
+from app.models.base import Base
+
+
+class KnowledgePoint(Base):
+    """知识点表."""
+
+    __tablename__ = "knowledge_points"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    subject: Mapped[str] = mapped_column(String(50), server_default="math", nullable=False, index=True)
+    chapter: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
+    section: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
+    name: Mapped[str] = mapped_column(String(500), nullable=False)
+    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    difficulty: Mapped[int] = mapped_column(Integer, server_default="1", nullable=False)
+    importance: Mapped[int] = mapped_column(Integer, server_default="1", nullable=False)
+    prerequisites: Mapped[Optional[list[Any]]] = mapped_column(JSONB, nullable=True)
+    keywords: Mapped[Optional[list[Any]]] = mapped_column(JSONB, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), nullable=False)
+
+
+class Question(Base):
+    """题目表."""
+
+    __tablename__ = "questions"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    subject: Mapped[str] = mapped_column(String(50), server_default="math", nullable=False, index=True)
+    knowledge_points: Mapped[Optional[list[Any]]] = mapped_column(JSONB, nullable=True)
+    type: Mapped[str] = mapped_column(String(50), server_default="choice", nullable=False, index=True)
+    difficulty: Mapped[int] = mapped_column(Integer, server_default="1", nullable=False)
+    title: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    content: Mapped[str] = mapped_column(Text, nullable=False)
+    options: Mapped[Optional[list[Any]]] = mapped_column(JSONB, nullable=True)
+    answer: Mapped[str] = mapped_column(Text, nullable=False)
+    solution: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), nullable=False)
+
+
+class VocabularyWord(Base):
+    """词汇表."""
+
+    __tablename__ = "vocabulary_words"
+
+    word_id: Mapped[str] = mapped_column(String(100), primary_key=True)
+    headword: Mapped[str] = mapped_column(String(200), nullable=False, index=True)
+    meaning: Mapped[str] = mapped_column(Text, nullable=False)
+    phonetic: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
+    tags: Mapped[Optional[list[Any]]] = mapped_column(JSONB, nullable=True)
+    frequency: Mapped[int] = mapped_column(Integer, server_default="0", nullable=False, index=True)
+    synonyms: Mapped[Optional[list[Any]]] = mapped_column(JSONB, nullable=True)
+    antonyms: Mapped[Optional[list[Any]]] = mapped_column(JSONB, nullable=True)
+    examples: Mapped[Optional[list[Any]]] = mapped_column(JSONB, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), nullable=False)
+
+
+class UserWordProgress(Base):
+    """用户词汇学习进度."""
+
+    __tablename__ = "user_word_progress"
+
+    user_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    word_id: Mapped[str] = mapped_column(
+        String(100), ForeignKey("vocabulary_words.word_id", ondelete="CASCADE"), primary_key=True
+    )
+    status: Mapped[str] = mapped_column(String(20), server_default="new", nullable=False)
+    mastery_level: Mapped[float] = mapped_column(Float, server_default="0", nullable=False)
+    ease_factor: Mapped[float] = mapped_column(Float, server_default="2.5", nullable=False)
+    interval_days: Mapped[int] = mapped_column(Integer, server_default="0", nullable=False)
+    next_review_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    review_count: Mapped[int] = mapped_column(Integer, server_default="0", nullable=False)
+    correct_count: Mapped[int] = mapped_column(Integer, server_default="0", nullable=False)
+    wrong_count: Mapped[int] = mapped_column(Integer, server_default="0", nullable=False)
+    # P1-05: 乐观锁版本号，防止并发更新丢失
+    version: Mapped[int] = mapped_column(Integer, server_default="0", nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, server_default=func.now(), onupdate=func.now(), nullable=False
+    )
+
+
+class WordLearningEvent(Base):
+    """词汇学习事件表（不可变事件流，用于回放/审计/统计）.
+
+    P1-05: 建立独立事件表，配合 event_id 幂等键防止重复写入。
+    每次词汇学习行为（review/answer/game）写入一条不可变事件记录。
+    """
+
+    __tablename__ = "word_learning_events"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    event_id: Mapped[str] = mapped_column(String(128), nullable=False, index=True)
+    user_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    word_id: Mapped[str] = mapped_column(
+        String(100), ForeignKey("vocabulary_words.word_id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    event_type: Mapped[str] = mapped_column(String(30), nullable=False)  # review/answer/game
+    source: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)  # vocab/game/recommend
+    correct: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
+    score: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    question_id: Mapped[Optional[int]] = mapped_column(
+        Integer, ForeignKey("questions.id", ondelete="SET NULL"), nullable=True
+    )
+    evidence: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # 题目/游戏证据快照 JSON
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, server_default=func.now(), nullable=False
+    )
+
+
+class QuestionAttemptEvent(Base):
+    """题目作答事件表（不可变事件流，用于回放/审计/统计）.
+
+    P1-03: 配合 attempt_id 幂等键防止重复写入，DB 层唯一约束兜底。
+    每次作答行为写入一条不可变事件记录。
+    """
+
+    __tablename__ = "question_attempt_events"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    attempt_id: Mapped[str] = mapped_column(String(128), nullable=False, index=True)
+    user_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    question_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("questions.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    user_answer: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    correct: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    duration_ms: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    knowledge_points: Mapped[Optional[list[Any]]] = mapped_column(JSONB, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, server_default=func.now(), nullable=False
+    )
+
+
+class UserQuestionAttempt(Base):
+    """用户答题记录."""
+
+    __tablename__ = "user_question_attempts"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    question_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("questions.id", ondelete="CASCADE"), nullable=False
+    )
+    user_answer: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    correct: Mapped[bool] = mapped_column(nullable=False, default=False)
+    duration_ms: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), nullable=False)
+
+
+class WrongQuestion(Base):
+    """错题本."""
+
+    __tablename__ = "wrong_questions"
+
+    user_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    question_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("questions.id", ondelete="CASCADE"), primary_key=True
+    )
+    wrong_count: Mapped[int] = mapped_column(Integer, server_default="1", nullable=False)
+    last_wrong_at: Mapped[datetime] = mapped_column(
+        DateTime, server_default=func.now(), nullable=False
+    )
+    next_review_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    # SRS 闭环字段（迁移 005）
+    review_count: Mapped[int] = mapped_column(Integer, server_default="0", nullable=False)
+    review_stage: Mapped[int] = mapped_column(Integer, server_default="0", nullable=False)
+    graduated_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+
+
+class AIConversation(Base):
+    """AI 对话记录."""
+
+    __tablename__ = "ai_conversations"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    messages: Mapped[list[Any]] = mapped_column(JSONB, nullable=False)
+    cited_kp: Mapped[Optional[list[Any]]] = mapped_column(JSONB, nullable=True)
+    token_cost: Mapped[int] = mapped_column(Integer, server_default="0", nullable=False)
+    provider: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    model: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), nullable=False)
+
+
+class GameSession(Base):
+    """游戏会话记录."""
+
+    __tablename__ = "game_sessions"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    game_id: Mapped[str] = mapped_column(String(100), nullable=False)
+    score: Mapped[int] = mapped_column(Integer, server_default="0", nullable=False)
+    xp_gained: Mapped[int] = mapped_column(Integer, server_default="0", nullable=False)
+    coins_gained: Mapped[int] = mapped_column(Integer, server_default="0", nullable=False)
+    accuracy: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    duration: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    started_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    finished_at: Mapped[datetime] = mapped_column(
+        DateTime, server_default=func.now(), nullable=False
+    )
+    # P0-02 (R3): 服务端生成的 nonce 与过期时间，支持逐题作答会话
+    server_nonce: Mapped[Optional[str]] = mapped_column(String(128), nullable=True, index=True)
+    expires_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    status: Mapped[str] = mapped_column(String(20), server_default="active", nullable=False)
+
+
+class GameQuestion(Base):
+    """游戏题目（session 绑定的题目集）— P0-02 (R3).
+
+    每个 game session 在 start 时由服务端生成一组题目并写入此表。
+    correct_answer 仅服务端持有，客户端不可见。
+    """
+
+    __tablename__ = "game_questions"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    session_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("game_sessions.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    question_id: Mapped[str] = mapped_column(String(200), nullable=False)
+    sequence: Mapped[int] = mapped_column(Integer, nullable=False)
+    correct_answer: Mapped[str] = mapped_column(Text, nullable=False)
+    user_answer: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    is_correct: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
+    answered_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+
+    __table_args__ = (
+        UniqueConstraint("session_id", "sequence", name="uq_game_questions_session_seq"),
+    )
+
+
+class GameAnswerEvent(Base):
+    """游戏答题事件（不可变事件流）— P0-02 (R3).
+
+    每次提交单题答案时写入一条不可变事件记录，配合 idempotency_key 防止重复写入。
+    """
+
+    __tablename__ = "game_answer_events"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    session_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("game_sessions.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    user_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    question_id: Mapped[str] = mapped_column(String(200), nullable=False)
+    sequence: Mapped[int] = mapped_column(Integer, nullable=False)
+    user_answer: Mapped[str] = mapped_column(Text, nullable=False)
+    is_correct: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    idempotency_key: Mapped[str] = mapped_column(String(128), nullable=False, index=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, server_default=func.now(), nullable=False
+    )
+
+    __table_args__ = (
+        UniqueConstraint("session_id", "idempotency_key", name="uq_game_answer_idempotency"),
+        UniqueConstraint("user_id", "idempotency_key", name="uq_game_answer_user_idempotency"),
+        # P0-01 (R7): 防止同一 session 同一题目重复答题
+        UniqueConstraint("session_id", "question_id", name="uq_game_answer_session_question"),
+    )
+
+
+class GameRewardsLedger(Base):
+    """游戏奖励账本（不可变）— P0-02 (R3).
+
+    每个 game session 在 finish 时由服务端一次性结算，写入一条不可变奖励记录。
+    uq_game_rewards_session 约束保证一个 session 仅结算一次。
+    """
+
+    __tablename__ = "game_rewards_ledger"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    session_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("game_sessions.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    user_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    game_id: Mapped[str] = mapped_column(String(100), nullable=False)
+    xp_gained: Mapped[int] = mapped_column(Integer, server_default="0", nullable=False)
+    coins_gained: Mapped[int] = mapped_column(Integer, server_default="0", nullable=False)
+    score: Mapped[int] = mapped_column(Integer, server_default="0", nullable=False)
+    accuracy: Mapped[float] = mapped_column(Float, server_default="0.0", nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, server_default=func.now(), nullable=False
+    )
+
+    __table_args__ = (
+        UniqueConstraint("session_id", name="uq_game_rewards_session"),
+    )
+
+
+class UserGameProfile(Base):
+    """用户游戏档案."""
+
+    __tablename__ = "user_game_profile"
+
+    user_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    level: Mapped[int] = mapped_column(Integer, server_default="1", nullable=False)
+    total_xp: Mapped[int] = mapped_column(Integer, server_default="0", nullable=False)
+    coins: Mapped[int] = mapped_column(Integer, server_default="0", nullable=False)
+    streak_days: Mapped[int] = mapped_column(Integer, server_default="0", nullable=False)
+    badges: Mapped[Optional[list[Any]]] = mapped_column(JSONB, nullable=True)
+    rank: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, server_default=func.now(), onupdate=func.now(), nullable=False
+    )
+
+
+class WordGameSession(Base):
+    """单词游戏活跃会话状态（跨 worker 可恢复）.
+
+    由 ai-engine asyncpg 读写；ORM 定义在此供 Alembic 迁移创建表。
+    """
+
+    __tablename__ = "word_game_sessions"
+
+    session_id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    user_id: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
+    game_type: Mapped[str] = mapped_column(String(50), nullable=False)
+    difficulty: Mapped[str] = mapped_column(String(20), nullable=False)
+    words: Mapped[list[Any]] = mapped_column(JSONB, nullable=False)
+    current_index: Mapped[int] = mapped_column(Integer, server_default="0", nullable=False)
+    score: Mapped[int] = mapped_column(Integer, server_default="0", nullable=False)
+    correct_count: Mapped[int] = mapped_column(Integer, server_default="0", nullable=False)
+    wrong_count: Mapped[int] = mapped_column(Integer, server_default="0", nullable=False)
+    time_limit_seconds: Mapped[int] = mapped_column(Integer, server_default="60", nullable=False)
+    started_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, server_default="true", nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, server_default=func.now(), onupdate=func.now(), nullable=False
+    )

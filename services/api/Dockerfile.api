@@ -41,6 +41,9 @@ COPY services/api/startup_check.py ./startup_check.py
 # 复制 alembic 迁移文件（如存在）
 COPY services/api/alembic ./alembic
 
+# 复制数据导入/初始化脚本（组B 约定位置 services/api/scripts，容器内 /app/scripts）
+COPY services/api/scripts /app/scripts
+
 # 创建非 root 用户并设置权限
 RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
 USER appuser
@@ -51,5 +54,7 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 
 EXPOSE 8000
 
-# 启动: 先执行安全校验，通过后启动服务
-CMD ["sh", "-c", "python startup_check.py && uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 4"]
+# 启动: 先执行安全校验 → 执行数据库迁移 → 启动服务
+# 6.1③ 修复：显式执行 alembic upgrade head，确保 word_game_sessions 等表存在，
+#           避免 ai-engine 的 /submit 因找不到 session 表而 500。
+CMD ["sh", "-c", "python startup_check.py && alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 4"]

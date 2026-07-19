@@ -2,10 +2,11 @@
 Provider 抽象基类
 
 定义所有 AI 供应商需要实现的接口规范。
+所有方法均为 async，适配 FastAPI 异步事件循环。
 """
 
 from abc import ABC, abstractmethod
-from typing import Any, Generator
+from typing import Any, AsyncGenerator
 
 
 class BaseProvider(ABC):
@@ -25,14 +26,14 @@ class BaseChatProvider(BaseProvider):
     """聊天/LLM 供应商抽象基类"""
 
     @abstractmethod
-    def chat_completion(
+    async def chat_completion(
         self,
         messages: list[dict[str, str]],
         max_tokens: int = 2048,
         temperature: float = 0.7,
         **kwargs: Any,
     ) -> str:
-        """同步聊天补全
+        """异步聊天补全
 
         Args:
             messages: 消息列表 [{"role": "user/system/assistant", "content": "..."}]
@@ -45,14 +46,14 @@ class BaseChatProvider(BaseProvider):
         """
         ...
 
-    def chat_completion_stream(
+    async def chat_completion_stream(
         self,
         messages: list[dict[str, str]],
         max_tokens: int = 2048,
         temperature: float = 0.7,
         **kwargs: Any,
-    ) -> Generator[str, None, None]:
-        """流式聊天补全
+    ) -> AsyncGenerator[str, None]:
+        """异步流式聊天补全
 
         Args:
             messages: 消息列表
@@ -63,8 +64,8 @@ class BaseChatProvider(BaseProvider):
         Yields:
             str: 增量文本片段
         """
-        # 默认实现：调用同步方法后一次性返回
-        result = self.chat_completion(messages, max_tokens, temperature, **kwargs)
+        # 默认实现：调用异步方法后一次性返回
+        result = await self.chat_completion(messages, max_tokens, temperature, **kwargs)
         yield result
 
 
@@ -72,7 +73,7 @@ class BaseEmbeddingProvider(BaseProvider):
     """嵌入向量供应商抽象基类"""
 
     @abstractmethod
-    def generate_embedding(self, text: str) -> list[float]:
+    async def generate_embedding(self, text: str) -> list[float]:
         """生成单个文本的嵌入向量
 
         Args:
@@ -83,8 +84,8 @@ class BaseEmbeddingProvider(BaseProvider):
         """
         ...
 
-    def generate_embeddings(self, texts: list[str]) -> list[list[float]]:
-        """批量生成嵌入向量
+    async def generate_embeddings(self, texts: list[str]) -> list[list[float]]:
+        """异步批量生成嵌入向量
 
         Args:
             texts: 输入文本列表
@@ -92,14 +93,14 @@ class BaseEmbeddingProvider(BaseProvider):
         Returns:
             list[list[float]]: 嵌入向量列表
         """
-        return [self.generate_embedding(t) for t in texts]
+        return [await self.generate_embedding(t) for t in texts]
 
 
 class BaseTTSProvider(BaseProvider):
     """文本转语音供应商抽象基类"""
 
     @abstractmethod
-    def text_to_speech(
+    async def text_to_speech(
         self,
         text: str,
         voice: str = "default",
@@ -123,7 +124,7 @@ class BaseSTTProvider(BaseProvider):
     """语音转文本供应商抽象基类"""
 
     @abstractmethod
-    def speech_to_text(
+    async def speech_to_text(
         self,
         audio_data: bytes,
         language: str = "zh",
@@ -146,7 +147,7 @@ class BaseImageProvider(BaseProvider):
     """图像生成供应商抽象基类"""
 
     @abstractmethod
-    def generate_image(
+    async def generate_image(
         self,
         prompt: str,
         size: str = "1024x1024",
@@ -171,7 +172,7 @@ class BaseModerationProvider(BaseProvider):
     """内容审核供应商抽象基类"""
 
     @abstractmethod
-    def moderate(
+    async def moderate(
         self,
         text: str,
         **kwargs: Any,

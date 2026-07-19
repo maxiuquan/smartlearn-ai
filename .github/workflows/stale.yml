@@ -1,0 +1,57 @@
+name: Mark stale issues and PRs
+
+on:
+  schedule:
+    # 每天 UTC 03:00（北京时间 11:00）执行
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  pull-requests: write
+  contents: read
+
+jobs:
+  stale:
+    name: Close stale issues & PRs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Stale
+        uses: actions/stale@v9
+        with:
+          # ── Issues ──
+          # 30 天无活动后标记 stale
+          days-before-issue-stale: 30
+          # 标记后再 14 天无活动则关闭
+          days-before-issue-close: 14
+          stale-issue-label: "stale"
+          exempt-issue-labels: "pinned,security,enhancement,bug,help wanted,roadmap"
+          stale-issue-message: |
+            👋 这个 issue 已经 30 天没有任何活动了，标记为 `stale`。
+            若仍然相关，请添加新评论或移除 `stale` 标签以保持活跃；
+            否则将在 14 天后自动关闭。
+
+            如需保留，请添加 `pinned` 标签或更新进展。
+          close-issue-message: |
+            🔒 这个 issue 因长期无活动被自动关闭。
+            若问题仍然存在，请重新打开或创建新 issue 并附上更多上下文。
+
+          # ── Pull Requests ──
+          days-before-pr-stale: 30
+          days-before-pr-close: 14
+          stale-pr-label: "stale"
+          exempt-pr-labels: "pinned,security,wip,dependencies"
+          stale-pr-message: |
+            👋 这个 PR 已经 30 天没有任何活动了，标记为 `stale`。
+            若仍在推进，请推送新 commit 或添加评论；否则将在 14 天后自动关闭。
+          close-pr-message: |
+            🔒 这个 PR 因长期无活动被自动关闭。
+            若需继续，请重新打开或基于最新分支创建新 PR。
+
+          # ── 操作策略 ──
+          # 每次最多操作 30 个 issue / 30 个 PR，避免触发限流
+          operations-per-run: 30
+          # 不自动删除 stale 标签（避免误操作）
+          delete-branch: false
+          # 启用统计
+          enable-statistics: true
