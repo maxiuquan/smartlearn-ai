@@ -1,4 +1,4 @@
-import client from './client';
+import client, { getAccessToken } from './client';
 
 /** 对话消息 */
 export interface ChatMessage {
@@ -58,7 +58,9 @@ export const aiApi = {
     // 直接使用 fetch 消费 SSE 流（axios 不原生支持 ReadableStream）
     const baseURL = (client.defaults?.baseURL || '');
     const url = baseURL.endsWith('/') ? `${baseURL}chat/stream` : `${baseURL}/chat/stream`;
-    const token = localStorage.getItem('smartlearn_token') || '';
+    // P1 修复 (2026-07-20): 改用内存 token (P0-01 R4 改造),
+    // 原代码 localStorage.getItem('smartlearn_token') 已废弃,导致 401 错误
+    const token = getAccessToken() || '';
 
     const res = await fetch(url, {
       method: 'POST',

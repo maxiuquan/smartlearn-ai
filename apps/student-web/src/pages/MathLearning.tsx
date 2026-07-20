@@ -9,7 +9,11 @@ import {
   type AttemptResult,
 } from '../api/questions';
 
-/** 数学章节 */
+/**
+ * 数学章节。
+ * P1 修复 (2026-07-20): id 传给后端的 chapter 参数,后端按 knowledge_points
+ * 数组元素的 kp_id 前缀匹配（如"一元函数微分学"→匹配 kp-2-*）。
+ */
 const MATH_CHAPTERS = [
   { id: '函数、极限、连续', label: '函数、极限、连续', emoji: '📈' },
   { id: '一元函数微分学', label: '一元函数微分学', emoji: '📉' },
@@ -64,9 +68,11 @@ export default function MathLearning() {
       try {
         setLoading(true);
         setError('');
+        // P1 修复 (2026-07-20): 改用 chapter 参数（按 knowledge_points 前缀匹配）
+        // 原 kp_id 参数对章节名无效，因为 knowledge_points 是 ["kp-2-1-1", ...] ID 数组
         const data = await questionsApi.getQuestions({
           subject: 'math',
-          kp_id: chap || undefined,
+          chapter: chap || undefined,
           difficulty: diff,
           page: pageNum,
         });

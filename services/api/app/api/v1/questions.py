@@ -32,6 +32,7 @@ router = APIRouter()
 async def list_questions(
     subject: Optional[str] = Query(None, description="学科筛选"),
     kp_id: Optional[str] = Query(None, description="知识点 slug 筛选"),
+    chapter: Optional[str] = Query(None, description="章节筛选（数学学科专用，按 knowledge_points 前缀匹配）"),
     difficulty: Optional[str] = Query(None, description="难度筛选（1-5）"),
     type: Optional[str] = Query(None, description="题型筛选"),
     category: Optional[str] = Query(None, description="分类筛选（CET4/CET6/考研等，按 tags 包含匹配）"),
@@ -44,6 +45,8 @@ async def list_questions(
     - 列表不返回答案和解析
     - 空字符串参数视为 None（前端未选筛选器时传空串）
     - category 按 tags 数组包含匹配（如 category=CET4 匹配 tags 含 "CET4" 的题）
+    - P1 修复 (2026-07-20): 新增 chapter 参数，按 knowledge_points 元素前缀匹配
+      （data/questions/math-examples.json 的 kp_id 规律：kp-{章节序号}-x-x）
     """
     conditions = []
     if subject:
@@ -53,6 +56,29 @@ async def list_questions(
     # P0-4 修复: kp_id 筛选加入 conditions（knowledge_points 是 JSONB 数组，用 contains 查询）
     if kp_id:
         conditions.append(Question.knowledge_points.contains([kp_id]))
+    # P1 修复 (2026-07-20): chapter 筛选 — 把章节名映射到 kp_id 前缀,
+    # 用 PostgreSQL jsonb_array_elements_text 展开数组后 LIKE 前缀匹配
+    if chapter:
+        _CHAPTER_TO_KP_PREFIX = {
+            "函数、极限、连续": "kp-1-",
+            "一元函数微分学": "kp-2-",
+            "一元函数积分学": "kp-3-",
+            "多元函数微积分学": "kp-4-",
+            "无穷级数": "kp-5-",
+            "常微分方程": "kp-6-",
+            "线性代数": "kp-7-",
+            "概率论与数理统计": "kp-8-",
+        }
+        prefix = _CHAPTER_TO_KP_PREFIX.get(chapter)
+        if prefix:
+            # EXISTS (SELECT 1 FROM jsonb_array_elements_text(knowledge_points) AS kp WHERE kp LIKE 'kp-N-%')
+            kp_elem = func.jsonb_array_elements_text(Question.knowledge_points).table_valued("kp")
+            from sqlalchemy import exists as sa_exists
+            conditions.append(
+                sa_exists(
+                    select(1).select_from(kp_elem).where(kp_elem.c.kp.like(f"{prefix}%"))
+                )
+            )
     # category 按 knowledge_points 包含匹配（CET4→vocab-cet4, CET6→vocab-cet6, 考研→vocab-kaoyan）
     if category:
         _category_kp_map = {

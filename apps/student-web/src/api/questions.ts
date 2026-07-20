@@ -58,6 +58,8 @@ export interface GetQuestionsParams {
   difficulty?: string;
   category?: string;
   kp_id?: string;
+  /** P1 修复 (2026-07-20): 章节筛选（数学学科专用，传章节名如"一元函数微分学"） */
+  chapter?: string;
   page?: number;
 }
 
@@ -78,6 +80,7 @@ export const questionsApi = {
         difficulty: params.difficulty,
         category: params.category,
         kp_id: params.kp_id,
+        chapter: params.chapter,
         page: params.page || 1,
       },
     });
