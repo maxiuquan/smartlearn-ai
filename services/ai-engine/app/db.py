@@ -79,9 +79,13 @@ async def get_pool() -> asyncpg.Pool:
     dsn, requires_ssl = _sanitize_dsn(dsn)
 
     logger.info("Creating asyncpg connection pool (ssl=%s) …", requires_ssl)
+    # P0-3 修复: 与 api 服务一致调小连接池,避免云 PG TooManyConnectionsError
+    # api 服务 (SQLAlchemy): pool_size=5 + max_overflow=5 = 10
+    # ai-engine (asyncpg): min=1 + max=5 = 5
+    # 合计 15 连接,留余量给超级用户/管理连接
     pool_kwargs: dict = {
-        "min_size": 2,
-        "max_size": 10,
+        "min_size": 1,
+        "max_size": 5,
         "command_timeout": 30,
     }
     if requires_ssl:

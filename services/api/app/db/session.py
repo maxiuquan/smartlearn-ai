@@ -22,8 +22,12 @@ if settings.database_requires_ssl:
 engine = create_async_engine(
     settings.database_url,
     echo=settings.DEBUG,
-    pool_size=20,
-    max_overflow=10,
+    # P0-3 修复: 云 PG (Aiven/CockroachDB) 连接数受限,原 pool_size=20+max_overflow=10=30
+    # 会触发 TooManyConnectionsError,导致 8 款游戏启动会话失败。
+    # 调小到 pool_size=5 + max_overflow=5 = 10 连接,符合云 DB 限额。
+    pool_size=5,
+    max_overflow=5,
+    pool_timeout=30,
     pool_pre_ping=True,
     connect_args=async_connect_args,
 )
