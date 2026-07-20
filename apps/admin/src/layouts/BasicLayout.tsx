@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { Outlet, useNavigate, useLocation, Link } from 'react-router-dom';
 import { ProLayout, PageContainer } from '@ant-design/pro-layout';
 import {
   DashboardOutlined,
@@ -150,7 +150,9 @@ const BasicLayout: React.FC = () => {
       menu={{ locale: false }}
       route={{ path: '/', routes: menuData }}
       menuItemRender={(item, dom) => (
-        <div onClick={() => item.path && handleMenuClick(item.path)}>{dom}</div>
+        // P0 修复: ProLayout 7.22.3 中 <div onClick> 包裹不触发导航,
+        // 改用 Link 组件确保可靠跳转 (React Router 拦截点击并 navigate)
+        item.path ? <Link to={item.path} style={{ display: 'block' }}>{dom}</Link> : <div>{dom}</div>
       )}
       actionsRender={() => [
         <Button

@@ -372,15 +372,23 @@ def _enrich_for_interaction(
 ) -> list[dict[str, Any]]:
     """P0-03 (R8): 根据交互类型为题目添加结构化字段并转换 correct_answer 格式。
 
+    P0 修复 (2026-07-20): 统一在入口处设置 question.type = interaction_type,
+    确保前端 QuestionCard 能依据 type 正确渲染对应游戏组件。
     - tap_match: 从词汇题生成配对题，correct_answer 变为 JSON {"pairs": [[l,r]...]}
     - drag_sort: 生成排序题，correct_answer 变为 JSON {"ordered": [...]}
     - word_bank: 生成词库填空题，correct_answer 变为 JSON {"blanks": {...}}
-    - 其他: 保持原样
+    - listen_select/multiple_choice: 生成 options 选项
+    - spelling/fill_blank: 仅设置 type,前端用 prompt + 输入框
     """
     import json as _json
 
     if not questions:
         return questions
+
+    # P0 修复: 统一设置 type 为交互类型,前端 QuestionCard 依据 type 渲染对应组件
+    # 覆盖原 type (vocabulary_meaning/calculation/fallback 等),这些值对前端无用
+    for q in questions:
+        q["type"] = interaction_type
 
     if interaction_type == "tap_match":
         # 每题作为一个配对题：prompt(单词) ↔ meaning(释义)
@@ -469,7 +477,31 @@ def _enrich_for_interaction(
             })
         return enriched
 
-    # 其他交互类型保持原样
+    elif interaction_type == "multiple_choice":
+        # P0 修复: 选择题需要 options 字段,前端 QuestionCard 依据 options 渲染选项
+        # 原词汇题只有 prompt+meaning,没有 options,会导致选择题区域空白
+        enriched = []
+        for q in questions:
+            prompt = q.get("prompt", "")
+            correct = q.get("meaning") or q.get("correct_answer", "")
+            distractors = [
+                other.get("meaning") or other.get("correct_answer", "")
+                for other in questions
+                if other.get("prompt") != prompt
+            ][:3]
+            # 干扰项不足时用占位(避免 options 只有1项)
+            while len(distractors) < 3:
+                distractors.append(f"(无)")
+            options = [correct] + distractors[:3]
+            random.shuffle(options)
+            enriched.append({
+                **q,
+                "options": options,
+                "correct_answer": correct,
+            })
+        return enriched
+
+    # spelling / fill_blank: 仅设置 type 即可,前端用 prompt + 输入框
     return questions
 
 
