@@ -42,9 +42,14 @@ class TokenResponse(BaseModel):
 
 
 class RefreshRequest(BaseModel):
-    """刷新 Token 请求"""
+    """刷新 Token 请求
 
-    refresh_token: str
+    P1 修复 (2026-07-20): refresh_token 改为 Optional,
+    因为前端通过 HttpOnly Cookie 自动携带 refresh_token, body 传 {} 即可。
+    原必填字段导致 Pydantic 解析失败返回 422, 使页面刷新后无法保持登录态。
+    """
+
+    refresh_token: Optional[str] = None
 
 
 class WechatLoginRequest(BaseModel):
