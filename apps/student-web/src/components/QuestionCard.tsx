@@ -1,5 +1,7 @@
 import { useState, useEffect, Fragment } from 'react';
 import type { GameQuestion } from '../hooks/useGameSession';
+import MemePopup, { type Meme } from './MemePopup';
+import { getRandomMeme, CORRECT_MEMES, WRONG_MEMES, COMBO_MEMES } from '../utils/memes';
 
 interface QuestionCardProps {
   question: GameQuestion;
@@ -8,6 +10,7 @@ interface QuestionCardProps {
   onAnswer: (answer?: string, structuredAnswer?: Record<string, unknown>) => void;
   feedback: { isCorrect: boolean; message: string } | null;
   submitting: boolean;
+  combo?: number;
 }
 
 // 题型标签映射
@@ -535,7 +538,22 @@ export default function QuestionCard({
   onAnswer,
   feedback,
   submitting,
+  combo,
 }: QuestionCardProps) {
+  // P3-D: Meme 表情包反馈层
+  const [meme, setMeme] = useState<Meme | null>(null);
+  useEffect(() => {
+    if (!feedback) {
+      setMeme(null);
+      return;
+    }
+    if (feedback.isCorrect && combo && combo >= 3) {
+      setMeme(getRandomMeme(COMBO_MEMES));
+    } else {
+      setMeme(getRandomMeme(feedback.isCorrect ? CORRECT_MEMES : WRONG_MEMES));
+    }
+  }, [feedback?.isCorrect, combo]);
+
   const isMultipleChoice = question.type === 'multiple_choice';
   const isSpelling = question.type === 'spelling';
   const isFillBlank = question.type === 'fill_blank';
@@ -708,6 +726,9 @@ export default function QuestionCard({
           submitting={submitting}
         />
       )}
+
+      {/* P3-D: Meme 表情包反馈 */}
+      <MemePopup meme={meme} onDismiss={() => setMeme(null)} />
     </div>
   );
 }

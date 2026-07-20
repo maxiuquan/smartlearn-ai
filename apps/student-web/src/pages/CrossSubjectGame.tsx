@@ -1,9 +1,12 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useGameSession } from '../hooks/useGameSession';
+import { useStreak } from '../hooks/useStreak';
+import { useDailyQuests } from '../hooks/useDailyQuests';
 import QuestionCard from '../components/QuestionCard';
 import ScoreBoard from '../components/ScoreBoard';
 import ProgressBar from '../components/ProgressBar';
+import GameToolbar from '../components/GameToolbar';
 
 interface Feedback {
   isCorrect: boolean;
@@ -13,6 +16,9 @@ interface Feedback {
 export default function CrossSubjectGame() {
   const { gameId } = useParams<{ gameId: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  // P1-B: 从 URL 读取 difficulty 参数
+  const difficulty = searchParams.get('difficulty') || undefined;
 
   const {
     sessionId,
@@ -26,10 +32,19 @@ export default function CrossSubjectGame() {
     correctCount,
     wrongCount,
     lastResult,
+    // P1-A: 新增 score / combo / maxCombo
+    score,
+    combo,
+    maxCombo,
     startSession,
     submitCurrentAnswer,
     finishSession,
   } = useGameSession();
+
+  // P3-A/B: 全局连胜 + 每日任务
+  const { recordDailyActivity } = useStreak();
+  const { recordGamePlayed } = useDailyQuests();
+  const questsTriggeredRef = useRef(false);
 
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -39,18 +54,25 @@ export default function CrossSubjectGame() {
   // 开始游戏
   useEffect(() => {
     if (!gameId) return;
-    startSession(gameId);
-  }, [gameId, startSession]);
+    // P1-B: 传递 difficulty 参数
+    startSession(gameId, difficulty);
+  }, [gameId, startSession, difficulty]);
 
   // 游戏结束后跳转结果页
   useEffect(() => {
     if (isGameOver && sessionId && gameId && !navigatedRef.current) {
       navigatedRef.current = true;
+      // P3-A/B: 触发连胜 + 任务进度(只触发一次)
+      if (!questsTriggeredRef.current) {
+        questsTriggeredRef.current = true;
+        recordDailyActivity();
+        recordGamePlayed();
+      }
       finishSession().then(() => {
         navigate(`/result/${sessionId}?gameId=${gameId}`, { replace: true });
       });
     }
-  }, [isGameOver, sessionId, gameId, navigate, finishSession]);
+  }, [isGameOver, sessionId, gameId, navigate, finishSession, recordDailyActivity, recordGamePlayed]);
 
   // 显示反馈后清空
   useEffect(() => {
@@ -78,6 +100,25 @@ export default function CrossSubjectGame() {
     },
     [submitting, submitCurrentAnswer]
   );
+
+  // P1-C: 提示道具
+  const [hintText, setHintText] = useState<string | null>(null);
+  const handleHint = useCallback(() => {
+    if (!currentQuestion) return;
+    if (currentQuestion.options && currentQuestion.options.length > 0) {
+      setHintText(`💡 提示: 4 个选项中,先排除明显错误的 2 个`);
+    } else {
+      setHintText(`💡 提示: 仔细阅读题目,关键词决定答案`);
+    }
+    setTimeout(() => setHintText(null), 5000);
+  }, [currentQuestion]);
+
+  const handleSkip = useCallback(() => {
+    if (submitting) return;
+    setHintText('⏭️ 已跳过本题');
+    setTimeout(() => setHintText(null), 1500);
+    handleAnswer('__SKIP__');
+  }, [submitting, handleAnswer]);
 
   if (loading) {
     return (
@@ -114,10 +155,11 @@ export default function CrossSubjectGame() {
 
       {/* 评分面板 */}
       <ScoreBoard
-        score={0}
+        score={score}
         correctCount={correctCount}
         wrongCount={wrongCount}
-        combo={0}
+        combo={combo}
+        maxCombo={maxCombo}
         timeLeft={timeLeft}
       />
 
@@ -138,6 +180,21 @@ export default function CrossSubjectGame() {
         onAnswer={handleAnswer}
         feedback={feedback}
         submitting={submitting}
+        combo={combo}
+      />
+
+      {/* P1-C: 提示气泡 */}
+      {hintText && (
+        <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-700 animate-pulse">
+          {hintText}
+        </div>
+      )}
+
+      {/* P1-C: 道具工具栏 */}
+      <GameToolbar
+        disabled={submitting}
+        onHint={handleHint}
+        onSkip={handleSkip}
       />
     </div>
   );

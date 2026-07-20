@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useStreak } from '../hooks/useStreak';
+import StreakBanner from './StreakBanner';
 
 /** 导航项配置 */
 const NAV_ITEMS = [
@@ -11,6 +13,7 @@ const NAV_ITEMS = [
   { path: '/exam', label: '真题模拟', emoji: '📝' },
   { path: '/ai-tutor', label: 'AI 辅导', emoji: '🤖' },
   { path: '/games', label: '游戏大厅', emoji: '🎮' },
+  { path: '/leaderboard', label: '排行榜', emoji: '🏆' },
   { path: '/profile', label: '个人中心', emoji: '👤' },
 ];
 
@@ -24,6 +27,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  // P3-A: 全局 Streak 显示
+  const { streak } = useStreak();
 
   function handleLogout() {
     logout();
@@ -32,6 +37,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      {/* P3-A: 顶部连胜火焰条 */}
+      <StreakBanner
+        current={streak.current}
+        longest={streak.longest}
+        freezes={streak.freezes}
+      />
       {/* 顶部导航栏 */}
       <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-4">

@@ -2,6 +2,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { vocabApi, type VocabProgress } from '../api/vocab';
 import { statisticsApi, type OverviewStats } from '../api/statistics';
+import { useStreak } from '../hooks/useStreak';
+import { useDailyQuests } from '../hooks/useDailyQuests';
+import DailyQuestsPanel from '../components/DailyQuestsPanel';
 
 /** 快捷入口卡片配置 */
 const QUICK_LINKS = [
@@ -10,6 +13,7 @@ const QUICK_LINKS = [
   { path: '/exam', label: '真题模拟', emoji: '📝', desc: '历年真题', color: 'from-orange-400 to-orange-600' },
   { path: '/ai-tutor', label: 'AI 辅导', emoji: '🤖', desc: '智能问答', color: 'from-purple-400 to-purple-600' },
   { path: '/games', label: '游戏大厅', emoji: '🎮', desc: '趣味学习', color: 'from-pink-400 to-pink-600' },
+  { path: '/leaderboard', label: '排行榜', emoji: '🏆', desc: '好友 PK', color: 'from-yellow-400 to-orange-500' },
   { path: '/profile', label: '个人中心', emoji: '👤', desc: '学习统计', color: 'from-teal-400 to-teal-600' },
 ];
 
@@ -23,6 +27,18 @@ export default function Dashboard() {
   const [overview, setOverview] = useState<OverviewStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  // P3-A/B: 全局连胜 + 每日任务
+  const { streak } = useStreak();
+  const { quests, claimReward } = useDailyQuests();
+
+  const handleClaim = useCallback((questId: string) => {
+    const reward = claimReward(questId);
+    if (reward > 0) {
+      // 简易提示:实际金币入账由后端处理(此处仅做前端反馈)
+      // eslint-disable-next-line no-alert
+      alert(`🎉 领取了 ${reward} 金币奖励！`);
+    }
+  }, [claimReward]);
 
   const loadData = useCallback(async () => {
     try {
@@ -67,6 +83,11 @@ export default function Dashboard() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-800 mb-2">📊 学习仪表盘</h1>
         <p className="text-gray-500">今日学习概览，继续保持！</p>
+        {streak.current > 0 && (
+          <p className="text-sm text-orange-500 mt-1">
+            🔥 当前 {streak.current} 天连胜 · 最长 {streak.longest} 天
+          </p>
+        )}
       </div>
 
       {error && (
@@ -80,6 +101,9 @@ export default function Dashboard() {
           </button>
         </div>
       )}
+
+      {/* P3-B: 每日任务面板 */}
+      <DailyQuestsPanel quests={quests} onClaim={handleClaim} />
 
       {/* 学习进度卡片 */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">

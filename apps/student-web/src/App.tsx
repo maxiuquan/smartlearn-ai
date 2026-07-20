@@ -18,6 +18,7 @@ import QuestionPractice from './pages/QuestionPractice';
 import PastExam from './pages/PastExam';
 import AITutor from './pages/AITutor';
 import Profile from './pages/Profile';
+import Leaderboard from './pages/Leaderboard';
 
 function App() {
   return (
@@ -144,6 +145,16 @@ function App() {
           <ProtectedRoute>
             <Layout>
               <GameResult />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/leaderboard"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <Leaderboard />
             </Layout>
           </ProtectedRoute>
         }
