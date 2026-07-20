@@ -58,6 +58,8 @@ async def list_questions(
         conditions.append(Question.knowledge_points.contains([kp_id]))
     # P1 修复 (2026-07-20): chapter 筛选 — 把章节名映射到 kp_id 前缀,
     # 用 PostgreSQL jsonb_array_elements_text 展开数组后 LIKE 前缀匹配
+    # 修复 (2026-07-20 v2): SQLAlchemy table_valued("kp") 没正确生成 AS anon_1(kp)
+    # 列别名导致 "column anon_1.kp does not exist",改用 raw SQL text() 构建条件
     if chapter:
         _CHAPTER_TO_KP_PREFIX = {
             "函数、极限、连续": "kp-1-",
@@ -71,13 +73,14 @@ async def list_questions(
         }
         prefix = _CHAPTER_TO_KP_PREFIX.get(chapter)
         if prefix:
-            # EXISTS (SELECT 1 FROM jsonb_array_elements_text(knowledge_points) AS kp WHERE kp LIKE 'kp-N-%')
-            kp_elem = func.jsonb_array_elements_text(Question.knowledge_points).table_valued("kp")
-            from sqlalchemy import exists as sa_exists
+            # EXISTS (SELECT 1 FROM jsonb_array_elements_text(knowledge_points) AS kp WHERE kp.value LIKE 'kp-N-%')
+            # 注意: jsonb_array_elements_text 返回的列默认名为 "value"
+            from sqlalchemy import literal_column, text as sa_text
             conditions.append(
-                sa_exists(
-                    select(1).select_from(kp_elem).where(kp_elem.c.kp.like(f"{prefix}%"))
-                )
+                sa_text(
+                    "EXISTS (SELECT 1 FROM jsonb_array_elements_text(questions.knowledge_points) AS kp "
+                    "WHERE kp.value LIKE :chapter_prefix)"
+                ).bindparams(chapter_prefix=f"{prefix}%")
             )
     # category 按 knowledge_points 包含匹配（CET4→vocab-cet4, CET6→vocab-cet6, 考研→vocab-kaoyan）
     if category:
