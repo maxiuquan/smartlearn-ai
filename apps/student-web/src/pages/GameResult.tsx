@@ -151,6 +151,11 @@ export default function GameResult() {
             )}
           </div>
         )}
+        {bestScore === 0 && summary.score === 0 && (
+          <div className="mb-4 p-3 rounded-lg text-center text-sm font-medium bg-gray-50 text-gray-600">
+            📊 个人最佳:0 分（继续努力创造纪录！）
+          </div>
+        )}
 
         {/* P3-C: Podium 领奖台动效 */}
         <PodiumCeremony accuracy={summary.accuracy} maxCombo={maxCombo} />
