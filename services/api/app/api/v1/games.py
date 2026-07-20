@@ -243,6 +243,99 @@ def _normalize_answer(value: str) -> str:
     return (value or "").strip().lower()
 
 
+# ── P1-3 改进 (2026-07-21): SymPy 数学答案等价判断 ──
+# 项目内存约束:
+#   - SymPy 1.13.3 + implicit_multiplication_application 已启用
+#   - LaTeX wrapping 必须剥离,^ 转换为 **
+#   - 方程等价判定: 差值为零即等价 (2x+y-z=1 ≡ 2x+y-z-1=0)
+
+_MATH_SYMBOLS_CACHE: dict = {}
+
+
+def _strip_latex(expr: str) -> str:
+    """剥离 LaTeX 包装 (如 $...$ / \(...\) / \[...\]) 并将 ^ 转为 **。"""
+    s = expr.strip()
+    # 剥离 LaTeX 包装
+    if s.startswith("\\(") and s.endswith("\\)"):
+        s = s[2:-2]
+    elif s.startswith("\\[") and s.endswith("\\]"):
+        s = s[2:-2]
+    elif s.startswith("$") and s.endswith("$"):
+        s = s[1:-1]
+    elif s.startswith("$$") and s.endswith("$$"):
+        s = s[2:-2]
+    # ^ → ** (Python 幂运算符)
+    s = s.replace("^", "**")
+    # 去除 LaTeX 命令前缀 \mathrm \text 等
+    import re
+    s = re.sub(r"\\mathrm\{([^}]*)\}", r"\1", s)
+    s = re.sub(r"\\text\{([^}]*)\}", r"\1", s)
+    s = re.sub(r"\\frac\{([^}]*)\}\{([^}]*)\}", r"(\1)/(\2)", s)
+    s = re.sub(r"\\sqrt\{([^}]*)\}", r"sqrt(\1)", s)
+    s = re.sub(r"\\cdot", "*", s)
+    s = re.sub(r"\\times", "*", s)
+    s = re.sub(r"\\pi", "pi", s)
+    return s.strip()
+
+
+def _is_math_equal(user_answer: str, correct_answer: str) -> bool:
+    """使用 SymPy 判断两个数学表达式是否等价。
+
+    支持分数/小数/根号/三角函数等多种形式。
+    方程等价: f(x)=g(x) ≡ f(x)-g(x)=0
+
+    Returns:
+        True 表示等价, False 表示不等价或解析失败。
+    """
+    if not user_answer or not correct_answer:
+        return False
+    if _normalize_answer(user_answer) == _normalize_answer(correct_answer):
+        return True
+
+    try:
+        from sympy import simplify, sympify, Eq
+        from sympy.parsing.sympy_parser import (
+            parse_expr,
+            standard_transformations,
+            implicit_multiplication_application,
+            convert_xor,
+        )
+
+        transformations = standard_transformations + (
+            implicit_multiplication_application,
+            convert_xor,
+        )
+
+        u = _strip_latex(user_answer)
+        c = _strip_latex(correct_answer)
+
+        # 处理方程形式: 含 = 号
+        if "=" in u and "=" in c:
+            # 将 f=g 转为 f-g,判定差值是否为零
+            u_parts = u.split("=", 1)
+            c_parts = c.split("=", 1)
+            try:
+                u_expr = parse_expr(u_parts[0], transformations=transformations) - parse_expr(
+                    u_parts[1], transformations=transformations
+                )
+                c_expr = parse_expr(c_parts[0], transformations=transformations) - parse_expr(
+                    c_parts[1], transformations=transformations
+                )
+                diff = simplify(u_expr - c_expr)
+                return diff == 0
+            except Exception:
+                return False
+
+        # 表达式形式: 直接比较差值
+        u_expr = parse_expr(u, transformations=transformations)
+        c_expr = parse_expr(c, transformations=transformations)
+        diff = simplify(u_expr - c_expr)
+        return diff == 0
+    except Exception:
+        # 解析失败,回退到字符串比较
+        return _normalize_answer(user_answer) == _normalize_answer(correct_answer)
+
+
 # P0-03 (R8): 交互类型映射（与 games-config.json 的 type 字段保持一致）
 _INTERACTION_TYPE_MAP: dict[str, str] = {
     # multiple_choice
@@ -353,6 +446,9 @@ def _judge_structured_answer(
             return False
 
     # 回退到字符串比较
+    # P1-3 改进: fill_blank 类型使用 SymPy 数学等价判断(支持分数/小数/根号/三角函数)
+    if interaction_type == "fill_blank":
+        return _is_math_equal(body_answer or "", correct_answer)
     return _normalize_answer(body_answer or "") == _normalize_answer(correct_answer)
 
 
@@ -370,87 +466,196 @@ def _serialize_answer_for_storage(
 def _enrich_for_interaction(
     questions: list[dict[str, Any]], interaction_type: str
 ) -> list[dict[str, Any]]:
-    """P0-03 (R8): 根据交互类型为题目添加结构化字段并转换 correct_answer 格式。
+    """P0-03 (R8) + P1 改进 (2026-07-21): 根据交互类型为题目添加结构化字段。
 
-    P0 修复 (2026-07-20): 统一在入口处设置 question.type = interaction_type,
-    确保前端 QuestionCard 能依据 type 正确渲染对应游戏组件。
-    - tap_match: 从词汇题生成配对题，correct_answer 变为 JSON {"pairs": [[l,r]...]}
-    - drag_sort: 生成排序题，correct_answer 变为 JSON {"ordered": [...]}
-    - word_bank: 生成词库填空题，correct_answer 变为 JSON {"blanks": {...}}
-    - listen_select/multiple_choice: 生成 options 选项
+    P1 改进 (对标 Quizlet Match / NYT Spelling Bee / Kahoot Jumble):
+    - tap_match: 多对配对(每 4 题合并为 1 道多对配对题),对标 Quizlet Match 12 卡片网格
+    - drag_sort: 每题独立排序(不再整 session 合并),对标 Kahoot Jumble 排序题
+    - word_bank: 题面语义化(优先使用 example 例句挖空,而非"释义+空格")
+    - listen_select/multiple_choice: 生成 options 选项,干扰项从全局抽取避免占位
     - spelling/fill_blank: 仅设置 type,前端用 prompt + 输入框
     """
     import json as _json
+    import re as _re
 
     if not questions:
         return questions
 
-    # P0 修复: 统一设置 type 为交互类型,前端 QuestionCard 依据 type 渲染对应组件
-    # 覆盖原 type (vocabulary_meaning/calculation/fallback 等),这些值对前端无用
+    # 统一设置 type 为交互类型
     for q in questions:
         q["type"] = interaction_type
 
     if interaction_type == "tap_match":
-        # 每题作为一个配对题：prompt(单词) ↔ meaning(释义)
+        # P1 改进: 每 4 题合并为 1 道多对配对题(对标 Quizlet Match)
+        # session 题量从 10 减为 ~3,但每题需 6-8 次点击完成,挑战性更高
         enriched = []
-        for q in questions:
-            prompt = q.get("prompt", "")
-            meaning = q.get("meaning") or q.get("correct_answer", "")
-            # 生成干扰项（从其他题目中抽取）
-            distractors = [
-                other.get("meaning") or other.get("correct_answer", "")
-                for other in questions
-                if other.get("prompt") != prompt
-            ][:3]
-            right_options = [meaning] + distractors
+        batch_size = 4
+        batch_idx = 0
+        for batch_start in range(0, len(questions), batch_size):
+            batch = questions[batch_start:batch_start + batch_size]
+            if len(batch) < 2:
+                # 不足 2 对的批次作为单题处理(保持原 1 对配对)
+                for q in batch:
+                    prompt = q.get("prompt", "")
+                    meaning = q.get("meaning") or q.get("correct_answer", "")
+                    enriched.append({
+                        **q,
+                        "pairs": [{"left": prompt, "right": meaning}],
+                        "left_items": [prompt],
+                        "right_options": [meaning],
+                        "correct_answer": _json.dumps(
+                            {"pairs": [[prompt, meaning]]}, ensure_ascii=False
+                        ),
+                    })
+                continue
+
+            # 合并为多对配对题
+            pairs = []
+            for q in batch:
+                prompt = q.get("prompt", "")
+                meaning = q.get("meaning") or q.get("correct_answer", "")
+                if prompt and meaning:
+                    pairs.append({"left": prompt, "right": meaning})
+
+            if not pairs:
+                continue
+
+            left_items = [p["left"] for p in pairs]
+            right_options = [p["right"] for p in pairs]
             random.shuffle(right_options)
+
+            correct_pairs = [[p["left"], p["right"]] for p in pairs]
+            base_qid = batch[0].get("question_id", f"tap:{batch_idx}")
+            # 提取 question_id 前缀(game_id:source)
+            qid_prefix = base_qid.rsplit(":", 1)[0] if ":" in base_qid else f"{base_qid}"
+
             enriched.append({
-                **q,
-                "pairs": [{"left": prompt, "right": meaning}],
-                "left_items": [prompt],
+                "question_id": f"{qid_prefix}:tap_match_batch_{batch_idx}",
+                "prompt": f"请将左右两列进行配对({len(pairs)} 对)",
+                "pairs": pairs,
+                "left_items": left_items,
                 "right_options": right_options,
                 "correct_answer": _json.dumps(
-                    {"pairs": [[prompt, meaning]]}, ensure_ascii=False
+                    {"pairs": correct_pairs}, ensure_ascii=False
                 ),
+                "type": "tap_match",
+                "sequence": batch_idx,
+                # 保留原 batch 的 meaning 用于提示
+                "meaning": f"配对 {len(pairs)} 组单词与释义",
             })
+            batch_idx += 1
         return enriched
 
     elif interaction_type == "drag_sort":
-        # 将所有题目合并为一个排序题：按 prompt 顺序排列
-        # 或者每题作为一个排序项
-        if len(questions) >= 2:
-            correct_order = [q.get("prompt", str(i)) for i, q in enumerate(questions)]
-            shuffled = correct_order.copy()
+        # P1 改进: 每题独立生成排序步骤(不再整 session 合并为 1 题)
+        # 优先从 hints/solution 字段获取排序步骤
+        enriched = []
+        for q_idx, q in enumerate(questions):
+            prompt = q.get("prompt", "")
+            correct_answer = q.get("correct_answer", "")
+
+            # 尝试从 hints/solution/example 字段获取排序步骤
+            solution = q.get("hints") or q.get("example") or q.get("solution") or ""
+
+            steps: list[str] = []
+            if isinstance(solution, str) and solution:
+                # 优先按换行分割
+                lines = [s.strip() for s in solution.replace("\\n", "\n").split("\n") if s.strip()]
+                if len(lines) >= 2:
+                    steps = lines
+                else:
+                    # 按句号分割
+                    sentences = [s.strip() for s in _re.split(r"[。.]", solution) if s.strip()]
+                    if len(sentences) >= 2:
+                        steps = sentences
+            elif isinstance(solution, list) and len(solution) >= 2:
+                steps = [str(s).strip() for s in solution if str(s).strip()]
+
+            # 如果没有 solution,从 prompt 按空格/标点分词
+            if len(steps) < 2 and prompt:
+                # 数学题/句子: 按空格分词(至少 3 个词)
+                words = [w for w in _re.split(r"\s+", prompt) if w]
+                if len(words) >= 3:
+                    steps = words
+                else:
+                    # 按字符分词(中文句子)
+                    chars = [c for c in prompt if not c.isspace()]
+                    if len(chars) >= 4:
+                        # 每 2-3 个字符一组
+                        step_size = max(2, len(chars) // 4)
+                        steps = ["".join(chars[i:i+step_size]) for i in range(0, len(chars), step_size)]
+
+            if len(steps) < 2:
+                # 实在无法生成排序步骤,跳过此题
+                continue
+
+            # 限制排序项数量(3-6 项最佳)
+            if len(steps) > 6:
+                steps = steps[:6]
+
+            correct_order = steps.copy()
+            shuffled = steps.copy()
             random.shuffle(shuffled)
-            return [{
-                "question_id": f"{questions[0].get('question_id', 'drag').rsplit(':', 1)[0]}:drag_sort",
-                "prompt": "请按正确顺序排列以下内容",
+            # 确保打乱后与原顺序不同
+            attempt_count = 0
+            while shuffled == correct_order and len(steps) > 1 and attempt_count < 5:
+                random.shuffle(shuffled)
+                attempt_count += 1
+
+            base_qid = q.get("question_id", f"drag:{q_idx}")
+            enriched.append({
+                **q,
+                "question_id": base_qid,
+                "prompt": f"请按正确顺序排列以下内容",
                 "sort_items": shuffled,
                 "correct_answer": _json.dumps(
                     {"ordered": correct_order}, ensure_ascii=False
                 ),
                 "type": "drag_sort",
-                "sequence": 0,
-            }]
-        return questions
+                "sequence": q_idx,
+            })
+        return enriched if enriched else questions
 
     elif interaction_type == "word_bank":
-        # 每题作为一个填空题：prompt 中的释义被挖空，从 word_bank 选词
+        # P1 改进: 题面语义化(优先使用 example 例句挖空)
+        # cloze-sprint: 例句挖空(对标完形填空)
+        # word-form-master: 词形变化(如果有 example)
+        # crossword-quest: 释义+空格(暂时保持,网格待实现)
+        # flashcard-rush: 释义+空格(保持简单)
         enriched = []
         all_words = [q.get("prompt", "") for q in questions]
         for i, q in enumerate(questions):
-            prompt = q.get("prompt", "")
-            meaning = q.get("meaning") or q.get("correct_answer", "")
+            prompt = q.get("prompt", "")  # 目标词
+            meaning = q.get("meaning") or q.get("correct_answer", "")  # 释义
+            example = q.get("example")  # 例句
+
             blank_id = f"b{i + 1}"
-            # 生成词库（含正确词 + 3个干扰词）
             distractors = [w for w in all_words if w != prompt][:3]
-            word_bank = [prompt] + distractors
+            # 干扰项不足时从词库补充
+            while len(distractors) < 3:
+                distractors.append(f"(干扰{len(distractors)+1})")
+            word_bank = [prompt] + distractors[:3]
             random.shuffle(word_bank)
+
+            # P1 改进: 优先使用 example 例句挖空,而非"释义+空格"
+            prompt_with_blanks = ""
+            if example and isinstance(example, str) and prompt and prompt.lower() in example.lower():
+                # 将例句中的目标词替换为 ______
+                try:
+                    # 大小写不敏感替换
+                    pattern = _re.compile(_re.escape(prompt), _re.IGNORECASE)
+                    prompt_with_blanks = pattern.sub("______", example, count=1)
+                except Exception:
+                    prompt_with_blanks = f"{meaning} ______"
+            else:
+                # 没有例句,使用"释义 + 空格"
+                prompt_with_blanks = f"{meaning} ______"
+
             enriched.append({
                 **q,
                 "blanks": [{"id": blank_id, "answer": prompt}],
                 "word_bank": word_bank,
-                "prompt_with_blanks": f"{meaning} ______",
+                "prompt_with_blanks": prompt_with_blanks,
                 "correct_answer": _json.dumps(
                     {"blanks": {blank_id: prompt}}, ensure_ascii=False
                 ),
@@ -458,17 +663,24 @@ def _enrich_for_interaction(
         return enriched
 
     elif interaction_type == "listen_select":
-        # 听音选词：从词汇题生成选择题
+        # 听音选词: 从词汇题生成选择题
         enriched = []
+        # P1 改进: 干扰项从全局抽取(避免重复)
+        all_meanings = [
+            other.get("meaning") or other.get("correct_answer", "")
+            for other in questions
+        ]
         for q in questions:
             prompt = q.get("prompt", "")
             meaning = q.get("meaning") or q.get("correct_answer", "")
-            distractors = [
-                other.get("meaning") or other.get("correct_answer", "")
-                for other in questions
-                if other.get("prompt") != prompt
-            ][:3]
-            options = [meaning] + distractors
+            # 去重干扰项
+            distractor_pool = [m for m in all_meanings if m and m != meaning]
+            random.shuffle(distractor_pool)
+            distractors = distractor_pool[:3]
+            # 干扰项不足时用占位
+            while len(distractors) < 3:
+                distractors.append(f"(选项{len(distractors)+1})")
+            options = [meaning] + distractors[:3]
             random.shuffle(options)
             enriched.append({
                 **q,
@@ -478,20 +690,22 @@ def _enrich_for_interaction(
         return enriched
 
     elif interaction_type == "multiple_choice":
-        # P0 修复: 选择题需要 options 字段,前端 QuestionCard 依据 options 渲染选项
-        # 原词汇题只有 prompt+meaning,没有 options,会导致选择题区域空白
+        # P1 改进: 选择题干扰项从全局抽取,避免占位"(无)"
         enriched = []
+        all_meanings = [
+            other.get("meaning") or other.get("correct_answer", "")
+            for other in questions
+        ]
         for q in questions:
             prompt = q.get("prompt", "")
             correct = q.get("meaning") or q.get("correct_answer", "")
-            distractors = [
-                other.get("meaning") or other.get("correct_answer", "")
-                for other in questions
-                if other.get("prompt") != prompt
-            ][:3]
-            # 干扰项不足时用占位(避免 options 只有1项)
+            # 去重干扰项
+            distractor_pool = [m for m in all_meanings if m and m != correct]
+            random.shuffle(distractor_pool)
+            distractors = distractor_pool[:3]
+            # 干扰项不足时用占位
             while len(distractors) < 3:
-                distractors.append(f"(无)")
+                distractors.append(f"(选项{len(distractors)+1})")
             options = [correct] + distractors[:3]
             random.shuffle(options)
             enriched.append({
@@ -510,24 +724,100 @@ def _build_questions_for_game(
 ) -> list[dict[str, Any]]:
     """根据游戏配置生成题目集（含 correct_answer）。
 
-    P0-03 (R8): 根据交互类型（interaction_type）生成结构化题目。
-    - tap_match: 题目含 pairs 字段，correct_answer 是 JSON {"pairs": [[l,r]...]}
-    - drag_sort: 题目含 sort_items 字段，correct_answer 是 JSON {"ordered": [...]}
-    - word_bank: 题目含 word_bank + blanks 字段，correct_answer 是 JSON {"blanks": {...}}
-    - 其他: 保持字符串 correct_answer
+    P1 改进 (2026-07-21):
+    - 新增 "all" 数据源: 聚合 vocabulary + questions 数据源(跨科目游戏可玩)
+    - 新增 "user_wrong_questions" 数据源: 暂回退到 all(错题本 API 后续接入)
+    - 新增 "user_word_progress" 数据源: 暂回退到 vocabulary(用户单词进度后续接入)
+    - 新增 difficulty 参数生效: easy=8题/medium=10题/hard=15题
 
     优先级：
-    1. 词汇类游戏：从 data_sources 中找到的 vocabulary/*.json 抽取单词
-    2. 数学/题库类游戏：从 questions/*.json 抽取题目
-    3. 兜底：使用游戏 props 字段合成简易题目
-
-    返回题目列表，每项包含 question_id / 题面字段 / correct_answer。
+    1. "all" 数据源: 聚合词汇 + 数学题库
+    2. "user_wrong_questions" / "user_word_progress": 暂回退到 all
+    3. 词汇类数据源: vocabulary/*.json
+    4. 题库类数据源: questions/*.json
+    5. 同义词数据源: synonyms.json
+    6. 词频数据源: word-frequency.json
+    7. 兜底: 使用游戏 props 合成简易题目
     """
     data_sources = game_cfg.get("data_sources") or []
     game_id = game_cfg.get("game_id", "unknown")
     interaction_type = _get_interaction_type(game_id)
-    target_count = _DEFAULT_QUESTION_COUNT
+
+    # P1 改进: difficulty 参数生效
+    if difficulty == "easy":
+        target_count = 8
+    elif difficulty == "hard":
+        target_count = 15
+    else:
+        target_count = _DEFAULT_QUESTION_COUNT
+
     questions: list[dict[str, Any]] = []
+
+    # P1 改进: 处理 "all" / "user_wrong_questions" / "user_word_progress" 数据源
+    # 跨科目游戏使用这些数据源,之前走 fallback 生成假题,现在聚合真实题库
+    has_all_source = "all" in data_sources
+    has_wrong_source = "user_wrong_questions" in data_sources
+    has_progress_source = "user_word_progress" in data_sources
+
+    if has_all_source or has_wrong_source or has_progress_source:
+        # 聚合词汇库(5 题) + 数学题库(5 题),难度调整题量
+        vocab_count = target_count // 2
+        math_count = target_count - vocab_count
+
+        # 词汇部分
+        vocab_data = _load_data_file("vocabulary/kaoyan-words.json")
+        if vocab_data and isinstance(vocab_data, dict):
+            words = vocab_data.get("words") or []
+            if words:
+                # P1 改进: difficulty 影响词汇筛选
+                # easy: 短词(<=6 字母); medium: 中等(7-9 字母); hard: 长词(>=10 字母)
+                if difficulty == "easy":
+                    filtered = [w for w in words if len(w.get("word", "")) <= 6]
+                elif difficulty == "hard":
+                    filtered = [w for w in words if len(w.get("word", "")) >= 7]
+                else:
+                    filtered = words
+                if not filtered:
+                    filtered = words  # 难度筛选无结果,回退到全部
+                random.shuffle(filtered)
+                for w in filtered[:vocab_count]:
+                    word_text = w.get("word") or ""
+                    meaning = w.get("meaning") or ""
+                    if not word_text or not meaning:
+                        continue
+                    questions.append({
+                        "question_id": f"{game_id}:vocab:{w.get('id', word_text)}",
+                        "prompt": word_text,
+                        "meaning": meaning,
+                        "phonetic": w.get("phonetic"),
+                        "example": w.get("example"),
+                        "type": "vocabulary_meaning",
+                        "correct_answer": meaning,
+                    })
+
+        # 数学部分
+        math_data = _load_data_file("questions/math-examples.json")
+        if math_data and isinstance(math_data, dict):
+            q_list = math_data.get("questions") or []
+            if q_list:
+                random.shuffle(q_list)
+                for q in q_list[:math_count]:
+                    answer = q.get("answer") or ""
+                    if not answer:
+                        continue
+                    questions.append({
+                        "question_id": f"{game_id}:q:{q.get('id', '')}",
+                        "prompt": q.get("content") or "",
+                        "title": q.get("title"),
+                        "chapter": q.get("chapter"),
+                        "section": q.get("section"),
+                        "hints": q.get("hints"),
+                        "type": q.get("type", "calculation"),
+                        "correct_answer": answer,
+                    })
+
+        if questions:
+            return _enrich_for_interaction(questions, interaction_type)
 
     # 1) 词汇类数据源
     vocab_source = next(
@@ -538,8 +828,17 @@ def _build_questions_for_game(
         if data and isinstance(data, dict):
             words = data.get("words") or []
             if words:
-                random.shuffle(words)
-                for w in words[:target_count]:
+                # P1 改进: difficulty 影响词汇筛选
+                if difficulty == "easy":
+                    filtered = [w for w in words if len(w.get("word", "")) <= 6]
+                elif difficulty == "hard":
+                    filtered = [w for w in words if len(w.get("word", "")) >= 7]
+                else:
+                    filtered = words
+                if not filtered:
+                    filtered = words
+                random.shuffle(filtered)
+                for w in filtered[:target_count]:
                     word_text = w.get("word") or ""
                     meaning = w.get("meaning") or ""
                     if not word_text or not meaning:
@@ -614,7 +913,48 @@ def _build_questions_for_game(
         if questions:
             return _enrich_for_interaction(questions, interaction_type)
 
-    # 4) 兜底：使用游戏 props 合成简易题目
+    # 4) 词频数据源（vocabulary/word-frequency.json）
+    freq_source = next(
+        (s for s in data_sources if "word-frequency" in s or "frequency" in s), None
+    )
+    if freq_source:
+        data = _load_data_file(freq_source)
+        if data and isinstance(data, dict):
+            entries = data.get("words") or data.get("entries") or []
+            if entries and isinstance(entries, list):
+                # P1 改进: difficulty 影响词频筛选
+                # easy: 高频词(前 30%); hard: 低频词(后 30%); medium: 中频
+                sorted_entries = sorted(
+                    entries,
+                    key=lambda e: -(e.get("frequency", 0) if isinstance(e, dict) else 0)
+                )
+                if difficulty == "easy":
+                    cutoff = int(len(sorted_entries) * 0.3)
+                    filtered = sorted_entries[:max(cutoff, 10)]
+                elif difficulty == "hard":
+                    cutoff = int(len(sorted_entries) * 0.7)
+                    filtered = sorted_entries[cutoff:]
+                else:
+                    filtered = sorted_entries
+                if not filtered:
+                    filtered = sorted_entries
+                random.shuffle(filtered)
+                for entry in filtered[:target_count]:
+                    word_text = entry.get("word") or entry.get("term") or ""
+                    meaning = entry.get("meaning") or entry.get("definition") or ""
+                    if not word_text or not meaning:
+                        continue
+                    questions.append({
+                        "question_id": f"{game_id}:freq:{word_text}",
+                        "prompt": word_text,
+                        "meaning": meaning,
+                        "type": "vocabulary_meaning",
+                        "correct_answer": meaning,
+                    })
+        if questions:
+            return _enrich_for_interaction(questions, interaction_type)
+
+    # 5) 兜底：使用游戏 props 合成简易题目
     props = game_cfg.get("props") or []
     fallback_items = props or ["hint", "skip", "freeze_time", "bomb"]
     for i, prop in enumerate(fallback_items[:target_count]):
@@ -764,6 +1104,14 @@ async def start_game_session(
         time_limit_sec=time_limit_sec,
         interaction_type=_get_interaction_type(game_id),
         game_name=game_cfg.get("name", game_id),
+        # P1 改进: 返回 lives 让前端 HeartsDisplay 生效
+        lives=int(session_cfg.get("lives", 0) or 0),
+        # P1 改进: 返回 rewards 让前端 score/combo 计算与服务端一致
+        rewards={
+            "base_xp": int((game_cfg.get("rewards") or {}).get("base_xp", 10) or 10),
+            "base_coin": int((game_cfg.get("rewards") or {}).get("base_coin", 5) or 5),
+            "combo_multiplier": float((game_cfg.get("rewards") or {}).get("combo_multiplier", 1.0) or 1.0),
+        },
     )
 
 
@@ -978,6 +1326,7 @@ async def finish_game_session(
                 accuracy=existing_ledger.accuracy,
                 correct_count=0,  # 不重新计算，避免侧信道
                 total_questions=0,
+                max_combo=0,  # P1-4: 已有 ledger 不重新计算 combo
             )
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -1146,6 +1495,8 @@ async def finish_game_session(
         accuracy=accuracy,
         correct_count=correct_count,
         total_questions=total_questions,
+        # P1-4 改进: 返回 max_combo 供前端 GameResult 展示连击纪录
+        max_combo=max_combo,
     )
 
 

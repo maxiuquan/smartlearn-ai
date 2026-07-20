@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useGameSession } from '../hooks/useGameSession';
 import { useStreak } from '../hooks/useStreak';
 import { useDailyQuests } from '../hooks/useDailyQuests';
+import { getGameProps } from '../utils/gameConfig';
 import QuestionCard from '../components/QuestionCard';
 import ScoreBoard from '../components/ScoreBoard';
 import ProgressBar from '../components/ProgressBar';
@@ -38,10 +39,22 @@ export default function MathGame() {
     score,
     combo,
     maxCombo,
+    // P3-E: lives
+    lives,
+    maxLives,
+    // P1-1: 道具系统
+    powerUps,
+    powerUpEffect,
+    availableProps,
+    applyPowerUp,
+    clearPowerUpEffect,
     startSession,
     submitCurrentAnswer,
     finishSession,
   } = useGameSession();
+
+  // P0-3: 读取该游戏的可用道具列表
+  const gameProps = useMemo(() => (gameId ? getGameProps(gameId) : ['hint', 'skip']), [gameId]);
 
   // P3-A/B: 全局连胜 + 每日任务
   const { recordDailyActivity } = useStreak();
@@ -54,12 +67,11 @@ export default function MathGame() {
   const feedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const navigatedRef = useRef(false);
 
-  // 开始游戏
+  // 开始游戏 — P0-3: 传 gameProps
   useEffect(() => {
     if (!gameId) return;
-    // P1-B: 传递 difficulty 参数
-    startSession(gameId, difficulty);
-  }, [gameId, startSession, difficulty]);
+    startSession(gameId, difficulty, gameProps);
+  }, [gameId, startSession, difficulty, gameProps]);
 
   // 游戏结束后跳转结果页
   useEffect(() => {
@@ -104,30 +116,6 @@ export default function MathGame() {
     [submitting, submitCurrentAnswer]
   );
 
-  // P1-C: 提示道具 - 数学题展示选项数/题型提示
-  const [hintText, setHintText] = useState<string | null>(null);
-  const handleHint = useCallback(() => {
-    if (!currentQuestion) return;
-    // 数学题提示:如果是选择题,提示选项数量;填空题提示答案长度
-    if (currentQuestion.options && currentQuestion.options.length > 0) {
-      setHintText(`💡 提示: 4 个选项中,排除明显错误的 2 个,再二选一`);
-    } else if (currentQuestion.type === 'fill_blank') {
-      setHintText(`💡 提示: 答案可能含数字、分数(如 1/2)或根号(如 √2)`);
-    } else if (currentQuestion.type === 'drag_sort') {
-      setHintText(`💡 提示: 先找起点/已知条件,再按因果关系排序`);
-    } else {
-      setHintText(`💡 提示: 仔细审题,注意单位和小数点`);
-    }
-    setTimeout(() => setHintText(null), 5000);
-  }, [currentQuestion]);
-
-  const handleSkip = useCallback(() => {
-    if (submitting) return;
-    setHintText('⏭️ 已跳过本题');
-    setTimeout(() => setHintText(null), 1500);
-    handleAnswer('__SKIP__');
-  }, [submitting, handleAnswer]);
-
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-20">
@@ -169,6 +157,8 @@ export default function MathGame() {
         combo={combo}
         maxCombo={maxCombo}
         timeLeft={timeLeft}
+        lives={lives}
+        maxLives={maxLives}
       />
 
       {/* 进度条 */}
@@ -180,7 +170,7 @@ export default function MathGame() {
         />
       </div>
 
-      {/* 题目卡片 - 使用 QuestionCard 支持全部 7 种题型（含 tap_match/drag_sort）*/}
+      {/* 题目卡片 — P1-1: 传 powerUpEffect/onClearPowerUpEffect */}
       <QuestionCard
         question={currentQuestion}
         questionIndex={currentIndex}
@@ -189,20 +179,16 @@ export default function MathGame() {
         feedback={feedback}
         submitting={submitting}
         combo={combo}
+        powerUpEffect={powerUpEffect}
+        onClearPowerUpEffect={clearPowerUpEffect}
       />
 
-      {/* P1-C: 提示气泡 */}
-      {hintText && (
-        <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-700 animate-pulse">
-          {hintText}
-        </div>
-      )}
-
-      {/* P1-C: 道具工具栏 */}
+      {/* P1-1: 道具工具栏 — 8 种道具全部可点击 */}
       <GameToolbar
+        availableProps={availableProps}
+        powerUps={powerUps}
         disabled={submitting}
-        onHint={handleHint}
-        onSkip={handleSkip}
+        onApplyPowerUp={applyPowerUp}
       />
 
       {/* 辅助工具切换 */}

@@ -1,12 +1,15 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useGameSession } from '../hooks/useGameSession';
 import { useStreak } from '../hooks/useStreak';
 import { useDailyQuests } from '../hooks/useDailyQuests';
+import { getGameProps } from '../utils/gameConfig';
 import QuestionCard from '../components/QuestionCard';
 import ScoreBoard from '../components/ScoreBoard';
 import ProgressBar from '../components/ProgressBar';
 import GameToolbar from '../components/GameToolbar';
+// P1-2: 单词接龙特色玩法
+import WordChainGame from '../components/WordChainGame';
 
 interface Feedback {
   isCorrect: boolean;
@@ -39,10 +42,19 @@ export default function WordGame() {
     // P3-E: lives
     lives,
     maxLives,
+    // P1-1: 道具系统
+    powerUps,
+    powerUpEffect,
+    availableProps,
+    applyPowerUp,
+    clearPowerUpEffect,
     startSession,
     submitCurrentAnswer,
     finishSession,
   } = useGameSession();
+
+  // P0-3: 读取该游戏的可用道具列表
+  const gameProps = useMemo(() => (gameId ? getGameProps(gameId) : ['hint', 'skip']), [gameId]);
 
   // P3-A/B: 全局连胜 + 每日任务
   const { recordDailyActivity } = useStreak();
@@ -66,22 +78,26 @@ export default function WordGame() {
   const feedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const navigatedRef = useRef(false);
 
-  // 开始游戏
+  // 开始游戏 — P0-3: 传 gameProps 让 useGameSession 设置 availableProps
   useEffect(() => {
     if (!gameId) return;
-    // P1-B: 传递 difficulty 参数
-    startSession(gameId, difficulty);
-  }, [gameId, startSession, difficulty]);
+    startSession(gameId, difficulty, gameProps);
+  }, [gameId, startSession, difficulty, gameProps]);
 
   // 游戏结束后跳转结果页（finishSession 幂等，多次调用安全）
   useEffect(() => {
     if (isGameOver && sessionId && gameId && !navigatedRef.current) {
       navigatedRef.current = true;
+      if (!questsTriggeredRef.current) {
+        questsTriggeredRef.current = true;
+        recordDailyActivity();
+        recordGamePlayed();
+      }
       finishSession().then(() => {
         navigate(`/result/${sessionId}?gameId=${gameId}`, { replace: true });
       });
     }
-  }, [isGameOver, sessionId, gameId, navigate, finishSession]);
+  }, [isGameOver, sessionId, gameId, navigate, finishSession, recordDailyActivity, recordGamePlayed]);
 
   // 显示反馈后清空
   useEffect(() => {
@@ -111,29 +127,6 @@ export default function WordGame() {
     [submitting, submitCurrentAnswer]
   );
 
-  // P1-C: 提示道具 - 显示首字母提示
-  const [hintText, setHintText] = useState<string | null>(null);
-  const handleHint = useCallback(() => {
-    if (!currentQuestion) return;
-    const word = currentQuestion.prompt || '';
-    if (word.length === 0) return;
-    // 显示首字母 + 末字母 + 长度
-    const firstChar = word[0];
-    const lastChar = word.length > 1 ? word[word.length - 1] : '';
-    const middle = '_'.repeat(Math.max(0, word.length - 2));
-    setHintText(`💡 提示: ${firstChar}${middle}${lastChar} (${word.length} 字母)`);
-    setTimeout(() => setHintText(null), 5000);
-  }, [currentQuestion]);
-
-  // P1-C: 跳过道具 - 提交空答案标记错误后进入下一题
-  const handleSkip = useCallback(() => {
-    if (submitting) return;
-    setHintText('⏭️ 已跳过本题');
-    setTimeout(() => setHintText(null), 1500);
-    // 提交一个不会正确的占位答案
-    handleAnswer('__SKIP__');
-  }, [submitting, handleAnswer]);
-
   // 加载状态
   if (loading) {
     return (
@@ -162,6 +155,9 @@ export default function WordGame() {
 
   if (!currentQuestion) return null;
 
+  // P1-2: word-chain 是页面级特色玩法,使用独立组件接管渲染
+  const isWordChain = gameId === 'word-chain';
+
   return (
     <div className="max-w-2xl mx-auto">
       {/* 评分面板 */}
@@ -185,29 +181,35 @@ export default function WordGame() {
         />
       </div>
 
-      {/* 题目卡片 */}
-      <QuestionCard
-        question={currentQuestion}
-        questionIndex={currentIndex}
-        totalQuestions={questions.length}
-        onAnswer={handleAnswer}
-        feedback={feedback}
-        submitting={submitting}
-        combo={combo}
-      />
-
-      {/* P1-C: 提示气泡 */}
-      {hintText && (
-        <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-700 animate-pulse">
-          {hintText}
-        </div>
+      {/* P1-2: word-chain 使用专用组件,其他游戏走标准 QuestionCard */}
+      {isWordChain ? (
+        <WordChainGame
+          questions={questions}
+          onAnswer={handleAnswer}
+          onFinish={finishSession}
+          submitting={submitting}
+        />
+      ) : (
+        <QuestionCard
+          question={currentQuestion}
+          questionIndex={currentIndex}
+          totalQuestions={questions.length}
+          onAnswer={handleAnswer}
+          feedback={feedback}
+          submitting={submitting}
+          combo={combo}
+          powerUpEffect={powerUpEffect}
+          onClearPowerUpEffect={clearPowerUpEffect}
+          gameId={gameId}
+        />
       )}
 
-      {/* P1-C: 道具工具栏 */}
+      {/* P1-1: 道具工具栏 — 8 种道具全部可点击 */}
       <GameToolbar
+        availableProps={availableProps}
+        powerUps={powerUps}
         disabled={submitting}
-        onHint={handleHint}
-        onSkip={handleSkip}
+        onApplyPowerUp={applyPowerUp}
       />
     </div>
   );

@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useGameSession } from '../hooks/useGameSession';
 import { useStreak } from '../hooks/useStreak';
 import { useDailyQuests } from '../hooks/useDailyQuests';
+import { getGameProps } from '../utils/gameConfig';
 import QuestionCard from '../components/QuestionCard';
 import ScoreBoard from '../components/ScoreBoard';
 import ProgressBar from '../components/ProgressBar';
@@ -36,10 +37,22 @@ export default function CrossSubjectGame() {
     score,
     combo,
     maxCombo,
+    // P3-E: lives
+    lives,
+    maxLives,
+    // P1-1: 道具系统
+    powerUps,
+    powerUpEffect,
+    availableProps,
+    applyPowerUp,
+    clearPowerUpEffect,
     startSession,
     submitCurrentAnswer,
     finishSession,
   } = useGameSession();
+
+  // P0-3: 读取该游戏的可用道具列表
+  const gameProps = useMemo(() => (gameId ? getGameProps(gameId) : ['hint', 'skip']), [gameId]);
 
   // P3-A/B: 全局连胜 + 每日任务
   const { recordDailyActivity } = useStreak();
@@ -51,18 +64,16 @@ export default function CrossSubjectGame() {
   const feedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const navigatedRef = useRef(false);
 
-  // 开始游戏
+  // 开始游戏 — P0-3: 传 gameProps
   useEffect(() => {
     if (!gameId) return;
-    // P1-B: 传递 difficulty 参数
-    startSession(gameId, difficulty);
-  }, [gameId, startSession, difficulty]);
+    startSession(gameId, difficulty, gameProps);
+  }, [gameId, startSession, difficulty, gameProps]);
 
   // 游戏结束后跳转结果页
   useEffect(() => {
     if (isGameOver && sessionId && gameId && !navigatedRef.current) {
       navigatedRef.current = true;
-      // P3-A/B: 触发连胜 + 任务进度(只触发一次)
       if (!questsTriggeredRef.current) {
         questsTriggeredRef.current = true;
         recordDailyActivity();
@@ -100,25 +111,6 @@ export default function CrossSubjectGame() {
     },
     [submitting, submitCurrentAnswer]
   );
-
-  // P1-C: 提示道具
-  const [hintText, setHintText] = useState<string | null>(null);
-  const handleHint = useCallback(() => {
-    if (!currentQuestion) return;
-    if (currentQuestion.options && currentQuestion.options.length > 0) {
-      setHintText(`💡 提示: 4 个选项中,先排除明显错误的 2 个`);
-    } else {
-      setHintText(`💡 提示: 仔细阅读题目,关键词决定答案`);
-    }
-    setTimeout(() => setHintText(null), 5000);
-  }, [currentQuestion]);
-
-  const handleSkip = useCallback(() => {
-    if (submitting) return;
-    setHintText('⏭️ 已跳过本题');
-    setTimeout(() => setHintText(null), 1500);
-    handleAnswer('__SKIP__');
-  }, [submitting, handleAnswer]);
 
   if (loading) {
     return (
@@ -161,6 +153,8 @@ export default function CrossSubjectGame() {
         combo={combo}
         maxCombo={maxCombo}
         timeLeft={timeLeft}
+        lives={lives}
+        maxLives={maxLives}
       />
 
       {/* 进度条 */}
@@ -172,7 +166,7 @@ export default function CrossSubjectGame() {
         />
       </div>
 
-      {/* 题目卡片 — 统一使用 QuestionCard 渲染所有题型 */}
+      {/* 题目卡片 — P1-1: 传 powerUpEffect/onClearPowerUpEffect */}
       <QuestionCard
         question={currentQuestion}
         questionIndex={currentIndex}
@@ -181,20 +175,16 @@ export default function CrossSubjectGame() {
         feedback={feedback}
         submitting={submitting}
         combo={combo}
+        powerUpEffect={powerUpEffect}
+        onClearPowerUpEffect={clearPowerUpEffect}
       />
 
-      {/* P1-C: 提示气泡 */}
-      {hintText && (
-        <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-700 animate-pulse">
-          {hintText}
-        </div>
-      )}
-
-      {/* P1-C: 道具工具栏 */}
+      {/* P1-1: 道具工具栏 — 8 种道具全部可点击 */}
       <GameToolbar
+        availableProps={availableProps}
+        powerUps={powerUps}
         disabled={submitting}
-        onHint={handleHint}
-        onSkip={handleSkip}
+        onApplyPowerUp={applyPowerUp}
       />
     </div>
   );

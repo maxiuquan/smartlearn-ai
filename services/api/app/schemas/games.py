@@ -215,6 +215,7 @@ class GameSessionFinishResponse(BaseModel):
     """结束游戏会话响应 — P0-02 (R3).
 
     服务端一次性返回最终结算结果：分数、XP、金币、正确率、正确题数、总题数。
+    P1-4 改进 (2026-07-21): 新增 max_combo,返回本局最高连击数供前端展示。
     """
 
     session_id: int
@@ -224,6 +225,8 @@ class GameSessionFinishResponse(BaseModel):
     accuracy: float
     correct_count: int
     total_questions: int
+    # P1-4 改进: 本局最高连击数
+    max_combo: int = 0
 
 
 class GameSessionSummaryResponse(BaseModel):
